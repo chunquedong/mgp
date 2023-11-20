@@ -42,6 +42,7 @@ struct RayQuery {
     Vector3 target;
     std::vector<int> path;
     double minDistance = Ray::INTERSECTS_NONE;
+    Drawable* drawable;
 };
 
 /**
@@ -111,6 +112,9 @@ public:
     bool isVisiable() { return _visiable; }
     void setVisiable(bool v) { _visiable = v; }
 
+    bool isClickable() { return _clickable; }
+    void setClickable(bool v) { _clickable = v; }
+
     bool raycast(RayQuery& query);
     virtual bool doRaycast(RayQuery& query);
 
@@ -147,7 +151,7 @@ protected:
 
     bool _visiable;
 
-    
+    bool _clickable;
 };
 
 class DrawableGroup : public Drawable {

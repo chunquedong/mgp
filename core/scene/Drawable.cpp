@@ -10,7 +10,7 @@ void RenderInfo::draw(DrawCall* drawCall) {
 }
 
 Drawable::Drawable()
-    : _node(NULL), _renderPass(RenderLayer::Qpaque), _lightMask(0), _visiable(true)
+    : _node(NULL), _renderPass(RenderLayer::Qpaque), _lightMask(0), _visiable(true), _clickable(true)
 {
 }
 
@@ -52,6 +52,7 @@ bool Drawable::raycast(RayQuery& query) {
             query.minDistance = distance;
             query.target = localQuery.target;
             query.path.swap(localQuery.path);
+            query.drawable = this;
         }
         return true;
     }
