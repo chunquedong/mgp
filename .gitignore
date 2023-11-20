@@ -1,7 +1,6 @@
 .vs/
 engine/Debug/
 external-deps/
-editor/gameplay-editor.pro.user
 x64/
 build/
 build-*
@@ -24,3 +23,5 @@ res/materials/
 res/fastEarth/
 res/shaders/custom/
 res/cae/
+res/shaders/IBL/
+res/shaders/postEffect/
