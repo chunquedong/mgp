@@ -1,0 +1,9 @@
+name = samples-triangle
+summary = samples
+outType = exe
+version = 1.0
+depends = mgpCore 1.0, mgpModules 1.0, jsonc 2.0
+srcDirs = ./
+incDir = ./
+defines=GP_NO_LUA_BINDINGS,GP_GLFW
+extConfigs.linkflags=-sUSE_GLFW=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sSAFE_HEAP=1 --preload-file D:/workspace/code/mgp/res/shaders@res/shaders -gsource-map -sMODULARIZE -s EXPORT_NAME="createMyModule" -s TOTAL_MEMORY=2013265920

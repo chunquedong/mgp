@@ -1,0 +1,10 @@
+name = mgpCore
+summary = MGP core
+outType = lib
+version = 1.0
+depends = jsonc 2.0
+srcDirs = base/,math/,3rd/,animation/,material/,objects/,platform/,scene/
+incDir = ./
+//debug.defines = GP_USE_MEM_LEAK_DETECTION
+defines=GP_NO_LUA_BINDINGS
+extConfigs.cppflags = -std=c++17

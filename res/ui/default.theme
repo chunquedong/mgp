@@ -1,0 +1,87 @@
+theme mainMenu
+{
+    style Default {
+        color = #ffffffff
+        textColor = #ffffffff
+        font = sans.ttf
+        fontSize = 16
+        opacity = 1.0
+        textAlignment = ALIGN_VCENTER_LEFT
+    }
+
+    style Form : Default
+    {
+        background
+        {
+            border
+            {
+                left = 15
+                right = 15
+                top = 15
+                bottom = 15
+            }
+            image = panel.png
+        }
+    }
+
+    // Style that can be used as a background for a container
+    style Panel : Default
+    {
+        background
+        {
+            border
+            {
+                left = 15
+                right = 15
+                top = 15
+                bottom = 15
+            }
+            image=panel.png
+        }
+        textAlignment = ALIGN_VCENTER_HCENTER
+    }
+
+    style Button : Default
+    {
+        background
+        {
+            border
+            {
+                left = 15
+                right = 15
+                top = 15
+                bottom = 15
+            }
+            image = button.png
+        }
+        normalColor = #ffffffff
+        hoverColor = #ccccccff
+        activeColor = #aaaaaaff
+        focusColor = #ffffffff
+        disabledColor = #ccccccff
+        textAlignment = ALIGN_VCENTER_HCENTER
+    }
+
+    style TextBox : Default
+    {
+        background
+        {
+            border
+            {
+                left = 15
+                right = 15
+                top = 15
+                bottom = 15
+            }
+            image=panel.png
+        }
+        textColor = #000000ff
+        textAlignment = ALIGN_TOP_LEFT
+    }
+
+    style Slider : Default
+    {
+        textAlignment = ALIGN_TOP_LEFT
+    }
+
+}

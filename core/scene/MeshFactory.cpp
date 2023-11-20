@@ -1,0 +1,390 @@
+#include "MeshFactory.h"
+
+using namespace mgp;
+
+UPtr<Mesh> MeshFactory::createQuad(float x, float y, float width, float height, float s1, float t1, float s2, float t2)
+{
+    float x2 = x + width;
+    float y2 = y + height;
+
+    float vertices[] =
+    {
+        x, y2, 0,   0, 0, 1,    s1, t2,
+        x, y, 0,    0, 0, 1,    s1, t1,
+        x2, y2, 0,  0, 0, 1,    s2, t2,
+        x2, y, 0,   0, 0, 1,    s2, t1,
+    };
+
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3),
+        VertexFormat::Element(VertexFormat::NORMAL, 3),
+        VertexFormat::Element(VertexFormat::TEXCOORD0, 2)
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 3), 4);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+
+    mesh->_primitiveType = Mesh::TRIANGLE_STRIP;
+    mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
+
+    return mesh;
+}
+
+UPtr<Mesh> MeshFactory::createQuadFullscreen()
+{
+    float x = -1.0f;
+    float y = -1.0f;
+    float x2 = 1.0f;
+    float y2 = 1.0f;
+
+    float vertices[] =
+    {
+        x, y2,   0, 1,
+        x, y,    0, 0,
+        x2, y2,  1, 1,
+        x2, y,   1, 0
+    };
+
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 2),
+        VertexFormat::Element(VertexFormat::TEXCOORD0, 2)
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 2), 4);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+
+    mesh->_primitiveType = Mesh::TRIANGLE_STRIP;
+    mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
+
+    return mesh;
+}
+
+UPtr<Mesh> MeshFactory::createPlane() {
+    float vertices[] = {
+        -1, 0, -1, 0, 1, 0,
+        -1, 0, 1, 0, 1, 0,
+        1, 0, -1, 0, 1, 0,
+        1, 0, 1, 0, 1, 0,
+    };
+
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3),
+        VertexFormat::Element(VertexFormat::NORMAL, 3),
+    };
+
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 2), 4);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+
+    mesh->_primitiveType = Mesh::TRIANGLE_STRIP;
+    mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
+
+    return mesh;
+}
+
+UPtr<Mesh> MeshFactory::createQuad3D(const Vector3& p1, const Vector3& p2, const Vector3& p3, const Vector3& p4)
+{
+    // Calculate the normal vector of the plane.
+    Vector3 v1, v2, n;
+    Vector3::subtract(p2, p1, &v1);
+    Vector3::subtract(p3, p2, &v2);
+    Vector3::cross(v1, v2, &n);
+    n.normalize();
+
+    float vertices[] =
+    {
+        (float)p1.x, (float)p1.y, (float)p1.z, (float)n.x, (float)n.y, (float)n.z, 0, 1,
+        (float)p2.x, (float)p2.y, (float)p2.z, (float)n.x, (float)n.y, (float)n.z, 0, 0,
+        (float)p3.x, (float)p3.y, (float)p3.z, (float)n.x, (float)n.y, (float)n.z, 1, 1,
+        (float)p4.x, (float)p4.y, (float)p4.z, (float)n.x, (float)n.y, (float)n.z, 1, 0
+    };
+
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3),
+        VertexFormat::Element(VertexFormat::NORMAL, 3),
+        VertexFormat::Element(VertexFormat::TEXCOORD0, 2)
+    };
+
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 3), 4);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+
+    mesh->_primitiveType = Mesh::TRIANGLE_STRIP;
+    mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
+
+    return mesh;
+}
+
+UPtr<Mesh> MeshFactory::createLines(Vector3* points, unsigned int pointCount)
+{
+    GP_ASSERT(points);
+    GP_ASSERT(pointCount);
+
+    float* vertices = new float[pointCount*3];
+    memcpy(vertices, points, pointCount*3*sizeof(float));
+
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3)
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 1), pointCount);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        SAFE_DELETE_ARRAY(vertices);
+        return UPtr<Mesh>(NULL);
+    }
+
+    mesh->_primitiveType = Mesh::LINE_STRIP;
+    mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
+
+    SAFE_DELETE_ARRAY(vertices);
+    return mesh;
+}
+
+UPtr<Mesh> MeshFactory::createCube(float size)
+{
+    float a = size * 0.5f;
+    float vertices[] =
+    {
+        -a, -a,  a,    0.0,  0.0,  1.0,   0.0, 0.0,
+         a, -a,  a,    0.0,  0.0,  1.0,   1.0, 0.0,
+        -a,  a,  a,    0.0,  0.0,  1.0,   0.0, 1.0,
+         a,  a,  a,    0.0,  0.0,  1.0,   1.0, 1.0,
+        -a,  a,  a,    0.0,  1.0,  0.0,   0.0, 0.0,
+         a,  a,  a,    0.0,  1.0,  0.0,   1.0, 0.0,
+        -a,  a, -a,    0.0,  1.0,  0.0,   0.0, 1.0,
+         a,  a, -a,    0.0,  1.0,  0.0,   1.0, 1.0,
+        -a,  a, -a,    0.0,  0.0, -1.0,   0.0, 0.0,
+         a,  a, -a,    0.0,  0.0, -1.0,   1.0, 0.0,
+        -a, -a, -a,    0.0,  0.0, -1.0,   0.0, 1.0,
+         a, -a, -a,    0.0,  0.0, -1.0,   1.0, 1.0,
+        -a, -a, -a,    0.0, -1.0,  0.0,   0.0, 0.0,
+         a, -a, -a,    0.0, -1.0,  0.0,   1.0, 0.0,
+        -a, -a,  a,    0.0, -1.0,  0.0,   0.0, 1.0,
+         a, -a,  a,    0.0, -1.0,  0.0,   1.0, 1.0,
+         a, -a,  a,    1.0,  0.0,  0.0,   0.0, 0.0,
+         a, -a, -a,    1.0,  0.0,  0.0,   1.0, 0.0,
+         a,  a,  a,    1.0,  0.0,  0.0,   0.0, 1.0,
+         a,  a, -a,    1.0,  0.0,  0.0,   1.0, 1.0,
+        -a, -a, -a,   -1.0,  0.0,  0.0,   0.0, 0.0,
+        -a, -a,  a,   -1.0,  0.0,  0.0,   1.0, 0.0,
+        -a,  a, -a,   -1.0,  0.0,  0.0,   0.0, 1.0,
+        -a,  a,  a,   -1.0,  0.0,  0.0,   1.0, 1.0
+    };
+    short indices[] =
+    {
+        0, 1, 2, 2, 1, 3, 4, 5, 6, 6, 5, 7, 8, 9, 10, 10, 9, 11, 12, 13, 14, 14, 13, 15, 16, 17, 18, 18, 17, 19, 20, 21, 22, 22, 21, 23
+    };
+    unsigned int vertexCount = 24;
+    unsigned int indexCount = 36;
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3),
+        VertexFormat::Element(VertexFormat::NORMAL, 3),
+        VertexFormat::Element(VertexFormat::TEXCOORD0, 2)
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 3), vertexCount);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+    mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
+    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->getIndexBuffer()->setData((char*)indices, sizeof(indices));
+    return mesh;
+}
+
+UPtr<Mesh> MeshFactory::createSimpleCube()
+{
+    float vertices[] =
+    {
+        -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0,
+      1.0, -1.0, -1.0, 1.0, -1.0,
+
+      -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0,
+      1.0, 1.0, -1.0, -1.0, 1.0,
+
+      1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+      -1.0, 1.0, -1.0, -1.0,
+
+      -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0,
+      1.0, -1.0, -1.0, 1.0,
+
+      -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0,
+      1.0, -1.0, 1.0, -1.0,
+
+      -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0,
+      -1.0, 1.0, 1.0, -1.0, 1.0,
+    };
+
+    unsigned int vertexCount = 36;
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3),
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 1), vertexCount);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+    mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
+    mesh->_primitiveType = Mesh::TRIANGLES;
+    return mesh;
+}
+
+UPtr<Mesh> MeshFactory::createSpherical(int subdivision) {
+    int width_segments = subdivision;
+    int height_segments = subdivision;
+
+    float phi_start = 0, phi_length = MATH_PI * 2, theta_start = 0, theta_length = MATH_PI;
+    float theta_end = std::min(theta_start + theta_length, (float)MATH_PI);
+    float radius = 1.0;
+
+    float *_vertices = new float[((width_segments + 1) * (height_segments + 1) * 6)];
+    int i = 0;
+    std::vector<uint16_t> indices;
+
+    int index = 0;
+    std::vector<std::vector<int> > grid;
+
+    // generate vertices, normals and uvs
+    for (int iy = 0; iy <= height_segments; iy++) {
+        std::vector<int> vertices_row;
+        float v = iy / (double)height_segments;
+        // special case for the poles
+        int uOffset = 0;
+        if (iy == 0 && theta_start == 0) {
+            uOffset = 0.5 / width_segments;
+        }
+        else if (iy == height_segments && theta_end == MATH_PI) {
+            uOffset = -0.5 / width_segments;
+        }
+
+        for (int ix = 0; ix <= width_segments; ix++) {
+            float u = ix / (double)width_segments;
+            // vertex
+            float x = -radius * cos(phi_start + u * phi_length) * sin(theta_start + v * theta_length);
+            float y = radius * cos(theta_start + v * theta_length);
+            float z = radius * sin(phi_start + u * phi_length) * sin(theta_start + v * theta_length);
+
+            _vertices[i++] = x;
+            _vertices[i++] = y;
+            _vertices[i++] = z;
+
+            // normal
+            _vertices[i++] = x;
+            _vertices[i++] = y;
+            _vertices[i++] = z;
+
+            // uv
+            //uvs.push( u + uOffset, 1 - v );
+            vertices_row.push_back(index++);
+        }
+
+        grid.push_back(vertices_row);
+    }
+
+    // indices
+    for (int iy = 0; iy < height_segments; iy++) {
+        for (int ix = 0; ix < width_segments; ix++) {
+            int a = grid[iy][ix + 1];
+            int b = grid[iy][ix];
+            int c = grid[iy + 1][ix];
+            int d = grid[iy + 1][ix + 1];
+            if (iy != 0 || theta_start > 0) {
+                indices.push_back(a);
+                indices.push_back(b);
+                indices.push_back(d);
+            }
+            if (iy != height_segments - 1 || theta_end < MATH_PI) {
+                indices.push_back(b);
+                indices.push_back(c);
+                indices.push_back(d);
+            }
+        }
+    }
+
+    unsigned int vertexCount = (width_segments + 1) * (height_segments + 1);
+    unsigned int indexCount = indices.size();
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3),
+        VertexFormat::Element(VertexFormat::NORMAL, 3),
+        //VertexFormat::Element(VertexFormat::TEXCOORD0, 2)
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 2), vertexCount);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+    mesh->getVertexBuffer()->setData((char*)_vertices, vertexCount*6*sizeof(float));
+    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->getIndexBuffer()->setData((char*)indices.data(), indices.size()*sizeof(uint16_t));
+
+    SAFE_DELETE_ARRAY(_vertices);
+    return mesh;
+}
+
+UPtr<Mesh> MeshFactory::createBoundingBox(const BoundingBox& box)
+{
+    Vector3 corners[8];
+    box.getCorners(corners);
+
+    float vertices[] =
+    {
+        (float)corners[7].x, (float)corners[7].y, (float)corners[7].z,
+        (float)corners[6].x, (float)corners[6].y, (float)corners[6].z,
+        (float)corners[1].x, (float)corners[1].y, (float)corners[1].z,
+        (float)corners[0].x, (float)corners[0].y, (float)corners[0].z,
+        (float)corners[7].x, (float)corners[7].y, (float)corners[7].z,
+        (float)corners[4].x, (float)corners[4].y, (float)corners[4].z,
+        (float)corners[3].x, (float)corners[3].y, (float)corners[3].z,
+        (float)corners[0].x, (float)corners[0].y, (float)corners[0].z,
+        (float)corners[0].x, (float)corners[0].y, (float)corners[0].z,
+        (float)corners[1].x, (float)corners[1].y, (float)corners[1].z,
+        (float)corners[2].x, (float)corners[2].y, (float)corners[2].z,
+        (float)corners[3].x, (float)corners[3].y, (float)corners[3].z,
+        (float)corners[4].x, (float)corners[4].y, (float)corners[4].z,
+        (float)corners[5].x, (float)corners[5].y, (float)corners[5].z,
+        (float)corners[2].x, (float)corners[2].y, (float)corners[2].z,
+        (float)corners[1].x, (float)corners[1].y, (float)corners[1].z,
+        (float)corners[6].x, (float)corners[6].y, (float)corners[6].z,
+        (float)corners[5].x, (float)corners[5].y, (float)corners[5].z
+    };
+
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3)
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 1), 18);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+
+    mesh->_primitiveType = Mesh::LINE_STRIP;
+    mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
+
+    return mesh;
+}
