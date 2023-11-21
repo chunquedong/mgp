@@ -1136,6 +1136,10 @@ PhysicsCollisionShape* PhysicsController::createMesh(Mesh* mesh, const Vector3& 
     shapeMeshData->vertexData = (float*)malloc(sizeof(float) * vertexCount * 3);
     Vector3 v;
     const VertexFormat::Element* vertexPosition = mesh->getVertexFormat().getPositionElement();
+    if (!vertexPosition || vertexPosition->size != 3) {
+        GP_ERROR("Failed to load mesh data from url '%s'.", mesh->getUrl());
+        return NULL;
+    }
     int vertexStride = vertexPosition->stride;
     int vertexOffset = vertexPosition->offset;
     for (unsigned int i = 0; i < vertexCount; i++)

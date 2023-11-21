@@ -133,10 +133,59 @@ void MeshBatch::draw(RenderInfo* view, Drawable *drawable)
 }
 
 unsigned int MeshBatch::draw(RenderInfo* view) {
-    return _mesh.draw(view, this, _material.get(), NULL, 0);
+    if (_highlightMaterial.get() && _mesh.getPartCount() > 1) {
+        std::vector<Material*> partMaterials(_mesh.getPartCount());
+        partMaterials[0] = _material.get();
+        for (int i = 1; i < _mesh.getPartCount(); ++i) {
+            partMaterials[i] = _highlightMaterial.get();
+        }
+        return _mesh.draw(view, this, _material.get(), partMaterials.data(), _mesh.getPartCount());
+    }
+    else {
+        return _mesh.draw(view, this, _material.get(), NULL, 0);
+    }
 }
 
 bool MeshBatch::doRaycast(RayQuery& query) {
-    return _mesh.doRaycast(query);
+
+    bool res = false;
+    for (int i = 0; i < _batchIndex.size(); ++i) {
+        int offset = _batchIndex[i];
+        int end = i + 1 < _batchIndex.size() ? _batchIndex[i + 1] : getMesh()->getIndexCount();
+        int size = end - offset;
+
+        if (_mesh.getIndexFormat() == Mesh::INDEX16) {
+            if (_mesh.raycastPart<uint16_t>(query, offset*2, size, i, _mesh.getPrimitiveType())) res = true;
+        }
+        else if (_mesh.getIndexFormat() == Mesh::INDEX32) {
+            if (_mesh.raycastPart<uint32_t>(query, offset*4, size, i, _mesh.getPrimitiveType())) res = true;
+        }
+    }
+    return res;
+}
+
+bool MeshBatch::getBatchVertices(int i, std::vector<float>& vertices) {
+    if (i < 0 || i >= _batchIndex.size()) return false;
+    int offset = _batchIndex[i];
+    int end = i + 1 < _batchIndex.size() ? _batchIndex[i + 1] : getMesh()->getIndexCount();
+
+    uint32_t* indices = (uint32_t*)((char*)getMesh()->getIndexBuffer()->_data);
+    char* verteix = (char*)getMesh()->getVertexBuffer()->_data;
+
+    const VertexFormat::Element* positionElement = getMesh()->getVertexFormat().getPositionElement();
+    if (!positionElement || positionElement->size != 3) return false;
+
+    uint32_t nindex = 0;
+    for (int j = offset; j < end; ++j) {
+        uint32_t ia = indices[j];
+        float* p = (float*)(verteix + (positionElement->stride * ia) + positionElement->offset);
+        float x = p[0];
+        float y = p[1];
+        float z = p[2];
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(z);
+    }
+    return true;
 }
 }

@@ -38,10 +38,28 @@ public:
 struct RayQuery {
     Ray ray;
     bool backfaceCulling = true;
-    
+    int pickMask = 1;
+
+    //camera fovDivisor = tan(camera.fov*0.5)/(viewport.h/2);
+    double fovDivisor = 1.0/1024.0;
+    double tolerance = 10;
+
+    //-------pick result
+    /**
+    * intersection point
+    */
     Vector3 target;
+    /**
+    * element index: [partIndex/batchIndex,triangleIndex]
+    */
     std::vector<int> path;
+    /**
+    * min distance to ray origin
+    */
     double minDistance = Ray::INTERSECTS_NONE;
+    /**
+    *pick object
+    */
     Drawable* drawable;
 };
 
@@ -112,8 +130,11 @@ public:
     bool isVisiable() { return _visiable; }
     void setVisiable(bool v) { _visiable = v; }
 
-    bool isClickable() { return _clickable; }
-    void setClickable(bool v) { _clickable = v; }
+    int getPickMask() { return _pickMask; }
+    void setPickMask(int v) { _pickMask = v; }
+
+    int getHighlightType() { return _highlightType; }
+    void setHighlightType(int v) { _highlightType = v; }
 
     bool raycast(RayQuery& query);
     virtual bool doRaycast(RayQuery& query);
@@ -151,7 +172,9 @@ protected:
 
     bool _visiable;
 
-    bool _clickable;
+    int _pickMask;
+
+    int _highlightType;
 };
 
 class DrawableGroup : public Drawable {

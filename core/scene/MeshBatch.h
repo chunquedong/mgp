@@ -133,6 +133,7 @@ public:
 
     int getBatchSize() const { return _batchIndex.size(); }
     const std::vector<uint32_t>& getBatchIndex() { return _batchIndex; }
+    bool getBatchVertices(int i, std::vector<float>& vertices);
 
     void write(Stream* file);
     bool read(Stream* file);
@@ -160,6 +161,8 @@ protected:
     UPtr<Material> _material;
     Mesh _mesh;
     std::vector<uint32_t> _batchIndex;
+public:
+    UPtr<Material> _highlightMaterial;
 };
 
 

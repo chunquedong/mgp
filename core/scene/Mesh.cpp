@@ -161,12 +161,10 @@ bool Mesh::unmapVertexBuffer()
 
 unsigned int Mesh::getIndexCount() const
 {
-    unsigned int count = 0;
-    for (int i = 0; i < _parts.size(); ++i) {
-        const MeshPart* p = &_parts[i];
-        count += p->_indexCount;
+    if (_parts.size() > 0) {
+        return _parts[0]._indexCount;
     }
-    return count;
+    return 0;
 }
 
 bool Mesh::isIndexed() const {
@@ -360,7 +358,8 @@ void Mesh::computeBounds()
     _boundingSphere.center.x = _boundingSphere.center.y = _boundingSphere.center.z = 0.0f;
     _boundingSphere.radius = 0.0f;
 
-    const VertexFormat::Element* positionElement = _vertexFormat.getPositionElement();    
+    const VertexFormat::Element* positionElement = _vertexFormat.getPositionElement();
+    if (!positionElement || positionElement->size != 3) return;
 
     for (int i = 0; i < _vertexCount; ++i)
     {
@@ -407,7 +406,7 @@ void Mesh::computeBounds()
     _boundingSphere.radius = sqrt(_boundingSphere.radius);
 }
 
-unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _material, UPtr<Material>* _partMaterials, int partMaterialCount)
+unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _material, Material** _partMaterials, int partMaterialCount)
 {
     Mesh* _mesh = this;
     GP_ASSERT(_mesh);
@@ -483,10 +482,11 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
 
         // Get the material for this mesh part.
         Material* material = NULL;
-        if (i < partCount && partMaterialCount > 0) material = _partMaterials[i].get();
+        if (i < partMaterialCount) material = _partMaterials[i];
         else if (_material) material = _material;
 
-        GP_ASSERT(material);
+        if (!material) continue;
+
         DrawCall drawCall;
         drawCall._drawable = drawable;
         for (; material != NULL; material = material->getNextPass())
@@ -516,46 +516,6 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
     return partCount;
 }
 
-template<typename T> bool Mesh::raycastPart(RayQuery& query, MeshPart* part, int partIndex) {
-    int minPart = -1;
-    Vector3 curTarget;
-
-    T* indices = (T*)((char*)this->_indexBuffer._data+part->_bufferOffset);
-    char* verteix = (char*)_vertexBuffer._data;
-    const VertexFormat::Element* positionElement = _vertexFormat.getPositionElement();
-    int count = part->_indexCount;
-
-    Vector3 a;
-    Vector3 b;
-    Vector3 c;
-    for (int j = 0; j < count; j += 3) {
-        T ia = indices[j];
-        T ib = indices[j + 1];
-        T ic = indices[j + 2];
-        float* af = (float*)(verteix + (positionElement->stride * ia) + positionElement->offset);
-        float* bf = (float*)(verteix + (positionElement->stride * ib) + positionElement->offset);
-        float* cf = (float*)(verteix + (positionElement->stride * ic) + positionElement->offset);
-        //float to double
-        a.x = af[0]; a.y = af[1]; a.z = af[2];
-        b.x = bf[0]; b.y = bf[1]; b.z = bf[2];
-        c.x = cf[0]; c.y = cf[1]; c.z = cf[2];
-        double dis = query.ray.intersectTriangle(a, b, c, query.backfaceCulling, &curTarget);
-        if (dis != Ray::INTERSECTS_NONE) {
-            if (dis < query.minDistance) {
-                query.minDistance = dis;
-                minPart = j;
-                query.target = curTarget;
-            }
-        }
-    }
-    if (minPart != -1) {
-        query.path.push_back(partIndex);
-        query.path.push_back(minPart);
-        return true;
-    }
-    return false;
-}
-
 bool Mesh::doRaycast(RayQuery& query) {
     bool res = false;
 
@@ -564,13 +524,11 @@ bool Mesh::doRaycast(RayQuery& query) {
     {
         MeshPart* part = getPart(i);
         GP_ASSERT(part);
-        if (part->_primitiveType == Mesh::TRIANGLES) {
-            if (getIndexFormat() == Mesh::INDEX16) {
-                if (raycastPart<uint16_t>(query, part, i)) res = true;
-            }
-            else if (getIndexFormat() == Mesh::INDEX32) {
-                if (raycastPart<uint32_t>(query, part, i)) res = true;
-            }
+        if (getIndexFormat() == Mesh::INDEX16) {
+            if (raycastPart<uint16_t>(query, part->_bufferOffset, part->_indexCount, i, part->_primitiveType)) res = true;
+        }
+        else if (getIndexFormat() == Mesh::INDEX32) {
+            if (raycastPart<uint32_t>(query, part->_bufferOffset, part->_indexCount, i, part->_primitiveType)) res = true;
         }
     }
 

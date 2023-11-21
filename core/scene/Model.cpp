@@ -193,7 +193,21 @@ void Model::setNode(Node* node)
 unsigned int Model::draw(RenderInfo* view)
 {
     GP_ASSERT(_mesh.get());
-    return _mesh->draw(view, this, _material.get(), _partMaterials.data(), _partMaterials.size());
+    int pmsize = _partMaterials.size();
+    if (pmsize < 128) {
+        Material* partMaterials[128] = { 0 };
+        for (int i = 0; i < pmsize; ++i) {
+            partMaterials[i] = _partMaterials[i].get();
+        }
+        return _mesh->draw(view, this, _material.get(), partMaterials, _partMaterials.size());
+    }
+    else {
+        std::vector<Material*> partMaterials(pmsize);
+        for (int i = 0; i < pmsize; ++i) {
+            partMaterials[i] = _partMaterials[i].get();
+        }
+        return _mesh->draw(view, this, _material.get(), partMaterials.data(), _partMaterials.size());
+    }
 }
 
 //void Model::setMaterialNodeBinding(Material *material)

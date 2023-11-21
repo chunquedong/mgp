@@ -10,7 +10,7 @@ void RenderInfo::draw(DrawCall* drawCall) {
 }
 
 Drawable::Drawable()
-    : _node(NULL), _renderPass(RenderLayer::Qpaque), _lightMask(0), _visiable(true), _clickable(true)
+    : _node(NULL), _renderPass(RenderLayer::Qpaque), _lightMask(0), _visiable(true), _pickMask(1), _highlightType(0)
 {
 }
 
@@ -33,14 +33,21 @@ bool Drawable::doRaycast(RayQuery& query) {
 }
 bool Drawable::raycast(RayQuery& query) {
     if (!isVisiable()) return Ray::INTERSECTS_NONE;
+    if ((_pickMask & query.pickMask) == 0) {
+        return Ray::INTERSECTS_NONE;
+    }
+
     if (_node) {
         auto sphere = _node->getBoundingSphere();
         if (sphere.intersectsQuery(query.ray) == Ray::INTERSECTS_NONE) {
             return false;
         }
     }
-    Matrix matrix = _node->getWorldMatrix();
-    matrix.invert();
+    Matrix matrix;
+    if (_node) {
+        matrix = _node->getWorldMatrix();
+        matrix.invert();
+    }
 
     RayQuery localQuery = query;
     localQuery.ray.transform(matrix);

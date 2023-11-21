@@ -290,7 +290,7 @@ public:
     void write(Stream* file);
     bool read(Stream* file);
 
-    unsigned int draw(RenderInfo* view, Drawable* drawable, Material* _material, UPtr<Material>* _partMaterials, int partMaterialCount);
+    unsigned int draw(RenderInfo* view, Drawable* drawable, Material* _material, Material** _partMaterials, int partMaterialCount);
 
     /**
     * Return the intersection point distance to ray origin.
@@ -323,10 +323,13 @@ public:
 
     void clearData();
 
+
+    std::vector<MeshPart>& getParts() { return _parts; }
+
+public:
+    template<typename T> bool raycastPart(RayQuery& query, int _bufferOffset, int _indexCount, int partIndex, PrimitiveType _primitiveType);
+
 private:
-    template<typename T> bool raycastPart(RayQuery& query, MeshPart* part, int partIndex);
-
-
     /**
      * Constructor.
      */
@@ -366,6 +369,104 @@ private:
 
     VertexAttributeBinding *_vertexAttributeArray = NULL;
 };
+
+
+template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset, int _indexCount, int partIndex, PrimitiveType _primitiveType) {
+    if (_primitiveType == Mesh::TRIANGLE_FAN || _primitiveType == Mesh::TRIANGLE_STRIP || _primitiveType == Mesh::LINE_LOOP || _primitiveType == Mesh::LINE_STRIP) {
+        return false;
+    }
+    int minTriangle = -1;
+    Vector3 curTarget;
+
+    T* indices = (T*)((char*)this->_indexBuffer._data + _bufferOffset);
+    char* verteix = (char*)_vertexBuffer._data;
+    const VertexFormat::Element* positionElement = _vertexFormat.getPositionElement();
+    if (!positionElement || positionElement->size != 3) return false;
+    int count = _indexCount;
+
+    if (_primitiveType == Mesh::TRIANGLES) {
+        Vector3 a;
+        Vector3 b;
+        Vector3 c;
+        for (int j = 0; j < count; j += 3) {
+            T ia = indices[j];
+            T ib = indices[j + 1];
+            T ic = indices[j + 2];
+            float* af = (float*)(verteix + (positionElement->stride * ia) + positionElement->offset);
+            float* bf = (float*)(verteix + (positionElement->stride * ib) + positionElement->offset);
+            float* cf = (float*)(verteix + (positionElement->stride * ic) + positionElement->offset);
+            //float to double
+            a.x = af[0]; a.y = af[1]; a.z = af[2];
+            b.x = bf[0]; b.y = bf[1]; b.z = bf[2];
+            c.x = cf[0]; c.y = cf[1]; c.z = cf[2];
+            double dis = query.ray.intersectTriangle(a, b, c, query.backfaceCulling, &curTarget);
+            if (dis != Ray::INTERSECTS_NONE) {
+                if (dis < query.minDistance) {
+                    query.minDistance = dis;
+                    minTriangle = j;
+                    query.target = curTarget;
+                }
+            }
+        }
+    }
+    else if (_primitiveType == Mesh::LINES) {
+        Vector3 a;
+        Vector3 b;
+        uint32_t ia;
+        uint32_t ib;
+        for (int j = 0; j < count; j += 2)
+        {
+            ia = indices[j];
+            ib = indices[j + 1];
+
+            float* af = (float*)(verteix + (positionElement->stride * ia) + positionElement->offset);
+            float* bf = (float*)(verteix + (positionElement->stride * ib) + positionElement->offset);
+            //float to double
+            a.x = af[0]; a.y = af[1]; a.z = af[2];
+            b.x = bf[0]; b.y = bf[1]; b.z = bf[2];
+            Vector3 optionalPointOnRay;
+            Vector3 optionalPointOnSegment;
+            double disSq = query.ray.distanceSqToSegment(a, b, &optionalPointOnRay, &optionalPointOnSegment);
+            double disToOrigin = query.ray.getOrigin().distance(optionalPointOnRay);
+            double limitDis = query.fovDivisor * disToOrigin * query.tolerance;
+            if (disToOrigin < query.minDistance && disSq < limitDis * limitDis) {
+                query.minDistance = disToOrigin;
+                query.target = optionalPointOnSegment;
+                minTriangle = j;
+            }
+            //printf("dis:%f\n", sqrt(disSq));
+        }
+    }
+    else if (_primitiveType == Mesh::POINTS) {
+        Vector3 a;
+        uint32_t ia;
+        for (int j = 0; j < count; j += 2)
+        {
+            ia = indices[j];
+
+            float* af = (float*)(verteix + (positionElement->stride * ia) + positionElement->offset);
+            //float to double
+            a.x = af[0]; a.y = af[1]; a.z = af[2];
+            double disSq = query.ray.distanceSqToPoint(a);
+            double disToOrigin = query.ray.getOrigin().distance(a);
+            double limitDis = query.fovDivisor * disToOrigin * query.tolerance;
+            if (disToOrigin < query.minDistance && disSq < limitDis * limitDis) {
+                query.minDistance = disToOrigin;
+                query.target = a;
+                minTriangle = j;
+            }
+            //printf("dis:%f\n", sqrt(disSq));
+        }
+    }
+
+    if (minTriangle != -1) {
+        std::vector<int> path = { partIndex, minTriangle };
+        query.path = path;
+        return true;
+    }
+    return false;
+}
+
 
 }
 

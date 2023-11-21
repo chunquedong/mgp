@@ -314,6 +314,9 @@ public:
     }
 
     SharedPtr<T> lock() {
+        if (!pointer) {
+            return SharedPtr<T>();
+        }
         SharedPtr<Refable> ptr(pointer->lock());
         return ptr.dynamicCastTo<T>();
     }
