@@ -131,11 +131,13 @@ public:
 
     Mesh* getMesh() { return &_mesh; }
 
-    int getBatchSize() { return _batchIndex.size(); }
+    int getBatchSize() const { return _batchIndex.size(); }
+    const std::vector<uint32_t>& getBatchIndex() { return _batchIndex; }
 
     void write(Stream* file);
     bool read(Stream* file);
 
+    const BoundingSphere* getBoundingSphere() override;
 protected:
 
     /**

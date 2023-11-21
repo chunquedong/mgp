@@ -104,6 +104,11 @@ void MeshBatch::setCapacity(unsigned int capacity)
     _mesh.getIndexBuffer()->setCapacity(vertexCount * _mesh.getIndexSize());
 }
 
+const BoundingSphere* MeshBatch::getBoundingSphere() {
+    if (_started) return NULL;
+    return &_mesh.getBoundingSphere();
+}
+
 void MeshBatch::start()
 {
     _mesh.clearData();
@@ -119,6 +124,7 @@ bool MeshBatch::isStarted() const
 void MeshBatch::finish()
 {
     _started = false;
+    getBoundingSphere();
 }
 
 void MeshBatch::draw(RenderInfo* view, Drawable *drawable)

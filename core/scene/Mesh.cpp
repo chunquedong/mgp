@@ -684,6 +684,8 @@ void Mesh::clearData() {
     for (MeshPart& part : _parts) {
         part._indexCount = 0;
     }
+    _boundingSphere = BoundingSphere::empty();
+    _boundingBox = BoundingBox::empty();
 }
 
 }
