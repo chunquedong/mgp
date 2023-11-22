@@ -81,7 +81,7 @@ bool Texture::load(const char* path) {
     return true;
 }
 
-UPtr<Texture> Texture::create(const char* path, bool generateMipmaps, bool flipY)
+UPtr<Texture> Texture::create(const char* path, bool generateMipmaps)
 {
     GP_ASSERT( path );
 
@@ -120,6 +120,7 @@ UPtr<Texture> Texture::create(const char* path, bool generateMipmaps, bool flipY
                 (tolower(ext[1]) == 'h' && tolower(ext[2]) == 'd' && tolower(ext[3]) == 'r')
                 )
             {
+                bool flipY = false;
                 UPtr<Image> image = Image::create(path, flipY);
                 if (image.get())
                     texture = create(image.get(), generateMipmaps);

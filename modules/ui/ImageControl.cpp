@@ -66,7 +66,7 @@ const char* ImageControl::getTypeName() const
 void ImageControl::setImage(const char* path)
 {
     SAFE_DELETE(_batch);
-    UPtr<Texture> texture = Texture::create(path, false, false);
+    UPtr<Texture> texture = Texture::create(path, false);
     _batch = SpriteBatch::create(texture.get()).take();
     _tw = 1.0f / texture->getWidth();
     _th = 1.0f / texture->getHeight();

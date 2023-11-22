@@ -115,7 +115,7 @@ public:
      * @return The new texture, or NULL if the texture could not be loaded/created.
      * @script{create}
      */
-    static UPtr<Texture> create(const char* path, bool generateMipmaps = false, bool flipY = true);
+    static UPtr<Texture> create(const char* path, bool generateMipmaps = false);
 
     bool load(const char* path);
 

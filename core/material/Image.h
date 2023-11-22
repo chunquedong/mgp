@@ -33,9 +33,9 @@ public:
      * @return The newly created image.
      * @script{create}
      */
-    static UPtr<Image> create(const char* path, bool flipY = true);
-    static UPtr<Image> createHDR(const char* path, bool flipY = true);
-    static UPtr<Image> createFromBuf(const char* file_data, size_t file_size, bool flipY = true);
+    static UPtr<Image> create(const char* path, bool flipY = false);
+    static UPtr<Image> createHDR(const char* path, bool flipY = false);
+    static UPtr<Image> createFromBuf(const char* file_data, size_t file_size, bool flipY = false);
 
     /**
      * Creates an image from the data provided

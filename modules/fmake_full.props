@@ -7,5 +7,5 @@ srcDirs = ai/,app/,audio/,physics/,render/,script/,ui/,openGL/,loader/
 incDir = ./
 win32.defines = UNICODE,GP_NO_LUA_BINDINGS,GP_GLFW,CURL_DISABLE_LDAP,CURL_STATICLIB
 //debug.defines = GP_USE_MEM_LEAK_DETECTION
-defines=GP_NO_LUA_BINDINGS,GP_GLFW,CURL_DISABLE_LDAP,CURL_STATICLIB
+defines=GP_NO_LUA_BINDINGS,GP_GLFW,CURL_DISABLE_LDAP,CURL_STATICLIB,GLTFIO_DRACO_SUPPORTED
 extConfigs.cppflags = -std=c++14

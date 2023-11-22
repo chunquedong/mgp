@@ -7,7 +7,9 @@
  */
 #include "GLtfLoader.h"
 
-#include "DracoCache.h"
+#ifdef GLTFIO_DRACO_SUPPORTED
+	#include "DracoCache.h"
+#endif
 
 #define CGLTF_IMPLEMENTATION
 #include "cgltf.h"
@@ -21,6 +23,9 @@
 
 
 using namespace mgp;
+
+#ifdef GLTFIO_DRACO_SUPPORTED
+
 using namespace filament_gltfio;
 
 static void decodeDracoMeshes(DracoCache* dracoCache, cgltf_data* _gltf_data) {
@@ -88,15 +93,20 @@ static void decodeDracoMeshes(DracoCache* dracoCache, cgltf_data* _gltf_data) {
 		}
 	}
 }
+#endif
 
 class GltfLoaderImp {
 	std::map<cgltf_node*, Node*> nodeMap;
 	std::string baseDir;
 	cgltf_data* _gltf_data;
+#ifdef GLTFIO_DRACO_SUPPORTED
 	DracoCache* _dracoCache = NULL;
+#endif
 public:
 	~GltfLoaderImp() {
+#ifdef GLTFIO_DRACO_SUPPORTED
 		delete _dracoCache;
+#endif
 	}
 	bool lighting = false;
 	UPtr<Scene> load(const char* file) {
@@ -155,7 +165,7 @@ private:
 			return t;
 		}
 		std::string uri = baseDir + texture->image->uri;
-		UPtr<Texture> t = Texture::create(uri.c_str(), true, false);
+		UPtr<Texture> t = Texture::create(uri.c_str(), true);
 		return t;
 	}
 
@@ -692,10 +702,13 @@ private:
 
 		for (cgltf_size i = 0; i < data->extensions_required_count; i++) {
 			if (!strcmp(data->extensions_required[i], "KHR_draco_mesh_compression")) {
-				//printf("KHR_draco_mesh_compression is not supported.\n");
-				//return UPtr<Scene>(NULL);
-				_dracoCache = new DracoCache();
-				decodeDracoMeshes(_dracoCache, data);
+				#ifdef GLTFIO_DRACO_SUPPORTED
+					_dracoCache = new DracoCache();
+					decodeDracoMeshes(_dracoCache, data);
+				#else
+					printf("KHR_draco_mesh_compression is not supported.\n");
+					return UPtr<Scene>(NULL);
+				#endif
 				break;
 			}
 		}
