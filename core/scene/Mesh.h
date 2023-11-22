@@ -8,6 +8,7 @@
 #include "math/Vector3.h"
 #include "math/BoundingBox.h"
 #include "math/BoundingSphere.h"
+#include "Drawable.h"
 
 namespace mgp
 {
@@ -17,7 +18,6 @@ class Model;
 class VertexAttributeBinding;
 class RenderInfo;
 class Drawable;
-struct RayQuery;
 
 typedef uint64_t BufferHandle;
 
