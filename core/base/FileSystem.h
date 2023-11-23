@@ -248,6 +248,7 @@ public:
      */
     static std::string getExtension(const char* path);
 
+    static bool remove(const char* path);
 private:
 
     /**

@@ -567,6 +567,17 @@ std::string FileSystem::getExtension(const char* path)
     return ext;
 }
 
-
+bool FileSystem::remove(const char* path) {
+#ifdef WIN32
+    if (DeleteFileA(path)) {
+        return true;
+    }
+#else
+    if (::remove(path) == 0) {
+        return true;
+    }
+#endif
+    return false;
+}
 
 }
