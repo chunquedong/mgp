@@ -392,7 +392,7 @@ void window_content_scale_callback(GLFWwindow* window, float xscale, float yscal
     lastYScale = yscale;
 }
 
-void Platform::init(const char* title)
+void Platform::init(const char* title, int w, int h)
 {
     //FileSystem::setResourcePath("./");
 
@@ -422,7 +422,7 @@ void Platform::init(const char* title)
     glfwWindowHint(GLFW_SAMPLES, 4);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(1920, 1080, title, NULL, NULL);
+    window = glfwCreateWindow(w, h, title, NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -679,11 +679,11 @@ void Platform::requestRepaint() {
 //    return false;
 //}
 
-int Platform::run() {
+int Platform::run(const char* title, int w, int h) {
 
     Game* game = Game::getInstance();
     GP_ASSERT(game);
-    Platform::init("MGP Engine");
+    Platform::init(title, w, h);
     int result = Platform::enterMessagePump();
 
 #ifndef __EMSCRIPTEN__

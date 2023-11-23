@@ -24,7 +24,7 @@ public:
      *
      * @script{ignore}
      */
-    static void init(const char* title);
+    static void init(const char* title, int w, int h);
 
     /**
      * Begins processing the platform messages.
@@ -322,7 +322,7 @@ public:
      */
     //static void shutdownInternal();
 
-    static int run();
+    static int run(const char* title= "MGP Engine", int w = 1920, int h=1080);
 
 private:
 

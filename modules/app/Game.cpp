@@ -212,12 +212,12 @@ void Game::drawFps() {
     _font->start();
     Rectangle* viewport = getView()->getViewport();
     int padding = 10;
-    int fontSize = 15;
+    int fontSize = 13;
     float y = viewport->height / Toolkit::cur()->getScreenScale() - fontSize - padding;
     float x = 100+padding;
     char buffer[256] = { 0 };
     int drawCall = Renderer::cur()->drawCallCount();
-    snprintf(buffer, 256, "FPS:%d, DrawCall:%d", _frameRate, drawCall);
+    snprintf(buffer, 256, "FPS:%d, DC:%d", _frameRate, drawCall);
     _font->drawText(buffer, x, y, Vector4::one(), fontSize);
     _font->finish(NULL);
     //Renderer::cur()->drawCallCount();
