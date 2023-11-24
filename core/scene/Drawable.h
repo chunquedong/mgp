@@ -60,7 +60,7 @@ struct RayQuery {
     /**
     *pick object
     */
-    Drawable* drawable;
+    Drawable* drawable = NULL;
 };
 
 /**

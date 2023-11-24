@@ -26,6 +26,7 @@ public:
     virtual bool mouseEvent(Mouse evt) { return false; }
 };
 
+class SceneView;
 class EditorCameraCtrl : public CameraCtrl {
     int _prevX;
     int _prevY;
@@ -33,7 +34,11 @@ class EditorCameraCtrl : public CameraCtrl {
 
     float _pitch;
     float _yaw;
+    double _surfaceDistance;
 public:
+
+    Vector3 rotateCenter;
+    SceneView* sceneView;
     EditorCameraCtrl();
 
     void setRotate(float pitch, float yaw) { _pitch = pitch; _yaw = yaw; }
@@ -48,6 +53,9 @@ public:
     void keyEvent(Keyboard evt);
 
     bool mouseEvent(Mouse evt);
+
+private:
+    bool updateSurfaceDistance();
 };
 
 }

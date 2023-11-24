@@ -51,8 +51,13 @@ void SceneView::setCamera(Camera* c, bool initCameraCtrl) {
     if (!_cameraCtrl.get() && initCameraCtrl) {
         UPtr<EditorCameraCtrl> cameraCtrl = UPtr<EditorCameraCtrl>(new EditorCameraCtrl());
         cameraCtrl->setCamera(_camera.get());
+        cameraCtrl->sceneView = this;
         setCameraCtrl(cameraCtrl.dynamicCastTo<CameraCtrl>());
     }
+}
+
+void SceneView::setCameraCtrl(UPtr<CameraCtrl> c) {
+    _cameraCtrl = std::move(c);
 }
 
 void SceneView::initCamera(bool firstPerson, float nearPlane, float farPlane, float fov)
@@ -92,6 +97,7 @@ void SceneView::initCamera(bool firstPerson, float nearPlane, float farPlane, fl
 
             UPtr<EditorCameraCtrl> cameraCtrl = UPtr<EditorCameraCtrl>(new EditorCameraCtrl());
             cameraCtrl->setCamera(camera.get());
+            cameraCtrl->sceneView = this;
             setCameraCtrl(cameraCtrl.dynamicCastTo<CameraCtrl>());
         }
         _useFirstPersonCamera = false;

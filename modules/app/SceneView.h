@@ -56,7 +56,7 @@ public:
     void setRenderPath(UPtr<RenderPath> s) { _renderPath = std::move(s); }
 
     CameraCtrl* getCameraCtrl() { return _cameraCtrl.get(); };
-    void setCameraCtrl(UPtr<CameraCtrl> c) { _cameraCtrl = std::move(c); }
+    void setCameraCtrl(UPtr<CameraCtrl> c);
 };
 
 

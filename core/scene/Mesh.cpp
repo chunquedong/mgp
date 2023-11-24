@@ -520,6 +520,43 @@ bool Mesh::doRaycast(RayQuery& query) {
     bool res = false;
 
     unsigned int partCount = getPartCount();
+    if (partCount == 0) {
+        int minTriangle = -1;
+        Vector3 curTarget;
+        char* verteix = (char*)_vertexBuffer._data;
+        const VertexFormat::Element* positionElement = _vertexFormat.getPositionElement();
+        if (!positionElement || positionElement->size != 3) return false;
+        int count = getVertexCount();
+
+        if (_primitiveType == Mesh::TRIANGLES) {
+            Vector3 a;
+            Vector3 b;
+            Vector3 c;
+            for (int j = 0; j < count; j += 3) {
+                float* af = (float*)(verteix + (positionElement->stride * j) + positionElement->offset);
+                float* bf = (float*)(verteix + (positionElement->stride * (j+1)) + positionElement->offset);
+                float* cf = (float*)(verteix + (positionElement->stride * (j+2)) + positionElement->offset);
+                //float to double
+                a.x = af[0]; a.y = af[1]; a.z = af[2];
+                b.x = bf[0]; b.y = bf[1]; b.z = bf[2];
+                c.x = cf[0]; c.y = cf[1]; c.z = cf[2];
+                double dis = query.ray.intersectTriangle(a, b, c, query.backfaceCulling, &curTarget);
+                if (dis != Ray::INTERSECTS_NONE) {
+                    if (dis < query.minDistance) {
+                        query.minDistance = dis;
+                        minTriangle = j;
+                        query.target = curTarget;
+                    }
+                }
+            }
+        }
+        if (minTriangle != -1) {
+            std::vector<int> path = { -1, minTriangle };
+            query.path = path;
+            res = true;
+        }
+        return res;
+    }
     for (unsigned int i = 0; i < partCount; ++i)
     {
         MeshPart* part = getPart(i);
