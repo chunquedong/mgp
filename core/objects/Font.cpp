@@ -249,6 +249,7 @@ bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, c
         
         glyphCache[key] = glyph;
 
+        glyph.metrics.scaleMetrics(fontSizeScale);
         //char name[256];
         //snprintf(name, 256, "fontTexture_%p.png", this);
         //stbi_write_png(name, textureWidth, textureHeight, 1, fontTexture->data, textureWidth * 1);

@@ -266,6 +266,8 @@ void RenderPath::createFramebuffer() {
 }
 
 void RenderPath::onResize(int w, int h) {
+    if (w == 0) w = 1;
+    if (h == 0) h = 1;
     if (_width == w && _height == h) {
         return;
     }
