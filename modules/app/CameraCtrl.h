@@ -35,13 +35,16 @@ class EditorCameraCtrl : public CameraCtrl {
     float _pitch;
     float _yaw;
     double _surfaceDistance;
+    Vector3 _rotateCenter;
+    bool _dirty = false;
 public:
 
-    Vector3 rotateCenter;
     SceneView* sceneView;
     EditorCameraCtrl();
 
-    void setRotate(float pitch, float yaw) { _pitch = pitch; _yaw = yaw; }
+    void setRotateCenter(const Vector3& c);
+
+    void setRotate(float pitch, float yaw);
     void getRotate(float* pitch, float* yaw) { *pitch = _pitch; *yaw = _yaw; }
 
     void setCamera(Camera* camera) { _camera = camera; }

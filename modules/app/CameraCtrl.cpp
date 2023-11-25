@@ -16,6 +16,40 @@ EditorCameraCtrl::EditorCameraCtrl(): _prevX(0), _prevY(0), _pitch(0), _yaw(0), 
 
 void EditorCameraCtrl::update(float elapsedTime)
 {
+    if (_dirty) {
+        _dirty = false;
+
+        Vector3 position = _camera->getNode()->getTranslationWorld();
+        double distance = position.distance(_rotateCenter);
+        Vector3 originPos(0, 0, 1);
+        originPos.scale(distance);
+
+        Matrix trans;
+        Matrix::createTranslation(originPos, &trans);
+
+        Matrix rotateY;
+        Matrix::createRotationY(_yaw, &rotateY);
+
+        Matrix rotateX;
+        Matrix::createRotationX(_pitch, &rotateX);
+
+        Matrix centerTrans;
+        Matrix::createTranslation(_rotateCenter, &centerTrans);
+
+        Matrix m = centerTrans * rotateY * rotateX * trans;
+
+        _camera->getNode()->setMatrix(m);
+    }
+}
+
+void EditorCameraCtrl::setRotateCenter(const Vector3& c) {
+    _rotateCenter = c;
+    _dirty = true;
+}
+
+void EditorCameraCtrl::setRotate(float pitch, float yaw) {
+    _pitch = pitch; _yaw = yaw;
+    _dirty = true;
 }
 
 bool EditorCameraCtrl::updateSurfaceDistance() {
@@ -69,8 +103,12 @@ void EditorCameraCtrl::touchEvent(MotionEvent& evt)
             Rectangle& viewport = *sceneView->getViewport();
             double fovDivisor = tan(MATH_DEG_TO_RAD(_camera->getFieldOfView()) / 2) / (viewport.height / 2);
             double scale = fovDivisor * _surfaceDistance;
-            rotateCenter.x -= deltaX * scale;
-            rotateCenter.y += deltaY * scale;
+
+            Vector3 left = -_camera->getNode()->getRightVectorWorld();
+            left.normalize().scale(deltaX * scale);
+            Vector3 up = _camera->getNode()->getUpVectorWorld();
+            up.normalize().scale(deltaY * scale);
+            _rotateCenter += left + up;
         }
         else {
 
@@ -91,26 +129,7 @@ void EditorCameraCtrl::touchEvent(MotionEvent& evt)
             _yaw += dyaw;
         }
 
-        Vector3 position = _camera->getNode()->getTranslationWorld();
-        double distance = position.distance(rotateCenter);
-        Vector3 originPos(0, 0, 1);
-        originPos.scale(distance);
-
-        Matrix trans;
-        Matrix::createTranslation(originPos, &trans);
-
-        Matrix rotateY;
-        Matrix::createRotationY(_yaw, &rotateY);
-
-        Matrix rotateX;
-        Matrix::createRotationX(_pitch, &rotateX);
-
-        Matrix centerTrans;
-        Matrix::createTranslation(rotateCenter, &centerTrans);
-
-        Matrix m = centerTrans * rotateY * rotateX * trans;
-
-        _camera->getNode()->setMatrix(m);
+        _dirty = true;
         break;
     }
     };
