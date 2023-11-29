@@ -73,7 +73,7 @@ bool EditorCameraCtrl::updateSurfaceDistance() {
         return true;
     }
     if (_surfaceDistance == -1) {
-        _surfaceDistance = (_camera->getFarPlane() + _camera->getNearPlane()) / 2.0;
+        _surfaceDistance = _camera->getNode()->getTranslationWorld().distance(_rotateCenter);
     }
     return false;
 }
@@ -146,7 +146,7 @@ bool EditorCameraCtrl::mouseEvent(Mouse evt)
     {
     case MotionEvent::wheel:
         updateSurfaceDistance();
-        float amount = (evt.wheelDelta / 8.0f) * (_surfaceDistance-0.1);
+        float amount = (evt.wheelDelta * 0.1f) * (_surfaceDistance-0.1);
         if (amount < 0 && amount > -10E-4) {
             amount = -10E-4;
         }
