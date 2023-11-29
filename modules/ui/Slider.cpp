@@ -1,5 +1,6 @@
 #include "Slider.h"
 #include "platform/Toolkit.h"
+#include "ScrollContainer.h"
 
 namespace mgp
 {

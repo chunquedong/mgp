@@ -2,7 +2,7 @@
 #define FORM_H_
 
 #include "base/Ref.h"
-#include "Container.h"
+#include "ScrollContainer.h"
 #include "scene/Mesh.h"
 #include "scene/Node.h"
 #include "platform/Keyboard.h"
@@ -26,8 +26,8 @@ class FormManager;
  */
 class Form : public Drawable
 {
-    friend class Control;
-    friend class Container;
+    //friend class Control;
+    //friend class Container;
     friend class FormManager;
 
 public:
@@ -122,6 +122,19 @@ public:
 
     bool screenToForm(int* x, int* y);
 
+    void controlDisabled(Control* control);
+
+    void setFocusControl(Control* control);
+
+    /**
+     * Called during drawing to prepare a sprite batch for being drawn into for this form.
+     */
+    void startBatch(BatchableLayer* batch);
+
+    /**
+     * Called during drawing to signal completion of drawing into a batch.
+     */
+    void finishBatch(BatchableLayer* batch, RenderInfo* view);
 private:
     
     /**
@@ -149,15 +162,6 @@ private:
      */
     void initialize();
 
-    /**
-     * Called during drawing to prepare a sprite batch for being drawn into for this form.
-     */
-    void startBatch(BatchableLayer* batch);
-
-    /**
-     * Called during drawing to signal completion of drawing into a batch.
-     */
-    void finishBatch(BatchableLayer* batch, RenderInfo* view);
 
     int flushBatch(RenderInfo* view);
 
@@ -178,9 +182,7 @@ private:
 
     void verifyRemovedControlState(Control* control);
 
-    void controlDisabled(Control* control);
 
-    void setFocusControl(Control* control);
 
     Control* findInputControl(int* x, int* y, bool focus, unsigned int contactIndex, bool* consumed);
     Control* handlePointerPressRelease(int* x, int* y, bool pressed, unsigned int contactIndex, bool* consumed);

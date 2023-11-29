@@ -84,4 +84,35 @@ theme mainMenu
         textAlignment = ALIGN_TOP_LEFT
     }
 
+    style ComboBox : Default
+    {
+        background
+        {
+            border
+            {
+                left = 10
+                right = 10
+                top = 10
+                bottom = 10
+            }
+            image=comboBox.png
+        }
+        textColor = #000000ff
+        textAlignment = ALIGN_TOP_LEFT
+    }
+
+    style MenuList : Default
+    {
+        background
+        {
+            border
+            {
+                left = 15
+                right = 15
+                top = 15
+                bottom = 15
+            }
+            image=outline.png
+        }
+    }
 }

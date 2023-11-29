@@ -1,33 +1,33 @@
 #include "ComboBox.h"
 #include "base/Base.h"
 #include "platform/Toolkit.h"
-using namespace mgp;
+#include "MenuList.h"
+#include "Form.h"
+
+namespace mgp {
 
 
-
-ComboBox::ComboBox() : _image(NULL)
+ComboBox::ComboBox()
 {
-    _canFocus = true;
-    setPadding(4, 4, 4, 4);
+    setPadding(8, 8, 8, 8);
 }
 
 ComboBox::~ComboBox()
 {
-
 }
 
 UPtr<ComboBox> ComboBox::create(const char* id, Style* style)
 {
     ComboBox* cb = new ComboBox();
     cb->_id = id ? id : "";
-    cb->initialize("CheckBox", style, NULL);
+    cb->initialize("ComboBox", style, NULL);
     return UPtr<ComboBox>(cb);
 }
 
 Control* ComboBox::create(Style* style, Properties* properties)
 {
     ComboBox* cb = new ComboBox();
-    cb->initialize("CheckBox", style, properties);
+    cb->initialize("ComboBox", style, properties);
     return cb;
 }
 
@@ -48,4 +48,20 @@ const char* ComboBox::getTypeName() const
 
 void ComboBox::setSelIndex(int v) {
     _selIndex = v;
+}
+
+void ComboBox::controlEvent(Control::Listener::EventType evt)
+{
+    Button::controlEvent(evt);
+
+    switch (evt)
+    {
+    case Control::Listener::CLICK:
+        UPtr<MenuList> list = MenuList::create((_id + "_menuList").c_str());
+        list->initItems(this->_items);
+        getParent()->getTopLevelForm()->getRoot()->addControl(std::move(list));
+        break;
+    }
+}
+
 }

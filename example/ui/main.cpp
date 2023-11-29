@@ -75,7 +75,7 @@ class MainApp : public Game, Control::Listener {
         //SAFE_RELEASE(button2);
         //SAFE_RELEASE(container);
 
-
+#if 0
         UPtr<ImageControl> image = ImageControl::create("image");
         image->setImage("res/image/logo.png");
         image->setSize(50, 50);
@@ -87,10 +87,16 @@ class MainApp : public Game, Control::Listener {
         joystick->setSize(100, 100);
         form->getRoot()->addControl(joystick.dynamicCastTo<Control>());
         //SAFE_RELEASE(joystick);
-
+#endif
         UPtr<ComboBox> combobox = ComboBox::create("combobox");
-        combobox->setSize(100, 100);
+        //combobox->setSize(100, 100);
+        combobox->setText("Combobox");
+        combobox->getItems().push_back("A");
         form->getRoot()->addControl(combobox.dynamicCastTo<Control>());
+
+        //UPtr<MenuList> menuList = MenuList::create("MenuList");
+        //menuList->setSize(100, 100);
+        //form->getRoot()->addControl(menuList.dynamicCastTo<Control>());
         
 #if 0
         UPtr<Font> font = Font::create("res/ui/sans.ttf");

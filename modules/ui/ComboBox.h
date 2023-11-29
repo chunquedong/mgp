@@ -1,52 +1,45 @@
-#ifndef COMBO_BOX_H_
-#define COMBO_BOX_H_
+#ifndef _COMBO_BOX_H_
+#define _COMBO_BOX_H_
 
 #include "Container.h"
 #include "Button.h"
 #include "Theme.h"
 #include "base/Properties.h"
 
+#include <vector>
+#include <string>
+
 namespace mgp
 {
 
 class ComboBox : public Button {
+
+    std::vector<std::string> _items;
+
     int _selIndex = -1;
     bool _dropdown = false;
 
-    ThemeImage* _image;
+    ThemeImage* _image = NULL;
+
 public:
 
-    std::vector<std::string> times;
+    std::vector<std::string>& getItems() { return _items; }
 
-    /**
-     * Creates a new CheckBox.
-     *
-     * @param id The checkbox ID.
-     * @param style The checkbox style (optional).
-     *
-     * @return The new checkbox.
-     * @script{create}
-     */
     static UPtr<ComboBox> create(const char* id, Style* style = NULL);
 
-    /**
-     * Extends ScriptTarget::getTypeName() to return the type name of this class.
-     *
-     * Child controls should override this function to return the correct type name.
-     *
-     * @return The type name of this class: "ComboBox"
-     * @see ScriptTarget::getTypeName()
-     */
     const char* getTypeName() const;
 
     int getSelIndex() { return _selIndex; }
     void setSelIndex(int v);
 
+    static Control* create(Style* style, Properties* properties = NULL);
 protected:
     ComboBox();
     ~ComboBox();
-    static Control* create(Style* style, Properties* properties = NULL);
+    
     void initialize(const char* typeName, Style* style, Properties* properties);
+
+    void controlEvent(Control::Listener::EventType evt);
 private:
     ComboBox(const ComboBox& copy) = delete;
 };

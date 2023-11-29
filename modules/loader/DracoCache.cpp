@@ -21,6 +21,7 @@
 #endif
 
 //#include <utils/Log.h>
+#include <assert.h>
 
 #if GLTFIO_DRACO_SUPPORTED
 

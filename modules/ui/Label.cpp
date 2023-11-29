@@ -84,6 +84,7 @@ std::string& Label::getDisplayedText() {
 }
 
 void Label::updateFontLayout() {
+    if (!_font) return;
     auto text = getDisplayedText();
     fontLayout.update(_font, getStyle()->getFontSize(), text.c_str(), text.size());
 }
