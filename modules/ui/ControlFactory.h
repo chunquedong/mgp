@@ -17,8 +17,8 @@ class Style;
  */
 class ControlFactory 
 {
-    friend class Game;
-	friend class Container;
+    //friend class Game;
+	//friend class Container;
 
 public:
 
@@ -51,6 +51,21 @@ public:
 	 */
     void unregisterCustomControl(const char* typeName);
 
+	/**
+	* Creates a controls from the set of core and custom controls registered.
+	*
+	* @param typeName The type of the control to create.
+	* @param style The style to apply to the control.
+	* @param properties A Properties object describing the control (optional).
+	* @return The new control.
+	*/
+	UPtr<Control> createControl(const char* typeName, Style* style, Properties* properties = NULL);
+
+	/**
+	 * Cleans up resources allocated by the ControlFactory.
+	 */
+	static void finalize();
+
 private:
 
 	/**
@@ -68,25 +83,12 @@ private:
 	 */
 	~ControlFactory();
 
-    /**
-     * Cleans up resources allocated by the ControlFactory.
-     */
-    static void finalize();
 
 	/**
 	 * Assignment operator
 	 */
 	ControlFactory &operator=(const ControlFactory&);
 
-	/**
-	* Creates a controls from the set of core and custom controls registered.
-	*
-	* @param typeName The type of the control to create.
-	* @param style The style to apply to the control.
-	* @param properties A Properties object describing the control (optional).
-	* @return The new control.
-	*/
-    UPtr<Control> createControl(const char* typeName, Style *style, Properties *properties = NULL);
 
     /**
 	 * Registers the standard (built-in) controls

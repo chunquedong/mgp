@@ -19,8 +19,8 @@ namespace mgp
  */
 class RadioButton : public Button
 {
-    friend class Container;
-    friend class ControlFactory;
+    //friend class Container;
+    //friend class ControlFactory;
 
 public:
 
@@ -82,6 +82,15 @@ public:
      */
     const char* getGroupId() const;
 
+    /**
+     * Create a radio button with a given style and properties.
+     *
+     * @param style The style to apply to this radio button.
+     * @param properties A properties object containing a definition of the radio button (optional).
+     *
+     * @return The new radio button.
+     */
+    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
     /**
@@ -93,16 +102,6 @@ protected:
      * Destructor.
      */
     virtual ~RadioButton();
-
-    /**
-     * Create a radio button with a given style and properties.
-     *
-     * @param style The style to apply to this radio button.
-     * @param properties A properties object containing a definition of the radio button (optional).
-     *
-     * @return The new radio button.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 
     /**
      * @see Control::initialize

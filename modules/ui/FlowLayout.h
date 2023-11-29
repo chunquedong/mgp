@@ -13,8 +13,8 @@ namespace mgp
  */
 class FlowLayout : public Layout
 {
-    friend class Form;
-    friend class Container;
+    //friend class Form;
+    //friend class Container;
 
 public:
 
@@ -47,6 +47,13 @@ public:
      */
     void setSpacing(int horizontalSpacing, int verticalSpacing);
 
+
+    /**
+     * Create a FlowLayout.
+     *
+     * @return A FlowLayout object.
+     */
+    static FlowLayout* create();
 protected:
 
     /**
@@ -83,12 +90,6 @@ private:
      */
     virtual ~FlowLayout();
 
-    /**
-     * Create a FlowLayout.
-     *
-     * @return A FlowLayout object.
-     */
-    static FlowLayout* create();
 
 };
 

@@ -87,6 +87,10 @@ class MainApp : public Game, Control::Listener {
         joystick->setSize(100, 100);
         form->getRoot()->addControl(joystick.dynamicCastTo<Control>());
         //SAFE_RELEASE(joystick);
+
+        UPtr<ComboBox> combobox = ComboBox::create("combobox");
+        combobox->setSize(100, 100);
+        form->getRoot()->addControl(combobox.dynamicCastTo<Control>());
         
 #if 0
         UPtr<Font> font = Font::create("res/ui/sans.ttf");

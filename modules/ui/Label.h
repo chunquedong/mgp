@@ -16,8 +16,8 @@ namespace mgp
  */
 class Label : public Control
 {
-    friend class Container;
-	friend class ControlFactory;
+    //friend class Container;
+	//friend class ControlFactory;
 
 public:
 
@@ -68,6 +68,16 @@ public:
      */
     virtual void addListener(Control::Listener* listener, int eventFlags);
 
+    /**
+    * Create a new label control.
+    *
+    * @param style The control's custom style.
+    * @param properties A properties object containing a definition of the label (optional).
+    *
+    * @return The new label.
+    * @script{create}
+    */
+    static Control* create(Style* style, Properties* properties);
 protected:
 
     /**
@@ -80,16 +90,6 @@ protected:
      */
     virtual ~Label();
 
-	/**
-	* Create a new label control.
-	*
-	* @param style The control's custom style.
-	* @param properties A properties object containing a definition of the label (optional).
-	*
-	* @return The new label.
-	* @script{create}
-	*/
-	static Control* create(Style* style, Properties* properties);
 
     /**
      * @see Control::initialize

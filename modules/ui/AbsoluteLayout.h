@@ -12,8 +12,8 @@ namespace mgp
  */
 class AbsoluteLayout : public Layout
 {
-    friend class Form;
-    friend class Container;
+    //friend class Form;
+    //friend class Container;
 
 public:
 
@@ -24,6 +24,12 @@ public:
      */
     Layout::Type getType();
 
+    /**
+     * Create an AbsoluteLayout.
+     *
+     * @return An AbsoluteLayout object.
+     */
+    static AbsoluteLayout* create();
 protected:
 
     /**
@@ -53,12 +59,6 @@ private:
      */
     virtual ~AbsoluteLayout();
 
-    /**
-     * Create an AbsoluteLayout.
-     *
-     * @return An AbsoluteLayout object.
-     */
-    static AbsoluteLayout* create();
 
 };
 

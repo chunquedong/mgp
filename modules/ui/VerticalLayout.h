@@ -15,8 +15,8 @@ namespace mgp
  */
 class VerticalLayout : public Layout
 {
-    friend class Form;
-    friend class Container;
+    //friend class Form;
+    //friend class Container;
 
 public:
 
@@ -56,6 +56,12 @@ public:
      */
     void setSpacing(int spacing);
 
+    /**
+     * Create a VerticalLayout.
+     *
+     * @return a VerticalLayout object.
+     */
+    static VerticalLayout* create();
 protected:
 
     /**
@@ -96,12 +102,6 @@ private:
      */
     VerticalLayout(const VerticalLayout& copy);
 
-    /**
-     * Create a VerticalLayout.
-     *
-     * @return a VerticalLayout object.
-     */
-    static VerticalLayout* create();
 
 };
 

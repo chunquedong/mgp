@@ -18,8 +18,8 @@ namespace mgp
  */
 class Slider : public Label
 {
-    friend class Container;
-    friend class ControlFactory;
+    //friend class Container;
+    //friend class ControlFactory;
 
 public:
 
@@ -156,6 +156,15 @@ public:
      */
     void addListener(Control::Listener* listener, int eventFlags);
 
+    /**
+     * Create a slider with a given style and properties.
+     *
+     * @param style The style to apply to this slider.
+     * @param properties A properties object containing a definition of the slider (optional).
+     *
+     * @return The new slider.
+     */
+    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
     /**
@@ -168,15 +177,6 @@ protected:
      */
     ~Slider();
 
-    /**
-     * Create a slider with a given style and properties.
-     *
-     * @param style The style to apply to this slider.
-     * @param properties A properties object containing a definition of the slider (optional).
-     *
-     * @return The new slider.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 
     /**
      * @see Control::initialize

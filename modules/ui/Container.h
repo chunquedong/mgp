@@ -16,7 +16,7 @@ class Container : public Control
 {
     friend class Form;
     friend class Control;
-    friend class ControlFactory;
+    //friend class ControlFactory;
 
 public:
 
@@ -197,6 +197,16 @@ public:
      * @param recursive If true, set the bits recursively on all children and their children.
      */
     void setDirty(int bits, bool recursive = true) override;
+
+    /**
+     * Create a container with a given style and properties, including a list of controls.
+     *
+     * @param style The style to apply to this container.
+     * @param properties A properties object containing a definition of the container and its nested controls (optional).
+     *
+     * @return The new container.
+     */
+    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
 
@@ -210,15 +220,6 @@ protected:
      */
     virtual ~Container();
 
-    /**
-     * Create a container with a given style and properties, including a list of controls.
-     *
-     * @param style The style to apply to this container.
-     * @param properties A properties object containing a definition of the container and its nested controls (optional).
-     *
-     * @return The new container.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 
     /**
      * @see Control::initialize
@@ -336,7 +337,7 @@ class ScrollContainer : public Container
 {
     friend class Form;
     friend class Control;
-    friend class ControlFactory;
+    //friend class ControlFactory;
 
 public:
 
@@ -484,6 +485,15 @@ public:
      */
     virtual void setAnimationPropertyValue(int propertyId, AnimationValue* value, float blendWeight = 1.0f);
 
+    /**
+     * Create a container with a given style and properties, including a list of controls.
+     *
+     * @param style The style to apply to this container.
+     * @param properties A properties object containing a definition of the container and its nested controls (optional).
+     *
+     * @return The new container.
+     */
+    static Control* create(Style* style, Properties* properties = NULL);
 protected:
     void getBarPadding(int* vertical, int* horizontal);
 
@@ -497,15 +507,6 @@ protected:
      */
     virtual ~ScrollContainer();
 
-    /**
-     * Create a container with a given style and properties, including a list of controls.
-     *
-     * @param style The style to apply to this container.
-     * @param properties A properties object containing a definition of the container and its nested controls (optional).
-     *
-     * @return The new container.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 
     /**
      * @see Control::initialize

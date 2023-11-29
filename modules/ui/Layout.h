@@ -21,8 +21,7 @@ class Control;
  */
 class Layout : public Refable
 {
-    friend class Container;
-    friend class Form;
+    //friend class Container;
 
 public:
 
@@ -58,7 +57,7 @@ public:
      */
     virtual Type getType() = 0;
 
-protected:
+//protected:
 
     /**
      * Position, resize, and update the controls within a container.

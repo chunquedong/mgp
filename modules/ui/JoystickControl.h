@@ -108,6 +108,15 @@ public:
      */
     bool isRadiusPercentage() const;
 
+    /**
+     * Create a joystick control with a given style and properties.
+     *
+     * @param style The style to apply to this joystick.
+     * @param properties A properties object containing a definition of the joystick.
+     *
+     * @return The new joystick.
+     */
+    static Control* create(Style* style, Properties* properties = NULL);
 protected:
     
     /**
@@ -120,15 +129,6 @@ protected:
      */
     virtual ~JoystickControl();
 
-    /**
-     * Create a joystick control with a given style and properties.
-     *
-     * @param style The style to apply to this joystick.
-     * @param properties A properties object containing a definition of the joystick.
-	 *
-     * @return The new joystick.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 
     /**
      * @see Control::initialize

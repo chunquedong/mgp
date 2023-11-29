@@ -75,8 +75,8 @@ typedef SideRegions Padding;
 */
 class ThemeImage : public Refable
 {
-    friend class Theme;
-    friend class Style;
+    //friend class Theme;
+    //friend class Style;
 public:
 
     /** 
@@ -97,7 +97,7 @@ private:
 */
 class BorderImage : public Refable
 {
-    friend class Style;
+    //friend class Style;
 public:
 
     enum SkinArea
@@ -172,10 +172,10 @@ private:
  */
 class Theme: public Refable
 {
-    friend class Control;
-    friend class Form;
-    friend class BorderImage;
-    friend class Game;
+    //friend class Control;
+    //friend class Form;
+    //friend class BorderImage;
+    //friend class Game;
 
 public:
 
@@ -229,6 +229,11 @@ public:
      * @return The theme's sprite batch.
      */
     SpriteBatch* getSpriteBatch() const;
+
+    /**
+     * Cleans up any theme related resources when the game shuts down.
+     */
+    static void finalize();
 private:
 
     /**
@@ -246,10 +251,6 @@ private:
      */
     ~Theme();
 
-    /**
-     * Cleans up any theme related resources when the game shuts down.
-     */
-    static void finalize();
 
     /**
      * Hidden copy assignment operator.

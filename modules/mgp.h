@@ -51,6 +51,8 @@
 #include "ui/AbsoluteLayout.h"
 #include "ui/VerticalLayout.h"
 #include "ui/FlowLayout.h"
+#include "ui/ComboBox.h"
+#include "ui/TreeView.h"
 
 // Render
 #include "loader/GltfLoader.h"

@@ -16,9 +16,9 @@ namespace mgp
  */
 class Button : public Label
 {
-    friend class Container;
-    friend class Gamepad;
-    friend class ControlFactory;
+    //friend class Container;
+    //friend class Gamepad;
+    //friend class ControlFactory;
 
 public:
 
@@ -33,6 +33,15 @@ public:
      */
     static UPtr<Button> create(const char* id, Style* style = NULL);
 
+    /**
+     * Create a button with a given style and properties.
+     *
+     * @param style The style to apply to this button.
+     * @param properties A properties object containing a definition of the button (optional).
+     *
+     * @return The new button.
+     */
+    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
     /**
@@ -45,15 +54,6 @@ protected:
      */
     virtual ~Button();
 
-    /**
-     * Create a button with a given style and properties.
-     *
-     * @param style The style to apply to this button.
-     * @param properties A properties object containing a definition of the button (optional).
-     *
-     * @return The new button.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 
     /**
      * @see Control::initialize

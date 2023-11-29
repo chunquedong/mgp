@@ -19,8 +19,8 @@ namespace mgp
  */
 class ImageControl : public Control
 {
-    friend class Container;
-    friend class ControlFactory;
+    //friend class Container;
+    //friend class ControlFactory;
 
 public:
 
@@ -104,23 +104,23 @@ public:
      */
     const Rectangle& getRegionDst() const;
 
+    /**
+     * Creates a new ImageControl.
+     *
+     * @param style The control's custom style.
+     * @param properties A properties object containing a definition of the ImageControl (optional).
+     *
+     * @return The new ImageControl.
+     * @script{create}
+      *
+      */
+    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
     ImageControl();
 
     virtual ~ImageControl();
 
-    /**
-     * Creates a new ImageControl.
-     * 
-     * @param style The control's custom style.
-     * @param properties A properties object containing a definition of the ImageControl (optional).
-     *
-     * @return The new ImageControl.
-     * @script{create}
-      * 
-      */
-    static Control* create(Style* style, Properties* properties = NULL);
 
     void initialize(const char* typeName, Style* style, Properties* properties);
 

@@ -19,8 +19,8 @@ namespace mgp
  */
 class TextBox : public Label
 {
-    friend class Container;
-    friend class ControlFactory;
+    //friend class Container;
+    //friend class ControlFactory;
 
 public:
 
@@ -117,6 +117,15 @@ public:
      */
     void setText(char const *text) override;
 
+    /**
+     * Create a text box with a given style and properties.
+     *
+     * @param style The style to apply to this text box.
+     * @param properties A properties object containing a definition of the text box (optional).
+     *
+     * @return The new text box.
+     */
+    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
     /**
@@ -129,15 +138,6 @@ protected:
      */
     ~TextBox();
 
-    /**
-     * Create a text box with a given style and properties.
-     *
-     * @param style The style to apply to this text box.
-     * @param properties A properties object containing a definition of the text box (optional).
-     *
-     * @return The new text box.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 
     /**
      * @see Control::initialize

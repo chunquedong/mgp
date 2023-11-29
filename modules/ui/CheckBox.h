@@ -17,8 +17,8 @@ namespace mgp
  */
 class CheckBox : public Button
 {
-    friend class Container;
-    friend class ControlFactory;
+    //friend class Container;
+    //friend class ControlFactory;
 
 public:
 
@@ -69,6 +69,15 @@ public:
      */
     virtual void addListener(Control::Listener* listener, int eventFlags);
 
+    /**
+     * Create a checkbox with a given style and properties.
+     *
+     * @param style The style to apply to this checkbox.
+     * @param properties A properties object containing a definition of the checkbox (optional).
+     *
+     * @return The new checkbox.
+     */
+    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
     /**
@@ -80,16 +89,6 @@ protected:
      * Destructor.
      */
     ~CheckBox();
-
-    /**
-     * Create a checkbox with a given style and properties.
-     *
-     * @param style The style to apply to this checkbox.
-     * @param properties A properties object containing a definition of the checkbox (optional).
-     *
-     * @return The new checkbox.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 
     /**
     * @see Control::initialize
