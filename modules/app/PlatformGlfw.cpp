@@ -303,8 +303,8 @@ static void getCursorPosPixel(GLFWwindow* window, double* x, double* y) {
 #if defined(WIN32) || defined(__EMSCRIPTEN__)
 #else
     getContentScale(window);
-    x *= lastXScale;
-    y *= lastYScale;
+    *x *= lastXScale;
+    *y *= lastYScale;
 #endif
 }
 

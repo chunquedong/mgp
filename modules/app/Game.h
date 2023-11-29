@@ -18,7 +18,6 @@
     #include "audio/AudioController.h"
     #include "physics/PhysicsController.h"
     #include "ai/AIController.h"
-    #define GP_SCRIPT_ENABLE 1
 #endif
 
 #include <queue>

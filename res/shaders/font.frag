@@ -28,7 +28,7 @@ out vec4 FragColor;
 void main()
 { 
     #ifdef DISTANCE_FIELD
-        float distance = texture(u_texture, v_texCoord).a;
+        float distance = texture(u_texture, v_texCoord).r;
         //float smoothing = fwidth(distance);
         //float alpha = smoothstep(0.5 - smoothing * u_cutoff.x, 0.5 + smoothing * u_cutoff.y, distance);
         float alpha = smoothstep(u_cutoff.x-u_cutoff.y, u_cutoff.x+u_cutoff.y, distance);

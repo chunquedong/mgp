@@ -223,7 +223,7 @@ bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, c
 
         //new texture
         if (fontTexture == NULL) {
-            fontTexture = new TextureAtlas(Texture::Format::ALPHA, textureWidth, textureHeight);
+            fontTexture = new TextureAtlas(Texture::Format::RED, textureWidth, textureHeight);
             fontTexture->getTexture()->setFilterMode(Texture::LINEAR, Texture::LINEAR);
             //fontTexture->getTexture()->setFilterMode(Texture::NEAREST, Texture::NEAREST);
             textureIndex = fontTextures.size();

@@ -29,7 +29,7 @@ inline void mgp_assert(bool c, const char *msg = "") {
 class Refable;
 
 template<typename U>
-typename std::enable_if<std::is_base_of_v<Refable, U>, void>::type doFree(U* p) {
+typename std::enable_if<std::is_base_of<Refable, U>::value, void>::type doFree(U* p) {
     Refable* r = dynamic_cast<Refable*>(p);
     if (r) {
         r->release();
@@ -38,7 +38,7 @@ typename std::enable_if<std::is_base_of_v<Refable, U>, void>::type doFree(U* p) 
 
 
 template<typename U>
-typename std::enable_if<!std::is_base_of_v<Refable, U>, void>::type doFree(U* p) {
+typename std::enable_if<!std::is_base_of<Refable, U>::value, void>::type doFree(U* p) {
     delete p;
 }
 
