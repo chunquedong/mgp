@@ -260,12 +260,12 @@ void Control::setId(const char* id)
 
 float Control::getX() const
 {
-    return _bounds.x;
+    return _localBounds.x;
 }
 
 void Control::setX(float x, bool percentage)
 {
-    if (_relativeBounds.x != x || percentage != ((_boundsBits & BOUNDS_X_PERCENTAGE_BIT) != 0))
+    if (_desiredBounds.x != x || percentage != ((_boundsBits & BOUNDS_X_PERCENTAGE_BIT) != 0))
     {
         setXInternal(x, percentage);
         setDirty(DIRTY_BOUNDS);
@@ -274,7 +274,7 @@ void Control::setX(float x, bool percentage)
 
 void Control::setXInternal(float x, bool percentage)
 {
-    _relativeBounds.x = x;
+    _desiredBounds.x = x;
     if (percentage)
     {
         _boundsBits |= BOUNDS_X_PERCENTAGE_BIT;
@@ -282,7 +282,7 @@ void Control::setXInternal(float x, bool percentage)
     else
     {
         _boundsBits &= ~BOUNDS_X_PERCENTAGE_BIT;
-        _bounds.x = x;
+        _localBounds.x = x;
     }
 }
 
@@ -293,12 +293,12 @@ bool Control::isXPercentage() const
 
 float Control::getY() const
 {
-    return _bounds.y;
+    return _localBounds.y;
 }
 
 void Control::setY(float y, bool percentage)
 {
-    if (_relativeBounds.y != y || percentage != ((_boundsBits & BOUNDS_Y_PERCENTAGE_BIT) != 0))
+    if (_desiredBounds.y != y || percentage != ((_boundsBits & BOUNDS_Y_PERCENTAGE_BIT) != 0))
     {
         setYInternal(y, percentage);
         setDirty(DIRTY_BOUNDS);
@@ -307,7 +307,7 @@ void Control::setY(float y, bool percentage)
 
 void Control::setYInternal(float y, bool percentage)
 {
-    _relativeBounds.y = y;
+    _desiredBounds.y = y;
     if (percentage)
     {
         _boundsBits |= BOUNDS_Y_PERCENTAGE_BIT;
@@ -315,7 +315,7 @@ void Control::setYInternal(float y, bool percentage)
     else
     {
         _boundsBits &= ~BOUNDS_Y_PERCENTAGE_BIT;
-        _bounds.y = y;
+        _localBounds.y = y;
     }
 }
 
@@ -326,14 +326,14 @@ bool Control::isYPercentage() const
 
 float Control::getWidth() const
 {
-    return _bounds.width;
+    return _localBounds.width;
 }
 
 void Control::setWidth(float width, bool percentage)
 {
     _autoSize = (AutoSize)(_autoSize & ~AUTO_SIZE_WIDTH);
 
-    if (_relativeBounds.width != width || percentage != ((_boundsBits & BOUNDS_WIDTH_PERCENTAGE_BIT) != 0))
+    if (_desiredBounds.width != width || percentage != ((_boundsBits & BOUNDS_WIDTH_PERCENTAGE_BIT) != 0))
     {
         setWidthInternal(width, percentage);
         setDirty(DIRTY_BOUNDS);
@@ -342,7 +342,7 @@ void Control::setWidth(float width, bool percentage)
 
 void Control::setWidthInternal(float width, bool percentage)
 {
-    _relativeBounds.width = width;
+    _desiredBounds.width = width;
     if (percentage)
     {
         _boundsBits |= BOUNDS_WIDTH_PERCENTAGE_BIT;
@@ -350,7 +350,7 @@ void Control::setWidthInternal(float width, bool percentage)
     else
     {
         _boundsBits &= ~BOUNDS_WIDTH_PERCENTAGE_BIT;
-        _bounds.width = width;
+        _localBounds.width = width;
     }
 }
 
@@ -361,14 +361,14 @@ bool Control::isWidthPercentage() const
 
 float Control::getHeight() const
 {
-    return _bounds.height;
+    return _localBounds.height;
 }
 
 void Control::setHeight(float height, bool percentage)
 {
     _autoSize = (AutoSize)(_autoSize & ~AUTO_SIZE_HEIGHT);
 
-    if (_relativeBounds.height != height || percentage != ((_boundsBits & BOUNDS_HEIGHT_PERCENTAGE_BIT) != 0))
+    if (_desiredBounds.height != height || percentage != ((_boundsBits & BOUNDS_HEIGHT_PERCENTAGE_BIT) != 0))
     {
         setHeightInternal(height, percentage);
         setDirty(DIRTY_BOUNDS);
@@ -377,7 +377,7 @@ void Control::setHeight(float height, bool percentage)
 
 void Control::setHeightInternal(float height, bool percentage)
 {
-    _relativeBounds.height = height;
+    _desiredBounds.height = height;
     if (percentage)
     {
         _boundsBits |= BOUNDS_HEIGHT_PERCENTAGE_BIT;
@@ -385,7 +385,7 @@ void Control::setHeightInternal(float height, bool percentage)
     else
     {
         _boundsBits &= ~BOUNDS_HEIGHT_PERCENTAGE_BIT;
-        _bounds.height = height;
+        _localBounds.height = height;
     }
 }
 
@@ -408,7 +408,7 @@ void Control::setSize(float width, float height)
 
 const Rectangle& Control::getBounds() const
 {
-    return _bounds;
+    return _localBounds;
 }
 
 void Control::setBounds(const Rectangle& bounds)
@@ -856,15 +856,15 @@ void Control::updateBounds()
     const Margin& margin = getMargin();
 
     // Calculate local unclipped bounds.
-    _bounds.set(_relativeBounds);
+    _localBounds.set(_desiredBounds);
     if (isXPercentage())
-        _bounds.x = _bounds.x * parentAbsoluteBounds.width + margin.left;
+        _localBounds.x = _localBounds.x * parentAbsoluteBounds.width + margin.left;
     if (isYPercentage())
-        _bounds.y = _bounds.y * parentAbsoluteBounds.height + margin.top;
+        _localBounds.y = _localBounds.y * parentAbsoluteBounds.height + margin.top;
     if (isWidthPercentage())
-        _bounds.width *= parentAbsoluteBounds.width;
+        _localBounds.width *= parentAbsoluteBounds.width;
     if (isHeightPercentage())
-        _bounds.height *= parentAbsoluteBounds.height;
+        _localBounds.height *= parentAbsoluteBounds.height;
 
     // Apply control alignment
     if (_alignment != Control::ALIGN_TOP_LEFT)
@@ -895,29 +895,29 @@ void Control::updateBounds()
         // Vertical alignment
         if ((_alignment & Control::ALIGN_BOTTOM) == Control::ALIGN_BOTTOM)
         {
-            _bounds.y = clipHeight - _bounds.height - margin.bottom;
+            _localBounds.y = clipHeight - _localBounds.height - margin.bottom;
         }
         else if ((_alignment & Control::ALIGN_VCENTER) == Control::ALIGN_VCENTER)
         {
-            _bounds.y = clipHeight * 0.5f - _bounds.height * 0.5f + (margin.top - margin.bottom) * 0.5f;
+            _localBounds.y = clipHeight * 0.5f - _localBounds.height * 0.5f + (margin.top - margin.bottom) * 0.5f;
         }
         else if ((_alignment & Control::ALIGN_TOP) == Control::ALIGN_TOP)
         {
-            _bounds.y = margin.top;
+            _localBounds.y = margin.top;
         }
 
         // Horizontal alignment
         if ((_alignment & Control::ALIGN_RIGHT) == Control::ALIGN_RIGHT)
         {
-            _bounds.x = clipWidth - _bounds.width - margin.right;
+            _localBounds.x = clipWidth - _localBounds.width - margin.right;
         }
         else if ((_alignment & Control::ALIGN_HCENTER) == Control::ALIGN_HCENTER)
         {
-            _bounds.x = clipWidth * 0.5f - _bounds.width * 0.5f + (margin.left - margin.right) * 0.5f;
+            _localBounds.x = clipWidth * 0.5f - _localBounds.width * 0.5f + (margin.left - margin.right) * 0.5f;
         }
         else if ((_alignment & Control::ALIGN_LEFT) == Control::ALIGN_LEFT)
         {
-            _bounds.x = margin.left;
+            _localBounds.x = margin.left;
         }
     }
 }
@@ -941,10 +941,10 @@ void Control::updateAbsoluteBounds(const Vector2& offset)
 
     // Calculate absolute unclipped bounds
     _absoluteBounds.set(
-        parentAbsoluteBounds.x + offset.x + _bounds.x,
-        parentAbsoluteBounds.y + offset.y + _bounds.y,
-        _bounds.width,
-        _bounds.height);
+        parentAbsoluteBounds.x + offset.x + _localBounds.x,
+        parentAbsoluteBounds.y + offset.y + _localBounds.y,
+        _localBounds.width,
+        _localBounds.height);
 
     // Calculate absolute clipped bounds
     Rectangle::intersect(_absoluteBounds, parentAbsoluteClip, &_absoluteClipBounds);
@@ -1107,24 +1107,24 @@ void Control::getAnimationPropertyValue(int propertyId, AnimationValue* value)
     switch (propertyId)
     {
     case ANIMATE_POSITION:
-        value->setFloat(0, _bounds.x);
-        value->setFloat(1, _bounds.y);
+        value->setFloat(0, _localBounds.x);
+        value->setFloat(1, _localBounds.y);
         break;
     case ANIMATE_SIZE:
-        value->setFloat(0, _bounds.width);
-        value->setFloat(1, _bounds.height);
+        value->setFloat(0, _localBounds.width);
+        value->setFloat(1, _localBounds.height);
         break;
     case ANIMATE_POSITION_X:
-        value->setFloat(0, _bounds.x);
+        value->setFloat(0, _localBounds.x);
         break;
     case ANIMATE_POSITION_Y:
-        value->setFloat(0, _bounds.y);
+        value->setFloat(0, _localBounds.y);
         break;
     case ANIMATE_SIZE_WIDTH:
-        value->setFloat(0, _bounds.width);
+        value->setFloat(0, _localBounds.width);
         break;
     case ANIMATE_SIZE_HEIGHT:
-        value->setFloat(0, _bounds.height);
+        value->setFloat(0, _localBounds.height);
         break;
     case ANIMATE_OPACITY: {
         float _opacity = getStyle()->getOpacity();
@@ -1143,24 +1143,24 @@ void Control::setAnimationPropertyValue(int propertyId, AnimationValue* value, f
     switch(propertyId)
     {
     case ANIMATE_POSITION:
-        setX(Curve::lerp(blendWeight, _bounds.x, value->getFloat(0)), isXPercentage());
-        setY(Curve::lerp(blendWeight, _bounds.y, value->getFloat(1)), isYPercentage());
+        setX(Curve::lerp(blendWeight, _localBounds.x, value->getFloat(0)), isXPercentage());
+        setY(Curve::lerp(blendWeight, _localBounds.y, value->getFloat(1)), isYPercentage());
         break;
     case ANIMATE_POSITION_X:
-        setX(Curve::lerp(blendWeight, _bounds.x, value->getFloat(0)), isXPercentage());
+        setX(Curve::lerp(blendWeight, _localBounds.x, value->getFloat(0)), isXPercentage());
         break;
     case ANIMATE_POSITION_Y:
-        setY(Curve::lerp(blendWeight, _bounds.y, value->getFloat(0)), isYPercentage());
+        setY(Curve::lerp(blendWeight, _localBounds.y, value->getFloat(0)), isYPercentage());
         break;
     case ANIMATE_SIZE:
-        setWidth(Curve::lerp(blendWeight, _bounds.width, value->getFloat(0)), isWidthPercentage());
-        setHeight(Curve::lerp(blendWeight, _bounds.height, value->getFloat(1)), isHeightPercentage());
+        setWidth(Curve::lerp(blendWeight, _localBounds.width, value->getFloat(0)), isWidthPercentage());
+        setHeight(Curve::lerp(blendWeight, _localBounds.height, value->getFloat(1)), isHeightPercentage());
         break;
     case ANIMATE_SIZE_WIDTH:
-        setWidth(Curve::lerp(blendWeight, _bounds.width, value->getFloat(0)), isWidthPercentage());
+        setWidth(Curve::lerp(blendWeight, _localBounds.width, value->getFloat(0)), isWidthPercentage());
         break;
     case ANIMATE_SIZE_HEIGHT:
-        setHeight(Curve::lerp(blendWeight, _bounds.height, value->getFloat(0)), isHeightPercentage());
+        setHeight(Curve::lerp(blendWeight, _localBounds.height, value->getFloat(0)), isHeightPercentage());
         break;
     case ANIMATE_OPACITY: {
         float _opacity = getStyle()->getOpacity();

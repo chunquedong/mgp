@@ -693,7 +693,7 @@ bool ScrollContainer::mouseEventScroll(MotionEvent::MotionType evt, int x, int y
                 float vWidth = _scrollBarVertical->getRegion().width;
                 float rightPadding = _absoluteBounds.right() - _viewportBounds.right();
                 float topPadding = _viewportBounds.y - _absoluteBounds.y;
-                float localVpRight = _bounds.width - rightPadding;
+                float localVpRight = _localBounds.width - rightPadding;
                 Rectangle vBounds(
                     localVpRight + rightPadding*0.5f - vWidth*0.5f,
                     topPadding + _scrollBarBounds.y,
@@ -725,7 +725,7 @@ bool ScrollContainer::mouseEventScroll(MotionEvent::MotionType evt, int x, int y
                 float hHeight = _scrollBarHorizontal->getRegion().height;
                 float bottomPadding = _absoluteBounds.bottom() - _viewportBounds.bottom();
                 float leftPadding = _viewportBounds.x - _absoluteBounds.x;
-                float localVpBottom = _bounds.height - bottomPadding;
+                float localVpBottom = _localBounds.height - bottomPadding;
                 Rectangle hBounds(
                     leftPadding + _scrollBarBounds.x,
                     localVpBottom + bottomPadding*0.5f - hHeight*0.5f,

@@ -1128,17 +1128,12 @@ protected:
     /**
      * Local bounds, relative to parent container's clipping window, possibly stored as percentages (see _boundsBits).
      */
-    Rectangle _relativeBounds;
+    Rectangle _desiredBounds;
 
     /**
      * Local bounds, relative to parent container's clipping window, and desired size.
      */
-    Rectangle _bounds;
-
-    /**
-     * Local bounds, relative to parent container's clipping window, including border and padding, after clipping.
-     */
-    //Rectangle _clipBounds;
+    Rectangle _localBounds;
 
     /**
      * Absolute bounds, including border and padding, before clipping.

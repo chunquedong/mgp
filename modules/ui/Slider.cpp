@@ -354,7 +354,7 @@ void Slider::updateBounds()
 
     if (_autoSize & AUTO_SIZE_HEIGHT)
     {
-        float height = _bounds.height + _trackHeight;
+        float height = _localBounds.height + _trackHeight;
         if (_valueTextVisible)
             height += getStyle()->getFontSize();
         setHeightInternal(height);

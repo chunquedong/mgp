@@ -133,6 +133,8 @@ void Form::initialize(Style* style, Properties* properties)
 
     auto overlay = Container::create("_form_overlay");
     _overlay = overlay.get();
+    //_overlay->setWidth(1, true);
+    //_overlay->setHeight(1, true);
 
     _root->addControl(UPtr<Control>(_content));
     _root->addControl(std::move(overlay));

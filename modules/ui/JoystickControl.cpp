@@ -194,8 +194,8 @@ bool JoystickControl::touchEvent(MotionEvent::MotionType evt, int x, int y, unsi
                 }
                 else
                 {
-                    _pressOffset.x = x + _bounds.x - _viewportClipBounds.width * 0.5f;
-                    _pressOffset.y = y + _bounds.y - _viewportClipBounds.height * 0.5f;
+                    _pressOffset.x = x + _localBounds.x - _viewportClipBounds.width * 0.5f;
+                    _pressOffset.y = y + _localBounds.y - _viewportClipBounds.height * 0.5f;
                 }
 
                 _displacement.set(dx, dy);
@@ -233,8 +233,8 @@ bool JoystickControl::touchEvent(MotionEvent::MotionType evt, int x, int y, unsi
         {
             if (_contactIndex == (int) contactIndex)
             {
-                float dx = x - ((_relative) ? _pressOffset.x - _bounds.x : 0.0f) - _viewportClipBounds.width * 0.5f;
-                float dy = -(y - ((_relative) ? _pressOffset.y - _bounds.y : 0.0f) - _viewportClipBounds.height * 0.5f);
+                float dx = x - ((_relative) ? _pressOffset.x - _localBounds.x : 0.0f) - _viewportClipBounds.width * 0.5f;
+                float dy = -(y - ((_relative) ? _pressOffset.y - _localBounds.y : 0.0f) - _viewportClipBounds.height * 0.5f);
 
                 _displacement.set(dx, dy);
 
