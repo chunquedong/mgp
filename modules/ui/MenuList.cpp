@@ -1,6 +1,7 @@
 #include "MenuList.h"
 #include "Form.h"
 #include "Button.h"
+#include "ModalLayer.h"
 
 using namespace mgp;
 
@@ -61,9 +62,9 @@ void MenuList::initItems(std::vector<std::string>& items) {
 
 void MenuList::show(Control* any) {
     GP_ASSERT(any);
-    any->getTopLevelForm()->getOverlay()->addControl(uniqueFromInstant(this));
+    any->getTopLevelForm()->getOverlay()->push(this, false);
 }
 
 void MenuList::close() {
-    this->getTopLevelForm()->getOverlay()->clear();
+    this->getTopLevelForm()->getOverlay()->pop();
 }

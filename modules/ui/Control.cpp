@@ -1,9 +1,10 @@
 #include "base/Base.h"
 #include "platform/Toolkit.h"
 #include "Control.h"
-#include "Form.h"
+#include "FormManager.h"
 #include "Theme.h"
 #include <algorithm>
+#include "ScrollContainer.h"
 
 namespace mgp
 {
@@ -475,7 +476,7 @@ void Control::setVisible(bool visible)
         setDirty(DIRTY_BOUNDS);
 
         // force to update parent boundaries when child is hidden
-        Control* parent = _parent;
+        Container* parent = _parent;
         while (parent && (parent->_autoSize != AUTO_SIZE_NONE || static_cast<Container *>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
         {
             parent->setDirty(DIRTY_BOUNDS);

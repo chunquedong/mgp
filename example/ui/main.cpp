@@ -16,6 +16,12 @@ class MainApp : public Game, Control::Listener {
         form->getContent()->setSize(600, 600);
         form->getContent()->setPadding(20, 20, 20, 20);
         form->getContent()->setLayout(Layout::LAYOUT_VERTICAL);
+
+        UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
+        combobox->setWidth(100);
+        combobox->setText("Combobox");
+        combobox->getItems() = { "Apple", "Google" };
+        form->getContent()->addControl(std::move(combobox));
 #if 1
         UPtr<Label> label = Control::create<Label>("testLabel");
         //label->setPosition(50, 50);
@@ -89,15 +95,7 @@ class MainApp : public Game, Control::Listener {
         form->getContent()->addControl(std::move(joystick));
         //SAFE_RELEASE(joystick);
 #endif
-        UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
-        combobox->setWidth(100);
-        combobox->setText("Combobox");
-        combobox->getItems() = { "Apple", "Google" };
-        form->getContent()->addControl(std::move(combobox));
 
-        //UPtr<MenuList> menuList = MenuList::create("MenuList");
-        //menuList->setSize(100, 100);
-        //form->getContent()->addControl(std::move(menuList));
         
 #if 0
         UPtr<Font> font = Font::create("res/ui/sans.ttf");

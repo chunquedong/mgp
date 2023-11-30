@@ -102,6 +102,8 @@ void Label::updateBounds()
         // is a pretty bad practice so we'll prioritize performance here.
         unsigned int w, h;
         fontLayout.measureText(&w, &h);
+        w += 2;
+        h += 2;
         if (_autoSize & AUTO_SIZE_WIDTH)
         {
             setWidthInternal(w + getPadding().left + getPadding().right);
@@ -117,7 +119,7 @@ void Label::updateAbsoluteBounds(const Vector2& offset)
 {
     Control::updateAbsoluteBounds(offset);
 
-    _textBounds.set((int)_viewportBounds.x, (int)_viewportBounds.y, _viewportBounds.width, _viewportBounds.height);
+    _textBounds.set((int)_viewportBounds.x+1, (int)_viewportBounds.y+1, _viewportBounds.width-2, _viewportBounds.height-2);
 
     if (_autoSize == AUTO_SIZE_NONE) {
         updateFontLayout();

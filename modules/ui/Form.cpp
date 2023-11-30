@@ -1,15 +1,15 @@
 #include "base/Base.h"
 #include "Form.h"
+#include "ModalLayer.h"
 #include "AbsoluteLayout.h"
 #include "FlowLayout.h"
 #include "VerticalLayout.h"
 #include "platform/Toolkit.h"
 #include "Theme.h"
-#include "Label.h"
-#include "Button.h"
-#include "CheckBox.h"
 #include "scene/Scene.h"
 #include "scene/Renderer.h"
+#include "ScrollContainer.h"
+#include "FormManager.h"
 
 // Scroll speed when using a joystick.
 static const float GAMEPAD_SCROLL_SPEED = 600.0f;
@@ -131,10 +131,10 @@ void Form::initialize(Style* style, Properties* properties)
     _content->initialize("Form", style, properties);
     _content->setId("_form_content");
 
-    auto overlay = Control::create<Container>("_form_overlay");
+    auto overlay = Control::create<ModalLayer>("_form_overlay");
     _overlay = overlay.get();
-    //_overlay->setWidth(1, true);
-    //_overlay->setHeight(1, true);
+    _overlay->setWidth(1, true);
+    _overlay->setHeight(1, true);
 
     _root->addControl(UPtr<Control>(_content));
     _root->addControl(std::move(overlay));
@@ -165,7 +165,7 @@ Container* Form::getRoot() {
 Container* Form::getContent() {
     return _content;
 }
-Container* Form::getOverlay() {
+ModalLayer* Form::getOverlay() {
     return _overlay;
 }
 
@@ -841,99 +841,5 @@ void Form::setFocusControl(Control* control)
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-
-FormManager* __formManager;
-
-FormManager::FormManager() {
-    __formManager = this;
-}
-
-FormManager* FormManager::cur() {
-    return __formManager;
-}
-
-FormManager::~FormManager() {
-}
-
-void FormManager::finalize() {
-    for (int i = 0; i < __forms.size(); ++i) {
-        Form* form = __forms[i];
-        form->release();
-    }
-    __forms.clear();
-    _focusForm = NULL;
-}
-
-void FormManager::add(UPtr<Form> f) {
-    __forms.push_back(f.take());
-}
-
-void FormManager::updateInternal(float elapsedTime)
-{
-    //pollGamepads();
-
-    for (size_t i = 0, size = __forms.size(); i < size; ++i)
-    {
-        Form* form = __forms[i];
-        if (form)
-        {
-            form->update(elapsedTime);
-        }
-    }
-}
-
-void FormManager::resizeEventInternal(unsigned int width, unsigned int height)
-{
-    for (size_t i = 0, size = __forms.size(); i < size; ++i)
-    {
-        Form* form = __forms[i];
-        if (form)
-        {
-            // Dirty the form
-            form->getRoot()->setDirty(Control::DIRTY_BOUNDS | Control::DIRTY_STATE);
-        }
-    }
-}
-
-bool FormManager::keyEventInternal(Keyboard::KeyEvent evt, int key) {
-    if (_focusForm) {
-        return _focusForm->keyEventInternal(evt, key);
-    }
-    return false;
-}
-
-bool FormManager::mouseEventInternal(MotionEvent& evt)
-{
-    // Do not process mouse input when mouse is captured
-    if (Toolkit::cur()->isMouseCaptured())
-        return false;
-
-    int x = evt.x / Toolkit::cur()->getScreenScale();
-    int y = evt.y / Toolkit::cur()->getScreenScale();
-
-    for (size_t i = 0, size = __forms.size(); i < size; ++i)
-    {
-        Form* form = __forms[i];
-        if (form)
-        {
-            if (form->pointerEventInternal(true, evt.type, x, y, evt.wheelDelta, evt.contactIndex, evt.button)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-void FormManager::verifyRemovedControlState(Control* control) {
-    Form* form = control->getTopLevelForm();
-    if (form) {
-        form->verifyRemovedControlState(control);
-    }
-    else if (_focusForm) {
-        _focusForm->verifyRemovedControlState(control);
-    }
-}
 
 }

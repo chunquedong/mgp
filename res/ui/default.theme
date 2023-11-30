@@ -112,7 +112,7 @@ theme mainMenu
                 top = 15
                 bottom = 15
             }
-            image=outline.png
+            image=panel.png
         }
     }
 }

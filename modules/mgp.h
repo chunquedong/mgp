@@ -55,6 +55,7 @@
 #include "ui/TreeView.h"
 #include "ui/ScrollContainer.h"
 #include "ui/MenuList.h"
+#include "ui/FormManager.h"
 
 // Render
 #include "loader/GltfLoader.h"

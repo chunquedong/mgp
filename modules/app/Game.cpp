@@ -4,7 +4,7 @@
 #include "render/FrameBuffer.h"
 #include "ui/ControlFactory.h"
 #include "ui/Theme.h"
-#include "ui/Form.h"
+#include "ui/FormManager.h"
 #include "render/RenderPath.h"
 #include "base/SerializerManager.h"
 #include "openGL/GLRenderer.h"
@@ -199,9 +199,7 @@ void Game::render(float elapsedTime)
     Rectangle* viewport = getView()->getViewport();
     Renderer::cur()->setViewport((int)viewport->x, (int)viewport->y, (int)viewport->width, (int)viewport->height);
 
-    for (int i = 0; i < _forms->getForms().size(); ++i) {
-        _forms->getForms()[i]->draw(NULL);
-    }
+    _forms->draw(NULL);
 
     if (_showFps) {
         drawFps();
