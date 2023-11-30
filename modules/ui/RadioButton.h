@@ -19,21 +19,9 @@ namespace mgp
  */
 class RadioButton : public Button
 {
-    //friend class Container;
-    //friend class ControlFactory;
+    friend class Control;
 
 public:
-
-    /**
-     * Creates a new RadioButton.
-     *
-     * @param id The radio button ID.
-     * @param style The radio button style (optional).
-     *
-     * @return The new radio button.
-     * @script{create}
-     */
-    static UPtr<RadioButton> create(const char* id, Style* style = NULL);
 
     /**
      * Extends ScriptTarget::getTypeName() to return the type name of this class.
@@ -82,15 +70,6 @@ public:
      */
     const char* getGroupId() const;
 
-    /**
-     * Create a radio button with a given style and properties.
-     *
-     * @param style The style to apply to this radio button.
-     * @param properties A properties object containing a definition of the radio button (optional).
-     *
-     * @return The new radio button.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
     /**

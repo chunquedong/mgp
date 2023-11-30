@@ -13,6 +13,7 @@ namespace mgp
 {
 
 class ComboBox : public Button, public Control::Listener {
+    friend class Control;
 
     std::vector<std::string> _items;
 
@@ -24,14 +25,11 @@ public:
 
     std::vector<std::string>& getItems() { return _items; }
 
-    static UPtr<ComboBox> create(const char* id, Style* style = NULL);
-
     const char* getTypeName() const;
 
     int getSelectIndex() { return _selectIndex; }
     void setSelectIndex(int v, bool fireEvent = true);
 
-    static Control* create(Style* style, Properties* properties = NULL);
 protected:
     ComboBox();
     ~ComboBox();

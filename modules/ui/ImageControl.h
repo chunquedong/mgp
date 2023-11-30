@@ -19,21 +19,9 @@ namespace mgp
  */
 class ImageControl : public Control
 {
-    //friend class Container;
-    //friend class ControlFactory;
+    friend class Control;
 
 public:
-
-    /**
-     * Creates a new ImageControl.
-     *
-     * @param id The image control ID.
-     * @param style The image control style (optional).
-     *
-     * @return The new image control.
-     * @script{create}
-     */
-    static UPtr<ImageControl> create(const char* id, Style* style = NULL);
 
     /**
      * Extends ScriptTarget::getTypeName() to return the type name of this class.
@@ -104,17 +92,6 @@ public:
      */
     const Rectangle& getRegionDst() const;
 
-    /**
-     * Creates a new ImageControl.
-     *
-     * @param style The control's custom style.
-     * @param properties A properties object containing a definition of the ImageControl (optional).
-     *
-     * @return The new ImageControl.
-     * @script{create}
-      *
-      */
-    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
     ImageControl();

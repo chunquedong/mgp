@@ -10,13 +10,11 @@ namespace mgp
 {
 
 class TreeView : public ScrollContainer {
+    friend class Control;
 public:
-
-    static UPtr<TreeView> create(const char* id, Style* style = NULL);
 
     const char* getTypeName() const;
 
-    static Control* create(Style* style, Properties* properties = NULL);
 protected:
     TreeView();
     ~TreeView();

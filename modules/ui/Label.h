@@ -16,21 +16,8 @@ namespace mgp
  */
 class Label : public Control
 {
-    //friend class Container;
-	//friend class ControlFactory;
-
+    friend class Control;
 public:
-
-    /**
-     * Creates a new label.
-     *
-     * @param id The label id.
-     * @param style The label style (optional).
-     *
-     * @return The new label.
-     * @script{create}
-     */
-    static UPtr<Label> create(const char* id, Style* style = NULL);
 
     /**
      * Extends ScriptTarget::getTypeName() to return the type name of this class.
@@ -68,16 +55,6 @@ public:
      */
     virtual void addListener(Control::Listener* listener, int eventFlags);
 
-    /**
-    * Create a new label control.
-    *
-    * @param style The control's custom style.
-    * @param properties A properties object containing a definition of the label (optional).
-    *
-    * @return The new label.
-    * @script{create}
-    */
-    static Control* create(Style* style, Properties* properties);
 protected:
 
     /**

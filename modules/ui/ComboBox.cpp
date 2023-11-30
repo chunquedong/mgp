@@ -16,21 +16,6 @@ ComboBox::~ComboBox()
 {
 }
 
-UPtr<ComboBox> ComboBox::create(const char* id, Style* style)
-{
-    ComboBox* cb = new ComboBox();
-    cb->_id = id ? id : "";
-    cb->initialize("ComboBox", style, NULL);
-    return UPtr<ComboBox>(cb);
-}
-
-Control* ComboBox::create(Style* style, Properties* properties)
-{
-    ComboBox* cb = new ComboBox();
-    cb->initialize("ComboBox", style, properties);
-    return cb;
-}
-
 void ComboBox::initialize(const char* typeName, Style* style, Properties* properties)
 {
     Button::initialize(typeName, style, properties);
@@ -66,7 +51,7 @@ void ComboBox::controlEvent(Control::Listener::EventType evt)
     switch (evt)
     {
     case Control::Listener::CLICK:
-        UPtr<MenuList> list = MenuList::create((_id + "_menuList").c_str());
+        UPtr<MenuList> list = Control::create<MenuList>((_id + "_menuList").c_str());
         list->initItems(this->_items);
         auto b = this->getAbsoluteBounds();
         list->setPosition(b.x, b.bottom());

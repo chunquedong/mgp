@@ -12,21 +12,6 @@ Label::~Label()
 {
 }
 
-UPtr<Label> Label::create(const char* id, Style* style)
-{
-    Label* label = new Label();
-    label->_id = id ? id : "";
-    label->initialize("Label", style, NULL);
-    return UPtr<Label>(label);
-}
-
-Control* Label::create(Style* style, Properties* properties)
-{
-    Label* label = new Label();
-	label->initialize("Label", style, properties);
-    return label;
-}
-
 void Label::initialize(const char* typeName, Style* style, Properties* properties)
 {
     Control::initialize(typeName, style, properties);

@@ -20,27 +20,6 @@ RadioButton::~RadioButton()
     }
 }
 
-UPtr<RadioButton> RadioButton::create(const char* id, Style* style)
-{
-    RadioButton* rb = new RadioButton();
-    rb->_id = id ? id : "";
-    rb->initialize("RadioButton", style, NULL);
-
-    __radioButtons.push_back(rb);
-
-    return UPtr<RadioButton>(rb);
-}
-
-Control* RadioButton::create(Style* style, Properties* properties)
-{
-    RadioButton* rb = new RadioButton();
-    rb->initialize("RadioButton", style, properties);
-
-    __radioButtons.push_back(rb);
-
-    return rb;
-}
-
 void RadioButton::initialize(const char* typeName, Style* style, Properties* properties)
 {
     Button::initialize(typeName, style, properties);

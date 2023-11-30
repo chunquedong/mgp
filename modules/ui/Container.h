@@ -21,18 +21,6 @@ class Container : public Control
 public:
 
     /**
-     * Creates a new container.
-     *
-     * @param id The container ID.
-     * @param style The container style (optional).
-     * @param layout The container layout (optional).
-     *
-     * @return The new container.
-     * @script{create}
-     */
-    static UPtr<Container> create(const char* id, Style* style = NULL, Layout::Type layout = Layout::LAYOUT_ABSOLUTE);
-
-    /**
      * Extends ScriptTarget::getTypeName() to return the type name of this class.
      *
      * Child controls should override this function to return the correct type name.
@@ -203,15 +191,6 @@ public:
      */
     void setDirty(int bits, bool recursive = true) override;
 
-    /**
-     * Create a container with a given style and properties, including a list of controls.
-     *
-     * @param style The style to apply to this container.
-     * @param properties A properties object containing a definition of the container and its nested controls (optional).
-     *
-     * @return The new container.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
 

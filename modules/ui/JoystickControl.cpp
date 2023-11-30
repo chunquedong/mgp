@@ -16,21 +16,6 @@ JoystickControl::~JoystickControl()
 
 }
 
-UPtr<JoystickControl> JoystickControl::create(const char* id, Style* style)
-{
-    JoystickControl* joystickControl = new JoystickControl();
-    joystickControl->_id = id ? id : "";
-    joystickControl->initialize("Joystick", style, NULL);
-    return UPtr<JoystickControl>(joystickControl);
-}
-
-Control* JoystickControl::create(Style* style, Properties* properties)
-{
-    JoystickControl* joystickControl = new JoystickControl();
-    joystickControl->initialize("Joystick", style, properties);
-    return joystickControl;
-}
-
 const char* JoystickControl::getTypeName() const
 {
     return "JoystickControl";

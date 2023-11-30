@@ -17,7 +17,7 @@ class MainApp : public Game, Control::Listener {
         form->getContent()->setPadding(20, 20, 20, 20);
         form->getContent()->setLayout(Layout::LAYOUT_VERTICAL);
 #if 1
-        UPtr<Label> label = Label::create("testLabel");
+        UPtr<Label> label = Control::create<Label>("testLabel");
         //label->setPosition(50, 50);
         //label->setSize(200, 50);
         label->setText("Label");
@@ -25,7 +25,7 @@ class MainApp : public Game, Control::Listener {
         _label->addRef();
         form->getContent()->addControl(std::move(label));
 
-        UPtr<Button> button = Button::create("testButton");
+        UPtr<Button> button = Control::create<Button>("testButton");
         //button->setPosition(45, 100);
         //button->setSize(200, 100);
         button->setText("Button");
@@ -33,31 +33,31 @@ class MainApp : public Game, Control::Listener {
         form->getContent()->addControl(std::move(button));
 
 
-        UPtr<CheckBox> checkbox = CheckBox::create("checkbox");
+        UPtr<CheckBox> checkbox = Control::create<CheckBox>("checkbox");
         //checkbox->setPosition(45, 200);
         checkbox->setText("CheckBox");
         form->getContent()->addControl(std::move(checkbox));
         //SAFE_RELEASE(checkbox);
 
-        UPtr<RadioButton> radio = RadioButton::create("radio");
+        UPtr<RadioButton> radio = Control::create<RadioButton>("radio");
         radio->setGroupId("radioGroup");
         radio->setText("RadioButton");
         form->getContent()->addControl(std::move(radio));
         //SAFE_RELEASE(radio);
 
-        UPtr<RadioButton> radio2 = RadioButton::create("radio");
+        UPtr<RadioButton> radio2 = Control::create<RadioButton>("radio");
         radio2->setGroupId("radioGroup");
         radio2->setText("RadioButton");
         form->getContent()->addControl(std::move(radio2));
         //SAFE_RELEASE(radio2);
 
-        UPtr<Slider> slider = Slider::create("slider");
+        UPtr<Slider> slider = Control::create<Slider>("slider");
         slider->setText("Slider");
         slider->setWidth(1.0, true);
         form->getContent()->addControl(std::move(slider));
         //SAFE_RELEASE(slider);
 
-        UPtr<TextBox> text = TextBox::create("text");
+        UPtr<TextBox> text = Control::create<TextBox>("text");
         text->setText("input");
         text->setWidth(300);
         form->getContent()->addControl(std::move(text));
@@ -65,10 +65,10 @@ class MainApp : public Game, Control::Listener {
 
 
         //test scroll
-        UPtr<ScrollContainer> container = ScrollContainer::create("container");
+        UPtr<ScrollContainer> container = Control::create<ScrollContainer>("container");
         container->setSize(200, 100);
         container->setScroll(ScrollContainer::SCROLL_BOTH);
-        UPtr<Button> button2 = Button::create("testButton2");
+        UPtr<Button> button2 = Control::create<Button>("testButton2");
         button2->setText("test\nButton");
         button2->setSize(200, 100);
         container->addControl(std::move(button2));
@@ -77,19 +77,19 @@ class MainApp : public Game, Control::Listener {
         //SAFE_RELEASE(container);
 
 
-        UPtr<ImageControl> image = ImageControl::create("image");
+        UPtr<ImageControl> image = Control::create<ImageControl>("image");
         image->setImage("res/image/logo.png");
         image->setSize(50, 50);
         form->getContent()->addControl(std::move(image));
         //SAFE_RELEASE(image);
 
 
-        UPtr<JoystickControl> joystick = JoystickControl::create("joystick");
+        UPtr<JoystickControl> joystick = Control::create<JoystickControl>("joystick");
         joystick->setSize(100, 100);
         form->getContent()->addControl(std::move(joystick));
         //SAFE_RELEASE(joystick);
 #endif
-        UPtr<ComboBox> combobox = ComboBox::create("combobox");
+        UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
         combobox->setWidth(100);
         combobox->setText("Combobox");
         combobox->getItems() = { "Apple", "Google" };

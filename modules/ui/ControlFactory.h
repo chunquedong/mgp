@@ -25,7 +25,7 @@ public:
 	/**
 	 * The activator interface for controls that are created.
 	 */
-	typedef Control* (*ControlActivator)(Style*, Properties*);
+	typedef Control* (*ControlActivator)(const char* id, Style*, Properties*, const char* typeName);
 
 	/**
 	 * Gets the single instance of the control factory used to create controls and register/unregister custom controls.

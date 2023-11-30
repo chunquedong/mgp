@@ -15,21 +15,6 @@ ImageControl::~ImageControl()
     SAFE_DELETE(_batch);
 }
 
-UPtr<ImageControl> ImageControl::create(const char* id, Style* style)
-{
-    ImageControl* imageControl = new ImageControl();
-    imageControl->_id = id ? id : "";
-    imageControl->initialize("Image", style, NULL);
-    return UPtr<ImageControl>(imageControl);
-}
-
-Control* ImageControl::create(Style* style, Properties* properties)
-{
-    ImageControl* imageControl = new ImageControl();
-    imageControl->initialize("Image", style, properties);
-    return imageControl;
-}
-
 void ImageControl::initialize(const char* typeName, Style* style, Properties* properties)
 {
 	Control::initialize(typeName, style, properties);

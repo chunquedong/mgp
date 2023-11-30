@@ -17,21 +17,9 @@ namespace mgp
  */
 class CheckBox : public Button
 {
-    //friend class Container;
-    //friend class ControlFactory;
+    friend class Control;
 
 public:
-
-    /**
-     * Creates a new CheckBox.
-     *
-     * @param id The checkbox ID.
-     * @param style The checkbox style (optional).
-     *
-     * @return The new checkbox.
-     * @script{create}
-     */
-    static UPtr<CheckBox> create(const char* id, Style* style = NULL);
 
     /**
      * Extends ScriptTarget::getTypeName() to return the type name of this class.
@@ -69,15 +57,6 @@ public:
      */
     virtual void addListener(Control::Listener* listener, int eventFlags);
 
-    /**
-     * Create a checkbox with a given style and properties.
-     *
-     * @param style The style to apply to this checkbox.
-     * @param properties A properties object containing a definition of the checkbox (optional).
-     *
-     * @return The new checkbox.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
     /**

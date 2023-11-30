@@ -75,24 +75,30 @@ UPtr<Control> ControlFactory::createControl(const char* typeName, Style* style, 
     if (it == _registeredControls.end())
 		return UPtr<Control>(NULL);
 
-    Control* ctrl = (*it->second)(style, properties);
+    Control* ctrl = (*it->second)(NULL, style, properties, typeName);
     return UPtr<Control>(ctrl);
+}
+
+template<typename T>
+static Control* templateCreateControl(const char* id, Style* style = NULL, Properties* properties = NULL, const char* typeName = NULL) {
+    UPtr<T> t = Control::create<T>(id, style, properties, typeName);
+    return t.take();
 }
 
 void ControlFactory::registerStandardControls() 
 {
-    registerCustomControl("LABEL", &Label::create);
-    registerCustomControl("BUTTON", &Button::create);
-    registerCustomControl("CHECKBOX", &CheckBox::create);
-    registerCustomControl("RADIOBUTTON", &RadioButton::create);
-    registerCustomControl("CONTAINER", &Container::create);
-    registerCustomControl("SCORLLCONTAINER", &ScrollContainer::create);
-    registerCustomControl("SLIDER", &Slider::create);
-    registerCustomControl("TEXTBOX", &TextBox::create);
-    registerCustomControl("JOYSTICK", &JoystickControl::create); // convenience alias
-    registerCustomControl("JOYSTICKCONTROL", &JoystickControl::create);
-    registerCustomControl("IMAGE", &ImageControl::create);  // convenience alias
-    registerCustomControl("IMAGECONTROL", &ImageControl::create);
+    registerCustomControl("LABEL", templateCreateControl<Label>);
+    registerCustomControl("BUTTON", templateCreateControl<Button>);
+    registerCustomControl("CHECKBOX", templateCreateControl<CheckBox>);
+    registerCustomControl("RADIOBUTTON", templateCreateControl<RadioButton>);
+    registerCustomControl("CONTAINER", templateCreateControl<Container>);
+    registerCustomControl("SCORLLCONTAINER", templateCreateControl<ScrollContainer>);
+    registerCustomControl("SLIDER", templateCreateControl<Slider>);
+    registerCustomControl("TEXTBOX", templateCreateControl<TextBox>);
+    registerCustomControl("JOYSTICK", templateCreateControl<JoystickControl>); // convenience alias
+    registerCustomControl("JOYSTICKCONTROL", templateCreateControl<JoystickControl>);
+    registerCustomControl("IMAGE", templateCreateControl<ImageControl>);  // convenience alias
+    registerCustomControl("IMAGECONTROL", templateCreateControl<ImageControl>);
 }
 
 }

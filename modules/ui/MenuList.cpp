@@ -15,21 +15,6 @@ MenuList::~MenuList()
 
 }
 
-UPtr<MenuList> MenuList::create(const char* id, Style* style)
-{
-    MenuList* cb = new MenuList();
-    cb->_id = id ? id : "";
-    cb->initialize("MenuList", style, NULL);
-    return UPtr<MenuList>(cb);
-}
-
-Control* MenuList::create(Style* style, Properties* properties)
-{
-    MenuList* cb = new MenuList();
-    cb->initialize("MenuList", style, properties);
-    return cb;
-}
-
 void MenuList::initialize(const char* typeName, Style* style, Properties* properties)
 {
     ScrollContainer::initialize(typeName, style, properties);
@@ -66,7 +51,7 @@ void MenuList::controlEvent(Control* control, EventType evt) {
 
 void MenuList::initItems(std::vector<std::string>& items) {
     for (std::string& name : items) {
-        UPtr<Label> label = Label::create((this->_id + "_items").c_str());
+        UPtr<Label> label = Control::create<Label>((this->_id + "_items").c_str());
         label->setText(name.c_str());
         label->setWidth(1, true);
         label->addListener(this, Listener::CLICK);

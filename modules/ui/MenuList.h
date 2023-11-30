@@ -11,14 +11,12 @@ namespace mgp
 {
 
 class MenuList : public ScrollContainer, public Control::Listener {
+    friend class Control;
+
     int _selectIndex = -1;
 public:
 
-    static UPtr<MenuList> create(const char* id, Style* style = NULL);
-
     const char* getTypeName() const;
-
-    static Control* create(Style* style, Properties* properties = NULL);
 
 protected:
     MenuList();

@@ -15,21 +15,6 @@ Button::~Button()
 {
 }
 
-UPtr<Button> Button::create(const char* id, Style* style)
-{
-    Button* button = new Button();
-    button->_id = id ? id : "";
-    button->initialize("Button", style, NULL);
-    return UPtr<Button>(button);
-}
-
-Control* Button::create(Style* style, Properties* properties)
-{
-    Button* button = new Button();
-	button->initialize("Button", style, properties);
-    return button;
-}
-
 void Button::initialize(const char* typeName, Style* style, Properties* properties)
 {
     Label::initialize(typeName, style, properties);

@@ -39,6 +39,16 @@ class Control : public Refable, public AnimationTarget
 #endif
 
 public:
+    template<typename T>
+    static UPtr<T> create(const char* id, Style* style = NULL, Properties* properties = NULL, const char* typeName = NULL) {
+        T* cb = new T();
+        cb->_id = id ? id : "";
+        if (!typeName) {
+            typeName = cb->getTypeName();
+        }
+        cb->initialize(typeName, style, properties);
+        return UPtr<T>(cb);
+    }
 
     /**
      * The possible states a control can be in.

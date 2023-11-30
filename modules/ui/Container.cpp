@@ -72,22 +72,6 @@ Container::~Container()
     SAFE_RELEASE(_layout);
 }
 
-UPtr<Container> Container::create(const char* id, Style* style, Layout::Type layout)
-{
-    Container* container = new Container();
-    container->_id = id ? id : "";
-    container->_layout = createLayout(layout);
-    container->initialize("Container", style, NULL);
-    return UPtr<Container>(container);
-}
-
-Control* Container::create(Style* style, Properties* properties)
-{
-    Container* container = new Container();
-    container->initialize("Container", style, properties);
-    return container;
-}
-
 void Container::initialize(const char* typeName, Style* style, Properties* properties)
 {
     Control::initialize(typeName, style, properties);

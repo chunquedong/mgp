@@ -15,21 +15,6 @@ CheckBox::~CheckBox()
 
 }
 
-UPtr<CheckBox> CheckBox::create(const char* id, Style* style)
-{
-    CheckBox* cb = new CheckBox();
-    cb->_id = id ? id : "";
-    cb->initialize("CheckBox", style, NULL);
-    return UPtr<CheckBox>(cb);
-}
-
-Control* CheckBox::create(Style* style, Properties* properties)
-{
-    CheckBox* cb = new CheckBox();
-    cb->initialize("CheckBox", style, properties);
-    return cb;
-}
-
 void CheckBox::initialize(const char* typeName, Style* style, Properties* properties)
 {
     Button::initialize(typeName, style, properties);

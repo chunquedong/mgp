@@ -18,21 +18,9 @@ namespace mgp
  */
 class Slider : public Label
 {
-    //friend class Container;
-    //friend class ControlFactory;
+    friend class Control;
 
 public:
-
-    /**
-     * Creates a new Slider.
-     *
-     * @param id The slider ID.
-     * @param style The slider style (optional).
-     *
-     * @return The new slider.
-     * @script{create}
-     */
-    static UPtr<Slider> create(const char* id, Style* style = NULL);
 
     /**
      * Extends ScriptTarget::getTypeName() to return the type name of this class.
@@ -156,15 +144,6 @@ public:
      */
     void addListener(Control::Listener* listener, int eventFlags);
 
-    /**
-     * Create a slider with a given style and properties.
-     *
-     * @param style The style to apply to this slider.
-     * @param properties A properties object containing a definition of the slider (optional).
-     *
-     * @return The new slider.
-     */
-    static Control* create(Style* style, Properties* properties = NULL);
 protected:
 
     /**

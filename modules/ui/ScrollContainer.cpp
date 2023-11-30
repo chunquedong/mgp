@@ -54,22 +54,6 @@ ScrollContainer::~ScrollContainer()
 
 }
 
-UPtr<ScrollContainer> ScrollContainer::create(const char* id, Style* style, Layout::Type layout)
-{
-    ScrollContainer* container = new ScrollContainer();
-    container->_id = id ? id : "";
-    container->_layout = createLayout(layout);
-    container->initialize("ScrollContainer", style, NULL);
-    return UPtr<ScrollContainer>(container);
-}
-
-Control* ScrollContainer::create(Style* style, Properties* properties)
-{
-    ScrollContainer* container = new ScrollContainer();
-    container->initialize("ScrollContainer", style, properties);
-    return container;
-}
-
 const char* ScrollContainer::getTypeName() const
 {
     return "ScrollContainer";

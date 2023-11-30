@@ -29,7 +29,7 @@ namespace mgp
 Form::Form() : Drawable(), _batched(true)
 {
     memset(__activeControl, 0, sizeof(__activeControl));
-    _root = Container::create("FormRoot");
+    _root = Control::create<Container>("FormRoot");
     _root->_form = this;
 }
 
@@ -131,7 +131,7 @@ void Form::initialize(Style* style, Properties* properties)
     _content->initialize("Form", style, properties);
     _content->setId("_form_content");
 
-    auto overlay = Container::create("_form_overlay");
+    auto overlay = Control::create<Container>("_form_overlay");
     _overlay = overlay.get();
     //_overlay->setWidth(1, true);
     //_overlay->setHeight(1, true);

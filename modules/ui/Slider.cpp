@@ -22,21 +22,6 @@ Slider::~Slider()
 {
 }
 
-UPtr<Slider> Slider::create(const char* id, Style* style)
-{
-    Slider* slider = new Slider();
-    slider->_id = id ? id : "";
-    slider->initialize("Slider", style, NULL);
-    return UPtr<Slider>(slider);
-}
-
-Control* Slider::create(Style* style, Properties* properties)
-{
-    Slider* slider = new Slider();
-    slider->initialize("Slider", style, properties);
-    return slider;
-}
-
 void Slider::initialize(const char* typeName, Style* style, Properties* properties)
 {
     Label::initialize(typeName, style, properties);

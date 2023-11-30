@@ -14,21 +14,6 @@ TextBox::~TextBox()
 {
 }
 
-UPtr<TextBox> TextBox::create(const char* id, Style* style)
-{
-    TextBox* textBox = new TextBox();
-    textBox->_id = id ? id : "";
-    textBox->initialize("TextBox", style, NULL);
-    return UPtr<TextBox>(textBox);
-}
-
-Control* TextBox::create(Style* style, Properties* properties)
-{
-    TextBox* textBox = new TextBox();
-    textBox->initialize("TextBox", style, properties);
-    return textBox;
-}
-
 void TextBox::initialize(const char* typeName, Style* style, Properties* properties)
 {
     Label::initialize(typeName, style, properties);
