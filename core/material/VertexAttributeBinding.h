@@ -32,6 +32,7 @@ class VertexAttributeObject;
  */
 class VertexAttributeBinding : public Refable {
     friend class VertexAttributeObject;
+    friend class Mesh;
 public:
     /**
      * Creates a new VertexAttributeObject between the given Mesh and Effect.

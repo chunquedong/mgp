@@ -440,10 +440,16 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
         _indexBuffer._pointerDirty = false;
     }
     else if (_vertexBuffer._pointerDirty || _indexBuffer._pointerDirty) {
+
+        if (mesh->_vertexAttributeArray->_indexBufferObject != _indexBuffer._bufferHandle) {
+            mesh->_vertexAttributeArray->_indexBufferObject = _indexBuffer._bufferHandle;
+        }
+
         mesh->_vertexAttributeArray->update();
         _vertexBuffer._pointerDirty = false;
         _indexBuffer._pointerDirty = false;
     }
+
 
     unsigned int partCount = mesh->getPartCount();
     if (partCount == 0)
