@@ -125,7 +125,7 @@ protected:
      *
      * @param groupId The group to clear.
      */
-    static void clearSelected(const std::string& groupId);
+    void clearSelected(const std::string& groupId);
 
     /**
      * The RadioButton's group ID.

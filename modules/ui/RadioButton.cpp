@@ -3,7 +3,6 @@
 
 namespace mgp
 {
-static std::vector<RadioButton*> __radioButtons;
 
 RadioButton::RadioButton() : _selected(false), _image(NULL)
 {
@@ -12,12 +11,6 @@ RadioButton::RadioButton() : _selected(false), _image(NULL)
 
 RadioButton::~RadioButton()
 {
-    // Remove this RadioButton from the global list.
-    std::vector<RadioButton*>::iterator it = std::find(__radioButtons.begin(), __radioButtons.end(), this);
-    if (it != __radioButtons.end())
-    {
-        __radioButtons.erase(it);
-    }
 }
 
 void RadioButton::initialize(const char* typeName, Style* style, Properties* properties)
@@ -75,15 +68,20 @@ void RadioButton::addListener(Control::Listener* listener, int eventFlags)
 
 void RadioButton::clearSelected(const std::string& groupId)
 {
-    std::vector<RadioButton*>::const_iterator it;
-    for (it = __radioButtons.begin(); it < __radioButtons.end(); ++it)
-    {
-        RadioButton* radioButton = *it;
-        GP_ASSERT(radioButton);
-        if (groupId == radioButton->_groupId)
+    Container* parent = getParent();
+    while (parent) {
+        bool found = false;
+        for (int i = 0; i < parent->getControlCount(); ++i)
         {
-            radioButton->setSelected(false);
+            RadioButton* radioButton = dynamic_cast<RadioButton*>(parent->getControl(i));
+            if (radioButton && groupId == radioButton->_groupId)
+            {
+                radioButton->setSelected(false);
+                found = true;
+            }
         }
+        if (found) break;
+        parent = parent->getParent();
     }
 }
 

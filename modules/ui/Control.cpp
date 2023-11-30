@@ -1051,7 +1051,7 @@ Control::State Control::getState(const char* state)
     return NORMAL;
 }
 
-Control* Control::getParent() const
+Container* Control::getParent() const
 {
     return _parent;
 }

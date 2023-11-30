@@ -708,7 +708,7 @@ public:
      *
      * @return This control's parent.
      */
-    Control* getParent() const;
+    Container* getParent() const;
 
     /**
      * Determines if this control is a child (at any level of hierarchy) of the 
