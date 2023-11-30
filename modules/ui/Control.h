@@ -194,7 +194,12 @@ public:
             /**
              * Event triggered when a control loses focus.
              */
-            FOCUS_LOST      = 0x400
+            FOCUS_LOST      = 0x400,
+
+            /**
+             * Event triggered when a control select index change
+             */
+            SELECT_CHANGE  = 0x800,
         };
 
         /*

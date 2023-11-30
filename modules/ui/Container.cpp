@@ -276,6 +276,13 @@ void Container::removeControl(unsigned int index)
     SAFE_RELEASE(control);
 }
 
+void Container::clear() {
+    for (int i=0; i<_controls.size(); ++i)
+    {
+        removeControl(i);
+    }
+}
+
 void Container::removeControl(const char* id)
 {
     GP_ASSERT(id);
@@ -451,7 +458,7 @@ Control* Container::findInputControl(int x, int y, bool focus, unsigned int cont
         return NULL;
 
     Container* container = this;
-    for (unsigned int i = 0, childCount = container->getControlCount(); i < childCount; ++i)
+    for (int i = container->getControlCount()-1; i >= 0; --i)
     {
         Control* ctrl = container->getControl(i)->findInputControl(x, y, focus, contactIndex);
         if (ctrl) return ctrl;

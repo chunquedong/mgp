@@ -10,7 +10,8 @@
 namespace mgp
 {
 
-class MenuList : public ScrollContainer {
+class MenuList : public ScrollContainer, public Control::Listener {
+    int _selectIndex = -1;
 public:
 
     static UPtr<MenuList> create(const char* id, Style* style = NULL);
@@ -25,8 +26,13 @@ protected:
     
     void initialize(const char* typeName, Style* style, Properties* properties);
 
+    void controlEvent(Control* control, EventType evt);
 public:
+    int getSelectIndex() { return _selectIndex; }
     void initItems(std::vector<std::string>& items);
+
+    void show(Control* any);
+    void close();
 };
 
 }

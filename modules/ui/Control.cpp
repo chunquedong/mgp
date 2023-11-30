@@ -666,34 +666,11 @@ void Control::addListener(Control::Listener* listener, int eventFlags)
 {
     GP_ASSERT(listener);
 
-    if ((eventFlags & Control::Listener::PRESS) == Control::Listener::PRESS)
-    {
-        addSpecificListener(listener, Control::Listener::PRESS);
-    }
-
-    if ((eventFlags & Control::Listener::RELEASE) == Control::Listener::RELEASE)
-    {
-        addSpecificListener(listener, Control::Listener::RELEASE);
-    }
-
-    if ((eventFlags & Control::Listener::CLICK) == Control::Listener::CLICK)
-    {
-        addSpecificListener(listener, Control::Listener::CLICK);
-    }
-
-    if ((eventFlags & Control::Listener::VALUE_CHANGED) == Control::Listener::VALUE_CHANGED)
-    {
-        addSpecificListener(listener, Control::Listener::VALUE_CHANGED);
-    }
-
-    if ((eventFlags & Control::Listener::TEXT_CHANGED) == Control::Listener::TEXT_CHANGED)
-    {
-        addSpecificListener(listener, Control::Listener::TEXT_CHANGED);
-    }
-
-    if ((eventFlags & Control::Listener::ACTIVATED) == Control::Listener::ACTIVATED)
-    {
-        addSpecificListener(listener, Control::Listener::ACTIVATED);
+    for (int i = 0; i < 32; ++i) {
+        uint32_t flag = 1U << i;
+        if (eventFlags & flag) {
+            addSpecificListener(listener, (Listener::EventType)flag);
+        }
     }
 }
 

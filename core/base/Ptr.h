@@ -231,6 +231,9 @@ public:
 
     T& operator*() { return *pointer; }
 
+    bool operator==(const SharedPtr& other) { return this->pointer == other.pointer; }
+    bool operator!=(const SharedPtr& other) { return this->pointer != other.pointer; }
+
     T* get() const { return pointer; }
 
     void _set(T* p) { pointer = p; }

@@ -12,12 +12,11 @@
 namespace mgp
 {
 
-class ComboBox : public Button {
+class ComboBox : public Button, public Control::Listener {
 
     std::vector<std::string> _items;
 
-    int _selIndex = -1;
-    bool _dropdown = false;
+    int _selectIndex = -1;
 
     ThemeImage* _image = NULL;
 
@@ -29,8 +28,8 @@ public:
 
     const char* getTypeName() const;
 
-    int getSelIndex() { return _selIndex; }
-    void setSelIndex(int v);
+    int getSelectIndex() { return _selectIndex; }
+    void setSelectIndex(int v, bool fireEvent = true);
 
     static Control* create(Style* style, Properties* properties = NULL);
 protected:
@@ -40,6 +39,8 @@ protected:
     void initialize(const char* typeName, Style* style, Properties* properties);
 
     void controlEvent(Control::Listener::EventType evt);
+
+    void controlEvent(Control* control, EventType evt);
 private:
     ComboBox(const ComboBox& copy) = delete;
 };

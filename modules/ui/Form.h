@@ -119,6 +119,8 @@ public:
 
 
     Container* getRoot();
+    Container* getContent();
+    Container* getOverlay();
 
     bool screenToForm(int* x, int* y);
 
@@ -160,7 +162,7 @@ private:
     /**
      * @see Control::initialize
      */
-    void initialize();
+    void initialize(Style* style, Properties* properties);
 
 
     int flushBatch(RenderInfo* view);
@@ -185,9 +187,11 @@ private:
 
 
     Control* findInputControl(int* x, int* y, bool focus, unsigned int contactIndex, bool* consumed);
-    Control* handlePointerPressRelease(int* x, int* y, bool pressed, unsigned int contactIndex, bool* consumed);
+    SPtr<Control> handlePointerPress(int* x, int* y, bool pressed, unsigned int contactIndex, bool* consumed);
+    SPtr<Control> handlePointerRelease(int* x, int* y, bool pressed, unsigned int contactIndex, bool* consumed);
+    bool bubblingTouch(SPtr<Control> ctrl, int formX, int formY, bool mouse, unsigned int contactIndex, int wheelDelta, int evt);
     bool pointerEventInternal(bool mouse, int evt, int x, int y, int wheelDelta, unsigned int contactIndex, int button);
-    Control* handlePointerMove(int* x, int* y, unsigned int contactIndex, bool* consumed);
+    SPtr<Control> handlePointerMove(int* x, int* y, unsigned int contactIndex, bool* consumed);
     bool keyEventInternal(Keyboard::KeyEvent evt, int key);
 private:
     Matrix _projectionMatrix;           // Projection matrix to be set on SpriteBatch objects when rendering the form
@@ -195,9 +199,12 @@ private:
     UPtr<Container> _root;
     bool _batched;
 
-    Control* __focusControl = NULL;
-    Control* __activeControl[MotionEvent::MAX_TOUCH_POINTS];
+    SPtr<Control> __focusControl;
+    SPtr<Control> __activeControl[MotionEvent::MAX_TOUCH_POINTS];
     bool __shiftKeyDown = false;
+
+    Container* _content = NULL;
+    Container* _overlay = NULL;
 };
 
 

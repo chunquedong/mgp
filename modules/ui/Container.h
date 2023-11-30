@@ -95,6 +95,11 @@ public:
     void removeControl(Control* control);
 
     /**
+    * Remove all contrls
+    */
+    void clear();
+
+    /**
      * Get the Control at a specific index.
      *
      * @param index The index at which to retrieve the Control.
