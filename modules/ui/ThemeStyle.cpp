@@ -3,7 +3,7 @@
 namespace mgp
 {
 
-Style::Style(Theme* theme, const char* id)
+Style::Style(SPtr<Theme> theme, const char* id)
     : _theme(theme), _id(id), _background(NULL), _font(NULL),
     _fontSize(16), _alignment(FontLayout::ALIGN_TOP_LEFT), _textRightToLeft(false), _textColor(Vector4::one()), _opacity(1.0f)
 {
@@ -23,7 +23,7 @@ Style::~Style()
 
 Theme* Style::getTheme() const
 {
-    return _theme;
+    return _theme.get();
 }
 
 const char* Style::getId() const

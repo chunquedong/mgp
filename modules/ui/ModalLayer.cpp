@@ -8,7 +8,7 @@ ModalLayer::ModalLayer()
     setPadding(0, 0, 0, 0);
     setLayout(Layout::LAYOUT_ABSOLUTE);
     this->setVisible(false);
-    _styleName = "ModalLayer";
+    _className = "ModalLayer";
 }
 
 ModalLayer::~ModalLayer()

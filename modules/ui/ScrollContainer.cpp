@@ -14,7 +14,7 @@
 #include "ImageControl.h"
 #include "Form.h"
 #include "platform/Toolkit.h"
-#include "ControlFactory.h"
+//#include "ControlFactory.h"
 #include <algorithm>
 #include <float.h>
 
@@ -47,7 +47,7 @@ ScrollContainer::ScrollContainer()
     _lastFrameTime(0), _totalWidth(0), _totalHeight(0),
     _initializedWithScroll(false), _scrollWheelRequiresFocus(false)
 {
-    _styleName = "ScrollContainer";
+    _className = "ScrollContainer";
 }
 
 ScrollContainer::~ScrollContainer()
@@ -55,26 +55,26 @@ ScrollContainer::~ScrollContainer()
 
 }
 
-void ScrollContainer::initialize(const char* typeName, Style* style, Properties* properties)
-{
-    Container::initialize(typeName, style, properties);
+void ScrollContainer::onSerialize(Serializer* serializer) {
+    Container::onSerialize(serializer);
+}
 
-    if (properties)
+void ScrollContainer::onDeserialize(Serializer* serializer) {
+    Container::onDeserialize(serializer);
+    
+    std::string scroll;
+    serializer->readString("scroll", scroll, "");
+    setScroll(getScroll(scroll.c_str()));
+
+    _scrollBarsAutoHide = serializer->readBool("scrollBarsAutoHide", false);
+    if (_scrollBarsAutoHide)
     {
-
-        setScroll(getScroll(properties->getString("scroll")));
-        _scrollBarsAutoHide = properties->getBool("scrollBarsAutoHide");
-        if (_scrollBarsAutoHide)
-        {
-            _scrollBarOpacity = 0.0f;
-        }
-
-        _scrollWheelRequiresFocus = properties->getBool("scrollWheelRequiresFocus");
-        if (properties->exists("scrollingFriction"))
-            _scrollingFriction = properties->getFloat("scrollingFriction");
-        if (properties->exists("scrollWheelSpeed"))
-            _scrollWheelSpeed = properties->getFloat("scrollWheelSpeed");
+        _scrollBarOpacity = 0.0f;
     }
+    _scrollWheelRequiresFocus = serializer->readBool("scrollWheelRequiresFocus", false);
+
+    _scrollingFriction = serializer->readFloat("scrollWheelRequiresFocus", _scrollingFriction);
+    _scrollWheelSpeed = serializer->readFloat("scrollWheelRequiresFocus", _scrollWheelSpeed);
 }
 
 void ScrollContainer::setScroll(Scroll scroll)

@@ -9,15 +9,13 @@ class MainApp : public Game, Control::Listener {
     //Button* button;
 
     void initialize() {
-        UPtr<Theme> theme = Theme::create("res/ui/default.theme");
+        auto theme = Theme::create("res/ui/default.theme");
         Theme::setDefault(theme.get());
-        
+#if 1
         UPtr<Form> form = Form::create();
         form->getContent()->setSize(600, 700);
         form->getContent()->setPadding(20, 20, 20, 20);
         form->getContent()->setLayout(Layout::LAYOUT_FLOW);
-
-
 
         UPtr<TreeView> tree = Control::create<TreeView>("treeview");
         //tree->setCheckbox(false);
@@ -42,7 +40,7 @@ class MainApp : public Game, Control::Listener {
             TreeView::TreeItem::create(0, "item4", {}),
         };
         form->getContent()->addControl(std::move(tree));
-#if 1
+
 
         UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
         combobox->setWidth(100);

@@ -6,7 +6,6 @@
 namespace mgp
 {
 
-static FlowLayout* __instance;
 
 FlowLayout::FlowLayout() : _horizontalSpacing(0), _verticalSpacing(0)
 {
@@ -14,21 +13,11 @@ FlowLayout::FlowLayout() : _horizontalSpacing(0), _verticalSpacing(0)
 
 FlowLayout::~FlowLayout()
 {
-    __instance = NULL;
 }
 
-FlowLayout* FlowLayout::create()
+UPtr<FlowLayout> FlowLayout::create()
 {
-    if (!__instance)
-    {
-        __instance = new FlowLayout();
-    }
-    else
-    {
-        __instance->addRef();
-    }
-
-    return __instance;
+    return UPtr<FlowLayout>(new FlowLayout());
 }
 
 Layout::Type FlowLayout::getType()

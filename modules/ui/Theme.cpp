@@ -16,6 +16,23 @@ Theme::Theme() : _texture(NULL), _spriteBatch(NULL)
 
 Theme::~Theme()
 {
+    clear();
+    SAFE_RELEASE(_texture);
+    SAFE_DELETE(_spriteBatch);
+
+    // Remove ourself from the theme cache.
+    std::vector<Theme*>::iterator itr = std::find(__themeCache.begin(), __themeCache.end(), this);
+    if (itr != __themeCache.end())
+    {
+        __themeCache.erase(itr);
+    }
+
+
+	if (__defaultTheme == this)
+		__defaultTheme = NULL;
+}
+
+void Theme::clear() {
     // Destroy all the cursors, styles and , fonts.
     for (auto it = _styles.begin(); it != _styles.end(); ++it)
     {
@@ -30,20 +47,6 @@ Theme::~Theme()
         SAFE_RELEASE(image);
     }
     _images.clear();
-
-    SAFE_RELEASE(_texture);
-    SAFE_DELETE(_spriteBatch);
-
-    // Remove ourself from the theme cache.
-    std::vector<Theme*>::iterator itr = std::find(__themeCache.begin(), __themeCache.end(), this);
-    if (itr != __themeCache.end())
-    {
-        __themeCache.erase(itr);
-    }
-
-
-	if (__defaultTheme == this)
-		__defaultTheme = NULL;
 }
 
 Theme* Theme::getDefault()
@@ -92,10 +95,11 @@ void Theme::setDefault(Theme* t) {
 
 void Theme::finalize()
 {
+    __defaultTheme->clear();
     SAFE_RELEASE(__defaultTheme);
 }
 
-UPtr<Theme> Theme::create(const char* url)
+SPtr<Theme> Theme::create(const char* url)
 {
     GP_ASSERT(url);
 
@@ -108,7 +112,7 @@ UPtr<Theme> Theme::create(const char* url)
             // Found a match.
             t->addRef();
 
-            return UPtr<Theme>(t);
+            return SPtr<Theme>(t);
         }
     }
 
@@ -117,7 +121,7 @@ UPtr<Theme> Theme::create(const char* url)
     GP_ASSERT(properties.get());
     if (properties.get() == NULL)
     {
-        return UPtr<Theme>(NULL);
+        return SPtr<Theme>(NULL);
     }
 
     // Check if the Properties is valid and has a valid namespace.
@@ -126,11 +130,11 @@ UPtr<Theme> Theme::create(const char* url)
     if (!themeProperties || !(strcmpnocase(themeProperties->getNamespace(), "theme") == 0))
     {
         //SAFE_DELETE(properties);
-        return UPtr<Theme>(NULL);
+        return SPtr<Theme>(NULL);
     }
 
     // Create a new theme.
-    Theme* theme = new Theme();
+    SPtr<Theme> theme(new Theme());
     theme->_url = url;
 
     // Parse the Properties object and set up the theme.
@@ -304,11 +308,11 @@ UPtr<Theme> Theme::create(const char* url)
     
 
     // Add this theme to the cache.
-    __themeCache.push_back(theme);
+    __themeCache.push_back(theme.get());
 
     //SAFE_DELETE(properties);
 
-    return UPtr<Theme>(theme);
+    return SPtr<Theme>(theme);
 }
 
 Style* Theme::getStyle(const char* name) const
@@ -329,7 +333,8 @@ Style* Theme::getEmptyStyle()
 
     if (!emptyStyle)
     {
-        emptyStyle = new Style(const_cast<Theme*>(this), "EMPTY_STYLE");
+        SPtr<Theme> theme; theme = this;
+        emptyStyle = new Style(theme, "EMPTY_STYLE");
         //ThemeImage* image = getImage("empty");
         //BorderImage* bg = new BorderImage(image->getRegion(), Border(0,0,0,0));
         //emptyStyle->setBgImage(bg);

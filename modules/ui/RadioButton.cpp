@@ -7,31 +7,25 @@ namespace mgp
 RadioButton::RadioButton() : _selected(false), _image(NULL)
 {
     setPadding(0, 0, 0, 0);
-    _styleName = "RadioButton";
+    _className = "RadioButton";
 }
 
 RadioButton::~RadioButton()
 {
 }
 
-void RadioButton::initialize(const char* typeName, Style* style, Properties* properties)
-{
-    Button::initialize(typeName, style, properties);
+void RadioButton::onSerialize(Serializer* serializer) {
+    Button::onSerialize(serializer);
+}
 
-    if (properties)
-    {
-        if (properties->getBool("selected"))
-        {
-            RadioButton::clearSelected(_groupId);
-            _selected = true;
-        }
-
-        const char* groupId = properties->getString("group");
-        if (groupId)
-        {
-            _groupId = groupId;
-        }
+void RadioButton::onDeserialize(Serializer* serializer) {
+    Button::onDeserialize(serializer);
+    bool checked = serializer->readBool("selected", false);
+    if (checked) {
+        RadioButton::clearSelected(_groupId);
+        _selected = true;
     }
+    serializer->readString("group", _groupId, "");
 }
 
 bool RadioButton::isSelected() const

@@ -16,30 +16,32 @@ Slider::Slider() : _min(0.0f), _max(1.0f), _step(0.0f), _value(0.0f), _delta(0.0
     _trackHeight(0.0f), _gamepadValue(0.0f)
 {
     _canFocus = true;
-    _styleName = "Slider";
+    _className = "Slider";
 }
 
 Slider::~Slider()
 {
 }
 
-void Slider::initialize(const char* typeName, Style* style, Properties* properties)
-{
-    Label::initialize(typeName, style, properties);
+void Slider::onSerialize(Serializer* serializer) {
+    Label::onSerialize(serializer);
+}
 
-    if (properties)
-    {
-        _min = properties->getFloat("min");
-        _max = properties->getFloat("max");
-        _value = properties->getFloat("value");
-        _step = properties->getFloat("step");
-        _valueTextVisible = properties->getBool("valueTextVisible");
-        _valueTextPrecision = properties->getInt("valueTextPrecision");
+void Slider::onDeserialize(Serializer* serializer) {
+    Label::onDeserialize(serializer);
 
-        if (properties->exists("valueTextAlignment"))
-        {
-            _valueTextAlignment = FontLayout::getJustify(properties->getString("valueTextAlignment"));
-        }
+    _min = serializer->readFloat("min", 0);
+    _max = serializer->readFloat("max", 1);
+    _value = serializer->readFloat("value", 0);
+    _step = serializer->readFloat("step", 1);
+
+    _valueTextVisible = serializer->readBool("valueTextVisible", false);
+    _valueTextPrecision = serializer->readInt("valueTextPrecision", 0);
+
+    std::string valueTextAlignment;
+    serializer->readString("valueTextAlignment", valueTextAlignment, "");
+    if (valueTextAlignment.size() > 0) {
+        _valueTextAlignment = FontLayout::getJustify(valueTextAlignment.c_str());
     }
 
     // Force value text to be updated

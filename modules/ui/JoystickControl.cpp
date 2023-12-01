@@ -9,7 +9,7 @@ JoystickControl::JoystickControl() : _radiusPixels(1.0f), _relative(true), _inde
 {
     setBoundsBit(true, _boundsBits, BOUNDS_RADIUS_PERCENTAGE_BIT);
     setCanFocus(true);
-    _styleName = "JoystickControl";
+    _className = "JoystickControl";
 }
 
 JoystickControl::~JoystickControl()
@@ -66,54 +66,25 @@ bool JoystickControl::isRadiusPercentage() const
     return _boundsBits & BOUNDS_RADIUS_PERCENTAGE_BIT;
 }
 
-void JoystickControl::initialize(const char* typeName, Style* style, Properties* properties)
-{
-    Control::initialize(typeName, style, properties);
+void JoystickControl::onSerialize(Serializer* serializer) {
+    Control::onSerialize(serializer);
+}
 
-    if (!properties)
+void JoystickControl::onDeserialize(Serializer* serializer) {
+    Control::onDeserialize(serializer);
+    std::string radiusStr;
+    serializer->readString("radius", radiusStr, "");
+    if (radiusStr.size() > 0)
     {
-        //GP_WARN("JoystickControl creation without properties object is unsupported.");
-        return;
-    }
-
-    const char* radiusId = "radius";
-    if (!properties->exists(radiusId))
-    {
-        GP_WARN("JoystickControl: required attribute 'radius' is missing.");
-    }
-    else
-    {
-        const char* radiusStr = properties->getString(radiusId);
         bool isPercentage = false;
-        _radiusCoord = parseCoord(radiusStr, &isPercentage);
+        _radiusCoord = parseCoord(radiusStr.c_str(), &isPercentage);
         setBoundsBit(isPercentage, _boundsBits, BOUNDS_RADIUS_PERCENTAGE_BIT);
     }
 
-    const char* relativeId = "relative";
-    if (properties->exists(relativeId))
-    {
-        setRelative(properties->getBool(relativeId));
-    }
-    else
-    {
-        setRelative(false);
-    }
+    bool r = serializer->readBool("relative", false);
+    setRelative(r);
 
-    //const char* innerRegionId = "innerRegion";
-    //if(properties->exists(innerRegionId))
-    //{
-    //    _innerRegionCoord = new Vector2();
-    //    getRegion(*_innerRegionCoord, _innerRegionCoordBoundsBits, properties->getString(innerRegionId));
-    //}
-
-    //const char* outerRegionId = "outerRegion";
-    //if(properties->exists(outerRegionId))
-    //{
-    //    _outerRegionCoord = new Vector2();
-    //    getRegion(*_outerRegionCoord, _outerRegionCoordBoundsBits, properties->getString(outerRegionId));
-    //}
-
-    _index = properties->getInt("index");
+    _index = serializer->readInt("index", 0);
 }
 
 void JoystickControl::updateBounds()

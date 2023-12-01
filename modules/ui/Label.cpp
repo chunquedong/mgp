@@ -6,25 +6,20 @@ namespace mgp
 
 Label::Label() : _text(""), _font(NULL)
 {
-    _styleName = "Label";
+    _className = "Label";
 }
 
 Label::~Label()
 {
 }
 
-void Label::initialize(const char* typeName, Style* style, Properties* properties)
-{
-    Control::initialize(typeName, style, properties);
+void Label::onSerialize(Serializer* serializer) {
+    Control::onSerialize(serializer);
+}
 
-	if (properties)
-	{
-		const char* text = properties->getString("text");
-		if (text)
-		{
-			_text = text;
-		}
-	}
+void Label::onDeserialize(Serializer* serializer) {
+    Control::onDeserialize(serializer);
+    serializer->readString("text", _text, "");
 }
 
 

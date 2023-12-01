@@ -186,7 +186,7 @@ public:
     /**
      * Constructor.
      */
-    Style(Theme* theme, const char* id);
+    Style(SPtr<Theme> theme, const char* id);
 
     /**
      * Constructor.
@@ -209,7 +209,7 @@ public:
     const char* getId() const;
     
 private:
-    Theme* _theme;
+    SPtr<Theme> _theme;
     std::string _id;
     BorderImage* _background;
     Vector4 _bgColors[OVERLAY_MAX];

@@ -12,12 +12,12 @@ namespace mgp
 Control::Control()
     : _id(""), _boundsBits(0), _dirtyBits(DIRTY_BOUNDS | DIRTY_STATE), _consumeInputEvents(true), _alignment(ALIGN_TOP_LEFT),
     _autoSize(AUTO_SIZE_BOTH), _listeners(NULL), _style(NULL), _visible(true), _opacity(0.0f), _zIndex(-1),
-    _contactIndex(INVALID_CONTACT_INDEX), _focusIndex(-1), _canFocus(false), _state(NORMAL), _parent(NULL), _styleOverridden(false)
+    _contactIndex(INVALID_CONTACT_INDEX), _focusIndex(-1), _canFocus(false), _state(NORMAL), _parent(NULL), _styleOverridden(false), _className("Control")
 {
 #if GP_SCRIPT_ENABLE
     GP_REGISTER_SCRIPT_EVENTS();
 #endif
-    _styleName = "Control";
+    _className = "Control";
 }
 
 Control::~Control()
@@ -32,17 +32,6 @@ Control::~Control()
             SAFE_DELETE(list);
         }
         SAFE_DELETE(_listeners);
-    }
-
-    if (_style)
-    {
-        // Release the style's theme since we addRef'd it in initialize()
-        getStyle()->getTheme()->release();
-
-        if (_styleOverridden)
-        {
-            SAFE_RELEASE(_style);
-        }
     }
 }
 
@@ -59,171 +48,80 @@ Control::AutoSize Control::parseAutoSize(const char* str)
     return _autoSize;
 }
 
-void Control::initialize(const char* styleName, Style* style, Properties* properties)
-{
-    // Load our theme style
-    if (properties)
+std::string Control::getClassName() {
+    return _className;
+}
+
+void Control::onSerialize(Serializer* serializer) {
+}
+
+void Control::onDeserialize(Serializer* serializer) {
+    serializer->readString("style", _styleName, _className.c_str());
+    serializer->readString("id", _id, "");
+
+    std::string alignmentString;
+    serializer->readString("alignment", alignmentString, "");
+    _alignment = getAlignment(alignmentString.c_str());
+
+    _consumeInputEvents = serializer->readBool("consumeInputEvents", true);
+    _visible = serializer->readBool("visible", true);
+
+    _zIndex = serializer->readInt("zIndex", -1);
+
+    _canFocus = serializer->readBool("canFocus", false);
+    _focusIndex = serializer->readInt("focusIndex", -1);
+
+
+    float bounds[2];
+    bool boundsBits[2];
+    std::string position;
+    serializer->readString("position", position, "");
+    if (position.size() > 0 && parseCoordPair(position.c_str(), &bounds[0], &bounds[1], &boundsBits[0], &boundsBits[1]))
     {
-        styleName = properties->getString("style", styleName);
+        setX(bounds[0], boundsBits[0]);
+        setY(bounds[1], boundsBits[1]);
     }
 
-    _style = style;
-    if (styleName) {
-        setStyleName(styleName);
-    }
-    else {
-        setStyleName(_styleName.c_str());
-    }
-
-    GP_ASSERT(_style);
-    // Increase the reference count of the style's theme while we hold the style
-    getStyle()->getTheme()->addRef();
-    if (properties)
+    // If there is an explicitly specified size, width or height, unset the corresponding autoSize bit
+    std::string size;
+    serializer->readString("size", size, "");
+    if (size.size() > 0 && parseCoordPair(size.c_str(), &bounds[0], &bounds[1], &boundsBits[0], &boundsBits[1]))
     {
-        const char* id = properties->getId();
-        if (id)
-            _id = id;
+        setWidth(bounds[0], boundsBits[0]);
+        setHeight(bounds[1], boundsBits[1]);
+    }
 
-		// Properties not defined by the style.
-		const char* alignmentString = properties->getString("alignment");
-		_alignment = getAlignment(alignmentString);
-		_consumeInputEvents = properties->getBool("consumeInputEvents", true);
-		_visible = properties->getBool("visible", true);
+    std::string autoSizeStr;
+    serializer->readString("autoSize", autoSizeStr, "");
+    _autoSize = parseAutoSize(autoSizeStr.c_str());
 
-		if (properties->exists("zIndex"))
-		{
-			_zIndex = properties->getInt("zIndex");
-		}
-		else
-		{
-			_zIndex = -1;
-		}
-		if (properties->exists("canFocus"))
-			_canFocus = properties->getBool("canFocus", false);
-		if (properties->exists("focusIndex"))
-		{
-			_focusIndex = properties->getInt("focusIndex");
-		}
-		else
-		{
-			_focusIndex = -1;
-		}
-		float bounds[2];
-		bool boundsBits[2];
-        const char* position = properties->getString("position");
-        if (position && parseCoordPair(position, &bounds[0], &bounds[1], &boundsBits[0], &boundsBits[1]))
-        {
-            setX(bounds[0], boundsBits[0]);
-            setY(bounds[1], boundsBits[1]);
-		}
-		else
-		{
-            if (properties->exists("x"))
-            {
-                bounds[0] = parseCoord(properties->getString("x", "0"), &boundsBits[0]);
-                setX(bounds[0], boundsBits[0]);
-            }
-            if (properties->exists("y"))
-            {
-                bounds[1] = parseCoord(properties->getString("y", "0"), &boundsBits[1]);
-                setY(bounds[1], boundsBits[1]);
-            }
-		}
-        // If there is an explicitly specified size, width or height, unset the corresponding autoSize bit
-        const char* size = properties->getString("size");
-        if (size && parseCoordPair(size, &bounds[0], &bounds[1], &boundsBits[0], &boundsBits[1]))
-        {
-            setWidth(bounds[0], boundsBits[0]);
-            setHeight(bounds[1], boundsBits[1]);
-        }
-		else
-		{
-            const char* width = properties->getString("width");
-            if (width)
-            {
-                bounds[0] = parseCoord(width, &boundsBits[0]);
-                setWidth(bounds[0], boundsBits[0]);
-            }
-            const char* height = properties->getString("height");
-            if (height)
-            {
-                bounds[1] = parseCoord(height, &boundsBits[1]);
-                setHeight(bounds[1], boundsBits[1]);
-            }
-		}
-        // Backwards Compatibility: Support deprecated autoWidth and autoHeight properties,
-        // which resolve to width=100% and height=100%.
-        if (properties->getBool("autoWidth"))
-            setWidth(1.0f, true);
-        if (properties->getBool("autoHeight"))
-            setHeight(1.0f, true);
+    std::string paddingStr;
+    serializer->readString("padding", paddingStr, "");
+    if (paddingStr.size() > 0)
+    {
+        float pad = atof(paddingStr.c_str());
+        setPadding(pad, pad, pad, pad);
+    }
 
-        // Parse the auto-size mode for the control (this overrides explicit sizes and legacy autoWidth/autoHeight)
-        _autoSize = parseAutoSize(properties->getString("autoSize"));
+    std::string marginStr;
+    serializer->readString("margin", paddingStr, "");
+    if (marginStr.size() > 0)
+    {
+        float pad = atof(marginStr.c_str());
+        setMargin(pad, pad, pad, pad);
+    }
 
-        // If there is are simple padding or margin variables, parse them
-        if (properties->exists("padding"))
-        {
-            float pad = properties->getFloat("padding");
-            setPadding(pad, pad, pad, pad);
-        }
-        if (properties->exists("margin"))
-        {
-            float margin = properties->getFloat("margin");
-            setPadding(margin, margin, margin, margin);
-        }
+    setEnabled(serializer->readBool("enabled", true));
 
-		if (properties->exists("enabled"))
-		{
-			setEnabled(properties->getBool("enabled"));
-		}
 #if GP_SCRIPT_ENABLE
-		// Register script listeners for control events
-		if (properties->exists("script"))
-			addScript(properties->getString("script"));
+    // Register script listeners for control events
+    std::string scriptStr;
+    serializer->readString("script", scriptStr, "");
+    if (scriptStr.size() > 0) {
+        addScript(scriptStr.c_str());
+    }
 #endif
-		// Potentially override themed properties for all states.
-		overrideThemedProperties(properties, STATE_ALL);
 
-		// Override themed properties on specific states.
-		Properties* innerSpace = properties->getNextNamespace();
-		while (innerSpace != NULL)
-		{
-			std::string spaceName(innerSpace->getNamespace());
-			std::transform(spaceName.begin(), spaceName.end(), spaceName.begin(), (int(*)(int))toupper);
-			if (spaceName == "STATENORMAL")
-			{
-				overrideThemedProperties(innerSpace, NORMAL);
-			}
-			else if (spaceName == "STATEFOCUS")
-			{
-				overrideThemedProperties(innerSpace, FOCUS);
-			}
-			else if (spaceName == "STATEACTIVE")
-			{
-				overrideThemedProperties(innerSpace, ACTIVE);
-			}
-			else if (spaceName == "STATEDISABLED")
-			{
-				overrideThemedProperties(innerSpace, DISABLED);
-			}
-			else if (spaceName == "STATEHOVER")
-			{
-				overrideThemedProperties(innerSpace, HOVER);
-			}
-			else if (spaceName == "MARGIN")
-			{
-				setMargin(innerSpace->getFloat("top"), innerSpace->getFloat("bottom"),
-					innerSpace->getFloat("left"), innerSpace->getFloat("right"));
-			}
-			else if (spaceName == "PADDING")
-			{
-				setPadding(innerSpace->getFloat("top"), innerSpace->getFloat("bottom"),
-					innerSpace->getFloat("left"), innerSpace->getFloat("right"));
-			}
-			innerSpace = properties->getNextNamespace();
-		}
-	}
 }
 
 const char* Control::getId() const
@@ -573,10 +471,10 @@ const Padding& Control::getPadding() const
 
 Style* Control::getStyle() const
 {
-    return _style;
+    return _style.get();
 }
 
-void Control::setStyle(Style* style)
+void Control::setStyle(SPtr<Style> style)
 {
     if (style != _style)
     {
@@ -587,7 +485,7 @@ void Control::setStyle(Style* style)
 
 Theme* Control::getTheme() const
 {
-    return _style ? getStyle()->getTheme() : NULL;
+    return _style.get() ? getStyle()->getTheme() : NULL;
 }
 
 const char* Control::getStyleName() const {
@@ -596,10 +494,9 @@ const char* Control::getStyleName() const {
 
 void Control::setStyleName(const char* styleName) {
     _styleName = styleName;
-    if (_styleName.size() == 0) return;
 
-    Style* styleObj = NULL;
-    if (_style) {
+    SPtr<Style> styleObj;
+    if (_style.get()) {
         Style* styleObj = getTheme()->getStyle(styleName);
         if (!styleObj) {
             styleObj = Theme::getDefault()->getStyle(styleName);
@@ -614,7 +511,7 @@ void Control::setStyleName(const char* styleName) {
         styleObj = Theme::getDefault()->getStyle(styleName);
     }
 
-    if (!styleObj)
+    if (!styleObj.get())
     {
         // No style was found, use an empty style
         styleObj = Theme::getDefault()->getEmptyStyle();
@@ -1189,55 +1086,9 @@ void Control::overrideStyle()
     }
 
     // Copy the style.
-    GP_ASSERT(_style);
-    _style = new Style(*_style);
+    GP_ASSERT(_style.get());
+    _style = SPtr<Style>(new Style(*_style));
     _styleOverridden = true;
-}
-
-void Control::overrideThemedProperties(Properties* properties, unsigned char states)
-{
-    GP_ASSERT(properties);
-    GP_ASSERT(_style);
-    GP_ASSERT(getStyle()->_theme);
-
-
-    if (properties->exists("skin"))
-    {
-        //getStyle()->setSkin(skin, states);
-    }
-
-    if (properties->exists("font"))
-    {
-        UPtr<Font> font = Font::create(properties->getString("font"));
-        getStyle()->setFont(font.get());
-        //font->release();
-    }
-
-    if (properties->exists("fontSize"))
-    {
-        getStyle()->setFontSize(properties->getInt("fontSize"));
-    }
-
-    if (properties->exists("textColor"))
-    {
-        Vector4 textColor(0, 0, 0, 1);
-        properties->getColor("textColor", &textColor);
-        getStyle()->setTextColor(textColor);
-    }
-
-    if (properties->exists("textAlignment"))
-    {
-        getStyle()->setTextAlignment(FontLayout::getJustify(properties->getString("textAlignment")));
-    }
-
-    if (properties->exists("rightToLeft"))
-    {
-        getStyle()->setTextRightToLeft(properties->getBool("rightToLeft"));
-    }
-    if (properties->exists("opacity"))
-    {
-        getStyle()->setOpacity(properties->getFloat("opacity"));
-    }
 }
 
 Control::Alignment Control::getAlignment(const char* alignment)

@@ -53,7 +53,7 @@ public:
      *
      * @return A FlowLayout object.
      */
-    static FlowLayout* create();
+    static UPtr<FlowLayout> create();
 protected:
 
     /**

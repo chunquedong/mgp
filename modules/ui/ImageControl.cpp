@@ -8,7 +8,7 @@ ImageControl::ImageControl() :
     _srcRegion(Rectangle::empty()), _dstRegion(Rectangle::empty()), _batch(NULL),
     _tw(0.0f), _th(0.0f), _uvs(Vector4(0,0,1,1))
 {
-    _styleName = "ImageControl";
+    _className = "ImageControl";
 }
 
 ImageControl::~ImageControl()
@@ -16,32 +16,24 @@ ImageControl::~ImageControl()
     SAFE_DELETE(_batch);
 }
 
-void ImageControl::initialize(const char* typeName, Style* style, Properties* properties)
-{
-	Control::initialize(typeName, style, properties);
+void ImageControl::onSerialize(Serializer* serializer) {
+    Control::onSerialize(serializer);
+}
 
-	if (properties)
-	{
-		std::string path;
-		if (properties->getPath("path", &path))
-		{
-			setImage(path.c_str());
-		}
+void ImageControl::onDeserialize(Serializer* serializer) {
+    Control::onDeserialize(serializer);
+    std::string path;
+    serializer->readString("path", path, "");
+    if (path.size() > 0)
+    {
+        setImage(path.c_str());
+    }
 
-		if (properties->exists("srcRegion"))
-		{
-			Vector4 region;
-			properties->getVector4("srcRegion", &region);
-			setRegionSrc(region.x, region.y, region.z, region.w);
-		}
+    Vector4 region = serializer->readVector("srcRegion", region);
+    setRegionSrc(region.x, region.y, region.z, region.w);
 
-		if (properties->exists("dstRegion"))
-		{
-			Vector4 region;
-			properties->getVector4("dstRegion", &region);
-			setRegionDst(region.x, region.y, region.z, region.w);
-		}
-	}
+    Vector4 regionDst = serializer->readVector("dstRegion", region);
+    setRegionDst(regionDst.x, regionDst.y, regionDst.z, regionDst.w);
 }
 
 void ImageControl::setImage(const char* path)

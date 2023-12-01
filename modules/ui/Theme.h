@@ -187,7 +187,7 @@ public:
      * @param url The URL pointing to the Properties object defining the theme. 
      * @script{create}
      */
-    static UPtr<Theme> create(const char* url);
+    static SPtr<Theme> create(const char* url);
 
     /**
      * Returns the default theme.
@@ -251,6 +251,7 @@ private:
      */
     ~Theme();
 
+    void clear();
 
     /**
      * Hidden copy assignment operator.

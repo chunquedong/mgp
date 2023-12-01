@@ -29,12 +29,6 @@ protected:
      */
     virtual ~Button();
 
-
-    /**
-     * @see Control::initialize
-     */
-    void initialize(const char* typeName, Style* style, Properties* properties);
-
     /**
      * Gets the data binding index for this control.
      *

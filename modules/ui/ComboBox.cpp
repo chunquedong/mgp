@@ -10,21 +10,20 @@ namespace mgp {
 ComboBox::ComboBox()
 {
     setPadding(8, 8, 8, 8);
-    _styleName = "ComboBox";
+    _className = "ComboBox";
 }
 
 ComboBox::~ComboBox()
 {
 }
 
-void ComboBox::initialize(const char* typeName, Style* style, Properties* properties)
-{
-    Button::initialize(typeName, style, properties);
+void ComboBox::onSerialize(Serializer* serializer) {
+    Button::onSerialize(serializer);
+}
 
-    if (properties)
-    {
-        _selectIndex = properties->getBool("selIndex");
-    }
+void ComboBox::onDeserialize(Serializer* serializer) {
+    Button::onDeserialize(serializer);
+    _selectIndex = serializer->readBool("selIndex", -1);
 }
 
 void ComboBox::setSelectIndex(int v, bool fireEvent) {

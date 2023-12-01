@@ -17,7 +17,7 @@ class JoystickControl : public Control
 {
     friend class Container;
     friend class Gamepad;
-	friend class ControlFactory;
+	//friend class ControlFactory;
     friend class Control;
 public:
 
@@ -100,10 +100,9 @@ protected:
     virtual ~JoystickControl();
 
 
-    /**
-     * @see Control::initialize
-     */
-    void initialize(const char* typeName, Style* style, Properties* properties);
+    virtual void onSerialize(Serializer* serializer);
+
+    virtual void onDeserialize(Serializer* serializer);
 
     /**
      * Touch callback on touch events.  Controls return true if they consume the touch event.

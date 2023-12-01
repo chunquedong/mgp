@@ -4,25 +4,27 @@
 namespace mgp
 {
 
-TextBox::TextBox() : _caretLocation(0), _lastKeypress(0), _fontSize(0), _caretImage(NULL), _passwordChar('*'), _inputMode(TEXT), _ctrlPressed(false), _shiftPressed(false)
+TextBox::TextBox() : _caretLocation(0), _lastKeypress(0), _fontSize(0), _caretImage(NULL), _passwordChar('*'), _inputMode(TEXT), 
+    _ctrlPressed(false), _shiftPressed(false)
 {
     _canFocus = true;
     setPadding(8, 8, 8, 8);
-    _styleName = "TextBox";
+    _className = "TextBox";
 }
 
 TextBox::~TextBox()
 {
 }
 
-void TextBox::initialize(const char* typeName, Style* style, Properties* properties)
-{
-    Label::initialize(typeName, style, properties);
+void TextBox::onSerialize(Serializer* serializer) {
+    Label::onSerialize(serializer);
+}
 
-	if (properties)
-	{
-		_inputMode = getInputMode(properties->getString("inputMode"));
-	}
+void TextBox::onDeserialize(Serializer* serializer) {
+    Label::onDeserialize(serializer);
+    std::string inputMode;
+    serializer->readString("inputMode", inputMode, "");
+    _inputMode = getInputMode(inputMode.c_str());
 }
 
 void TextBox::addListener(Control::Listener* listener, int eventFlags)

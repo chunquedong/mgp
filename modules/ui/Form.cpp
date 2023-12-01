@@ -28,7 +28,7 @@ namespace mgp
 
 Form::Form() : Drawable(), _batched(true)
 {
-    memset(__activeControl, 0, sizeof(__activeControl));
+    //memset(__activeControl, 0, sizeof(__activeControl));
     _root = Control::create<Container>("FormRoot");
     _root->_form = this;
 }
@@ -127,16 +127,15 @@ UPtr<Form> Form::create()
 
 void Form::initialize(Style* style, Properties* properties)
 {
-    _content = new ScrollContainer();
-    _content->initialize("Form", style, properties);
-    _content->setId("_form_content");
+    auto content = Control::create<ScrollContainer>("_form_content", style, "Form");
+    _content = content.get();
 
     auto overlay = Control::create<ModalLayer>("_form_overlay");
     _overlay = overlay.get();
     _overlay->setWidth(1, true);
     _overlay->setHeight(1, true);
 
-    _root->addControl(UPtr<Control>(_content));
+    _root->addControl(std::move(content));
     _root->addControl(std::move(overlay));
 }
 

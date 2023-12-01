@@ -107,10 +107,9 @@ protected:
     ~TextBox();
 
 
-    /**
-     * @see Control::initialize
-     */
-    void initialize(const char* typeName, Style* style, Properties* properties);
+    virtual void onSerialize(Serializer* serializer);
+
+    virtual void onDeserialize(Serializer* serializer);
 
     /**
      * Touch callback on touch events.  Controls return true if they consume the touch event.

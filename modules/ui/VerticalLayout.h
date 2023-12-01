@@ -61,7 +61,7 @@ public:
      *
      * @return a VerticalLayout object.
      */
-    static VerticalLayout* create();
+    static UPtr<VerticalLayout> create();
 protected:
 
     /**

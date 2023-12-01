@@ -249,6 +249,15 @@ public:
         }
     }
 
+    T* take() {
+        if (pointer) {
+            Refable* refp = dynamic_cast<Refable*>(pointer);
+            mgp_assert(refp);
+            refp->addRef();
+        }
+        return pointer;
+    }
+
     template <class U> SharedPtr<U> staticCastTo()
     {
         SharedPtr<U> copy;

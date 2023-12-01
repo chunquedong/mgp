@@ -156,10 +156,9 @@ protected:
     virtual ~ScrollContainer();
 
 
-    /**
-     * @see Control::initialize
-     */
-    void initialize(const char* typeName, Style* style, Properties* properties);
+    virtual void onSerialize(Serializer* serializer);
+
+    virtual void onDeserialize(Serializer* serializer);
 
     /**
      * @see Control::updateState

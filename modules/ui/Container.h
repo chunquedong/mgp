@@ -195,10 +195,9 @@ protected:
     virtual ~Container();
 
 
-    /**
-     * @see Control::initialize
-     */
-    void initialize(const char* typeName, Style* style, Properties* properties);
+    virtual void onSerialize(Serializer* serializer);
+
+    virtual void onDeserialize(Serializer* serializer);
 
     /**
      * @see Control::update
@@ -248,14 +247,8 @@ protected:
      * @param type The type of layout to create.
      * @return The new Layout.
      */
-    static Layout* createLayout(Layout::Type type);
+    static UPtr<Layout> createLayout(Layout::Type type);
 
-    /**
-     * Adds controls nested within a properties object to this container.
-     *
-     * @param properties The properties to use.
-     */
-    void addControls(Properties* properties);
 
     /**
      * @see Control::draw
@@ -272,7 +265,7 @@ protected:
     /**
      * The container's layout.
      */
-    Layout* _layout;
+    UPtr<Layout> _layout;
     /**
      * List of controls within the container.
      */

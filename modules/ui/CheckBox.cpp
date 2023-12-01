@@ -8,7 +8,7 @@ namespace mgp
 CheckBox::CheckBox() : _checked(false), _image(NULL)
 {
     setPadding(0, 0, 0, 0);
-    _styleName = "CheckBox";
+    _className = "CheckBox";
 }
 
 CheckBox::~CheckBox()
@@ -16,14 +16,13 @@ CheckBox::~CheckBox()
 
 }
 
-void CheckBox::initialize(const char* typeName, Style* style, Properties* properties)
-{
-    Button::initialize(typeName, style, properties);
+void CheckBox::onSerialize(Serializer* serializer) {
+    Button::onSerialize(serializer);
+}
 
-    if (properties)
-    {
-        _checked = properties->getBool("checked");
-    }
+void CheckBox::onDeserialize(Serializer* serializer) {
+    Button::onDeserialize(serializer);
+    _checked = serializer->readBool("checked", false);
 }
 
 bool CheckBox::isChecked()

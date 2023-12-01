@@ -29,7 +29,7 @@ public:
      *
      * @return An AbsoluteLayout object.
      */
-    static AbsoluteLayout* create();
+    static UPtr<AbsoluteLayout> create();
 protected:
 
     /**

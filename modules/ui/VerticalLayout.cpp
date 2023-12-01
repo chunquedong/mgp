@@ -12,9 +12,9 @@ VerticalLayout::~VerticalLayout()
 {
 }
 
-VerticalLayout* VerticalLayout::create()
+UPtr<VerticalLayout> VerticalLayout::create()
 {
-    return new VerticalLayout();
+    return UPtr<VerticalLayout>(new VerticalLayout());
 }
 
 void VerticalLayout::setBottomToTop(bool bottomToTop)

@@ -2,7 +2,7 @@
 #include "Platform.h"
 #include "base/FileSystem.h"
 #include "render/FrameBuffer.h"
-#include "ui/ControlFactory.h"
+//#include "ui/ControlFactory.h"
 #include "ui/Theme.h"
 #include "ui/FormManager.h"
 #include "render/RenderPath.h"
@@ -388,7 +388,7 @@ void Game::shutdown()
         SAFE_DELETE(_audioListener);
     #endif
         
-        ControlFactory::finalize();
+        //ControlFactory::finalize();
 
         Theme::finalize();
 

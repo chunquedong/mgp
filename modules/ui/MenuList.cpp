@@ -9,7 +9,7 @@ MenuList::MenuList()
 {
     setPadding(8, 8, 8, 8);
     setLayout(Layout::LAYOUT_VERTICAL);
-    _styleName = "MenuList";
+    _className = "MenuList";
 }
 
 MenuList::~MenuList()
@@ -17,13 +17,12 @@ MenuList::~MenuList()
 
 }
 
-void MenuList::initialize(const char* typeName, Style* style, Properties* properties)
-{
-    ScrollContainer::initialize(typeName, style, properties);
+void MenuList::onSerialize(Serializer* serializer) {
+    ScrollContainer::onSerialize(serializer);
+}
 
-    if (properties)
-    {
-    }
+void MenuList::onDeserialize(Serializer* serializer) {
+    ScrollContainer::onDeserialize(serializer);
 }
 
 void MenuList::controlEvent(Control* control, EventType evt) {

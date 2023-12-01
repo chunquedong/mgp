@@ -17,7 +17,7 @@ AbsoluteLayout::~AbsoluteLayout()
     __instance = NULL;
 }
 
-AbsoluteLayout* AbsoluteLayout::create()
+UPtr<AbsoluteLayout> AbsoluteLayout::create()
 {
     if (!__instance)
     {
@@ -28,7 +28,7 @@ AbsoluteLayout* AbsoluteLayout::create()
         __instance->addRef();
     }
 
-    return __instance;
+    return UPtr<AbsoluteLayout>(__instance);
 }
 
 Layout::Type AbsoluteLayout::getType()

@@ -14,7 +14,7 @@
 #include "ImageControl.h"
 #include "FormManager.h"
 #include "platform/Toolkit.h"
-#include "ControlFactory.h"
+//#include "ControlFactory.h"
 #include <algorithm>
 #include <float.h>
 
@@ -59,7 +59,8 @@ Container::Container()
     _zIndexDefault(0), _form(NULL)
 {
     clearContacts();
-    _styleName = "Container";
+    _className = "Container";
+    _layout = createLayout(Layout::LAYOUT_ABSOLUTE);
 }
 
 Container::~Container()
@@ -70,97 +71,70 @@ Container::~Container()
         (*it)->_parent = nullptr;
         SAFE_RELEASE((*it));
     }
-    SAFE_RELEASE(_layout);
 }
 
-void Container::initialize(const char* typeName, Style* style, Properties* properties)
-{
-    Control::initialize(typeName, style, properties);
+void Container::onSerialize(Serializer* serializer) {
+    Control::onSerialize(serializer);
+}
 
-    if (properties)
+void Container::onDeserialize(Serializer* serializer) {
+    Control::onDeserialize(serializer);
+    std::string layoutStr;
+    serializer->readString("layout", layoutStr, "");
+    if (layoutStr.size() > 0)
     {
-        // Parse layout
-        Properties* layoutNS = properties->getNamespace("layout", true, false);
-        if (layoutNS)
+        _layout = createLayout(getLayoutType(layoutStr.c_str()));
+        switch (_layout->getType())
         {
-            _layout = createLayout(getLayoutType(layoutNS->getString("type")));
-            switch (_layout->getType())
-            {
-            case Layout::LAYOUT_FLOW:
-                static_cast<FlowLayout*>(_layout)->setSpacing(layoutNS->getInt("horizontalSpacing"), layoutNS->getInt("verticalSpacing"));
-                break;
-            case Layout::LAYOUT_VERTICAL:
-                static_cast<VerticalLayout*>(_layout)->setSpacing(layoutNS->getInt("spacing"));
-                break;
-            }
-        }
-        else
-        {
-            _layout = createLayout(getLayoutType(properties->getString("layout")));
-        }
-
-        addControls(properties);
-
-        const char* activeControl = properties->getString("activeControl");
-        if (activeControl)
-        {
-            for (size_t i = 0, count = _controls.size(); i < count; ++i)
-            {
-                if (_controls[i]->_id == activeControl)
-                {
-                    _activeControl = _controls[i];
-                    break;
-                }
-            }
+        case Layout::LAYOUT_FLOW:
+            static_cast<FlowLayout*>(_layout.get())->setSpacing(serializer->readInt("horizontalSpacing", 0), 
+                serializer->readInt("verticalSpacing", 0));
+            break;
+        case Layout::LAYOUT_VERTICAL:
+            static_cast<VerticalLayout*>(_layout.get())->setSpacing(serializer->readInt("spacing", 0));
+            break;
         }
     }
 
-    // Create a default layout if one does not yet exist
-    if (_layout == NULL)
-        _layout = createLayout(Layout::LAYOUT_ABSOLUTE);
-}
-
-
-void Container::addControls(Properties* properties)
-{
-    GP_ASSERT(properties);
-
-    // Add all the controls to this container.
-    Properties* controlSpace = properties->getNextNamespace();
-    while (controlSpace != NULL)
-    {
-        const char* controlName = controlSpace->getNamespace();
-
-        // Pass our own style into the creation of the child control.
-        // The child control's style will be looked up using the passed in style's theme.
-        UPtr<Control> control = ControlFactory::getInstance()->createControl(controlName, _style, controlSpace);
+    int size = serializer->readList("_children");
+    for (int i = 0; i < size; ++i) {
+        Serializable* control = serializer->readObject(NULL);
 
         // Add the new control to the form.
-        if (control.get())
+        if (control)
         {
-            addControl(std::move(control));
+            addControl(UPtr<Control>(dynamic_cast<Control*>(control)));
             //control->release();
         }
-
-        // Get the next control.
-        controlSpace = properties->getNextNamespace();
     }
 
     // Sort controls by Z-Order.
     sortControls();
+
+    std::string activeControl;
+    serializer->readString("activeControl", activeControl, "");
+    if (activeControl.size() > 0)
+    {
+        for (size_t i = 0, count = _controls.size(); i < count; ++i)
+        {
+            if (_controls[i]->_id == activeControl)
+            {
+                _activeControl = _controls[i];
+                break;
+            }
+        }
+    }
 }
 
 Layout* Container::getLayout()
 {
-    return _layout;
+    return _layout.get();
 }
 
 void Container::setLayout(Layout::Type type)
 {
-	if (_layout == NULL || _layout->getType() != type)
+	if (_layout.isNull() || _layout->getType() != type)
 	{
-		SAFE_RELEASE(_layout);
-
 		_layout = createLayout(type);
         setDirty(Control::DIRTY_BOUNDS);
 	}
@@ -816,7 +790,7 @@ void Container::updateBounds()
     Control::updateBounds();
 
     // Update layout to position children correctly within us
-    GP_ASSERT(_layout);
+    GP_ASSERT(_layout.get());
     _layout->update(this);
 }
 
@@ -849,7 +823,7 @@ Layout::Type Container::getLayoutType(const char* layoutString)
     }
 }
 
-Layout* Container::createLayout(Layout::Type type)
+UPtr<Layout> Container::createLayout(Layout::Type type)
 {
     switch (type)
     {

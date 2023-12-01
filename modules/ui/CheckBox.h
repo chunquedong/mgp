@@ -60,9 +60,18 @@ protected:
     ~CheckBox();
 
     /**
-    * @see Control::initialize
-    */
-    void initialize(const char* typeName, Style* style, Properties* properties);
+     * Event handled when an object is asked to serialize itself.
+     * 
+     * @param serializer The serializer to write properties to.
+     */
+    virtual void onSerialize(Serializer* serializer);
+
+    /**
+     * Event handled when an object properties are being deserialized.
+     *
+     * @param serializer The serializer to read properties from.
+     */
+    virtual void onDeserialize(Serializer* serializer);
 
     /**
      * Keyboard callback on key events.

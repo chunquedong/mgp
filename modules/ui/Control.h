@@ -11,7 +11,7 @@
 #if GP_SCRIPT_ENABLE
     #include "script/ScriptTarget.h"
 #endif
-//#include "platform/Gamepad.h"
+#include "base/Serializable.h"
 
 namespace mgp
 {
@@ -24,7 +24,7 @@ class Form;
  *
  * @see http://gameplay3d.github.io/GamePlay/docs/file-formats.html#wiki-UI_Forms
  */
-class Control : public Refable, public AnimationTarget
+class Control : public Refable, public AnimationTarget, public Serializable
 #if GP_SCRIPT_ENABLE
 , public ScriptTarget
 #endif
@@ -40,10 +40,18 @@ class Control : public Refable, public AnimationTarget
 
 public:
     template<typename T>
-    static UPtr<T> create(const char* id, Style* style = NULL, Properties* properties = NULL, const char* typeName = NULL) {
+    static UPtr<T> create(const char* id, Style* style = NULL, const char* typeName = NULL) {
         T* cb = new T();
         cb->_id = id ? id : "";
-        cb->initialize(typeName, style, properties);
+        if (style) {
+            cb->_style = style;
+        }
+        if (!typeName) {
+            cb->setStyleName(cb->getClassName().c_str());
+        }
+        else {
+            cb->setStyleName(typeName);
+        }
         return UPtr<T>(cb);
     }
 
@@ -614,7 +622,7 @@ public:
      *
      * @param style The style this control will use when rendering.
      */
-    void setStyle(Style* style);
+    void setStyle(SPtr<Style> style);
 
     /**
      * Returns the theme for this control.
@@ -1032,13 +1040,26 @@ protected:
     virtual unsigned int drawText(Form* form, const Rectangle& clip, RenderInfo* view);
 
     /**
-     * Initializes the control.
+     * Gets the class name string for the object.
      *
-     * @param typeName The type name of the control being initalized.
-     * @param style The style to apply to this control (optional).
-     * @param properties The properties to set on this control (optional).
+     * This is used by the Serializer when reading/writing objects.
+     * The class name should be namespaced. Ex: mgp::SceneObject
      */
-    virtual void initialize(const char* typeName, Style* style, Properties* properties);
+    virtual std::string getClassName();
+
+    /**
+     * Event handled when an object is asked to serialize itself.
+     * 
+     * @param serializer The serializer to write properties to.
+     */
+    virtual void onSerialize(Serializer* serializer);
+
+    /**
+     * Event handled when an object properties are being deserialized.
+     *
+     * @param serializer The serializer to read properties from.
+     */
+    virtual void onDeserialize(Serializer* serializer);
 
     /**
      * Get a Control::State enum from a matching string.
@@ -1188,7 +1209,7 @@ protected:
     /**
      * The Control's Style.
      */
-    Style* _style;
+    SPtr<Style> _style;
 
     /**
      * The control is not visible and _state become DISABLED if false.
@@ -1232,6 +1253,7 @@ protected:
 
 
     std::string _styleName;
+    std::string _className;
 private:
 
     /*
@@ -1240,8 +1262,6 @@ private:
     Control(const Control& copy);
 
     AutoSize parseAutoSize(const char* str);
-
-    void overrideThemedProperties(Properties* properties, unsigned char states);
 
     void addSpecificListener(Control::Listener* listener, Control::Listener::EventType eventType);
 
