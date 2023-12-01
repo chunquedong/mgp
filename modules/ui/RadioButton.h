@@ -24,16 +24,6 @@ class RadioButton : public Button
 public:
 
     /**
-     * Extends ScriptTarget::getTypeName() to return the type name of this class.
-     *
-     * Child controls should override this function to return the correct type name.
-     *
-     * @return The type name of this class: "RadioButton"
-     * @see ScriptTarget::getTypeName()
-     */
-    const char* getTypeName() const;
-
-    /**
      * Get whether this radio button is currently selected.
      *
      * @return Whether this radio button is currently selected.

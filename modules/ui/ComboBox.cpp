@@ -10,6 +10,7 @@ namespace mgp {
 ComboBox::ComboBox()
 {
     setPadding(8, 8, 8, 8);
+    _styleName = "ComboBox";
 }
 
 ComboBox::~ComboBox()
@@ -24,11 +25,6 @@ void ComboBox::initialize(const char* typeName, Style* style, Properties* proper
     {
         _selectIndex = properties->getBool("selIndex");
     }
-}
-
-const char* ComboBox::getTypeName() const
-{
-    return "ComboBox";
 }
 
 void ComboBox::setSelectIndex(int v, bool fireEvent) {

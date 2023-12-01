@@ -47,16 +47,12 @@ ScrollContainer::ScrollContainer()
     _lastFrameTime(0), _totalWidth(0), _totalHeight(0),
     _initializedWithScroll(false), _scrollWheelRequiresFocus(false)
 {
+    _styleName = "ScrollContainer";
 }
 
 ScrollContainer::~ScrollContainer()
 {
 
-}
-
-const char* ScrollContainer::getTypeName() const
-{
-    return "ScrollContainer";
 }
 
 void ScrollContainer::initialize(const char* typeName, Style* style, Properties* properties)

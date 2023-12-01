@@ -17,6 +17,7 @@ Control::Control()
 #if GP_SCRIPT_ENABLE
     GP_REGISTER_SCRIPT_EVENTS();
 #endif
+    _styleName = "Control";
 }
 
 Control::~Control()
@@ -58,41 +59,22 @@ Control::AutoSize Control::parseAutoSize(const char* str)
     return _autoSize;
 }
 
-void Control::initialize(const char* typeName, Style* style, Properties* properties)
+void Control::initialize(const char* styleName, Style* style, Properties* properties)
 {
     // Load our theme style
     if (properties)
     {
-        // The style passed is in our parent control's style.
-        // Attempt to load our own style from our parent style's theme.
-        const char* styleName = properties->getString("style", typeName);
-        if (style)
-        {
-            // The passed in style is our parent control's style : attempt to load our style from it.
-            _style = style->getTheme()->getStyle(styleName);
-        }
-        if (!_style)
-        {
-            // Use an empty style from our parent's theme
-            _style = style->getTheme()->getEmptyStyle();
-        }
-    }
-    else
-    {
-        // No properties passed in - the style passed in was explicity for us.
-        _style = style;
+        styleName = properties->getString("style", styleName);
     }
 
-    if (!_style)
-    {
-        // Search for a style from the default theme that matches this control's name
-        _style = Theme::getDefault()->getStyle(typeName);
-        if (!_style)
-        {
-            // No style was found, use an empty style
-            _style = style ? style->getTheme()->getEmptyStyle() : Theme::getDefault()->getEmptyStyle();
-        }
+    _style = style;
+    if (styleName) {
+        setStyleName(styleName);
     }
+    else {
+        setStyleName(_styleName.c_str());
+    }
+
     GP_ASSERT(_style);
     // Increase the reference count of the style's theme while we hold the style
     getStyle()->getTheme()->addRef();
@@ -242,11 +224,6 @@ void Control::initialize(const char* typeName, Style* style, Properties* propert
 			innerSpace = properties->getNextNamespace();
 		}
 	}
-}
-
-const char* Control::getTypeName() const
-{
-    return "Control";
 }
 
 const char* Control::getId() const
@@ -611,6 +588,39 @@ void Control::setStyle(Style* style)
 Theme* Control::getTheme() const
 {
     return _style ? getStyle()->getTheme() : NULL;
+}
+
+const char* Control::getStyleName() const {
+    return _styleName.c_str();
+}
+
+void Control::setStyleName(const char* styleName) {
+    _styleName = styleName;
+    if (_styleName.size() == 0) return;
+
+    Style* styleObj = NULL;
+    if (_style) {
+        Style* styleObj = getTheme()->getStyle(styleName);
+        if (!styleObj) {
+            styleObj = Theme::getDefault()->getStyle(styleName);
+        }
+        if (!styleObj)
+        {
+            // No style was found, use an empty style
+            styleObj = getTheme()->getEmptyStyle();
+        }
+    }
+    else {
+        styleObj = Theme::getDefault()->getStyle(styleName);
+    }
+
+    if (!styleObj)
+    {
+        // No style was found, use an empty style
+        styleObj = Theme::getDefault()->getEmptyStyle();
+    }
+
+    setStyle(styleObj);
 }
 
 Control::State Control::getState() const

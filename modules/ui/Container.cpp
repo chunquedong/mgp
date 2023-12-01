@@ -59,6 +59,7 @@ Container::Container()
     _zIndexDefault(0), _form(NULL)
 {
     clearContacts();
+    _styleName = "Container";
 }
 
 Container::~Container()
@@ -147,11 +148,6 @@ void Container::addControls(Properties* properties)
 
     // Sort controls by Z-Order.
     sortControls();
-}
-
-const char* Container::getTypeName() const
-{
-    return "Container";
 }
 
 Layout* Container::getLayout()

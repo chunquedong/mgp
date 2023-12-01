@@ -9,6 +9,7 @@ Button::Button() : _dataBinding(0)
 {
     _canFocus = true;
     setPadding(12, 12, 12, 12);
+    _styleName = "Button";
 }
 
 Button::~Button()
@@ -29,11 +30,6 @@ void Button::initialize(const char* typeName, Style* style, Properties* properti
         //     _dataBinding = Gamepad::getButtonMappingFromString(mapping);
         // }
     }
-}
-
-const char* Button::getTypeName() const
-{
-    return "Button";
 }
 
 const unsigned int Button::getDataBinding() const

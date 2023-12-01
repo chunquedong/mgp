@@ -25,8 +25,6 @@ public:
 
     std::vector<std::string>& getItems() { return _items; }
 
-    const char* getTypeName() const;
-
     int getSelectIndex() { return _selectIndex; }
     void setSelectIndex(int v, bool fireEvent = true);
 

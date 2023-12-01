@@ -39,7 +39,6 @@ private:
     bool _isDirty = true;
     bool _useCheckBox = true;
 public:
-    const char* getTypeName() const;
 
     void setCheckbox(bool v);
 

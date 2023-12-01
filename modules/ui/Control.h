@@ -43,9 +43,6 @@ public:
     static UPtr<T> create(const char* id, Style* style = NULL, Properties* properties = NULL, const char* typeName = NULL) {
         T* cb = new T();
         cb->_id = id ? id : "";
-        if (!typeName) {
-            typeName = cb->getTypeName();
-        }
         cb->initialize(typeName, style, properties);
         return UPtr<T>(cb);
     }
@@ -279,16 +276,6 @@ public:
      * Opacity property.  Data = opacity
      */
     static const int ANIMATE_OPACITY = 7;
-
-    /**
-     * Extends ScriptTarget::getTypeName() to return the type name of this class.
-     *
-     * Child controls should override this function to return the correct type name.
-     *
-     * @return The type name of this class: "Control"
-     * @see ScriptTarget::getTypeName()
-     */
-    const char* getTypeName() const;
 
     /**
      * Get this control's ID string.
@@ -633,6 +620,9 @@ public:
      * Returns the theme for this control.
      */
     Theme* getTheme() const;
+
+    const char* getStyleName() const;
+    void setStyleName(const char* style);
 
     /**
      * Get this control's z-index.
@@ -1240,6 +1230,8 @@ protected:
      */
     Container* _parent;
 
+
+    std::string _styleName;
 private:
 
     /*

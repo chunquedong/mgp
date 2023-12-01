@@ -16,8 +16,6 @@ class MenuList : public ScrollContainer, public Control::Listener {
     int _selectIndex = -1;
 public:
 
-    const char* getTypeName() const;
-
 protected:
     MenuList();
     ~MenuList();

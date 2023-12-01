@@ -8,6 +8,7 @@ namespace mgp
 CheckBox::CheckBox() : _checked(false), _image(NULL)
 {
     setPadding(0, 0, 0, 0);
+    _styleName = "CheckBox";
 }
 
 CheckBox::~CheckBox()
@@ -23,11 +24,6 @@ void CheckBox::initialize(const char* typeName, Style* style, Properties* proper
     {
         _checked = properties->getBool("checked");
     }
-}
-
-const char* CheckBox::getTypeName() const
-{
-    return "CheckBox";
 }
 
 bool CheckBox::isChecked()

@@ -16,8 +16,6 @@ class ModalLayer : public Container {
     std::vector<bool> _isModal;
 public:
 
-    const char* getTypeName() const;
-
 protected:
     ModalLayer();
     ~ModalLayer();

@@ -8,6 +8,7 @@ TextBox::TextBox() : _caretLocation(0), _lastKeypress(0), _fontSize(0), _caretIm
 {
     _canFocus = true;
     setPadding(8, 8, 8, 8);
+    _styleName = "TextBox";
 }
 
 TextBox::~TextBox()
@@ -22,11 +23,6 @@ void TextBox::initialize(const char* typeName, Style* style, Properties* propert
 	{
 		_inputMode = getInputMode(properties->getString("inputMode"));
 	}
-}
-
-const char* TextBox::getTypeName() const
-{
-    return "TextBox";
 }
 
 void TextBox::addListener(Control::Listener* listener, int eventFlags)

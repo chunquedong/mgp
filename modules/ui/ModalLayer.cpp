@@ -8,15 +8,11 @@ ModalLayer::ModalLayer()
     setPadding(0, 0, 0, 0);
     setLayout(Layout::LAYOUT_ABSOLUTE);
     this->setVisible(false);
+    _styleName = "ModalLayer";
 }
 
 ModalLayer::~ModalLayer()
 {
-}
-
-const char* ModalLayer::getTypeName() const
-{
-    return "ModalLayer";
 }
 
 void ModalLayer::controlEvent(Listener::EventType evt) {

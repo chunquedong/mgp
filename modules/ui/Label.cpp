@@ -6,6 +6,7 @@ namespace mgp
 
 Label::Label() : _text(""), _font(NULL)
 {
+    _styleName = "Label";
 }
 
 Label::~Label()
@@ -24,11 +25,6 @@ void Label::initialize(const char* typeName, Style* style, Properties* propertie
 			_text = text;
 		}
 	}
-}
-
-const char* Label::getTypeName() const
-{
-    return "Label";
 }
 
 

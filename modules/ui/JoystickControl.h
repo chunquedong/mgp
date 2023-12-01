@@ -22,16 +22,6 @@ class JoystickControl : public Control
 public:
 
     /**
-     * Extends ScriptTarget::getTypeName() to return the type name of this class.
-     *
-     * Child controls should override this function to return the correct type name.
-     *
-     * @return The type name of this class: "JoystickControl"
-     * @see ScriptTarget::getTypeName()
-     */
-    const char* getTypeName() const;
-
-    /**
      * Add a listener to be notified of specific events affecting
      * this control.  Event types can be OR'ed together.
      * E.g. To listen to touch-press and touch-release events,

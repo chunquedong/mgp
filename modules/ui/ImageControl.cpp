@@ -8,6 +8,7 @@ ImageControl::ImageControl() :
     _srcRegion(Rectangle::empty()), _dstRegion(Rectangle::empty()), _batch(NULL),
     _tw(0.0f), _th(0.0f), _uvs(Vector4(0,0,1,1))
 {
+    _styleName = "ImageControl";
 }
 
 ImageControl::~ImageControl()
@@ -41,11 +42,6 @@ void ImageControl::initialize(const char* typeName, Style* style, Properties* pr
 			setRegionDst(region.x, region.y, region.z, region.w);
 		}
 	}
-}
-
-const char* ImageControl::getTypeName() const
-{
-    return "ImageControl";
 }
 
 void ImageControl::setImage(const char* path)

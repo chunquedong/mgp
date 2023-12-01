@@ -9,16 +9,12 @@ JoystickControl::JoystickControl() : _radiusPixels(1.0f), _relative(true), _inde
 {
     setBoundsBit(true, _boundsBits, BOUNDS_RADIUS_PERCENTAGE_BIT);
     setCanFocus(true);
+    _styleName = "JoystickControl";
 }
 
 JoystickControl::~JoystickControl()
 {
 
-}
-
-const char* JoystickControl::getTypeName() const
-{
-    return "JoystickControl";
 }
 
 const Vector2& JoystickControl::getValue() const

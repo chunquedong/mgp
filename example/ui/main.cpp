@@ -15,7 +15,7 @@ class MainApp : public Game, Control::Listener {
         UPtr<Form> form = Form::create();
         form->getContent()->setSize(600, 700);
         form->getContent()->setPadding(20, 20, 20, 20);
-        form->getContent()->setLayout(Layout::LAYOUT_VERTICAL);
+        form->getContent()->setLayout(Layout::LAYOUT_FLOW);
 
 
 
@@ -42,7 +42,7 @@ class MainApp : public Game, Control::Listener {
             TreeView::TreeItem::create(0, "item4", {}),
         };
         form->getContent()->addControl(std::move(tree));
-#if 0
+#if 1
 
         UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
         combobox->setWidth(100);

@@ -43,6 +43,7 @@ TreeView::TreeView()
     root = TreeItem::create(0, "name", {});
     root->expanded = true;
     setLayout(Layout::LAYOUT_VERTICAL);
+    _styleName = "TreeView";
 }
 
 TreeView::~TreeView()
@@ -57,11 +58,6 @@ void TreeView::initialize(const char* typeName, Style* style, Properties* proper
     if (properties)
     {
     }
-}
-
-const char* TreeView::getTypeName() const
-{
-    return "TreeView";
 }
 
 void TreeView::addItemLabel(TreeItem* item, int level) {

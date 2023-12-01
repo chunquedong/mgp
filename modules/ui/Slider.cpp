@@ -16,6 +16,7 @@ Slider::Slider() : _min(0.0f), _max(1.0f), _step(0.0f), _value(0.0f), _delta(0.0
     _trackHeight(0.0f), _gamepadValue(0.0f)
 {
     _canFocus = true;
+    _styleName = "Slider";
 }
 
 Slider::~Slider()
@@ -43,11 +44,6 @@ void Slider::initialize(const char* typeName, Style* style, Properties* properti
 
     // Force value text to be updated
     setValue(_value);
-}
-
-const char* Slider::getTypeName() const
-{
-    return "Slider";
 }
 
 void Slider::setMin(float min)

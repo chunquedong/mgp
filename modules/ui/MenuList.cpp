@@ -9,6 +9,7 @@ MenuList::MenuList()
 {
     setPadding(8, 8, 8, 8);
     setLayout(Layout::LAYOUT_VERTICAL);
+    _styleName = "MenuList";
 }
 
 MenuList::~MenuList()
@@ -23,11 +24,6 @@ void MenuList::initialize(const char* typeName, Style* style, Properties* proper
     if (properties)
     {
     }
-}
-
-const char* MenuList::getTypeName() const
-{
-    return "MenuList";
 }
 
 void MenuList::controlEvent(Control* control, EventType evt) {

@@ -7,6 +7,7 @@ namespace mgp
 RadioButton::RadioButton() : _selected(false), _image(NULL)
 {
     setPadding(0, 0, 0, 0);
+    _styleName = "RadioButton";
 }
 
 RadioButton::~RadioButton()
@@ -31,11 +32,6 @@ void RadioButton::initialize(const char* typeName, Style* style, Properties* pro
             _groupId = groupId;
         }
     }
-}
-
-const char* RadioButton::getTypeName() const
-{
-    return "RadioButton";
 }
 
 bool RadioButton::isSelected() const
