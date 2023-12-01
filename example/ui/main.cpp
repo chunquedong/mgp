@@ -13,16 +13,44 @@ class MainApp : public Game, Control::Listener {
         Theme::setDefault(theme.get());
         
         UPtr<Form> form = Form::create();
-        form->getContent()->setSize(600, 600);
+        form->getContent()->setSize(600, 700);
         form->getContent()->setPadding(20, 20, 20, 20);
         form->getContent()->setLayout(Layout::LAYOUT_VERTICAL);
+
+
+
+        UPtr<TreeView> tree = Control::create<TreeView>("treeview");
+        //tree->setCheckbox(false);
+        tree->setWidth(120);
+        tree->setHeight(300);
+        tree->root->children = {
+            TreeView::TreeItem::create(0, "item1", {
+                TreeView::TreeItem::create(0, "item11", {}),
+                TreeView::TreeItem::create(0, "item12", {}),
+                TreeView::TreeItem::create(0, "item13", {}),
+            }),
+            TreeView::TreeItem::create(0, "item2", {
+                TreeView::TreeItem::create(0, "item21", {}),
+                TreeView::TreeItem::create(0, "item22", {}),
+                TreeView::TreeItem::create(0, "item23", {}),
+            }),
+            TreeView::TreeItem::create(0, "item3", {
+                TreeView::TreeItem::create(0, "item31", {}),
+                TreeView::TreeItem::create(0, "item32", {}),
+                TreeView::TreeItem::create(0, "item33", {}),
+            }),
+            TreeView::TreeItem::create(0, "item4", {}),
+        };
+        form->getContent()->addControl(std::move(tree));
+#if 0
 
         UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
         combobox->setWidth(100);
         combobox->setText("Combobox");
         combobox->getItems() = { "Apple", "Google" };
         form->getContent()->addControl(std::move(combobox));
-#if 1
+
+
         UPtr<Label> label = Control::create<Label>("testLabel");
         //label->setPosition(50, 50);
         //label->setSize(200, 50);

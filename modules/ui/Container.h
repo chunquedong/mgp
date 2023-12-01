@@ -101,7 +101,7 @@ public:
      *
      * @param id The ID of the Control to search for.
      */
-    Control* getControl(const char* id);
+    Control* findControl(const char* id);
 
     /**
      * Returns the number of child controls for this container.

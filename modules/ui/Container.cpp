@@ -261,7 +261,7 @@ void Container::removeControl(unsigned int index)
 }
 
 void Container::clear() {
-    for (int i=0; i<_controls.size(); ++i)
+    for (int i= _controls.size()-1; i>=0; --i)
     {
         removeControl(i);
     }
@@ -303,7 +303,7 @@ Control* Container::getControl(unsigned int index) const
     return _controls[index];
 }
 
-Control* Container::getControl(const char* id)
+Control* Container::findControl(const char* id)
 {
     GP_ASSERT(id);
     if (strcmp(id, this->getId()) == 0)

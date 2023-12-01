@@ -210,6 +210,11 @@ public:
              * Event triggered when a control select index change
              */
             SELECT_CHANGE  = 0x800,
+
+            /**
+             * Tree Expanded
+             */
+            EXPANDED       = 0x100,
         };
 
         /*
