@@ -95,8 +95,10 @@ void Theme::setDefault(Theme* t) {
 
 void Theme::finalize()
 {
-    __defaultTheme->clear();
-    SAFE_RELEASE(__defaultTheme);
+    if (__defaultTheme) {
+        __defaultTheme->clear();
+        SAFE_RELEASE(__defaultTheme);
+    }
 }
 
 SPtr<Theme> Theme::create(const char* url)

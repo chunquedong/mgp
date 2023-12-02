@@ -35,7 +35,7 @@ fan fmake engine/fmake.props -debug
 ```
 5. generate IDE project file
 ```
-sh build.sh
+sh build.sh -G -debug
 ```
 
 

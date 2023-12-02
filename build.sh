@@ -1,4 +1,4 @@
-OPTIONS="-G -debug"
+OPTIONS="$@"
 fan fmake core/fmake.props $OPTIONS
 fan fmake modules/fmake.props $OPTIONS
 
