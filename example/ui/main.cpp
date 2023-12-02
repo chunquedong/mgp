@@ -11,12 +11,12 @@ class MainApp : public Game, Control::Listener {
     void initialize() {
         auto theme = Theme::create("res/ui/default.theme");
         Theme::setDefault(theme.get());
-#if 1
+
         UPtr<Form> form = Form::create();
         form->getContent()->setSize(600, 700);
         form->getContent()->setPadding(20, 20, 20, 20);
         form->getContent()->setLayout(Layout::LAYOUT_FLOW);
-
+#if 1
         UPtr<TreeView> tree = Control::create<TreeView>("treeview");
         //tree->setCheckbox(false);
         tree->setWidth(120);
@@ -40,7 +40,7 @@ class MainApp : public Game, Control::Listener {
             TreeView::TreeItem::create(0, "item4", {}),
         };
         form->getContent()->addControl(std::move(tree));
-
+#endif
 
         UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
         combobox->setWidth(100);
@@ -48,7 +48,7 @@ class MainApp : public Game, Control::Listener {
         combobox->getItems() = { "Apple", "Google" };
         form->getContent()->addControl(std::move(combobox));
 
-
+#if 1
         UPtr<Label> label = Control::create<Label>("testLabel");
         //label->setPosition(50, 50);
         //label->setSize(200, 50);

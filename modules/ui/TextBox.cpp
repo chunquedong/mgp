@@ -336,7 +336,7 @@ unsigned int TextBox::drawImages(Form* form, const Rectangle& clip, RenderInfo* 
         if (!region.isEmpty())
         {
             //const Vector4& uvs = _caretImage->getUVs();
-            Vector4 color = Vector4::one();
+            Vector4 color = _textColor;
             color.w *= _opacity;
 
             float caretWidth = 2;
@@ -374,7 +374,7 @@ unsigned int TextBox::drawText(Form* form, const Rectangle& clip, RenderInfo* vi
         //unsigned int fontSize = getStyle()->getFontSize();
 
         //SpriteBatch* batch = _font->getSpriteBatch(fontSize);
-        startBatch(form, _font);
+        startBatch(form, _font, 2);
         //_font->start();
         fontLayout.drawText(_textBounds, _textColor, getStyle()->getTextAlignment(), &_viewportClipBounds);
         //_font->finish();

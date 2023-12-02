@@ -191,8 +191,18 @@ void Form::startBatch(BatchableLayer* batch)
         batch->setProjectionMatrix(_projectionMatrix);
         batch->start();
 
-        if (_batched)
-            _batches.push_back(batch);
+        if (_batched) {
+            int i = 0;
+            for (; i < _batches.size(); ++i) {
+                if (_batches[i]->zorder > batch->zorder) {
+                    _batches.insert(_batches.begin()+i, batch);
+                    break;
+                }
+            }
+            if (i == _batches.size()) {
+                _batches.push_back(batch);
+            }
+        }
     }
 }
 

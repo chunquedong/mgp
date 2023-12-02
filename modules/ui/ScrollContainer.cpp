@@ -37,7 +37,7 @@ ScrollContainer::ScrollContainer()
     : _scrollBarVertical(NULL),
     _scrollBarHorizontal(NULL),
     _scroll(SCROLL_NONE), _scrollBarBounds(Rectangle::empty()), _scrollPosition(Vector2::zero()),
-    _scrollBarsAutoHide(false), _scrollBarOpacity(1.0f), _scrolling(false),
+    _scrollBarsAutoHide(true), _scrollBarOpacity(1.0f), _scrolling(false),
     _scrollingVeryFirstX(0), _scrollingVeryFirstY(0), _scrollingFirstX(0), _scrollingFirstY(0), _scrollingLastX(0), _scrollingLastY(0),
     _scrollingStartTimeX(0), _scrollingStartTimeY(0), _scrollingLastTime(0),
     _scrollingVelocity(Vector2::zero()), _scrollingFriction(1.0f), _scrollWheelSpeed(400.0f),
@@ -495,7 +495,7 @@ void ScrollContainer::updateScroll()
     // If scroll velocity is 0 and scrollbars are not always visible, trigger fade-out animation.
     if (!_scrolling && _scrollingVelocity.isZero() && _scrollBarsAutoHide && _scrollBarOpacity == 1.0f)
     {
-        float to = 0;
+        float to = 0.2;
         _scrollBarOpacity = 0.99f;
         if (!_scrollBarOpacityClip)
         {

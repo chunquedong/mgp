@@ -9,21 +9,6 @@ theme mainMenu
         textAlignment = ALIGN_VCENTER_LEFT
     }
 
-    style Form : Default
-    {
-        background
-        {
-            border
-            {
-                left = 15
-                right = 15
-                top = 15
-                bottom = 15
-            }
-            image = panel.png
-        }
-    }
-
     // Style that can be used as a background for a container
     style Panel : Default
     {
@@ -54,10 +39,10 @@ theme mainMenu
             }
             image = button.png
         }
-        normalColor = #ffffffff
-        hoverColor = #ccccccff
-        activeColor = #aaaaaaff
-        focusColor = #ffffffff
+        normalColor = #33b5e5ff
+        hoverColor = #66b5e5ff
+        activeColor = #88b5e5ff
+        focusColor = #66b5e5ff
         disabledColor = #ccccccff
         textAlignment = ALIGN_VCENTER_HCENTER
     }
@@ -97,22 +82,28 @@ theme mainMenu
             }
             image=comboBox.png
         }
-        textColor = #000000ff
+        //textColor = #000000ff
         textAlignment = ALIGN_TOP_LEFT
     }
 
-    style MenuList : Default
+    style MenuItem : Default
     {
         background
         {
             border
             {
-                left = 15
-                right = 15
-                top = 15
-                bottom = 15
+                left = 1
+                right = 1
+                top = 1
+                bottom = 1
             }
-            image=panel.png
+            image = empty.png
         }
+        normalColor = #f9f9f9ff
+        hoverColor = #aaaaaaff
+        activeColor = #eeeeeeff
+        focusColor = #aaaaaaff
+        disabledColor = #ccccccff
+        textColor = #000000ff
     }
 }

@@ -16,6 +16,7 @@ namespace mgp
 */
 class BatchableLayer {
 public:
+    int zorder = 1;
     virtual void start() = 0;
     virtual void finish(RenderInfo* view) = 0;
     virtual void setProjectionMatrix(const Matrix& matrix) = 0;

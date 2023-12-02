@@ -497,11 +497,11 @@ void Control::setStyleName(const char* styleName) {
 
     SPtr<Style> styleObj;
     if (_style.get()) {
-        Style* styleObj = getTheme()->getStyle(styleName);
-        if (!styleObj) {
+        styleObj = getTheme()->getStyle(styleName);
+        if (!styleObj.get()) {
             styleObj = Theme::getDefault()->getStyle(styleName);
         }
-        if (!styleObj)
+        if (!styleObj.get())
         {
             // No style was found, use an empty style
             styleObj = getTheme()->getEmptyStyle();
@@ -876,8 +876,9 @@ void Control::updateAbsoluteBounds(const Vector2& offset)
     Rectangle::intersect(_viewportBounds, parentAbsoluteClip, &_viewportClipBounds);
 }
 
-void Control::startBatch(Form* form, BatchableLayer* batch)
+void Control::startBatch(Form* form, BatchableLayer* batch, int zorder)
 {
+    batch->zorder = zorder;
     form->startBatch(batch);
 }
 
@@ -906,7 +907,7 @@ unsigned int Control::drawBorder(Form* form, const Rectangle& clip, RenderInfo* 
     unsigned int drawCalls = 0;
 
     SpriteBatch* batch = getStyle()->getTheme()->getSpriteBatch();
-    startBatch(form, batch);
+    startBatch(form, batch, 0);
 
     Vector4 skinColor = getStyle()->getBgColor((Style::OverlayType)getState());
     skinColor.w *= getStyle()->getOpacity();

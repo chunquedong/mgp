@@ -126,7 +126,7 @@ unsigned int Label::drawText(Form* form, const Rectangle& clip, RenderInfo* view
         unsigned int fontSize = getStyle()->getFontSize();
 
         //SpriteBatch* batch = _font->getSpriteBatch(fontSize);
-        startBatch(form, _font);
+        startBatch(form, _font, 2);
         //_font->drawText(_text.c_str(), _textBounds.x, _textBounds.y, _textColor, fontSize, _text.size(), &_viewportClipBounds);
         fontLayout.drawText(_textBounds, _textColor, getStyle()->getTextAlignment(), &_viewportClipBounds);
         finishBatch(form, _font, view);

@@ -47,7 +47,9 @@ void MenuList::controlEvent(Control* control, EventType evt) {
 
 void MenuList::initItems(std::vector<std::string>& items) {
     for (std::string& name : items) {
-        UPtr<Label> label = Control::create<Label>((this->_id + "_items").c_str());
+        UPtr<Button> label = Control::create<Button>((this->_id + "_items").c_str());
+        label->setPadding(5, 5, 5, 5);
+        label->setStyleName("MenuItem");
         label->setText(name.c_str());
         label->setWidth(1, true);
         label->addListener(this, Listener::CLICK);

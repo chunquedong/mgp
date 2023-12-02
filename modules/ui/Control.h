@@ -969,7 +969,7 @@ protected:
      * @param form The form beign drawn.
      * @param batch The sprite batch to be drawn into.
      */
-    void startBatch(Form* form, BatchableLayer* batch);
+    void startBatch(Form* form, BatchableLayer* batch, int zorder = 1);
 
     /**
      * Called after a batch has been drawn into and before any other batch is used.
