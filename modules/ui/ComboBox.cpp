@@ -50,7 +50,7 @@ void ComboBox::controlEvent(Control::Listener::EventType evt)
         list->initItems(this->_items);
         auto b = this->getAbsoluteBounds();
         list->setPosition(b.x, b.bottom());
-        list->setWidth(150);
+        list->setWidth(250);
         list->addListener(this, Listener::SELECT_CHANGE);
         list->show(this);
         break;

@@ -9,6 +9,7 @@ ModalLayer::ModalLayer()
     setLayout(Layout::LAYOUT_ABSOLUTE);
     this->setVisible(false);
     _className = "ModalLayer";
+    _consumeInputEvents = true;
 }
 
 ModalLayer::~ModalLayer()

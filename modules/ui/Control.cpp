@@ -1211,7 +1211,7 @@ Control* Control::findInputControl(int x, int y, bool focus, unsigned int contac
     return result;
 }
 
-Control* Control::getControl(const char* id) {
+Control* Control::findControl(const char* id) {
     if (strcmp(id, this->getId()) == 0)
     {
         return this;

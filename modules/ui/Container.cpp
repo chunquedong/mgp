@@ -59,6 +59,7 @@ Container::Container()
     _zIndexDefault(0), _form(NULL)
 {
     clearContacts();
+    _consumeInputEvents = false;
     _className = "Container";
     _layout = createLayout(Layout::LAYOUT_ABSOLUTE);
 }
@@ -286,7 +287,7 @@ Control* Container::findControl(const char* id)
     {
         Control* c = *it;
         GP_ASSERT(c);
-        Control* found = c->getControl(id);
+        Control* found = c->findControl(id);
         if (found)
         {
             return found;

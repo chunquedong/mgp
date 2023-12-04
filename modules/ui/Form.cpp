@@ -29,7 +29,7 @@ namespace mgp
 Form::Form() : Drawable(), _batched(true)
 {
     //memset(__activeControl, 0, sizeof(__activeControl));
-    _root = Control::create<Container>("FormRoot");
+    _root = Control::create<Container>("_form_root");
     _root->_form = this;
 }
 
@@ -127,6 +127,10 @@ UPtr<Form> Form::create()
 
 void Form::initialize(Style* style, Properties* properties)
 {
+    _root->setWidth(1, true);
+    _root->setHeight(1, true);
+    _root->_consumeInputEvents = false;
+
     auto content = Control::create<ScrollContainer>("_form_content", style, "Form");
     _content = content.get();
 
@@ -653,6 +657,10 @@ bool Form::pointerEventInternal(bool mouse, int evt, int x, int y, int wheelDelt
 
         if (bubblingTouch(ctrl, formX, formY, mouse, contactIndex, wheelDelta, evt)) {
             return true;
+        }
+
+        if (ctrl->_consumeInputEvents) {
+            consumed = true;
         }
     }
     else

@@ -771,7 +771,7 @@ public:
      *
      * @param id The ID of the Control to search for.
      */
-    virtual Control* getControl(const char* id);
+    virtual Control* findControl(const char* id);
 
     /**
      * Indicates that the bounds of the control are dirty.
