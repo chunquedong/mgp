@@ -1,5 +1,6 @@
 #include "TreeView.h"
 #include "CheckBox.h"
+#include "Icon.h"
 
 using namespace mgp;
 
@@ -62,8 +63,15 @@ void TreeView::onDeserialize(Serializer* serializer) {
 void TreeView::addItemLabel(TreeItem* item, int level) {
     if (item->_contronl.isNull()) {
         item->_contronl = Control::create<Container>("tree_item");
-        //item->_contronl->setWidth(1, true);
+        item->_contronl->setHeight(25);
 
+        UPtr<Icon> image = Control::create<Icon>("image");
+        image->setImagePath("res/ui/right.png");
+        image->setSize(23, 23);
+        image->setPadding(4, 4, 4, 4);
+        image->addListener(this, Listener::CLICK);
+        item->_contronl->addControl(std::move(image));
+        
         UPtr<Label> label = Control::create<Label>("treeItemLabel");
         label->addListener(this, Listener::CLICK);
         //label->setWidth(1, true);
@@ -77,18 +85,36 @@ void TreeView::addItemLabel(TreeItem* item, int level) {
         }
     }
     Container* control = item->_contronl.get();
-    Label* label = dynamic_cast<Label*>(control->getControl(0));
-    label->setText(item->name.c_str());
-
-    if (_useCheckBox) {
-        label->setX((level - 1) * 20 + 30);
+    Icon* icon = dynamic_cast<Icon*>(control->getControl(0));
+    if (item->expanded) {
+        if (strcmp(icon->getImagePath(), "res/ui/down.png") != 0) {
+            icon->setImagePath("res/ui/down.png");
+        }
     }
     else {
-        label->setX((level - 1) * 20);
+        if (strcmp(icon->getImagePath(), "res/ui/right.png") != 0) {
+            icon->setImagePath("res/ui/right.png");
+        }
+    }
+    if (item->expanded && item->children.size() == 0) {
+        icon->setVisible(false);
+    }
+    else {
+        icon->setVisible(true);
     }
 
+    Label* label = dynamic_cast<Label*>(control->getControl(1));
+    label->setText(item->name.c_str());
+
+    float baseX = (level - 1) * 20;
     if (_useCheckBox) {
-        CheckBox* checkbox = dynamic_cast<CheckBox*>(control->getControl(1));
+        baseX += 30;
+    }
+    icon->setX(baseX);
+    label->setX(baseX+20);
+
+    if (_useCheckBox) {
+        CheckBox* checkbox = dynamic_cast<CheckBox*>(control->getControl(2));
         checkbox->setChecked(item->isChecked());
     }
 
@@ -110,6 +136,7 @@ void TreeView::update(float elapsedTime) {
     if (_isDirty) {
         _isDirty = false;
         this->clear();
+        root->expanded = true;
         for (SPtr<TreeItem>& it : root->children) {
             it.get()->_parent = root.get();
             addItemLabel(it.get(), 1);
@@ -144,22 +171,17 @@ void TreeView::controlEvent(Control* control, Listener::EventType evt) {
 
         if (CheckBox* checkbox = dynamic_cast<CheckBox*>(control)) {
             item->setChecked(checkbox->isChecked());
-            notifyListeners(Control::Listener::VALUE_CHANGED);
-
-            setSelectItem(item);
             _isDirty = true;
-            return;
+            notifyListeners(Control::Listener::VALUE_CHANGED);
         }
 
-        if (item && item == _selectItem) {
+        if (Icon* checkbox = dynamic_cast<Icon*>(control)) {
             item->expanded = !item->expanded;
             _isDirty = true;
             notifyListeners(Listener::EXPANDED);
-            return;
         }
-        else {
-            setSelectItem(item);
-        }
+
+        setSelectItem(item);
     }
 }
 

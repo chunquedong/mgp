@@ -56,6 +56,7 @@
 #include "ui/ScrollContainer.h"
 #include "ui/MenuList.h"
 #include "ui/FormManager.h"
+#include "ui/Icon.h"
 
 // Render
 #include "loader/GltfLoader.h"
