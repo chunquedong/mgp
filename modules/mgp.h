@@ -45,7 +45,7 @@
 #include "ui/TextBox.h"
 #include "ui/RadioButton.h"
 #include "ui/Slider.h"
-#include "ui/ImageControl.h"
+#include "ui/ImageView.h"
 #include "ui/JoystickControl.h"
 #include "ui/Layout.h"
 #include "ui/AbsoluteLayout.h"

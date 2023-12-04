@@ -109,7 +109,7 @@ class MainApp : public Game, Control::Listener {
         //SAFE_RELEASE(container);
 
 
-        UPtr<ImageControl> image = Control::create<ImageControl>("image");
+        UPtr<ImageView> image = Control::create<ImageView>("image");
         image->setImage("res/image/logo.png");
         image->setSize(50, 50);
         form->getContent()->addControl(std::move(image));

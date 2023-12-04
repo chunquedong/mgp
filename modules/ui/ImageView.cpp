@@ -1,26 +1,26 @@
 #include "base/Base.h"
-#include "ImageControl.h"
+#include "ImageView.h"
 
 namespace mgp
 {
 
-ImageControl::ImageControl() :
+ImageView::ImageView() :
     _srcRegion(Rectangle::empty()), _dstRegion(Rectangle::empty()), _batch(NULL),
     _tw(0.0f), _th(0.0f), _uvs(Vector4(0,0,1,1))
 {
-    _className = "ImageControl";
+    _className = "ImageView";
 }
 
-ImageControl::~ImageControl()
+ImageView::~ImageView()
 {
     SAFE_DELETE(_batch);
 }
 
-void ImageControl::onSerialize(Serializer* serializer) {
+void ImageView::onSerialize(Serializer* serializer) {
     Control::onSerialize(serializer);
 }
 
-void ImageControl::onDeserialize(Serializer* serializer) {
+void ImageView::onDeserialize(Serializer* serializer) {
     Control::onDeserialize(serializer);
     std::string path;
     serializer->readString("path", path, "");
@@ -36,7 +36,7 @@ void ImageControl::onDeserialize(Serializer* serializer) {
     setRegionDst(regionDst.x, regionDst.y, regionDst.z, regionDst.w);
 }
 
-void ImageControl::setImage(const char* path)
+void ImageView::setImage(const char* path)
 {
     SAFE_DELETE(_batch);
     UPtr<Texture> texture = Texture::create(path, false);
@@ -49,7 +49,7 @@ void ImageControl::setImage(const char* path)
         setDirty(DIRTY_BOUNDS);
 }
 
-void ImageControl::setRegionSrc(float x, float y, float width, float height)
+void ImageView::setRegionSrc(float x, float y, float width, float height)
 {
     _srcRegion.set(x, y, width, height);
 
@@ -59,32 +59,32 @@ void ImageControl::setRegionSrc(float x, float y, float width, float height)
     _uvs.w = ((y + height) * _th);
 }
 
-void ImageControl::setRegionSrc(const Rectangle& region)
+void ImageView::setRegionSrc(const Rectangle& region)
 {
     setRegionSrc(region.x, region.y, region.width, region.height);
 }
 
-const Rectangle& ImageControl::getRegionSrc() const
+const Rectangle& ImageView::getRegionSrc() const
 {
     return _srcRegion;
 }
 
-void ImageControl::setRegionDst(float x, float y, float width, float height)
+void ImageView::setRegionDst(float x, float y, float width, float height)
 {
     _dstRegion.set(x, y, width, height);
 }
 
-void ImageControl::setRegionDst(const Rectangle& region)
+void ImageView::setRegionDst(const Rectangle& region)
 {
     setRegionDst(region.x, region.y, region.width, region.height);
 }
 
-const Rectangle& ImageControl::getRegionDst() const
+const Rectangle& ImageView::getRegionDst() const
 {
     return _dstRegion;
 }
 
-unsigned int ImageControl::drawImages(Form* form, const Rectangle& clip, RenderInfo* view)
+unsigned int ImageView::drawImages(Form* form, const Rectangle& clip, RenderInfo* view)
 {
     if (!_batch)
         return 0;
@@ -111,7 +111,7 @@ unsigned int ImageControl::drawImages(Form* form, const Rectangle& clip, RenderI
     return 1;
 }
 
-void ImageControl::updateBounds()
+void ImageView::updateBounds()
 {
     if (_batch)
     {

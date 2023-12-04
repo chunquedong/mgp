@@ -11,7 +11,7 @@
 #include "Slider.h"
 #include "TextBox.h"
 #include "JoystickControl.h"
-#include "ImageControl.h"
+//#include "ImageControl.h"
 #include "Form.h"
 #include "platform/Toolkit.h"
 //#include "ControlFactory.h"

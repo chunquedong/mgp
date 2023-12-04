@@ -1,5 +1,5 @@
-#ifndef IMAGECONTROL_H_
-#define IMAGECONTROL_H_
+#ifndef IMAGEVIEW_H_
+#define IMAGEVIEW_H_
 
 #include "Control.h"
 #include "Theme.h"
@@ -17,21 +17,21 @@ namespace mgp
  *
  * @see http://gameplay3d.github.io/GamePlay/docs/file-formats.html#wiki-UI_Forms
  */
-class ImageControl : public Control
+class ImageView : public Control
 {
     friend class Control;
 
 public:
 
     /**
-     * Set the path of the image for this ImageControl to display.
+     * Set the path of the image for this ImageView to display.
      *
      * @param path The path to the image.
      */
     void setImage(const char* path);
 
     /**
-     * Set the source region of this ImageControl.  This is the region of the file,
+     * Set the source region of this ImageView.  This is the region of the file,
      * in pixels, to use when drawing.
      *
      * @param x The x coordinate of the source region.
@@ -42,7 +42,7 @@ public:
     void setRegionSrc(float x, float y, float width, float height);
 
     /**
-     * Set the source region of this ImageControl.  This is the region of the file,
+     * Set the source region of this ImageView.  This is the region of the file,
      * in pixels, to use when drawing.
      *
      * @param region The new source region.
@@ -50,14 +50,14 @@ public:
     void setRegionSrc(const Rectangle& region);
 
     /**
-     * Get the source region of this ImageControl.
+     * Get the source region of this ImageView.
      *
-     * @return The source region of this ImageControl.
+     * @return The source region of this ImageView.
      */
     const Rectangle& getRegionSrc() const;
 
     /**
-     * Sets the destination region of this ImageControl.  This is the region
+     * Sets the destination region of this ImageView.  This is the region
      * within the control's viewport to draw the image.
      *
      * @param x The x coordinate of the destination region.
@@ -68,7 +68,7 @@ public:
     void setRegionDst(float x, float y, float width, float height);
 
     /**
-     * Sets the destination region of this ImageControl.  This is the region
+     * Sets the destination region of this ImageView.  This is the region
      * within the control's viewport to draw the image.
      *
      * @param region The new destination region.
@@ -76,17 +76,17 @@ public:
     void setRegionDst(const Rectangle& region);
 
     /**
-     * Get the destination region of this ImageControl.
+     * Get the destination region of this ImageView.
      *
-     * @return The destination region of this ImageControl.
+     * @return The destination region of this ImageView.
      */
     const Rectangle& getRegionDst() const;
 
 protected:
 
-    ImageControl();
+    ImageView();
 
-    virtual ~ImageControl();
+    virtual ~ImageView();
 
 
     virtual void onSerialize(Serializer* serializer);
@@ -105,7 +105,7 @@ protected:
 
 private:
 
-    ImageControl(const ImageControl& copy);
+    ImageView(const ImageView& copy);
 
     // Source region.
     Rectangle _srcRegion;
