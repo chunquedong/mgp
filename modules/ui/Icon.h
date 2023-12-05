@@ -43,6 +43,8 @@ protected:
     virtual void onDeserialize(Serializer* serializer);
 
     unsigned int drawImages(Form* form, const Rectangle& clip, RenderInfo* view);
+
+    void updateBounds();
 private:
     std::string _imagePath;
     ThemeImage* _image = NULL;

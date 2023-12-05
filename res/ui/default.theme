@@ -144,4 +144,14 @@ theme mainMenu
         disabledColor = #ccccccff
         textColor = #000000ff
     }
+
+    style Icon: Default
+    {
+        normalColor = #f9f9f9ff
+        hoverColor = #aaaaaaff
+        activeColor = #eeeeeeff
+        focusColor = #aaaaaaff
+        disabledColor = #ccccccff
+        textColor = #000000ff
+    }
 }
