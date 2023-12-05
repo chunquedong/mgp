@@ -268,6 +268,11 @@ void Container::removeControl(Control* control)
     }
 }
 
+void Container::removeSelf() {
+    if (!_parent) return;
+    _parent->removeControl(this);
+}
+
 Control* Container::getControl(unsigned int index) const
 {
     GP_ASSERT(index < _controls.size());

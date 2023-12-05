@@ -72,6 +72,9 @@ public:
      */
     void removeControl(Control* control);
 
+
+    void removeSelf();
+
     /**
     * Remove all contrls
     */

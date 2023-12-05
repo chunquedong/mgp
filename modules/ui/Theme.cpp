@@ -178,6 +178,9 @@ SPtr<Theme> Theme::create(const char* url)
                 std::string fontPath;
                 if (innerSpace->getPath("font", &fontPath))
                 {
+#if WIN32
+                    fontPath = "C:/Windows/Fonts/msyh.ttc";
+#endif
                     UPtr<Font> font = Font::create(fontPath.c_str());
                     if (font.get())
                     {

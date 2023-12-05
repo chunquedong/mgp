@@ -26,7 +26,7 @@ theme mainMenu
         textAlignment = ALIGN_VCENTER_HCENTER
     }
 
-    style Button : Default
+    style ButtonNormal : Default
     {
         background
         {
@@ -47,7 +47,28 @@ theme mainMenu
         textAlignment = ALIGN_VCENTER_HCENTER
     }
 
-    style TextBox : Default
+    style Button : Default
+    {
+        background
+        {
+            border
+            {
+                left = 18
+                right = 18
+                top = 18
+                bottom = 18
+            }
+            image = circle37.png
+        }
+        normalColor = #33b5e5ff
+        hoverColor = #66b5e5ff
+        activeColor = #88b5e5ff
+        focusColor = #66b5e5ff
+        disabledColor = #ccccccff
+        textAlignment = ALIGN_VCENTER_HCENTER
+    }
+
+    style TextBoxNormal : Default
     {
         background
         {
@@ -61,6 +82,23 @@ theme mainMenu
             image=panel.png
         }
         textColor = #000000ff
+        textAlignment = ALIGN_TOP_LEFT
+    }
+
+    style TextBox : Default
+    {
+        background
+        {
+            border
+            {
+                left = 10
+                right = 10
+                top = 10
+                bottom = 10
+            }
+            image=input.png
+        }
+        textColor = #ffffffff
         textAlignment = ALIGN_TOP_LEFT
     }
 
