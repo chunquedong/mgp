@@ -450,8 +450,12 @@ const std::string& Material::getShaderDefines() {
     return shaderDefines;
 }
 void Material::setShaderDefines(const std::string& defiens) {
-    GP_ASSERT(!_shaderProgram);
-    shaderDefines = defiens;
+    if (defiens != shaderDefines) {
+        if (_shaderProgram) {
+            SAFE_RELEASE(_shaderProgram);
+        }
+        shaderDefines = defiens;
+    }
 }
 
 //void Material::setNodeBinding(Node* node)
