@@ -5,6 +5,7 @@
 #include "GLFrameBuffer.h"
 #include "scene/Drawable.h"
 #include "base/FileSystem.h"
+#include "platform/Toolkit.h"
 
 /** @script{ignore} */
 GLenum __gl_error_code = GL_NO_ERROR;
@@ -51,6 +52,15 @@ void GLRenderer::clear(ClearFlags flags, const Vector4& color, float clearDepth,
 }
 
 void GLRenderer::setViewport(int x, int y, int w, int h) {
+    FrameBuffer *curFrameBuffer = getCurrentFrameBuffer();
+    if (curFrameBuffer) {
+        if (curFrameBuffer->isDefault()) {
+            y = (Toolkit::cur()->getHeight() - y) - h;
+        }
+        else {
+            y = (curFrameBuffer->getHeight() - y) - h;
+        }
+    }
     glViewport((GLuint)x, (GLuint)y, (GLuint)w, (GLuint)h);
 }
 

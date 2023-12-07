@@ -26,6 +26,7 @@ RenderPath::RenderPath(Renderer* renderer) : _renderer(renderer),
     _use_shadow = false;
     _use_fxaa = false;
     _use_hdr = false;
+    _blend = false;
 }
 
 RenderPath::~RenderPath()
@@ -173,6 +174,7 @@ void RenderPath::initForward() {
     if (_use_fxaa) {
         RenderPass* post2 = new RenderPass();
         post2->_renderPath = this;
+        post2->_clearBuffer = 0;
         post2->_inputTextureBuffers["u_texture"] = "main.0";
         post2->_dstBufferName = "main";
         post2->_material = Material::create("res/shaders/postEffect/fullQuad.vert", "res/shaders/postEffect/fxaa.frag");
@@ -183,19 +185,37 @@ void RenderPath::initForward() {
     if (_use_hdr) {
         RenderPass* post3 = new RenderPass();
         post3->_renderPath = this;
+        post3->_clearBuffer = 0;
+        post3->_drawToScreen = true;
         post3->_inputTextureBuffers["u_texture"] = "main.0";
         post3->_material = Material::create("res/shaders/postEffect/fullQuad.vert", "res/shaders/postEffect/hdrToLdr.frag");
         post3->_material->getStateBlock()->setDepthTest(false);
+        if (_blend) {
+            post3->_material->getStateBlock()->setBlend(true);
+        }
         _renderStages.push_back(post3);
     }
     else {
         RenderPass* post3 = new RenderPass();
         post3->_renderPath = this;
+        post3->_clearBuffer = 0;
+        post3->_drawToScreen = true;
         post3->_inputTextureBuffers["u_texture"] = "main.0";
         post3->_material = Material::create("res/shaders/postEffect/fullQuad.vert", "res/shaders/postEffect/passthrough.frag");
         post3->_material->getStateBlock()->setDepthTest(false);
+        if (_blend) {
+            post3->_material->getStateBlock()->setBlend(true);
+        }
         _renderStages.push_back(post3);
     }
+
+    RenderPass* p3 = new RenderPass();
+    p3->_renderPath = this;
+    p3->_drawType = (int)Drawable::RenderLayer::Overlay;
+    p3->_clearBuffer = 0;
+    p3->_drawToScreen = true;
+    p3->_useScreenViewport = true;
+    _renderStages.push_back(p3);
 }
 
 void RenderPath::resetViewport(Rectangle* viewport) {
@@ -240,15 +260,12 @@ void RenderPath::render(Scene* scene, Camera* camera, Rectangle* viewport) {
 
     for (int i = 0; i < _renderStages.size(); ++i) {
         RenderStage* p = _renderStages[i];
-        //last stage render to screen
-        if (i == _renderStages.size() - 1  && _previousFrameBuffer) {
+
+        RenderPass* pass = dynamic_cast<RenderPass*>(p);
+        if (pass && pass->_drawToScreen && _previousFrameBuffer) {
             _previousFrameBuffer->bind();
-            RenderPass *pass = dynamic_cast<RenderPass*>(p);
-            if (pass) {
-                pass->_resetViewport = false;
-                resetViewport(viewport);
-            }
         }
+
         p->render();
     }
 }

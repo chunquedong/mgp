@@ -74,13 +74,27 @@ void RenderPass::render() {
         }
     }
 
-    if (_resetViewport) {
+    if (true) {
         if (_dstFrameBuffer.get()) {
             _renderPath->getRenderer()->setViewport(0, 0, _dstFrameBuffer->getWidth(), _dstFrameBuffer->getHeight());
         }
-        else {
+        else if (_useScreenViewport) {
+            int vpx = 0;
+            int vpy = 0;
+            int vpw = Toolkit::cur()->getWidth();
+            int vph = Toolkit::cur()->getHeight();
+            _renderPath->getRenderer()->setViewport(vpx, vpy, vpw, vph);
+        }
+        else if (_drawToScreen) {
             int vpx = (int)view->viewport.x;
             int vpy = (int)view->viewport.y;
+            int vpw = (int)view->viewport.width;
+            int vph = (int)view->viewport.height;
+            _renderPath->getRenderer()->setViewport(vpx, vpy, vpw, vph);
+        }
+        else {
+            int vpx = 0;// (int)view->viewport.x;
+            int vpy = 0;//(int)view->viewport.y;
             int vpw = (int)view->viewport.width;
             int vph = (int)view->viewport.height;
             _renderPath->getRenderer()->setViewport(vpx, vpy, vpw, vph);
@@ -132,7 +146,7 @@ void RestStage::render() {
     RenderInfo* view = _renderPath->getRenderView();
     _renderPath->getRenderQueue()->beginDrawScene(view, Drawable::RenderLayer::Custom);
     _renderPath->getRenderQueue()->beginDrawScene(view, Drawable::RenderLayer::Transparent);
-    _renderPath->getRenderQueue()->beginDrawScene(view, Drawable::RenderLayer::Overlay);
+    //_renderPath->getRenderQueue()->beginDrawScene(view, Drawable::RenderLayer::Overlay);
     _renderPath->applyDraw(view);
 }
 

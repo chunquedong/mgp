@@ -52,6 +52,7 @@ namespace mgp {
 		bool _use_shadow;
 		bool _use_fxaa;
 		bool _use_hdr;
+		bool _blend;
 	public:
 		RenderPath(Renderer* renderer);
 		~RenderPath();
