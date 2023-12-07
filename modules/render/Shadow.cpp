@@ -114,6 +114,7 @@ void Shadow::draw(Scene* scene, Renderer* renderer, Matrix& lightView, Matrix& l
     renderer->clear(Renderer::CLEAR_DEPTH);
 
     UPtr<Camera> camera = Camera::createOrthographic(20, 20, 1, 1, 100);
+    Camera* _camera = camera.get();
     camera->setProjectionMatrix(lightProjection);
     UPtr<Node> cameraNode = Node::create("shadowCamera");
     cameraNode->setCamera(std::move(camera));
@@ -134,7 +135,7 @@ void Shadow::draw(Scene* scene, Renderer* renderer, Matrix& lightView, Matrix& l
     //view._renderer = renderer;
 
     RenderQueue renderQueue;
-    renderQueue.fill(scene, camera.get(), &viewport);
+    renderQueue.fill(scene, _camera, &viewport);
 
     view._overridedMaterial = _material;
     view.isDepthPass = true;
@@ -148,7 +149,7 @@ void Shadow::draw(Scene* scene, Renderer* renderer, Matrix& lightView, Matrix& l
         renderer->draw(drawCall);
     }
 
-    cascade.lightSpaceMatrix = camera->getViewProjectionMatrix();
+    cascade.lightSpaceMatrix = _camera->getViewProjectionMatrix();
     //SAFE_RELEASE(camera);
     //SAFE_RELEASE(cameraNode);
 
