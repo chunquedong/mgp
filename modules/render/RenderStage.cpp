@@ -51,9 +51,7 @@ void RenderPass::render() {
 
     Model* _quadModel = RenderPath::fullscreenQuadModel();
 
-    if (_clearBuffer) {
-        _renderPath->getRenderer()->clear((Renderer::ClearFlags)_clearBuffer);
-    }
+    
     RenderInfo* view = _renderPath->getRenderView();
     if (_material.get()) {
         view->_overridedMaterial = _material.get();
@@ -99,6 +97,9 @@ void RenderPass::render() {
             int vph = (int)view->viewport.height;
             _renderPath->getRenderer()->setViewport(vpx, vpy, vpw, vph);
         }
+    }
+    if (_clearBuffer) {
+        _renderPath->getRenderer()->clear((Renderer::ClearFlags)_clearBuffer);
     }
 
     beforeRender(view);

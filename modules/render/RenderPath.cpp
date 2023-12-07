@@ -135,6 +135,8 @@ void RenderPath::initDeferred() {
     _renderStages.push_back(post);
 }
 
+void RenderPath::addPostProcess() {}
+
 void RenderPath::initForward() {
     clearStages();
 
@@ -161,15 +163,7 @@ void RenderPath::initForward() {
     p11->_renderPath = this;
     _renderStages.push_back(p11);
 
-    // if (_use_ssao) {
-    //     SSAO* ssao = new SSAO(this);
-    //     _renderStages.push_back(ssao);
-    // }
-
-    // if (_use_bloom) {
-    //     Bloom* bloom = new Bloom(this);
-    //     _renderStages.push_back(bloom);
-    // }
+    addPostProcess();
 
     if (_use_fxaa) {
         RenderPass* post2 = new RenderPass();

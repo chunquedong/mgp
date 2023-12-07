@@ -82,6 +82,8 @@ namespace mgp {
 		FrameBuffer* getFrameBuffer(const std::string& name);
 		Texture* getTexture(const std::string& name);
 	protected:
+
+		virtual void addPostProcess();
 		
 		void createFramebuffer();
 		void updateShadowMap(Scene* scene, Camera* camera);
