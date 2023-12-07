@@ -1080,17 +1080,19 @@ void GLRenderer::bindVertexAttributeObj(VertexAttributeObject* vertextAttribute)
             GL_ASSERT(glBindBuffer(GL_ARRAY_BUFFER, b->getInstancedVbo()));
             int loc = b->_effect->getVertexAttribute("a_instanceMatrix");
             if (loc >= 0) {
+                int matrixByteSize = 16 * sizeof(float);
+                int vector4Size = 4 * sizeof(float);
                 GL_ASSERT(glEnableVertexAttribArray(loc));
-                GL_ASSERT(glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, sizeof(Matrix), (void*)0));
+                GL_ASSERT(glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, matrixByteSize, (void*)0));
 
                 GL_ASSERT(glEnableVertexAttribArray(loc + 1));
-                GL_ASSERT(glVertexAttribPointer(loc + 1, 4, GL_FLOAT, GL_FALSE, sizeof(Matrix), (void*)(sizeof(Vector4))));
+                GL_ASSERT(glVertexAttribPointer(loc + 1, 4, GL_FLOAT, GL_FALSE, matrixByteSize, (void*)(vector4Size)));
 
                 GL_ASSERT(glEnableVertexAttribArray(loc + 2));
-                GL_ASSERT(glVertexAttribPointer(loc + 2, 4, GL_FLOAT, GL_FALSE, sizeof(Matrix), (void*)(2 * sizeof(Vector4))));
+                GL_ASSERT(glVertexAttribPointer(loc + 2, 4, GL_FLOAT, GL_FALSE, matrixByteSize, (void*)(2 * vector4Size)));
 
                 GL_ASSERT(glEnableVertexAttribArray(loc + 3));
-                GL_ASSERT(glVertexAttribPointer(loc + 3, 4, GL_FLOAT, GL_FALSE, sizeof(Matrix), (void*)(3 * sizeof(Vector4))));
+                GL_ASSERT(glVertexAttribPointer(loc + 3, 4, GL_FLOAT, GL_FALSE, matrixByteSize, (void*)(3 * vector4Size)));
 
                 GL_ASSERT(glVertexAttribDivisor(loc, 1));
                 GL_ASSERT(glVertexAttribDivisor(loc + 1, 1));
