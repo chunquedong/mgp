@@ -345,6 +345,158 @@ UPtr<Mesh> MeshFactory::createSpherical(int subdivision) {
     return mesh;
 }
 
+UPtr<Mesh> MeshFactory::createCone(float radius, float height) {
+    int subdivision = 10;
+    std::vector<float> vertices;
+    std::vector<uint16_t> indices;
+
+    vertices.reserve(subdivision * 3 + 9);
+    indices.reserve(subdivision * 6);
+
+    vertices.push_back(0);
+    vertices.push_back(0);
+    vertices.push_back(0);
+
+    vertices.push_back(0);
+    vertices.push_back(0);
+    vertices.push_back(height);
+
+    float delta = MATH_PI * 2 / (double)subdivision;
+    float theta = 0;
+    int i = 0;
+    for (; i < subdivision; ++i) {
+        theta += delta;
+        // vertex
+        float x = radius * cos(theta);
+        float y = radius * sin(theta);
+        float z = 0;
+
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(z);
+
+        if (theta > 0) {
+            int index = i + 2;
+            indices.push_back(index-1);
+            indices.push_back(0);
+            indices.push_back(index);
+
+            indices.push_back(index);
+            indices.push_back(1);
+            indices.push_back(index-1);
+        }
+    }
+
+    indices.push_back(i + 2 - 1);
+    indices.push_back(0);
+    indices.push_back(2);
+    
+    indices.push_back(2);
+    indices.push_back(1);
+    indices.push_back(i + 2 - 1);
+    
+
+    unsigned int vertexCount = vertices.size()/3;
+    unsigned int indexCount = indices.size();
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3),
+        //VertexFormat::Element(VertexFormat::NORMAL, 3),
+        //VertexFormat::Element(VertexFormat::TEXCOORD0, 2)
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 1), vertexCount);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+    mesh->getVertexBuffer()->setData((char*)vertices.data(), vertexCount * 3 * sizeof(float));
+    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->getIndexBuffer()->setData((char*)indices.data(), indices.size() * sizeof(uint16_t));
+
+    return mesh;
+}
+
+UPtr<Mesh> MeshFactory::createCylinder(float radius, float height) {
+    int subdivision = 10;
+    std::vector<float> vertices;
+    std::vector<uint16_t> indices;
+
+    vertices.reserve(subdivision * 3 * 2 + 9);
+    indices.reserve(subdivision * 3 * 4 + 9);
+
+    vertices.push_back(0);
+    vertices.push_back(0);
+    vertices.push_back(0);
+
+    vertices.push_back(0);
+    vertices.push_back(0);
+    vertices.push_back(-height);
+
+    float delta = MATH_PI * 2 / (double)subdivision;
+    float theta = 0;
+    int i = 0;
+    for (; i <= subdivision; ++i) {
+        theta += delta;
+
+        // vertex
+        float x = radius * cos(theta);
+        float y = radius * sin(theta);
+
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(0);
+
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(-height);
+
+        if (theta > 0) {
+            int index1 = 2 + ((i-1)*2);
+            int index2 = 2 + (i * 2);
+            indices.push_back(index2);
+            indices.push_back(0);
+            indices.push_back(index1);
+
+            int index3 = 2 + ((i - 1) * 2) + 1;
+            int index4 = 2 + (i * 2) + 1;
+            indices.push_back(index3);
+            indices.push_back(1);
+            indices.push_back(index4);
+
+
+            indices.push_back(index2);
+            indices.push_back(index1);
+            indices.push_back(index4);
+
+            indices.push_back(index1);
+            indices.push_back(index3);
+            indices.push_back(index4);
+        }
+    }
+
+
+    unsigned int vertexCount = vertices.size() / 3;
+    unsigned int indexCount = indices.size();
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3),
+        //VertexFormat::Element(VertexFormat::NORMAL, 3),
+        //VertexFormat::Element(VertexFormat::TEXCOORD0, 2)
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 1), vertexCount);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+    mesh->getVertexBuffer()->setData((char*)vertices.data(), vertexCount * 3 * sizeof(float));
+    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->getIndexBuffer()->setData((char*)indices.data(), indices.size() * sizeof(uint16_t));
+
+    return mesh;
+}
+
 UPtr<Mesh> MeshFactory::createBoundingBox(const BoundingBox& box)
 {
     Vector3 corners[8];

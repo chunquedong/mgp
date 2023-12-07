@@ -75,6 +75,9 @@ public:
     static UPtr<Mesh> createSimpleCube();
     static UPtr<Mesh> createSpherical(int subdivision = 64);
 
+    static UPtr<Mesh> createCone(float radius, float height);
+    static UPtr<Mesh> createCylinder(float radius, float height);
+
     /**
      * Creates a bounding box mesh when passed a BoundingBox.
      *

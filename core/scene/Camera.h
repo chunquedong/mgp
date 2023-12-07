@@ -363,7 +363,7 @@ public:
         copyFrom(other);
         return *this;
     }
-private:
+
     /**
      * Constructor.
      */
@@ -381,7 +381,7 @@ private:
      * @return The newly created camera.
      */
     UPtr<Camera> clone(NodeCloneContext& context);
-
+private:
     /**
      * Sets the node associated with this camera.
      */
