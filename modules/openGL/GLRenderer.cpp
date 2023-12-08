@@ -547,7 +547,29 @@ void GLRenderer::updateTexture(Texture* texture) {
     {
         GL_ASSERT(glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, ioFormat, texelType, texture->_data));
     }
-    else
+    else if (type == Texture::TEXTURE_2D_ARRAY) {
+        //(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels);
+        GL_ASSERT(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, internalFormat, width, height, 0, 0, ioFormat, texelType, NULL));
+
+        // Get texture size
+        unsigned int textureSize = width * height;
+        if (bpp == 0)
+        {
+            glDeleteTextures(1, &textureId);
+            GP_ERROR("Failed to determine texture size because format is UNKNOWN.");
+            texture->_handle = 0;
+            return;
+        }
+        textureSize *= bpp;
+        // Texture Cube
+        for (unsigned int i = 0; i < texture->_arrayDepth; i++)
+        {
+            const unsigned char* texturePtr = (texture->_data == NULL) ? NULL : &texture->_data[i * textureSize];
+            //(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *pixels);
+            GL_ASSERT(glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height, 1, ioFormat, texelType, texturePtr));
+        }
+    }
+    else if (type == Texture::TEXTURE_CUBE)
     {
         // Get texture size
         unsigned int textureSize = width * height;
@@ -570,6 +592,9 @@ void GLRenderer::updateTexture(Texture* texture) {
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    }
+    else {
+        abort();
     }
 
     // Set initial minification filter based on whether or not mipmaping was enabled.

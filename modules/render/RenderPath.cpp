@@ -315,11 +315,15 @@ void RenderPath::bindShadow(std::vector<Light*> *lights, DrawCall* drawCall) {
         }
         Shadow* shadow = _shadowMapCache[light];
         char buf[256];
+
+        snprintf(buf, 256, "u_directionalLightShadowMap[%d]", i);
+        drawCall->_material->getParameter(buf)->setValue(shadow->getFrameBuffer()->getRenderTarget(0));
+
         //for (int j = shadow->getCascadeCount()-1; j >= 0; --j) {
         for (int j = 0; j < shadow->getCascadeCount(); ++j) {
             int pos = i * shadow->getCascadeCount() + j;
-            snprintf(buf, 256, "u_directionalLightShadowMap[%d]", pos);
-            drawCall->_material->getParameter(buf)->setValue(shadow->getCascade(j).frameBuffer->getRenderTarget(0));
+            //snprintf(buf, 256, "u_directionalLightShadowMap[%d]", pos);
+            //drawCall->_material->getParameter(buf)->setValue(shadow->getCascade(j).frameBuffer->getRenderTarget(0));
 
             snprintf(buf, 256, "u_directionalLightSpaceMatrix[%d]", pos);
             Matrix worldViewProj;

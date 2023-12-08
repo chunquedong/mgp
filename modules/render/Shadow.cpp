@@ -15,7 +15,7 @@
 
 using namespace mgp;
 
-Shadow::Shadow(): _material(NULL), _cascadeCount(3), _cascadeTextureSize(1024) {
+Shadow::Shadow(): _material(NULL), _cascadeCount(2), _cascadeTextureSize(1024) {
     _material = Material::create("res/shaders/depth.vert", "res/shaders/null.frag").take();
     //_material = Material::create("res/shaders/min.vert", "res/shaders/min.frag");
     //_material->getParameter("u_diffuseColor")->setVector4(Vector4(1.0, 0.0, 0.0, 1.0));
@@ -23,10 +23,8 @@ Shadow::Shadow(): _material(NULL), _cascadeCount(3), _cascadeTextureSize(1024) {
 }
 
 Shadow::~Shadow() {
-    for (CascadeInfo& c : _cascades) {
-        SAFE_RELEASE(c.frameBuffer);
-    }
     _cascades.clear();
+    SAFE_RELEASE(_frameBuffer);
     SAFE_RELEASE(_material);
 }
 
@@ -99,19 +97,9 @@ void Shadow::initCascadeDistance(Camera* curCamera) {
     }
 }
 
-void Shadow::draw(Scene* scene, Renderer* renderer, Matrix& lightView, Matrix& lightProjection, CascadeInfo& cascade, Light* light) {
+void Shadow::draw(Scene* scene, Renderer* renderer, Matrix& lightView, Matrix& lightProjection, CascadeInfo& cascade, int index) {
     int width = _cascadeTextureSize;
     int height = _cascadeTextureSize;
-    if (cascade.frameBuffer == NULL) {
-        //SAFE_RELEASE(cascade.frameBuffer);
-        //cascade.frameBuffer = renderer->createFrameBuffer("shadow", width, height, Texture::RGBA);
-        //cascade.frameBuffer->createDepthStencilTarget();
-        cascade.frameBuffer = renderer->createFrameBuffer("shadow", width, height, Texture::DEPTH).take();
-        cascade.frameBuffer->disableDrawBuffer();
-        cascade.frameBuffer->check();
-    }
-    FrameBuffer* preFrameBuffer = cascade.frameBuffer->bind();
-    renderer->clear(Renderer::CLEAR_DEPTH);
 
     UPtr<Camera> camera = Camera::createOrthographic(20, 20, 1, 1, 100);
     Camera* _camera = camera.get();
@@ -124,7 +112,7 @@ void Shadow::draw(Scene* scene, Renderer* renderer, Matrix& lightView, Matrix& l
     //cameraNode->setMatrix(light->getNode()->getWorldMatrix());
     cameraNode->setMatrix(nodeMatrix);
 
-    Rectangle viewport(0, 0, width, height);
+    Rectangle viewport(0, index*height, width, height);
     renderer->setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
     RenderInfo view;
@@ -150,14 +138,23 @@ void Shadow::draw(Scene* scene, Renderer* renderer, Matrix& lightView, Matrix& l
     }
 
     cascade.lightSpaceMatrix = _camera->getViewProjectionMatrix();
-    //SAFE_RELEASE(camera);
-    //SAFE_RELEASE(cameraNode);
-
-    preFrameBuffer->bind();
 }
 
 void Shadow::update(Scene* scene, Renderer *renderer, Light* light, Camera* curCamera) {
     initCascadeDistance(curCamera);
+
+    int width = _cascadeTextureSize;
+    int height = _cascadeTextureSize;
+    if (_frameBuffer == NULL) {
+        //SAFE_RELEASE(cascade.frameBuffer);
+        //cascade.frameBuffer = renderer->createFrameBuffer("shadow", width, height, Texture::RGBA);
+        //cascade.frameBuffer->createDepthStencilTarget();
+        _frameBuffer = renderer->createFrameBuffer("shadow", width, height * _cascadeCount, Texture::DEPTH).take();
+        _frameBuffer->disableDrawBuffer();
+        _frameBuffer->check();
+    }
+    FrameBuffer* preFrameBuffer = _frameBuffer->bind();
+    renderer->clear(Renderer::CLEAR_DEPTH);
 
     Vector3 lightDir = light->getNode()->getForwardVectorWorld();
     lightDir = -lightDir;
@@ -172,6 +169,8 @@ void Shadow::update(Scene* scene, Renderer *renderer, Light* light, Camera* curC
             curCamera->getFieldOfView(), curCamera->getAspectRatio(), near, far, 
             lightView, lightProjection);
 
-        draw(scene, renderer, lightView, lightProjection, _cascades[i], light);
+        draw(scene, renderer, lightView, lightProjection, _cascades[i], i);
     }
+
+    preFrameBuffer->bind();
 }

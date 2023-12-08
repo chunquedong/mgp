@@ -12,7 +12,7 @@
     #define LIGHTING
 #endif
 #ifndef SHADOW_CASCADE_COUNT
-    #define SHADOW_CASCADE_COUNT 3
+    #define SHADOW_CASCADE_COUNT 2
 #endif
 
 #if defined(LIGHTING)
@@ -27,7 +27,7 @@
     #if (DIRECTIONAL_LIGHT_COUNT > 0)
         uniform vec3 u_directionalLightColor[DIRECTIONAL_LIGHT_COUNT];
         #if defined(SHADOW)
-            uniform sampler2D u_directionalLightShadowMap[DIRECTIONAL_LIGHT_COUNT*SHADOW_CASCADE_COUNT];
+            uniform sampler2D u_directionalLightShadowMap[DIRECTIONAL_LIGHT_COUNT];
             uniform mat4 u_directionalLightSpaceMatrix[DIRECTIONAL_LIGHT_COUNT*SHADOW_CASCADE_COUNT];
             uniform float u_directionalLightCascadeDistance[DIRECTIONAL_LIGHT_COUNT*SHADOW_CASCADE_COUNT];
         #endif

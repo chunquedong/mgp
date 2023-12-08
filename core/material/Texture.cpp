@@ -20,7 +20,7 @@ public:
 
 static std::vector<Texture*> __textureCache;
 
-Texture::Texture() : _handle(0), _format(UNKNOWN), _type((Texture::Type)0), _width(0), _height(0), _mipmapped(false), _cached(false), _compressed(false),
+Texture::Texture() : _handle(0), _format(UNKNOWN), _type((Texture::Type)0), _width(0), _height(0), _arrayDepth(0), _mipmapped(false), _cached(false), _compressed(false),
     _wrapS(Texture::REPEAT), _wrapT(Texture::REPEAT), _wrapR(Texture::REPEAT), _minFilter(Texture::NEAREST), _magFilter(Texture::LINEAR), _data(NULL)
 {
 }
@@ -171,7 +171,7 @@ UPtr<Texture> Texture::create(Image* image, bool generateMipmaps, bool copyData)
 }
 
 UPtr<Texture> Texture::create(Format format, unsigned int width, unsigned int height, const unsigned char* data,
-    bool generateMipmaps, Texture::Type type, bool copyData)
+    bool generateMipmaps, Texture::Type type, bool copyData, unsigned int arrayDepth)
 {
     Texture* texture = new Texture();
     // Set initial minification filter based on whether or not mipmaping was enabled.
@@ -196,6 +196,7 @@ UPtr<Texture> Texture::create(Format format, unsigned int width, unsigned int he
     texture->_type = type;
     texture->_width = width;
     texture->_height = height;
+    texture->_arrayDepth = arrayDepth;
     texture->_minFilter = minFilter;
     texture->_mipmapped = generateMipmaps;
     if (copyData) {
@@ -376,6 +377,10 @@ unsigned int Texture::getWidth() const
 unsigned int Texture::getHeight() const
 {
     return _height;
+}
+
+unsigned int Texture::getArrayDepth() const {
+    return _arrayDepth;
 }
 
 TextureHandle Texture::getHandle() const

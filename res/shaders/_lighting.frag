@@ -106,10 +106,11 @@ vec3 getNormalFromMap(vec3 normalVector)
         return 0;
     }
 
-    float sampleShadowMap(int globalIndex, vec2 projCoords) {
+    float sampleShadowMap(int globalIndex, vec2 projCoords, int cascadeLayer) {
         if (projCoords.x < 0 || projCoords.y < 0 || projCoords.x > 1.0 || projCoords.y > 1.0) return 1.0;
 
-        float closestDepth = texture(u_directionalLightShadowMap[globalIndex], projCoords.xy).r;
+        float v = projCoords.y/float(SHADOW_CASCADE_COUNT)+float(SHADOW_CASCADE_COUNT-cascadeLayer-1)/float(SHADOW_CASCADE_COUNT);
+        float closestDepth = texture(u_directionalLightShadowMap[globalIndex], vec2(projCoords.x, v)).r;
         return closestDepth;
     }
 
@@ -128,13 +129,13 @@ vec3 getNormalFromMap(vec3 normalVector)
         // Transform to [0,1] range
         projCoords = projCoords * 0.5 + 0.5;
     #if 0
-        float closestDepth = sampleShadowMap(globalIndex, projCoords.xy);
+        float closestDepth = sampleShadowMap(lightIndex, projCoords.xy, cascadeLayer);
         float currentDepth = projCoords.z;
         float shadow = currentDepth-0.005 > closestDepth  ? 1.0 : 0.0;
         return shadow;
     #else
         // Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-        float closestDepth = sampleShadowMap(globalIndex, projCoords.xy); 
+        float closestDepth = sampleShadowMap(lightIndex, projCoords.xy, cascadeLayer); 
         // Get depth of current fragment from light's perspective
         float currentDepth = projCoords.z;
         // Calculate bias (based on depth map resolution and slope)
@@ -145,12 +146,12 @@ vec3 getNormalFromMap(vec3 normalVector)
         // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
         // PCF
         float shadow = 0.0;
-        vec2 texelSize = 1.0 / textureSize(u_directionalLightShadowMap[globalIndex], 0);
+        vec2 texelSize = vec2(1.0 / textureSize(u_directionalLightShadowMap[lightIndex], 0).x);
         for(int x = -1; x <= 1; ++x)
         {
             for(int y = -1; y <= 1; ++y)
             {
-                float pcfDepth = sampleShadowMap(globalIndex, projCoords.xy + vec2(x, y) * texelSize); 
+                float pcfDepth = sampleShadowMap(lightIndex, projCoords.xy + vec2(x, y) * texelSize, cascadeLayer); 
                 shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
             }    
         }

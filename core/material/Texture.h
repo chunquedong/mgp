@@ -87,7 +87,8 @@ public:
     enum Type
     {
         TEXTURE_2D = 0x0DE1,
-        TEXTURE_CUBE = 0x8513
+        TEXTURE_CUBE = 0x8513,
+        TEXTURE_2D_ARRAY = 0x8C1A
     };
 
     /**
@@ -148,7 +149,7 @@ public:
      * @script{create}
      */
     static UPtr<Texture> create(Format format, unsigned int width, unsigned int height, const unsigned char* data, 
-        bool generateMipmaps = false, Type type = TEXTURE_2D, bool copyData = true);
+        bool generateMipmaps = false, Type type = TEXTURE_2D, bool copyData = true, unsigned int arrayDepth = 0);
 
     static UPtr<Texture> loadCubeMap(const char* faces[]);
 
@@ -226,6 +227,8 @@ public:
      * @return The texture height.
      */
     unsigned int getHeight() const;
+
+    unsigned int getArrayDepth() const;
 
     /**
      * Generates a full mipmap chain for this texture if it isn't already mipmapped.
@@ -330,6 +333,7 @@ private:
     Type _type;
     unsigned int _width;
     unsigned int _height;
+    unsigned int _arrayDepth;
     bool _mipmapped;
     bool _cached;
     bool _compressed;
