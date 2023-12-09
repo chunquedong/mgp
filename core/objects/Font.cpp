@@ -653,7 +653,7 @@ void FontLayout::drawText(const Rectangle& area, const Vector4& color, Justify a
 
 void FontLayout::measureText(unsigned int* widthOut, unsigned int* heightOut)
 {
-    int maxWidth = 0;
+    unsigned maxWidth = 0;
     unsigned int h = 0;
     for (Line& line : lines) {
         unsigned int w;

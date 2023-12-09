@@ -93,6 +93,9 @@ void Label::updateBounds()
         // is a pretty bad practice so we'll prioritize performance here.
         unsigned int w, h;
         fontLayout.measureText(&w, &h);
+        if (h == 0) {
+            h = getStyle()->getFontSize();
+        }
         w += 2;
         h += 2;
         if (_autoSize & AUTO_SIZE_WIDTH)

@@ -761,7 +761,7 @@ void Container::updateBounds()
                 if (ctrl->isVisible() && !ctrl->isWidthPercentage())
                 {
                     float w = ctrl->getWidth() + ctrl->getMargin().right;
-                    if (!ctrl->isXPercentage())
+                    if (!ctrl->isXPercentage() && (ctrl->getAlignment() & ALIGN_LEFT))
                         w += ctrl->getX();
                     if (width < w)
                         width = w;

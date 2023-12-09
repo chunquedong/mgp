@@ -246,7 +246,9 @@ public:
      *
      * @return The file extension, all uppercase, including the '.'.
      */
-    static std::string getExtension(const char* path);
+    static std::string getExtension(const char* path, bool uppper = true);
+
+    static std::string getBaseName(const char* path);
 
     static bool remove(const char* path);
 private:

@@ -553,7 +553,7 @@ std::string FileSystem::getDirectoryName(const char* path)
 #endif
 }
 
-std::string FileSystem::getExtension(const char* path)
+std::string FileSystem::getExtension(const char* path, bool uppper)
 {
     const char* str = strrchr(path, '.');
     if (str == NULL)
@@ -562,9 +562,28 @@ std::string FileSystem::getExtension(const char* path)
     std::string ext;
     size_t len = strlen(str);
     for (size_t i = 0; i < len; ++i)
-        ext += std::toupper(str[i]);
+        if (uppper) ext += std::toupper(str[i]);
+        else ext += str[i];
 
     return ext;
+}
+
+std::string FileSystem::getBaseName(const char* path) {
+    std::string spath = path;
+#if WIN32
+    std::replace(spath.begin(), spath.end(), '\\', '/');
+#endif
+
+    std::string::size_type pos = spath.find_last_of("/");
+    if (pos != std::string::npos && pos+1 < spath.size()) {
+        spath = spath.substr(pos + 1);
+    }
+
+    pos = spath.find_last_of(".");
+    if (pos != std::string::npos) {
+        spath = spath.substr(0, pos);
+    }
+    return spath;
 }
 
 bool FileSystem::remove(const char* path) {
