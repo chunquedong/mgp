@@ -517,6 +517,7 @@ void Control::setStyleName(const char* styleName) {
         styleObj = Theme::getDefault()->getEmptyStyle();
     }
 
+    _styleOverridden = false;
     setStyle(styleObj);
 }
 
@@ -1079,17 +1080,18 @@ void Control::setAnimationPropertyValue(int propertyId, AnimationValue* value, f
     }
 }
 
-void Control::overrideStyle()
+Style* Control::overrideStyle()
 {
     if (_styleOverridden)
     {
-        return;
+        return getStyle();
     }
 
     // Copy the style.
     GP_ASSERT(_style.get());
     _style = SPtr<Style>(new Style(*_style));
     _styleOverridden = true;
+    return getStyle();
 }
 
 Control::Alignment Control::getAlignment(const char* alignment)

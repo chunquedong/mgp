@@ -188,8 +188,25 @@ void TreeView::controlEvent(Control* control, Listener::EventType evt) {
 
 void TreeView::setSelectItem(TreeItem* item) {
     if (item != _selectItem) {
+        if (_selectItem && _selectItem->_contronl.get()) {
+            Control* control = _selectItem->_contronl->findControl("treeItemLabel");
+            if (control) {
+                control->setStyleName("Label");
+            }
+        }
+
         _selectItem = item;
         _isDirty = true;
         notifyListeners(Listener::SELECT_CHANGE);
+
+        if (_selectItem && _selectItem->_contronl.get()) {
+            Control* control = _selectItem->_contronl->findControl("treeItemLabel");
+            if (control) {
+                Vector4 color = control->getStyle()->getTextColor();
+                color.x *= 0.5;
+                color.y *= 1.5;
+                control->overrideStyle()->setTextColor(color);
+            }
+        }
     }
 }

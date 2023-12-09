@@ -615,7 +615,7 @@ public:
      */
     Style* getStyle() const;
 
-    void overrideStyle();
+    Style* overrideStyle();
 
     /**
      * Set the style this control will use when rendering.

@@ -82,8 +82,9 @@ public:
 
     struct MeshPart {
         Mesh::PrimitiveType _primitiveType;
-        int _indexCount;
-        int _bufferOffset;
+        int _indexCount = 0;
+        int _bufferOffset = 0;
+        bool _visiable = true;
     };
 
     /**

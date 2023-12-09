@@ -94,7 +94,7 @@ void Label::updateBounds()
         unsigned int w, h;
         fontLayout.measureText(&w, &h);
         if (h == 0) {
-            h = getStyle()->getFontSize();
+            h = getStyle()->getFontSize()*1.4;
         }
         w += 2;
         h += 2;

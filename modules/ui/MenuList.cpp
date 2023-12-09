@@ -9,7 +9,9 @@ MenuList::MenuList()
 {
     setPadding(8, 8, 8, 8);
     setLayout(Layout::LAYOUT_VERTICAL);
+    setScroll(SCROLL_VERTICAL);
     _className = "MenuList";
+    setHeight(0.8, true);
 }
 
 MenuList::~MenuList()

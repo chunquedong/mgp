@@ -486,6 +486,10 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
         MeshPart* part = mesh->getPart(i);
         GP_ASSERT(part);
 
+        if (!part->_visiable) {
+            continue;
+        }
+
         // Get the material for this mesh part.
         Material* material = NULL;
         if (i < partMaterialCount) material = _partMaterials[i];
