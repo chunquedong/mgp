@@ -24,8 +24,8 @@ public:
         bool isChecked();
         void setChecked(bool v);
         static SPtr<TreeView::TreeItem> create(uint64_t id, const char* name, const std::vector<SPtr<TreeItem> >& cs);
-    private:
         bool expanded = false;
+    private:
         UPtr<Container> _contronl;
         TreeItem* _parent = NULL;
     };

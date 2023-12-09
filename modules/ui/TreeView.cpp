@@ -169,6 +169,8 @@ void TreeView::controlEvent(Control* control, Listener::EventType evt) {
     if (evt == Listener::CLICK) {
         TreeItem* item = findTreeItem(control, root.get());
 
+        setSelectItem(item);
+
         if (CheckBox* checkbox = dynamic_cast<CheckBox*>(control)) {
             item->setChecked(checkbox->isChecked());
             _isDirty = true;
@@ -181,7 +183,6 @@ void TreeView::controlEvent(Control* control, Listener::EventType evt) {
             notifyListeners(Listener::EXPANDED);
         }
 
-        setSelectItem(item);
     }
 }
 
