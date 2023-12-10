@@ -337,7 +337,7 @@ GLint getFormatInternal(Texture::Format format)
     case Texture::ALPHA:
         return GL_ALPHA;
     case Texture::RED:
-        return GL_RED;
+        return GL_R8;
     case Texture::RG:
         return GL_RG;
 

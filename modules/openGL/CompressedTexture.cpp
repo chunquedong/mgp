@@ -52,12 +52,12 @@ using namespace mgp;
 #define GL_ETC2_RGBA8_OES 0x9278
 #endif
 
-#define DDSKTX
-#define PVR
-#define DDS
+//#define GP_DDSKTX
+//#define GP_PVR
+//#define GP_DDS
 
 
-#ifdef DDSKTX
+#ifdef GP_DDSKTX
 
 #define DDSKTX_IMPLEMENT
 #include "3rd/dds-ktx.h"
@@ -161,9 +161,13 @@ UPtr<Texture> CompressedTexture::createCompressedDdsKtx(const char* path) {
     return UPtr<Texture>(NULL);
 }
 
+#else
+UPtr<Texture> CompressedTexture::createCompressedDdsKtx(const char* path) {
+    return UPtr<Texture>();
+}
 #endif
 
-#ifdef PVR
+#ifdef GP_PVR
 
 // Computes the size of a PVRTC data chunk for a mipmap level of the given size.
 static unsigned int computePVRTCDataSize(int width, int height, int bpp)
@@ -559,10 +563,13 @@ GLubyte* readCompressedPVRTCLegacy(const char* path, Stream* stream, GLsizei* wi
 
     return data;
 }
-
+#else
+UPtr<Texture> CompressedTexture::createCompressedPVRTC(const char* path) {
+    return UPtr<Texture>();
+}
 #endif
 
-#ifdef DDS
+#ifdef GP_DDS
 
 int getMaskByteIndex(unsigned int mask)
 {
@@ -942,5 +949,8 @@ UPtr<Texture> CompressedTexture::createCompressedDDS(const char* path)
 
     return texture;
 }
-
+#else
+UPtr<Texture> CompressedTexture::createCompressedDDS(const char* path) {
+    return UPtr<Texture>();
+}
 #endif
