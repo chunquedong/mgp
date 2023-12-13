@@ -45,9 +45,17 @@ public:
      * Constructs a new plane from the specified values.
      *
      * @param normal The normal vector of this plane.
+     * @param origin any point on plane
+     */
+    Plane(const Vector3& normal, const Vector3& origin);
+
+    /**
+     * Constructs a new plane from the specified values.
+     *
+     * @param normal The normal vector of this plane.
      * @param distance The distance from this plane along its (unit) normal to the origin.
      */
-    Plane(const Vector3& normal, Float distance);
+    Plane(const Vector3& normal, Float negDistance);
 
     /**
      * Constructs a new plane from the specified values.
@@ -57,7 +65,7 @@ public:
      * @param normalZ The z coordinate of the normal.
      * @param distance The distance from this plane along its (unit) normal to the origin.
      */
-    Plane(Float normalX, Float normalY, Float normalZ, Float distance);
+    Plane(Float normalX, Float normalY, Float normalZ, Float negDistance);
 
     /**
      * Constructs a new plane from the given plane.
@@ -99,14 +107,14 @@ public:
      *
      * @return The plane's distance to the origin along its normal.
      */
-    Float getDistance() const;
+    Float getNegDistance() const;
 
     /**
      * Sets the plane's distance to the origin along its normal.
      *
      * @param distance The new distance.
      */
-    void setDistance(Float distance);
+    void setNegDistance(Float distance);
 
     /**
      * Calculates the distance from this plane to the specified point.
@@ -182,6 +190,9 @@ public:
      */
     Float intersectsQuery(const Ray& ray) const;
 
+
+    bool intersectsLineSegment(const Vector3& p1, const Vector3& p2, Vector3* point, double* t = NULL);
+
     /**
      * Determines whether the given plane is parallel to this plane.
      * 
@@ -197,7 +208,7 @@ public:
      * @param normal The normal vector of this plane.
      * @param distance The distance to this plane along its normal to the origin.
      */
-    void set(const Vector3& normal, Float distance);
+    void set(const Vector3& normal, Float negDistance);
 
     /**
      * Sets this plane to the given plane.
@@ -229,7 +240,7 @@ private:
     void normalize();
 
     Vector3 _normal;    // The normal vector of the Plane.
-    Float _distance;    // The distance of the Plane along its normal from the origin.
+    Float _negDistance;    // The distance of the Plane along its normal from the origin.
 };
 
 /**

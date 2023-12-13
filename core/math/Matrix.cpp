@@ -236,7 +236,7 @@ void Matrix4::createBillboardHelper(const Vector3& objectPosition, const Vector3
 void Matrix4::createReflection(const Plane& plane, Matrix4* dst)
 {
     Vector3 normal(plane.getNormal());
-    Float k = -2.0f * plane.getDistance();
+    Float k = -2.0f * plane.getNegDistance();
 
     dst->setIdentity();
 

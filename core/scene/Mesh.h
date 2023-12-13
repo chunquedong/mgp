@@ -124,6 +124,7 @@ public:
      * @return The number of vertices in the mesh.
      */
     unsigned int getVertexCount() const;
+    void setVertexCount(unsigned int c);
 
     /**
      * Returns a handle to the vertex buffer for the mesh.

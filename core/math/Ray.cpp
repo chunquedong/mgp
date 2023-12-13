@@ -127,7 +127,7 @@ Float Ray::intersectsQuery(const Plane& plane) const
 {
     const Vector3& normal = plane.getNormal();
     // If the origin of the ray is on the plane then the distance is zero.
-    Float alpha = (normal.dot(_origin) + plane.getDistance());
+    Float alpha = (normal.dot(_origin) + plane.getNegDistance());
     if (fabs(alpha) < MATH_EPSILON)
     {
         return 0.0f;

@@ -126,6 +126,10 @@ unsigned int Mesh::getVertexCount() const
     return _vertexCount;
 }
 
+void Mesh::setVertexCount(unsigned int c) {
+    _vertexCount = c;
+}
+
 RenderBuffer* Mesh::getVertexBuffer()
 {
     return &_vertexBuffer;
