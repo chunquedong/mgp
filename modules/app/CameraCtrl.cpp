@@ -86,52 +86,53 @@ void EditorCameraCtrl::touchEvent(MotionEvent& evt)
     case MotionEvent::press:
         _prevX = evt.x;
         _prevY = evt.y;
+        _isPressed = true;
         break;
     case MotionEvent::release:
         _prevX = 0;
         _prevY = 0;
+        _isPressed = false;
         break;
     case MotionEvent::touchMove:
-    {
-        int deltaX = evt.x - _prevX;
-        int deltaY = evt.y - _prevY;
-        _prevX = evt.x;
-        _prevY = evt.y;
+        if (_isPressed) {
+            int deltaX = evt.x - _prevX;
+            int deltaY = evt.y - _prevY;
+            _prevX = evt.x;
+            _prevY = evt.y;
 
-        if (evt.button == MotionEvent::right) {
-            updateSurfaceDistance();
-            Rectangle& viewport = *sceneView->getViewport();
-            double fovDivisor = tan(MATH_DEG_TO_RAD(_camera->getFieldOfView()) / 2) / (viewport.height / 2);
-            double scale = fovDivisor * _surfaceDistance;
+            if (evt.button == MotionEvent::right) {
+                updateSurfaceDistance();
+                Rectangle& viewport = *sceneView->getViewport();
+                double fovDivisor = tan(MATH_DEG_TO_RAD(_camera->getFieldOfView()) / 2) / (viewport.height / 2);
+                double scale = fovDivisor * _surfaceDistance;
 
-            Vector3 left = -_camera->getNode()->getRightVectorWorld();
-            left.normalize().scale(deltaX * scale);
-            Vector3 up = _camera->getNode()->getUpVectorWorld();
-            up.normalize().scale(deltaY * scale);
-            _rotateCenter += left + up;
+                Vector3 left = -_camera->getNode()->getRightVectorWorld();
+                left.normalize().scale(deltaX * scale);
+                Vector3 up = _camera->getNode()->getUpVectorWorld();
+                up.normalize().scale(deltaY * scale);
+                _rotateCenter += left + up;
+            }
+            else {
+
+                float dpitch = -MATH_DEG_TO_RAD(deltaY * 0.5f);
+                float dyaw = -MATH_DEG_TO_RAD(deltaX * 0.5f);
+
+                if (_pitch > 2 * MATH_PI) {
+                    _pitch -= 2 * MATH_PI;
+                }
+                else if (_pitch < 0) {
+                    _pitch += 2 * MATH_PI;
+                }
+                if (_pitch > MATH_DEG_TO_RAD(90) && _pitch < MATH_DEG_TO_RAD(270)) {
+                    dyaw = -dyaw;
+                }
+
+                _pitch += dpitch;
+                _yaw += dyaw;
+            }
+            _dirty = true;
         }
-        else {
-
-            float dpitch = -MATH_DEG_TO_RAD(deltaY * 0.5f);
-            float dyaw = -MATH_DEG_TO_RAD(deltaX * 0.5f);
-
-            if (_pitch > 2 * MATH_PI) {
-                _pitch -= 2 * MATH_PI;
-            }
-            else if (_pitch < 0) {
-                _pitch += 2 * MATH_PI;
-            }
-            if (_pitch > MATH_DEG_TO_RAD(90) && _pitch < MATH_DEG_TO_RAD(270)) {
-                dyaw = -dyaw;
-            }
-
-            _pitch += dpitch;
-            _yaw += dyaw;
-        }
-
-        _dirty = true;
         break;
-    }
     };
 }
 
@@ -146,7 +147,11 @@ bool EditorCameraCtrl::mouseEvent(Mouse evt)
     {
     case MotionEvent::wheel:
         updateSurfaceDistance();
-        float amount = (evt.wheelDelta * 0.1f) * (_surfaceDistance-0.1);
+        float wheelDelta = evt.wheelDelta;
+        if (_reverseZoom) {
+            wheelDelta = -wheelDelta;
+        }
+        float amount = (wheelDelta * 0.1f) * (_surfaceDistance-0.1);
         if (amount < 0 && amount > -10E-4) {
             amount = -10E-4;
         }

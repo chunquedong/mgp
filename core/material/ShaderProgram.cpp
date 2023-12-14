@@ -114,7 +114,7 @@ static void replaceDefines(const char* defines, std::string& out)
         if (out[0] == ';') {
             out.erase(0, 1);
         }
-        if (out[out.size() - 1] == ';') {
+        if (out.size() > 0 && out[out.size() - 1] == ';') {
             out.erase(out.size()-1, 1);
         }
     }

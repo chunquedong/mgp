@@ -28,6 +28,7 @@ public:
 
 class SceneView;
 class EditorCameraCtrl : public CameraCtrl {
+    bool _isPressed = false;
     int _prevX;
     int _prevY;
     Camera* _camera;
@@ -38,7 +39,7 @@ class EditorCameraCtrl : public CameraCtrl {
     Vector3 _rotateCenter;
     bool _dirty = false;
 public:
-
+    bool _reverseZoom = false;
     SceneView* sceneView;
     EditorCameraCtrl();
 
