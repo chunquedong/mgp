@@ -139,6 +139,8 @@ public:
 
     void update();
 
+    void addElement(const Element& element);
+
     /**
      * Destructor.
      */
@@ -152,6 +154,7 @@ public:
      * @param index The index of the element to retrieve.
      */
     const Element& getElement(unsigned int index) const;
+    Element& getElement(unsigned int index);
 
     /**
      * Gets the number of elements in this VertexFormat.

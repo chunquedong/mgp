@@ -77,6 +77,16 @@ const VertexFormat::Element* VertexFormat::getPositionElement() const {
     return NULL;
 }
 
+void VertexFormat::addElement(const Element& element) {
+    _elements.push_back(element);
+}
+
+VertexFormat::Element& VertexFormat::getElement(unsigned int index)
+{
+    GP_ASSERT(index < _elements.size());
+    return _elements[index];
+}
+
 const VertexFormat::Element& VertexFormat::getElement(unsigned int index) const
 {
     GP_ASSERT(index < _elements.size());
