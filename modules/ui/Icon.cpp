@@ -6,6 +6,7 @@ namespace mgp
 
 Icon::Icon()
 {
+    _canFocus = true;
     _className = "Icon";
 }
 

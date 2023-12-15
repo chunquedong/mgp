@@ -24,7 +24,7 @@ public:
      *
      * @param text The text to display.
      */
-    virtual void setText(const char* text);
+    virtual void setText(const char* text, bool fireEvent = true);
 
     /**
      * Get the text displayed by this label.

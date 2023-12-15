@@ -71,7 +71,7 @@ public:
      *
      * @param value The new value.
      */
-    void setValue(float value);
+    void setValue(float value, bool fireEvent = true);
 
     /**
      * Get this slider's current value.

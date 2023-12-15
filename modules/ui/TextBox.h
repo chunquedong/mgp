@@ -92,7 +92,7 @@ public:
     /**
      * Update the text being edited.
      */
-    void setText(char const *text) override;
+    void setText(char const *text, bool fireEvent = true) override;
 
 protected:
 

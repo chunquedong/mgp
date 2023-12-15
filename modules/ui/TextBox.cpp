@@ -386,14 +386,14 @@ unsigned int TextBox::drawText(Form* form, const Rectangle& clip, RenderInfo* vi
     return 0;
 }
 
-void TextBox::setText(char const *text)
+void TextBox::setText(char const *text, bool fireEvent)
 {
     Label::setText(text);
     if (_caretLocation > _text.length())
     {
         _caretLocation = _text.length();
     }
-    notifyListeners(Control::Listener::TEXT_CHANGED);
+    if (fireEvent) notifyListeners(Control::Listener::TEXT_CHANGED);
 }
 
 void TextBox::setCaretLocation(int x, int y)

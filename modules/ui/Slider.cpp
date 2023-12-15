@@ -83,14 +83,14 @@ float Slider::getValue() const
     return _value;
 }
 
-void Slider::setValue(float value)
+void Slider::setValue(float value, bool fireEvent)
 {
     value = MATH_CLAMP(value, _min, _max);
 
     if (value != _value)
     {
         _value = value;
-        notifyListeners(Control::Listener::VALUE_CHANGED);
+        if (fireEvent) notifyListeners(Control::Listener::VALUE_CHANGED);
     }
 
     // Always update value text if it's visible

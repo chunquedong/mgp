@@ -37,7 +37,7 @@ void Label::addListener(Control::Listener* listener, int eventFlags)
     Control::addListener(listener, eventFlags);
 }
 
-void Label::setText(const char* text)
+void Label::setText(const char* text, bool fireEvent)
 {
     if ((text == NULL && _text.length() > 0) || strcmp(text, _text.c_str()) != 0)
     {
