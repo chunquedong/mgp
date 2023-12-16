@@ -667,6 +667,11 @@ public:
      * Removes this node from its parent.
      */
     UPtr<Node> remove();
+
+    /**
+     * Marks the bounding volume of the node as dirty.
+     */
+    void setBoundsDirty();
 protected:
     /**
      * Clones a single node and its data but not its children.
@@ -703,11 +708,6 @@ protected:
      * Called when this Node's hierarchy changes.
      */
     void hierarchyChanged();
-
-    /**
-     * Marks the bounding volume of the node as dirty.
-     */
-    void setBoundsDirty();
 
     /**
      * Returns the first child node that matches the given ID.

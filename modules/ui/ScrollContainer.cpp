@@ -48,6 +48,7 @@ ScrollContainer::ScrollContainer()
     _initializedWithScroll(false), _scrollWheelRequiresFocus(false)
 {
     _className = "ScrollContainer";
+    _consumeInputEvents = true;
 }
 
 ScrollContainer::~ScrollContainer()
