@@ -443,15 +443,20 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
         _vertexBuffer._pointerDirty = false;
         _indexBuffer._pointerDirty = false;
     }
-    else if (_vertexBuffer._pointerDirty || _indexBuffer._pointerDirty) {
+    else if (_dirtyVertexFormat || _vertexBuffer._pointerDirty || _indexBuffer._pointerDirty) {
 
         if (mesh->_vertexAttributeArray->_indexBufferObject != _indexBuffer._bufferHandle) {
             mesh->_vertexAttributeArray->_indexBufferObject = _indexBuffer._bufferHandle;
         }
 
+        if (_dirtyVertexFormat) {
+            mesh->_vertexAttributeArray->vertexFormat = mesh->getVertexFormat();
+        }
+
         mesh->_vertexAttributeArray->update();
         _vertexBuffer._pointerDirty = false;
         _indexBuffer._pointerDirty = false;
+        _dirtyVertexFormat = false;
     }
 
 
@@ -695,6 +700,10 @@ void Mesh::clearData() {
     }
     _boundingSphere = BoundingSphere::empty();
     _boundingBox = BoundingBox::empty();
+}
+
+void Mesh::setVertexFormatDirty() {
+    _dirtyVertexFormat = true;
 }
 
 }

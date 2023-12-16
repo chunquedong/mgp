@@ -612,6 +612,11 @@ void Texture::bind()
     Renderer::cur()->bindTextureSampler(this);
 }
 
+void Texture::setSize(unsigned int width, unsigned int height) {
+    _width = width;
+    _height = height;
+}
+
 void* Texture::lock() {
     return (void*)_data;
     //TODO;

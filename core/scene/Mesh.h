@@ -328,6 +328,8 @@ public:
 
     std::vector<MeshPart>& getParts() { return _parts; }
 
+    void setVertexFormatDirty();
+
 public:
     template<typename T> bool raycastPart(RayQuery& query, int _bufferOffset, int _indexCount, int partIndex, PrimitiveType _primitiveType);
 
@@ -370,6 +372,7 @@ private:
     Mesh::IndexFormat _indexFormat = INDEX16;
 
     VertexAttributeBinding *_vertexAttributeArray = NULL;
+    bool _dirtyVertexFormat = false;
 };
 
 

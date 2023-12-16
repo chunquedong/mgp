@@ -305,6 +305,8 @@ public:
      * Binds the texture of this sampler to the renderer and applies the sampler state.
      */
     void bind();
+
+    void setSize(unsigned int width, unsigned int height);
 private:
 
     /**
