@@ -29,6 +29,9 @@ TextureAtlas::~TextureAtlas() {
 
 
 bool TextureAtlas::addImage(Image* image, Rectangle& rect) {
+    if (texture->getFormat() == Texture::RGBA) {
+        GP_ASSERT(image->getFormat() == Image::RGBA);
+    }
     return addImageData(image->getWidth(), image->getHeight(), image->getData(), rect);
 }
 

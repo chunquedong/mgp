@@ -978,6 +978,7 @@ bool Properties::getPath(const char* name, std::string* path) const
                 prop = prop->_parent;
             }
         }
+        path->assign(valueString);
     }
     return false;
 }

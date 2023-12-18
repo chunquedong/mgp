@@ -6,4 +6,8 @@ depends = mgpCore 1.0, mgpModules 1.0, jsonc 2.0
 srcDirs = ./
 incDir = ./
 defines=GP_NO_LUA_BINDINGS,GP_GLFW
-extConfigs.linkflags=-sUSE_GLFW=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sSAFE_HEAP=1 -sFULL_ES2 -sFULL_ES3 --preload-file D:/workspace/code/mgp/res/shaders@res/shaders --preload-file D:/workspace/code/mgp/res/ui@res/ui --preload-file D:/workspace/code/mgp/res/image@res/image -gsource-map -sMODULARIZE -s EXPORT_NAME="createMyModule" -s TOTAL_MEMORY=2013265920 --js-library library.js --extern-pre-js util.js -sEXPORTED_FUNCTIONS=_main,_malloc,_free
+extConfigs.linkflags=-sUSE_GLFW=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sSAFE_HEAP=1 -sFULL_ES2 -sFULL_ES3 \
+--preload-file C:/workspace/code/mgp/res/shaders@res/shaders --preload-file C:/workspace/code/mgp/res/ui@res/ui --preload-file C:/workspace/code/mgp/res/image@res/image -gsource-map \
+-sMODULARIZE -s EXPORT_NAME="createMyModule" -s TOTAL_MEMORY=2013265920 \
+--js-library C:/workspace/code/mgpPro/wasm/library.js --extern-pre-js C:/workspace/code/mgpPro/wasm/util.js \
+-sEXPORTED_FUNCTIONS=_main,_malloc,_free

@@ -568,6 +568,19 @@ std::string FileSystem::getExtension(const char* path, bool uppper)
     return ext;
 }
 
+std::string FileSystem::getParentPath(const char* path) {
+    std::string spath = path;
+#if WIN32
+    std::replace(spath.begin(), spath.end(), '\\', '/');
+#endif
+
+    std::string::size_type pos = spath.find_last_of("/");
+    if (pos != std::string::npos && pos + 1 < spath.size()) {
+        spath = spath.substr(0, pos);
+    }
+    return spath;
+}
+
 std::string FileSystem::getBaseName(const char* path) {
     std::string spath = path;
 #if WIN32

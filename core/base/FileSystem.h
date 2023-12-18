@@ -250,6 +250,8 @@ public:
 
     static std::string getBaseName(const char* path);
 
+    static std::string getParentPath(const char* path);
+
     static bool remove(const char* path);
 private:
 
