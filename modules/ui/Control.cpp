@@ -913,7 +913,7 @@ unsigned int Control::drawBorder(Form* form, const Rectangle& clip, RenderInfo* 
     Vector4 skinColor = getStyle()->getBgColor((Style::OverlayType)getState());
     skinColor.w *= getStyle()->getOpacity();
 
-    drawCalls += _skin->draw(batch, _absoluteBounds, skinColor, clip);
+    drawCalls += _skin->draw(batch, _absoluteBounds, skinColor, clip, getPadding());
 
     finishBatch(form, batch, view);
 

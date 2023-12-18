@@ -27,7 +27,7 @@ theme mainMenu
         textAlignment = ALIGN_VCENTER_HCENTER
     }
 
-    style ButtonNormal : Default
+    style Button : Default
     {
         background
         {
@@ -48,7 +48,7 @@ theme mainMenu
         textAlignment = ALIGN_VCENTER_HCENTER
     }
 
-    style Button : Default
+    style RoundButton : Default
     {
         background
         {
@@ -56,8 +56,8 @@ theme mainMenu
             {
                 left = 18
                 right = 18
-                top = 18
-                bottom = 18
+                top = 0
+                bottom = 0
             }
             image = circle37.png
         }

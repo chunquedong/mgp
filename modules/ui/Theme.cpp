@@ -457,7 +457,7 @@ void BorderImage::setRegion(const Rectangle& region)
     _uvs[BOTTOM_RIGHT].w = bottomEdge;
 }
 
-unsigned int BorderImage::draw(SpriteBatch* batch, const Rectangle& _absoluteBounds, const Vector4& skinColor, const Rectangle& clip) {
+unsigned int BorderImage::draw(SpriteBatch* batch, const Rectangle& _absoluteBounds, const Vector4& skinColor, const Rectangle& clip, const SideRegions& padding) {
     unsigned int drawCalls = 0;
     BorderImage* _skin = this;
 
@@ -476,8 +476,12 @@ unsigned int BorderImage::draw(SpriteBatch* batch, const Rectangle& _absoluteBou
     const Vector4& bottomRight = _skin->getUVs(BorderImage::BOTTOM_RIGHT, tw, th);
 
     // Calculate screen-space positions.
-    const Border& border = _skin->getBorder();
-    //const Padding& padding = getPadding();
+    Border border = _skin->getBorder();
+    float scale = 1 / Toolkit::cur()->getScreenScale();
+    border.bottom *= scale;
+    border.top *= scale;
+    border.left *= scale;
+    border.right *= scale;
     //Vector4 skinColor = getStyle()->getBgColor((Style::OverlayType)getState());
     //skinColor.w *= getStyle()->getOpacity();
 

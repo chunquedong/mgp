@@ -149,7 +149,7 @@ public:
     void setRegion(const Rectangle& region);
 
 
-    unsigned int draw(SpriteBatch* batch, const Rectangle& _absoluteBounds, const Vector4& skinColor, const Rectangle& clip);
+    unsigned int draw(SpriteBatch* batch, const Rectangle& _absoluteBounds, const Vector4& skinColor, const Rectangle& clip, const SideRegions& border);
 
 private:
     //std::string _id;
