@@ -42,15 +42,15 @@ const char* Icon::getImagePath() {
 void Icon::updateBounds()
 {
     Control::updateBounds();
-    if (_autoSize != AUTO_SIZE_NONE && _image)
+    if (isAutoSize() && _image)
     {
         unsigned int w = _image->getRegion().width;
         unsigned int h = _image->getRegion().height;
-        if (_autoSize & AUTO_SIZE_WIDTH)
+        if (_autoSizeW == AUTO_WRAP_CONTENT)
         {
             setWidthInternal(w + getPadding().left + getPadding().right);
         }
-        if (_autoSize & AUTO_SIZE_HEIGHT)
+        if (_autoSizeH == AUTO_WRAP_CONTENT)
         {
             setHeightInternal(h + getPadding().top + getPadding().bottom);
         }
@@ -62,7 +62,7 @@ unsigned int Icon::drawImages(Form* form, const Rectangle& clip, RenderInfo* vie
     if (!_image) return 0;
 
     const Rectangle& region = _image->getRegion();
-    Vector4 color = getStyle()->getBgColor((Style::OverlayType)getState());
+    Vector4 color = getStyle()->getColor((Style::OverlayType)getState());
     color.w *= _opacity;
 
     SpriteBatch* batch = getStyle()->getTheme()->getSpriteBatch();

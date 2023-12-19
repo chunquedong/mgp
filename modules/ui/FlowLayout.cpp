@@ -91,5 +91,21 @@ void FlowLayout::update(const Container* container)
         }
     }
 }
-
+float FlowLayout::prefContentWidth(const Container* container) {
+    // Size ourself to tightly fit the width of our children
+    float width = 0;
+    for (size_t i = 0, count = container->getControls().size(); i < count; ++i)
+    {
+        Control* ctrl = container->getControls()[i];
+        if (ctrl->isVisible() && !ctrl->isWidthPercentage())
+        {
+            float w = ctrl->getWidth() + ctrl->getMargin().right + ctrl->getMargin().left;
+            if (!ctrl->isXPercentage() && (ctrl->getAlignment() & Control::ALIGN_LEFT))
+                w += ctrl->getX();
+            
+            width += w + _horizontalSpacing;
+        }
+    }
+    return width;
+}
 }

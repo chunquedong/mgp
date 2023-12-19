@@ -78,7 +78,7 @@ public:
      * @param states The states to set this property on.
      *               One or more members of the Control::State enum, ORed together.
      */
-    void setBgColor(const Vector4& color, OverlayType state=OverlayType::OVERLAY_NORMAL);
+    void setColor(const Vector4& color, OverlayType state=OverlayType::OVERLAY_NORMAL);
 
     /**
      * Get the blend color of this control's skin for a given state.
@@ -87,7 +87,7 @@ public:
      *
      * @return The blend color of this control's skin.
      */
-    const Vector4& getBgColor(OverlayType state=OverlayType::OVERLAY_NORMAL) const;
+    const Vector4& getColor(OverlayType state=OverlayType::OVERLAY_NORMAL) const;
 
     /**
      * Get the font used by this control for a given state.
@@ -212,7 +212,7 @@ private:
     SPtr<Theme> _theme;
     std::string _id;
     BorderImage* _background;
-    Vector4 _bgColors[OVERLAY_MAX];
+    Vector4 _colors[OVERLAY_MAX];
 
     //font
     Font* _font;

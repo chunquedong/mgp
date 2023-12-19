@@ -89,4 +89,22 @@ void VerticalLayout::update(const Container* container)
     }
 }
 
+float VerticalLayout::prefContentHeight(const Container* container) {
+    // Size ourself to tightly fit the height of our children
+    float height = 0;
+    for (size_t i = 0, count = container->getControls().size(); i < count; ++i)
+    {
+        Control* ctrl = container->getControls()[i];
+        if (ctrl->isVisible() && !ctrl->isHeightPercentage())
+        {
+            float h = ctrl->getHeight() + ctrl->getMargin().bottom + ctrl->getMargin().top;
+            if (!ctrl->isYPercentage())
+                h += ctrl->getY();
+
+            height += h + _spacing;
+        }
+    }
+    return height;
+}
+
 }

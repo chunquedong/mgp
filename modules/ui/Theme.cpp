@@ -218,42 +218,42 @@ SPtr<Theme> Theme::create(const char* url)
             {
                 Vector4 color;
                 innerSpace->getColor("color", &color);
-                style->setBgColor(color, Style::OVERLAY_MAX);
+                style->setColor(color, Style::OVERLAY_MAX);
             }
 
             if (innerSpace->exists("normalColor"))
             {
                 Vector4 normalColor;
                 innerSpace->getColor("normalColor", &normalColor);
-                style->setBgColor(normalColor, Style::OVERLAY_NORMAL);
+                style->setColor(normalColor, Style::OVERLAY_NORMAL);
             }
 
             if (innerSpace->exists("hoverColor"))
             {
                 Vector4 hoverColor;
                 innerSpace->getColor("hoverColor", &hoverColor);
-                style->setBgColor(hoverColor, Style::OVERLAY_HOVER);
+                style->setColor(hoverColor, Style::OVERLAY_HOVER);
             }
 
             if (innerSpace->exists("activeColor"))
             {
                 Vector4 activeColor;
                 innerSpace->getColor("activeColor", &activeColor);
-                style->setBgColor(activeColor, Style::OVERLAY_ACTIVE);
+                style->setColor(activeColor, Style::OVERLAY_ACTIVE);
             }
 
             if (innerSpace->exists("focusColor"))
             {
                 Vector4 focusColor;
                 innerSpace->getColor("focusColor", &focusColor);
-                style->setBgColor(focusColor, Style::OVERLAY_FOCUS);
+                style->setColor(focusColor, Style::OVERLAY_FOCUS);
             }
 
             if (innerSpace->exists("disabledColor"))
             {
                 Vector4 disabledColor;
                 innerSpace->getColor("disabledColor", &disabledColor);
-                style->setBgColor(disabledColor, Style::OVERLAY_DISABLED);
+                style->setColor(disabledColor, Style::OVERLAY_DISABLED);
             }
 
 
@@ -482,7 +482,7 @@ unsigned int BorderImage::draw(SpriteBatch* batch, const Rectangle& _absoluteBou
     border.top *= scale;
     border.left *= scale;
     border.right *= scale;
-    //Vector4 skinColor = getStyle()->getBgColor((Style::OverlayType)getState());
+    //Vector4 skinColor = getStyle()->getColor((Style::OverlayType)getState());
     //skinColor.w *= getStyle()->getOpacity();
 
     float midWidth = _absoluteBounds.width - border.left - border.right;

@@ -41,14 +41,14 @@ class MainApp : public Game, Control::Listener {
         };
         form->getContent()->addControl(std::move(tree));
 #endif
-
+#if 1
         UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
         combobox->setWidth(100);
         combobox->setText("Combobox");
         combobox->getItems() = { "Apple", "Google" };
         form->getContent()->addControl(std::move(combobox));
 
-#if 1
+
         UPtr<Label> label = Control::create<Label>("testLabel");
         //label->setPosition(50, 50);
         //label->setSize(200, 50);
@@ -122,7 +122,6 @@ class MainApp : public Game, Control::Listener {
         //SAFE_RELEASE(joystick);
 #endif
 
-        
 #if 0
         UPtr<Font> font = Font::create("res/ui/sans.ttf");
         set button style

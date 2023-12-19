@@ -57,8 +57,6 @@ public:
      */
     virtual Type getType() = 0;
 
-//protected:
-
     /**
      * Position, resize, and update the controls within a container.
      *
@@ -66,19 +64,9 @@ public:
      */
     virtual void update(const Container* container) = 0;
 
-    /**
-     * Touch callback on touch events.  Coordinates are given relative to the container's
-     * content area.
-     *
-     * @param evt The touch event that occurred.
-     * @param x The x position of the touch in pixels. Left edge is zero.
-     * @param y The y position of the touch in pixels. Top edge is zero.
-     * @param contactIndex The order of occurrence for multiple touch contacts starting at zero.
-     *
-     * @see MotionEvent::MotionType
-     */
-    //virtual bool touchEvent(MotionEvent::MotionType evt, int x, int y, unsigned int contactIndex);
-
+    
+    virtual float prefContentWidth(const Container* container);
+    virtual float prefContentHeight(const Container* container);
 };
 
 }

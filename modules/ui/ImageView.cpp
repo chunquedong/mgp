@@ -45,7 +45,7 @@ void ImageView::setImage(const char* path)
     _th = 1.0f / texture->getHeight();
     //texture->release();
 
-    if (_autoSize != AUTO_SIZE_NONE)
+    if (isAutoSize())
         setDirty(DIRTY_BOUNDS);
 }
 
@@ -115,12 +115,12 @@ void ImageView::updateBounds()
 {
     if (_batch)
     {
-        if (_autoSize & AUTO_SIZE_WIDTH)
+        if (_autoSizeW == AUTO_WRAP_CONTENT)
         {
             setWidthInternal(_batch->getSampler()->getWidth());
         }
 
-        if (_autoSize & AUTO_SIZE_HEIGHT)
+        if (_autoSizeH == AUTO_WRAP_CONTENT)
         {
             setHeightInternal(_batch->getSampler()->getWidth());
         }

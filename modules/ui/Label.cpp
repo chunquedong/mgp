@@ -42,7 +42,7 @@ void Label::setText(const char* text, bool fireEvent)
     if ((text == NULL && _text.length() > 0) || strcmp(text, _text.c_str()) != 0)
     {
         _text = text ? text : "";
-        if (_autoSize != AUTO_SIZE_NONE)
+        if (isAutoSize())
             setDirty(DIRTY_BOUNDS);
         else {
             updateFontLayout();
@@ -85,7 +85,7 @@ void Label::updateBounds()
 {
     Control::updateBounds();
 
-    if (_autoSize != AUTO_SIZE_NONE && _font)
+    if (isAutoSize() && _font)
     {
         updateFontLayout();
         // Measure bounds based only on normal state so that bounds updates are not always required on state changes.
@@ -101,11 +101,11 @@ void Label::updateBounds()
         }
         w += 2;
         h += 2;
-        if (_autoSize & AUTO_SIZE_WIDTH)
+        if (_autoSizeW == AUTO_WRAP_CONTENT)
         {
             setWidthInternal(w + getPadding().left + getPadding().right);
         }
-        if (_autoSize & AUTO_SIZE_HEIGHT)
+        if (_autoSizeH = AUTO_WRAP_CONTENT)
         {
             setHeightInternal(h + getPadding().top + getPadding().bottom);
         }
@@ -118,7 +118,7 @@ void Label::updateAbsoluteBounds(const Vector2& offset)
 
     _textBounds.set((int)_viewportBounds.x+1, (int)_viewportBounds.y+1, _viewportBounds.width-2, _viewportBounds.height-2);
 
-    if (_autoSize == AUTO_SIZE_NONE) {
+    if (!isAutoSize()) {
         updateFontLayout();
     }
 }

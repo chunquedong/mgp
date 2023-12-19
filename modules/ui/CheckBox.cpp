@@ -88,7 +88,7 @@ void CheckBox::updateBounds()
     const Rectangle& selectedRegion = _image->getRegion();
     size.set(selectedRegion.width, selectedRegion.height);
 
-    if (_autoSize & AUTO_SIZE_HEIGHT)
+    if (_autoSizeH == AUTO_WRAP_CONTENT)
     {
         // Text-only width was already measured in Label::update - append image
         //const Border& border = getBorder(NORMAL);
@@ -96,7 +96,7 @@ void CheckBox::updateBounds()
         //setHeightInternal(std::max(_bounds.height, size.y + padding.top + padding.bottom));
     }
 
-    if (_autoSize & AUTO_SIZE_WIDTH)
+    if (_autoSizeW == AUTO_WRAP_CONTENT)
     {
         // Text-only width was already measured in Label::update - append image
         setWidthInternal(_localBounds.height + 5 + _localBounds.width);
@@ -120,7 +120,7 @@ unsigned int CheckBox::drawImages(Form* form, const Rectangle& clip, RenderInfo*
 
     const Rectangle& region = _image->getRegion();
     //const Vector4& uvs = _image->getUVs();
-    Vector4 color = getStyle()->getBgColor((Style::OverlayType)getState());
+    Vector4 color = getStyle()->getColor((Style::OverlayType)getState());
     color.w *= _opacity;
 
     //Vector2 pos(_viewportBounds.x, _viewportBounds.y);

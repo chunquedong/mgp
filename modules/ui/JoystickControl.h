@@ -148,6 +148,9 @@ private:
 
     ThemeImage* outer;
     ThemeImage* inner;
+
+    //RADIUS_PERCENTAGE
+    bool _isRadiusPercentage;
 };
 
 }

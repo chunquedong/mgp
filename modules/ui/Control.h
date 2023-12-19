@@ -128,22 +128,22 @@ public:
         /**
          * No auto sizing is applied.
          */
-        AUTO_SIZE_NONE = 0x00,
+        AUTO_SIZE_NONE = 0,
 
         /**
          * The control's width is set to tightly fit its contents.
          */
-        AUTO_SIZE_WIDTH = 0x01,
+        AUTO_WRAP_CONTENT = 1,
 
         /**
         * The control's height is set to tightly fit its contents.
         */
-        AUTO_SIZE_HEIGHT = 0x02,
+        AUTO_PERCENT_LEFT = 2,
 
         /**
          * The control's width and height are set to tightly fit its contents.
          */
-        AUTO_SIZE_BOTH = (AUTO_SIZE_WIDTH | AUTO_SIZE_HEIGHT)
+        AUTO_PERCENT_PARENT = 3,
     };
 
     /**
@@ -483,14 +483,22 @@ public:
      *
      * @return The auto size mode for this control.
      */
-    AutoSize getAutoSize() const;
+    AutoSize getAutoSizeX() const;
+    AutoSize getAutoSizeY() const;
+    AutoSize getAutoSizeW() const;
+    AutoSize getAutoSizeH() const;
 
     /**
      * Sets the auto size mode for this control.
      *
      * @param mode The new auto size mode for this control.
      */
-    void setAutoSize(AutoSize mode);
+    void setAutoSizeX(AutoSize mode);
+    void setAutoSizeY(AutoSize mode);
+    void setAutoSizeW(AutoSize mode);
+    void setAutoSizeH(AutoSize mode);
+
+    bool isAutoSize() const;
 
     /**
      * Set the alignment of this control within its parent container.
@@ -790,31 +798,6 @@ protected:
     static const int INVALID_CONTACT_INDEX = -1;
 
     /**
-     * Indicates that the x position of the control is a percentage.
-     */
-    static const int BOUNDS_X_PERCENTAGE_BIT = 1;
-
-    /**
-     * Indicates that the y position of the control is a percentage.
-     */
-    static const int BOUNDS_Y_PERCENTAGE_BIT = 2;
-
-    /**
-     * Indicates that the width of the control is a percentage.
-     */
-    static const int BOUNDS_WIDTH_PERCENTAGE_BIT = 4;
-
-    /**
-     * Indicates that the height of the control is a percentage.
-     */
-    static const int BOUNDS_HEIGHT_PERCENTAGE_BIT = 8;
-
-    /**
-     * Indicates that the radius of the control is a percentage.
-     */
-    static const int BOUNDS_RADIUS_PERCENTAGE_BIT = 16;
-
-    /**
      * Constructor.
      */
     Control();
@@ -837,7 +820,7 @@ protected:
      *
      * @see setX(float, bool)
      */
-    void setXInternal(float x, bool percentage = false);
+    void setXInternal(float x);
 
     /**
      * Internal method for setting the Y position of the control.
@@ -847,7 +830,7 @@ protected:
      *
      * @see setY(float, bool)
      */
-    void setYInternal(float x, bool percentage = false);
+    void setYInternal(float x);
 
     /**
      * Internal method for setting the width of the control.
@@ -860,7 +843,7 @@ protected:
      *
      * @see setWidth(float, bool)
      */
-    void setWidthInternal(float width, bool percentage = false);
+    void setWidthInternal(float width);
 
     /**
      * Internal method for setting the height of the control.
@@ -873,7 +856,7 @@ protected:
      *
      * @see setHeight(float, bool)
      */
-    void setHeightInternal(float height, bool percentage = false);
+    void setHeightInternal(float height);
 
     /**
      * Touch callback on touch events.  Controls return true if they consume the touch event.
@@ -1147,11 +1130,6 @@ protected:
     std::string _id;
 
     /**
-     * Bits indicating whether bounds values are absolute values or percentages.
-     */
-    int _boundsBits;
-
-    /**
      * Local bounds, relative to parent container's clipping window, possibly stored as percentages (see _boundsBits).
      */
     Rectangle _desiredBounds;
@@ -1199,7 +1177,10 @@ protected:
     /**
      * The Control's auto size mode.
      */
-    AutoSize _autoSize;
+    AutoSize _autoSizeX;
+    AutoSize _autoSizeY;
+    AutoSize _autoSizeW;
+    AutoSize _autoSizeH;
     
     /**
      * Listeners map of EventType's to a list of Listeners.

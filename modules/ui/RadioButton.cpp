@@ -119,7 +119,7 @@ void RadioButton::updateBounds()
     const Rectangle& selectedRegion = _image->getRegion();
     size.set(selectedRegion.width, selectedRegion.height);
 
-    if (_autoSize & AUTO_SIZE_HEIGHT)
+    if (_autoSizeW == AUTO_WRAP_CONTENT)
     {
         // Text-only width was already measured in Label::update - append image
         //const Border& border = getBorder(NORMAL);
@@ -127,7 +127,7 @@ void RadioButton::updateBounds()
         //setHeightInternal(std::max(_bounds.height, size.y));
     }
 
-    if (_autoSize & AUTO_SIZE_WIDTH)
+    if (_autoSizeH == AUTO_WRAP_CONTENT)
     {
         // Text-only width was already measured in Label::update - append image
         setWidthInternal(_localBounds.height + 5 + _localBounds.width);
@@ -150,7 +150,7 @@ unsigned int RadioButton::drawImages(Form* form, const Rectangle& clip, RenderIn
     // TODO: Set an alignment for radio button images.   
     const Rectangle& region = _image->getRegion();
     //const Vector4& uvs = _image->getUVs();
-    Vector4 color = getStyle()->getBgColor((Style::OverlayType)getState());
+    Vector4 color = getStyle()->getColor((Style::OverlayType)getState());
     color.w *= _opacity;
 
     //Vector2 pos(_viewportBounds.x, _viewportBounds.y);

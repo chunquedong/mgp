@@ -107,7 +107,7 @@ void Slider::setValueTextVisible(bool valueTextVisible)
     if (valueTextVisible != _valueTextVisible)
     {
         _valueTextVisible = valueTextVisible;
-        if (_autoSize & AUTO_SIZE_HEIGHT)
+        if (_autoSizeH == AUTO_WRAP_CONTENT)
             setDirty(DIRTY_BOUNDS);
     }
 }
@@ -335,7 +335,7 @@ void Slider::updateBounds()
     //_trackHeight = std::max(_trackHeight, _markerImage->getRegion().height);
     _trackHeight = std::max((Float)_trackHeight, _trackImage->getRegion().height);
 
-    if (_autoSize & AUTO_SIZE_HEIGHT)
+    if (_autoSizeH == AUTO_WRAP_CONTENT)
     {
         float height = _localBounds.height + _trackHeight;
         if (_valueTextVisible)

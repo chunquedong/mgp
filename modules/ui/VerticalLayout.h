@@ -82,7 +82,9 @@ protected:
      *
      * @param container The container to update.
      */
-    void update(const Container* container);
+    void update(const Container* container) override;
+
+    float prefContentHeight(const Container* container) override;
 
     /**
      * Flag determining whether this layout will start laying out controls from the bottom of the container.

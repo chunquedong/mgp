@@ -10,8 +10,9 @@ namespace mgp
 {
 
 Control::Control()
-    : _id(""), _boundsBits(0), _dirtyBits(DIRTY_BOUNDS | DIRTY_STATE), _consumeInputEvents(true), _alignment(ALIGN_TOP_LEFT),
-    _autoSize(AUTO_SIZE_BOTH), _listeners(NULL), _style(NULL), _visible(true), _opacity(0.0f), _zIndex(-1),
+    : _id(""), _dirtyBits(DIRTY_BOUNDS | DIRTY_STATE), _consumeInputEvents(true), _alignment(ALIGN_TOP_LEFT),
+    _autoSizeX(AUTO_SIZE_NONE), _autoSizeY(AUTO_SIZE_NONE), _autoSizeW(AUTO_WRAP_CONTENT), _autoSizeH(AUTO_WRAP_CONTENT),
+    _listeners(NULL), _style(NULL), _visible(true), _opacity(0.0f), _zIndex(-1),
     _contactIndex(INVALID_CONTACT_INDEX), _focusIndex(-1), _canFocus(false), _state(NORMAL), _parent(NULL), _styleOverridden(false), _className("Control")
 {
 #if GP_SCRIPT_ENABLE
@@ -38,14 +39,14 @@ Control::~Control()
 Control::AutoSize Control::parseAutoSize(const char* str)
 {
     if (str == NULL)
-        return _autoSize;
-    if (strcmpnocase(str, "AUTO_SIZE_WIDTH") == 0 )
-        return AUTO_SIZE_WIDTH;
-    if (strcmpnocase(str, "AUTO_SIZE_HEIGHT") == 0)
-        return AUTO_SIZE_HEIGHT;
-    if (strcmpnocase(str, "AUTO_SIZE_BOTH") == 0)
-        return AUTO_SIZE_BOTH;
-    return _autoSize;
+        return AUTO_SIZE_NONE;
+    if (strcmpnocase(str, "AUTO_WRAP_CONTENT") == 0 )
+        return AUTO_WRAP_CONTENT;
+    if (strcmpnocase(str, "AUTO_PERCENT_LEFT") == 0)
+        return AUTO_PERCENT_LEFT;
+    if (strcmpnocase(str, "AUTO_PERCENT_PARENT") == 0)
+        return AUTO_PERCENT_PARENT;
+    return AUTO_SIZE_NONE;
 }
 
 std::string Control::getClassName() {
@@ -92,8 +93,20 @@ void Control::onDeserialize(Serializer* serializer) {
     }
 
     std::string autoSizeStr;
-    serializer->readString("autoSize", autoSizeStr, "");
-    _autoSize = parseAutoSize(autoSizeStr.c_str());
+    serializer->readString("autoSizeX", autoSizeStr, "");
+    _autoSizeX = parseAutoSize(autoSizeStr.c_str());
+
+    autoSizeStr.clear();
+    serializer->readString("autoSizeY", autoSizeStr, "");
+    _autoSizeY = parseAutoSize(autoSizeStr.c_str());
+
+    autoSizeStr.clear();
+    serializer->readString("autoSizeW", autoSizeStr, "");
+    _autoSizeW = parseAutoSize(autoSizeStr.c_str());
+
+    autoSizeStr.clear();
+    serializer->readString("autoSizeH", autoSizeStr, "");
+    _autoSizeH = parseAutoSize(autoSizeStr.c_str());
 
     std::string paddingStr;
     serializer->readString("padding", paddingStr, "");
@@ -141,30 +154,29 @@ float Control::getX() const
 
 void Control::setX(float x, bool percentage)
 {
-    if (_desiredBounds.x != x || percentage != ((_boundsBits & BOUNDS_X_PERCENTAGE_BIT) != 0))
+    if (_desiredBounds.x != x || percentage != (_autoSizeX != AUTO_PERCENT_PARENT))
     {
-        setXInternal(x, percentage);
+        _desiredBounds.x = x;
+        if (percentage)
+        {
+            _autoSizeX = AUTO_PERCENT_PARENT;
+        }
+        else
+        {
+            _autoSizeX = AUTO_SIZE_NONE;
+        }
         setDirty(DIRTY_BOUNDS);
     }
 }
 
-void Control::setXInternal(float x, bool percentage)
+void Control::setXInternal(float x)
 {
-    _desiredBounds.x = x;
-    if (percentage)
-    {
-        _boundsBits |= BOUNDS_X_PERCENTAGE_BIT;
-    }
-    else
-    {
-        _boundsBits &= ~BOUNDS_X_PERCENTAGE_BIT;
-        _localBounds.x = x;
-    }
+    _localBounds.x = x;
 }
 
 bool Control::isXPercentage() const
 {
-    return (_boundsBits & BOUNDS_X_PERCENTAGE_BIT) != 0;
+    return _autoSizeX == AUTO_PERCENT_PARENT || _autoSizeX == AUTO_PERCENT_LEFT;
 }
 
 float Control::getY() const
@@ -174,30 +186,29 @@ float Control::getY() const
 
 void Control::setY(float y, bool percentage)
 {
-    if (_desiredBounds.y != y || percentage != ((_boundsBits & BOUNDS_Y_PERCENTAGE_BIT) != 0))
+    if (_desiredBounds.y != y || percentage != (_autoSizeY != AUTO_PERCENT_PARENT))
     {
-        setYInternal(y, percentage);
+        _desiredBounds.y = y;
+        if (percentage)
+        {
+            _autoSizeY = AUTO_PERCENT_PARENT;
+        }
+        else
+        {
+            _autoSizeY = AUTO_SIZE_NONE;
+        }
         setDirty(DIRTY_BOUNDS);
     }
 }
 
-void Control::setYInternal(float y, bool percentage)
+void Control::setYInternal(float y)
 {
-    _desiredBounds.y = y;
-    if (percentage)
-    {
-        _boundsBits |= BOUNDS_Y_PERCENTAGE_BIT;
-    }
-    else
-    {
-        _boundsBits &= ~BOUNDS_Y_PERCENTAGE_BIT;
-        _localBounds.y = y;
-    }
+    _localBounds.y = y;
 }
 
 bool Control::isYPercentage() const
 {
-    return (_boundsBits & BOUNDS_Y_PERCENTAGE_BIT) != 0;
+    return _autoSizeY == AUTO_PERCENT_PARENT || _autoSizeY == AUTO_PERCENT_LEFT;
 }
 
 float Control::getWidth() const
@@ -207,32 +218,29 @@ float Control::getWidth() const
 
 void Control::setWidth(float width, bool percentage)
 {
-    _autoSize = (AutoSize)(_autoSize & ~AUTO_SIZE_WIDTH);
-
-    if (_desiredBounds.width != width || percentage != ((_boundsBits & BOUNDS_WIDTH_PERCENTAGE_BIT) != 0))
+    if (_desiredBounds.width != width || percentage != (_autoSizeW != AUTO_PERCENT_PARENT))
     {
-        setWidthInternal(width, percentage);
+        _desiredBounds.width = width;
+        if (percentage)
+        {
+            _autoSizeW = AUTO_PERCENT_PARENT;
+        }
+        else
+        {
+            _autoSizeW = AUTO_SIZE_NONE;
+        }
         setDirty(DIRTY_BOUNDS);
     }
 }
 
-void Control::setWidthInternal(float width, bool percentage)
+void Control::setWidthInternal(float width)
 {
-    _desiredBounds.width = width;
-    if (percentage)
-    {
-        _boundsBits |= BOUNDS_WIDTH_PERCENTAGE_BIT;
-    }
-    else
-    {
-        _boundsBits &= ~BOUNDS_WIDTH_PERCENTAGE_BIT;
-        _localBounds.width = width;
-    }
+    _localBounds.width = width;
 }
 
 bool Control::isWidthPercentage() const
 {
-    return (_boundsBits & BOUNDS_WIDTH_PERCENTAGE_BIT) != 0;
+    return _autoSizeW == AUTO_PERCENT_PARENT || _autoSizeW == AUTO_PERCENT_LEFT;
 }
 
 float Control::getHeight() const
@@ -242,32 +250,29 @@ float Control::getHeight() const
 
 void Control::setHeight(float height, bool percentage)
 {
-    _autoSize = (AutoSize)(_autoSize & ~AUTO_SIZE_HEIGHT);
-
-    if (_desiredBounds.height != height || percentage != ((_boundsBits & BOUNDS_HEIGHT_PERCENTAGE_BIT) != 0))
+    if (_desiredBounds.height != height || percentage != (_autoSizeH != AUTO_PERCENT_PARENT))
     {
-        setHeightInternal(height, percentage);
+        _desiredBounds.height = height;
+        if (percentage)
+        {
+            _autoSizeH = AUTO_PERCENT_PARENT;
+        }
+        else
+        {
+            _autoSizeH = AUTO_SIZE_NONE;
+        }
         setDirty(DIRTY_BOUNDS);
     }
 }
 
-void Control::setHeightInternal(float height, bool percentage)
+void Control::setHeightInternal(float height)
 {
-    _desiredBounds.height = height;
-    if (percentage)
-    {
-        _boundsBits |= BOUNDS_HEIGHT_PERCENTAGE_BIT;
-    }
-    else
-    {
-        _boundsBits &= ~BOUNDS_HEIGHT_PERCENTAGE_BIT;
-        _localBounds.height = height;
-    }
+    _localBounds.height = height;
 }
 
 bool Control::isHeightPercentage() const
 {
-    return (_boundsBits & BOUNDS_HEIGHT_PERCENTAGE_BIT) != 0;
+    return _autoSizeH == AUTO_PERCENT_PARENT || _autoSizeH == AUTO_PERCENT_LEFT;
 }
 
 void Control::setPosition(float x, float y)
@@ -324,18 +329,58 @@ Control::Alignment Control::getAlignment() const
     return _alignment;
 }
 
-Control::AutoSize Control::getAutoSize() const
+Control::AutoSize Control::getAutoSizeX() const
 {
-    return _autoSize;
+    return _autoSizeX;
+}
+Control::AutoSize Control::getAutoSizeY() const
+{
+    return _autoSizeY;
+}
+Control::AutoSize Control::getAutoSizeW() const
+{
+    return _autoSizeW;
+}
+Control::AutoSize Control::getAutoSizeH() const
+{
+    return _autoSizeH;
 }
 
-void Control::setAutoSize(AutoSize mode)
+void Control::setAutoSizeH(AutoSize mode)
 {
-    if (_autoSize != mode)
+    if (_autoSizeH != mode)
     {
-        _autoSize = mode;
+        _autoSizeH = mode;
         setDirty(DIRTY_BOUNDS);
     }
+}
+void Control::setAutoSizeW(AutoSize mode)
+{
+    if (_autoSizeW != mode)
+    {
+        _autoSizeW = mode;
+        setDirty(DIRTY_BOUNDS);
+    }
+}
+void Control::setAutoSizeY(AutoSize mode)
+{
+    if (_autoSizeY != mode)
+    {
+        _autoSizeY = mode;
+        setDirty(DIRTY_BOUNDS);
+    }
+}
+void Control::setAutoSizeX(AutoSize mode)
+{
+    if (_autoSizeX != mode)
+    {
+        _autoSizeX = mode;
+        setDirty(DIRTY_BOUNDS);
+    }
+}
+
+bool Control::isAutoSize() const {
+    return _autoSizeW != AUTO_SIZE_NONE || _autoSizeH != AUTO_SIZE_NONE;
 }
 
 void Control::setVisible(bool visible)
@@ -352,7 +397,7 @@ void Control::setVisible(bool visible)
 
         // force to update parent boundaries when child is hidden
         Container* parent = _parent;
-        while (parent && (parent->_autoSize != AUTO_SIZE_NONE || static_cast<Container *>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
+        while (parent && (parent->isAutoSize() || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
         {
             parent->setDirty(DIRTY_BOUNDS);
             parent = parent->_parent;
@@ -736,6 +781,7 @@ bool Control::updateLayout(const Vector2& offset)
         Rectangle oldViewportBounds(_viewportBounds);
         Rectangle oldViewportClipBounds(_viewportClipBounds);
 
+        _localBounds.set(_desiredBounds);
         updateBounds();
         updateAbsoluteBounds(offset);
 
@@ -760,20 +806,37 @@ void Control::updateBounds()
 {
     Toolkit* game = Toolkit::cur();
 
-    const Rectangle parentAbsoluteBounds = _parent ? _parent->_viewportBounds : Rectangle(0, 0, game->getDpWidth(), game->getDpHeight());
+    float leftWidth = 0;
+    float leftHeight = 0;
+    Rectangle parentAbsoluteBounds;
+    if (_parent) {
+        parentAbsoluteBounds = _parent->_viewportBounds;
+        leftWidth = _parent->_leftWidth;
+        leftHeight = _parent->_leftHeight;
+    }
+    else {
+        leftWidth = game->getDpWidth();
+        leftHeight = game->getDpHeight();
+        parentAbsoluteBounds = Rectangle(0, 0, leftWidth, leftHeight);
+    }
 
     const Margin& margin = getMargin();
 
     // Calculate local unclipped bounds.
-    _localBounds.set(_desiredBounds);
-    if (isXPercentage())
+    if (_autoSizeX == AUTO_PERCENT_PARENT)
         _localBounds.x = _localBounds.x * parentAbsoluteBounds.width + margin.left;
-    if (isYPercentage())
+    if (_autoSizeY == AUTO_PERCENT_PARENT)
         _localBounds.y = _localBounds.y * parentAbsoluteBounds.height + margin.top;
-    if (isWidthPercentage())
+
+    if (_autoSizeW == AUTO_PERCENT_PARENT)
         _localBounds.width *= parentAbsoluteBounds.width;
-    if (isHeightPercentage())
+    else if (_autoSizeW == AUTO_PERCENT_LEFT)
+        _localBounds.width *= leftWidth;
+
+    if (_autoSizeH == AUTO_PERCENT_PARENT)
         _localBounds.height *= parentAbsoluteBounds.height;
+    else if (_autoSizeH == AUTO_PERCENT_LEFT)
+        _localBounds.height *= leftHeight;
 
     // Apply control alignment
     if (_alignment != Control::ALIGN_TOP_LEFT)
@@ -910,7 +973,7 @@ unsigned int Control::drawBorder(Form* form, const Rectangle& clip, RenderInfo* 
     SpriteBatch* batch = getStyle()->getTheme()->getSpriteBatch();
     startBatch(form, batch, 0);
 
-    Vector4 skinColor = getStyle()->getBgColor((Style::OverlayType)getState());
+    Vector4 skinColor = getStyle()->getColor((Style::OverlayType)getState());
     skinColor.w *= getStyle()->getOpacity();
 
     drawCalls += _skin->draw(batch, _absoluteBounds, skinColor, clip, getPadding());

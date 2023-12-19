@@ -8,10 +8,10 @@ Style::Style(SPtr<Theme> theme, const char* id)
     _fontSize(16), _alignment(FontLayout::ALIGN_TOP_LEFT), _textRightToLeft(false), _textColor(Vector4::one()), _opacity(1.0f)
 {
     for (int i=0; i<OVERLAY_MAX; ++i) {
-        _bgColors[i].x = 1;
-        _bgColors[i].y = 1;
-        _bgColors[i].z = 1;
-        _bgColors[i].w = 1;
+        _colors[i].x = 1;
+        _colors[i].y = 1;
+        _colors[i].z = 1;
+        _colors[i].w = 1;
     }
 }
 
@@ -48,7 +48,7 @@ Style::Style(const Style& copy) : _background(NULL), _font(NULL), _theme(NULL)
     _opacity = copy._opacity;
 
     for (int i = 0; i < OVERLAY_MAX; ++i) {
-        _bgColors[i] = copy._bgColors[i];
+        _colors[i] = copy._colors[i];
     }
 
     if (_font)
@@ -93,21 +93,21 @@ void Style::setOpacity(float opacity)
 //    }
 //}
 
-void Style::setBgColor(const Vector4& color, OverlayType state)
+void Style::setColor(const Vector4& color, OverlayType state)
 {
     if (state == OVERLAY_MAX) {
         for (int i = 0; i < OVERLAY_MAX; ++i) {
-            _bgColors[i] = color;
+            _colors[i] = color;
         }
     }
     else {
-        _bgColors[state] = color;
+        _colors[state] = color;
     }
 }
 
-const Vector4& Style::getBgColor(OverlayType state) const
+const Vector4& Style::getColor(OverlayType state) const
 {
-    return _bgColors[state];
+    return _colors[state];
 }
 
 Font* Style::getFont() const

@@ -56,7 +56,7 @@ void Container::clearContacts()
 
 Container::Container()
     : _layout(NULL), _activeControl(NULL),
-    _zIndexDefault(0), _form(NULL)
+    _zIndexDefault(0), _form(NULL), _leftWidth(0), _leftHeight(0)
 {
     clearContacts();
     _consumeInputEvents = false;
@@ -456,7 +456,7 @@ bool Container::updateChildBounds()
             if (changed)
             {
                 Control* parent = this;
-                while (parent && (parent->_autoSize != AUTO_SIZE_NONE || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
+                while (parent && (parent->isAutoSize() || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
                 {
                     parent->setDirty(DIRTY_BOUNDS);
                     parent = parent->_parent;
@@ -748,55 +748,31 @@ bool Container::inContact()
 
 void Container::updateBounds()
 {
-    // Handle automatically sizing based on our children
-    if (_autoSize != AUTO_SIZE_NONE)
-    {
-        if (_autoSize & AUTO_SIZE_WIDTH)
-        {
-            // Size ourself to tightly fit the width of our children
-            float width = 0;
-            for (size_t i = 0, count = _controls.size(); i < count; ++i)
-            {
-                Control* ctrl = _controls[i];
-                if (ctrl->isVisible() && !ctrl->isWidthPercentage())
-                {
-                    float w = ctrl->getWidth() + ctrl->getMargin().right;
-                    if (!ctrl->isXPercentage() && (ctrl->getAlignment() & ALIGN_LEFT))
-                        w += ctrl->getX();
-                    if (width < w)
-                        width = w;
-                }
-            }
-            width += getPadding().left + getPadding().right;
-            setWidthInternal(width);
-        }
+    GP_ASSERT(_layout.get());
 
-        if (_autoSize & AUTO_SIZE_HEIGHT)
-        {
-            // Size ourself to tightly fit the height of our children
-            float height = 0;
-            for (size_t i = 0, count = _controls.size(); i < count; ++i)
-            {
-                Control* ctrl = _controls[i];
-                if (ctrl->isVisible() && !ctrl->isHeightPercentage())
-                {
-                    float h = ctrl->getHeight() + ctrl->getMargin().bottom;
-                    if (!ctrl->isYPercentage())
-                        h += ctrl->getY();
-                    if (height < h)
-                        height = h;
-                }
-            }
-            height += getPadding().top + getPadding().bottom;
-            setHeightInternal(height);
-        }
+    float prefW = _layout->prefContentWidth(this);
+    prefW += getPadding().left + getPadding().right;
+    float prefH = _layout->prefContentHeight(this);
+    prefH += getPadding().top + getPadding().bottom;
+
+    // Handle automatically sizing based on our children
+    if (_autoSizeW == AUTO_WRAP_CONTENT)
+    {
+        setWidthInternal(prefW);
+    }
+
+    if (_autoSizeH == AUTO_WRAP_CONTENT)
+    {
+        setHeightInternal(prefH);
     }
 
     // Compute total bounds of container
     Control::updateBounds();
 
+    _leftWidth = _localBounds.width - prefW;
+    _leftHeight = _localBounds.height - prefH;
+
     // Update layout to position children correctly within us
-    GP_ASSERT(_layout.get());
     _layout->update(this);
 }
 

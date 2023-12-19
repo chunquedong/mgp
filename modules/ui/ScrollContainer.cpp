@@ -220,7 +220,7 @@ bool ScrollContainer::updateChildBounds()
             if (changed)
             {
                 Control* parent = this;
-                while (parent && (parent->_autoSize != AUTO_SIZE_NONE || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
+                while (parent && (parent->isAutoSize() || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
                 {
                     parent->setDirty(DIRTY_BOUNDS);
                     parent = parent->_parent;

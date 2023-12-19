@@ -277,6 +277,9 @@ protected:
      * The active control for the container.
      */
     Control* _activeControl;
+
+    float _leftWidth;
+    float _leftHeight;
     
 private:
 

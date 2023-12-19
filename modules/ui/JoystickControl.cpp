@@ -5,9 +5,9 @@ namespace mgp
 {
 
 JoystickControl::JoystickControl() : _radiusPixels(1.0f), _relative(true), _index(0), _radiusCoord(0.5f),
-    outer(NULL), inner(NULL)
+    outer(NULL), inner(NULL), _isRadiusPercentage(true)
 {
-    setBoundsBit(true, _boundsBits, BOUNDS_RADIUS_PERCENTAGE_BIT);
+    //setBoundsBit(true, _boundsBits, BOUNDS_RADIUS_PERCENTAGE_BIT);
     setCanFocus(true);
     _className = "JoystickControl";
 }
@@ -52,7 +52,7 @@ void JoystickControl::setBoundsBit(bool set, int& bitSetOut, int bit)
 void JoystickControl::setRadius(float radius, bool isPercentage)
 {
     _radiusCoord = radius;
-    setBoundsBit(isPercentage, _boundsBits, BOUNDS_RADIUS_PERCENTAGE_BIT);
+    _isRadiusPercentage = isPercentage;
     updateAbsoluteSizes();
 }
 
@@ -63,7 +63,7 @@ float JoystickControl::getRadius() const
 
 bool JoystickControl::isRadiusPercentage() const
 {
-    return _boundsBits & BOUNDS_RADIUS_PERCENTAGE_BIT;
+    return _isRadiusPercentage;
 }
 
 void JoystickControl::onSerialize(Serializer* serializer) {
@@ -78,7 +78,8 @@ void JoystickControl::onDeserialize(Serializer* serializer) {
     {
         bool isPercentage = false;
         _radiusCoord = parseCoord(radiusStr.c_str(), &isPercentage);
-        setBoundsBit(isPercentage, _boundsBits, BOUNDS_RADIUS_PERCENTAGE_BIT);
+        //setBoundsBit(isPercentage, _boundsBits, BOUNDS_RADIUS_PERCENTAGE_BIT);
+        _isRadiusPercentage = isPercentage;
     }
 
     bool r = serializer->readBool("relative", false);
@@ -111,7 +112,7 @@ void JoystickControl::updateAbsoluteBounds(const Vector2& offset)
 
 void JoystickControl::updateAbsoluteSizes()
 {
-    _radiusPixels = std::max(1.0, _boundsBits & BOUNDS_RADIUS_PERCENTAGE_BIT ?
+    _radiusPixels = std::max(1.0, _isRadiusPercentage ?
                 std::min(_viewportClipBounds.width, _viewportClipBounds.height) * _radiusCoord : _radiusCoord);
 }
 
