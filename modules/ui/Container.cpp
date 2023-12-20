@@ -472,8 +472,36 @@ bool Container::layoutChildren() {
 }
 
 void Container::updateChildBounds() {
-    _leftWidth = _localBounds.width - _measureBounds.width;
-    _leftHeight = _localBounds.height - _measureBounds.height;
+    bool hasExpand = false;
+    for (size_t i = 0, count = _controls.size(); i < count; ++i)
+    {
+        Control* ctrl = _controls[i];
+        GP_ASSERT(ctrl);
+
+        if (ctrl->isVisible())
+        {
+            if (ctrl->getAutoSizeW() == AUTO_PERCENT_LEFT || ctrl->getAutoSizeH() == AUTO_PERCENT_LEFT) {
+                //pass
+                hasExpand = true;
+            }
+            else {
+                ctrl->measureSize();
+            }
+        }
+    }
+
+    if (hasExpand) {
+        GP_ASSERT(_layout.get());
+        float prefW = _layout->prefContentWidth(this);
+        float prefH = _layout->prefContentHeight(this);
+
+        _leftWidth = _localBounds.width - prefW - getPadding().left - getPadding().right;
+        _leftHeight = _localBounds.height - prefH - getPadding().top - getPadding().bottom;
+    }
+    else {
+        _leftWidth = 0;
+        _leftHeight = 0;
+    }
 
     for (size_t i = 0, count = _controls.size(); i < count; ++i)
     {
@@ -482,7 +510,9 @@ void Container::updateChildBounds() {
 
         if (ctrl->isVisible())
         {
-            ctrl->measureSize();
+            if (ctrl->getAutoSizeW() == AUTO_PERCENT_LEFT || ctrl->getAutoSizeH() == AUTO_PERCENT_LEFT) {
+                ctrl->measureSize();
+            }
             ctrl->_localBounds = ctrl->_measureBounds;
             ctrl->applyAlignment();
         }
