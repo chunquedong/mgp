@@ -81,7 +81,7 @@ void TreeView::addItemLabel(TreeItem* item, int level) {
 
         if (_useCheckBox) {
             UPtr<CheckBox> checkbox = Control::create<CheckBox>("tree_item_checkbox");
-            checkbox->setHeight(1, true);
+            checkbox->setHeight(1, Control::AUTO_PERCENT_PARENT);
             checkbox->addListener(this, Listener::CLICK);
             item->_contronl->addControl(std::move(checkbox));
         }

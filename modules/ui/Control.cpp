@@ -79,8 +79,8 @@ void Control::onDeserialize(Serializer* serializer) {
     serializer->readString("position", position, "");
     if (position.size() > 0 && parseCoordPair(position.c_str(), &bounds[0], &bounds[1], &boundsBits[0], &boundsBits[1]))
     {
-        setX(bounds[0], boundsBits[0]);
-        setY(bounds[1], boundsBits[1]);
+        setX(bounds[0], boundsBits[0] ? AUTO_PERCENT_PARENT : AUTO_SIZE_NONE);
+        setY(bounds[1], boundsBits[1] ? AUTO_PERCENT_PARENT : AUTO_SIZE_NONE);
     }
 
     // If there is an explicitly specified size, width or height, unset the corresponding autoSize bit
@@ -88,8 +88,8 @@ void Control::onDeserialize(Serializer* serializer) {
     serializer->readString("size", size, "");
     if (size.size() > 0 && parseCoordPair(size.c_str(), &bounds[0], &bounds[1], &boundsBits[0], &boundsBits[1]))
     {
-        setWidth(bounds[0], boundsBits[0]);
-        setHeight(bounds[1], boundsBits[1]);
+        setWidth(bounds[0], boundsBits[0] ? AUTO_PERCENT_PARENT : AUTO_SIZE_NONE);
+        setHeight(bounds[1], boundsBits[1] ? AUTO_PERCENT_PARENT : AUTO_SIZE_NONE);
     }
 
     std::string autoSizeStr;
@@ -152,19 +152,12 @@ float Control::getX() const
     return _localBounds.x;
 }
 
-void Control::setX(float x, bool percentage)
+void Control::setX(float x, AutoSize percentage)
 {
-    if (_desiredBounds.x != x || percentage != (_autoSizeX != AUTO_PERCENT_PARENT))
+    if (_desiredBounds.x != x || percentage != _autoSizeX)
     {
         _desiredBounds.x = x;
-        if (percentage)
-        {
-            _autoSizeX = AUTO_PERCENT_PARENT;
-        }
-        else
-        {
-            _autoSizeX = AUTO_SIZE_NONE;
-        }
+        _autoSizeX = percentage;
         setDirty(DIRTY_BOUNDS);
     }
 }
@@ -184,19 +177,12 @@ float Control::getY() const
     return _localBounds.y;
 }
 
-void Control::setY(float y, bool percentage)
+void Control::setY(float y, AutoSize percentage)
 {
-    if (_desiredBounds.y != y || percentage != (_autoSizeY != AUTO_PERCENT_PARENT))
+    if (_desiredBounds.y != y || percentage != _autoSizeY)
     {
         _desiredBounds.y = y;
-        if (percentage)
-        {
-            _autoSizeY = AUTO_PERCENT_PARENT;
-        }
-        else
-        {
-            _autoSizeY = AUTO_SIZE_NONE;
-        }
+        _autoSizeY = percentage;
         setDirty(DIRTY_BOUNDS);
     }
 }
@@ -216,19 +202,12 @@ float Control::getWidth() const
     return _localBounds.width;
 }
 
-void Control::setWidth(float width, bool percentage)
+void Control::setWidth(float width, AutoSize percentage)
 {
-    if (_desiredBounds.width != width || percentage != (_autoSizeW != AUTO_PERCENT_PARENT))
+    if (_desiredBounds.width != width || percentage != _autoSizeW)
     {
         _desiredBounds.width = width;
-        if (percentage)
-        {
-            _autoSizeW = AUTO_PERCENT_PARENT;
-        }
-        else
-        {
-            _autoSizeW = AUTO_SIZE_NONE;
-        }
+        _autoSizeW = percentage;
         setDirty(DIRTY_BOUNDS);
     }
 }
@@ -272,19 +251,12 @@ float Control::getHeight() const
     return _localBounds.height;
 }
 
-void Control::setHeight(float height, bool percentage)
+void Control::setHeight(float height, AutoSize percentage)
 {
-    if (_desiredBounds.height != height || percentage != (_autoSizeH != AUTO_PERCENT_PARENT))
+    if (_desiredBounds.height != height || percentage != _autoSizeH)
     {
         _desiredBounds.height = height;
-        if (percentage)
-        {
-            _autoSizeH = AUTO_PERCENT_PARENT;
-        }
-        else
-        {
-            _autoSizeH = AUTO_SIZE_NONE;
-        }
+        _autoSizeH = percentage;
         setDirty(DIRTY_BOUNDS);
     }
 }
@@ -1163,24 +1135,24 @@ void Control::setAnimationPropertyValue(int propertyId, AnimationValue* value, f
     switch(propertyId)
     {
     case ANIMATE_POSITION:
-        setX(Curve::lerp(blendWeight, _localBounds.x, value->getFloat(0)), isXPercentage());
-        setY(Curve::lerp(blendWeight, _localBounds.y, value->getFloat(1)), isYPercentage());
+        setX(Curve::lerp(blendWeight, _localBounds.x, value->getFloat(0)), getAutoSizeX());
+        setY(Curve::lerp(blendWeight, _localBounds.y, value->getFloat(1)), getAutoSizeY());
         break;
     case ANIMATE_POSITION_X:
-        setX(Curve::lerp(blendWeight, _localBounds.x, value->getFloat(0)), isXPercentage());
+        setX(Curve::lerp(blendWeight, _localBounds.x, value->getFloat(0)), getAutoSizeX());
         break;
     case ANIMATE_POSITION_Y:
-        setY(Curve::lerp(blendWeight, _localBounds.y, value->getFloat(0)), isYPercentage());
+        setY(Curve::lerp(blendWeight, _localBounds.y, value->getFloat(0)), getAutoSizeY());
         break;
     case ANIMATE_SIZE:
-        setWidth(Curve::lerp(blendWeight, _localBounds.width, value->getFloat(0)), isWidthPercentage());
-        setHeight(Curve::lerp(blendWeight, _localBounds.height, value->getFloat(1)), isHeightPercentage());
+        setWidth(Curve::lerp(blendWeight, _localBounds.width, value->getFloat(0)), getAutoSizeW());
+        setHeight(Curve::lerp(blendWeight, _localBounds.height, value->getFloat(1)), getAutoSizeH());
         break;
     case ANIMATE_SIZE_WIDTH:
-        setWidth(Curve::lerp(blendWeight, _localBounds.width, value->getFloat(0)), isWidthPercentage());
+        setWidth(Curve::lerp(blendWeight, _localBounds.width, value->getFloat(0)), getAutoSizeW());
         break;
     case ANIMATE_SIZE_HEIGHT:
-        setHeight(Curve::lerp(blendWeight, _localBounds.height, value->getFloat(0)), isHeightPercentage());
+        setHeight(Curve::lerp(blendWeight, _localBounds.height, value->getFloat(0)), getAutoSizeH());
         break;
     case ANIMATE_OPACITY: {
         float _opacity = getStyle()->getOpacity();

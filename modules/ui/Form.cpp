@@ -127,8 +127,8 @@ UPtr<Form> Form::create()
 
 void Form::initialize(Style* style, Properties* properties)
 {
-    _root->setWidth(1, true);
-    _root->setHeight(1, true);
+    _root->setWidth(1, Control::AUTO_PERCENT_PARENT);
+    _root->setHeight(1, Control::AUTO_PERCENT_PARENT);
     _root->_consumeInputEvents = false;
 
     auto content = Control::create<ScrollContainer>("_form_content", style, "Form");
@@ -136,8 +136,8 @@ void Form::initialize(Style* style, Properties* properties)
 
     auto overlay = Control::create<ModalLayer>("_form_overlay");
     _overlay = overlay.get();
-    _overlay->setWidth(1, true);
-    _overlay->setHeight(1, true);
+    _overlay->setWidth(1, Control::AUTO_PERCENT_PARENT);
+    _overlay->setHeight(1, Control::AUTO_PERCENT_PARENT);
 
     _root->addControl(std::move(content));
     _root->addControl(std::move(overlay));

@@ -315,7 +315,7 @@ public:
      * @param x The new X coordinate.
      * @param percentage True if the value should be interpreted as a percentage (0-1), false if it is regular number.
      */
-    void setX(float x, bool percentage = false);
+    void setX(float x, AutoSize percentage = AUTO_SIZE_NONE);
 
     /**
      * Determines if the X coordinate of this control computed as a percentage of its parent container.
@@ -340,7 +340,7 @@ public:
      * @param y The new Y coordinate.
      * @param percentage True if the value should be interpreted as a percentage (0-1), false if it is regular number.
      */
-    void setY(float y, bool percentage = false);
+    void setY(float y, AutoSize percentage = AUTO_SIZE_NONE);
 
     /**
      * Determines if the Y coordinate of this control is computed as a percentage of its parent container.
@@ -367,7 +367,7 @@ public:
      * @param width The new width.
      * @param percentage True if the value should be interpreted as a percentage (0-1), false if it is regular number.
      */
-    void setWidth(float width, bool percentage = false);
+    void setWidth(float width, AutoSize percentage = AUTO_SIZE_NONE);
 
     /**
      * Determines if the width of this control is computed as a percentage of its parent container.
@@ -394,7 +394,7 @@ public:
      * @param height The new height.
      * @param percentage True if the value should be interpreted as a percentage (0-1), false if it is regular number.
      */
-    void setHeight(float height, bool percentage = false);
+    void setHeight(float height, AutoSize percentage = AUTO_SIZE_NONE);
 
     /**
      * Determines if the height of this control is computed as a percentage of its parent container.

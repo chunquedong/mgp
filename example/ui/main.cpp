@@ -87,7 +87,7 @@ class MainApp : public Game, Control::Listener {
 
         UPtr<Slider> slider = Control::create<Slider>("slider");
         slider->setText("Slider");
-        slider->setWidth(1.0, true);
+        slider->setWidth(1.0, Control::AUTO_PERCENT_PARENT);
         form->getContent()->addControl(std::move(slider));
         //SAFE_RELEASE(slider);
 

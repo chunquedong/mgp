@@ -54,7 +54,7 @@ void MenuList::initItems(std::vector<std::string>& items) {
         label->setPadding(5, 5, 5, 5);
         label->setStyleName("MenuItem");
         label->setText(name.c_str());
-        label->setWidth(1, true);
+        label->setWidth(1, Control::AUTO_PERCENT_PARENT);
         label->addListener(this, Listener::CLICK);
         this->addControl(std::move(label));
     }
