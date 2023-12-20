@@ -44,7 +44,7 @@ protected:
 
     unsigned int drawImages(Form* form, const Rectangle& clip, RenderInfo* view);
 
-    void updateBounds();
+    void measureSize();
 private:
     std::string _imagePath;
     ThemeImage* _image = NULL;

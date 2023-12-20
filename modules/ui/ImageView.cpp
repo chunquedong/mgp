@@ -111,7 +111,7 @@ unsigned int ImageView::drawImages(Form* form, const Rectangle& clip, RenderInfo
     return 1;
 }
 
-void ImageView::updateBounds()
+void ImageView::measureSize()
 {
     if (_batch)
     {
@@ -126,7 +126,7 @@ void ImageView::updateBounds()
         }
     }
 
-    Control::updateBounds();
+    Control::measureSize();
 }
 
 }

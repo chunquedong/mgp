@@ -88,7 +88,7 @@ void JoystickControl::onDeserialize(Serializer* serializer) {
     _index = serializer->readInt("index", 0);
 }
 
-void JoystickControl::updateBounds()
+void JoystickControl::measureSize()
 {
 
     //if (_autoSize & AUTO_SIZE_WIDTH)
@@ -101,7 +101,7 @@ void JoystickControl::updateBounds()
     //    setHeightInternal(_screenRegionPixels.height);
     //}
     
-    Control::updateBounds();
+    Control::measureSize();
 }
 
 void JoystickControl::updateAbsoluteBounds(const Vector2& offset)

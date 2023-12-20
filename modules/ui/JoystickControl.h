@@ -122,7 +122,7 @@ protected:
      * @see Control::updateAbsoluteBounds
      */
     void updateAbsoluteBounds(const Vector2& offset);
-    void updateBounds();
+    void measureSize();
 
     /**
      * @see Control::drawImages

@@ -176,6 +176,7 @@ public:
     bool canReceiveFocus() const override;
 
 
+protected:
     /**
      * Sets the specified dirty bits for all children within this container.
      *
@@ -183,9 +184,6 @@ public:
      * @param recursive If true, set the bits recursively on all children and their children.
      */
     void setDirty(int bits, bool recursive = true) override;
-
-protected:
-
 
     /**
      * Constructor.
@@ -222,19 +220,21 @@ protected:
     /**
      * @see Control::updateBounds
      */
-    void updateBounds() override;
+    //void updateBounds() override;
 
     /**
      * @see Control::updateAbsoluteBounds
      */
     //void updateAbsoluteBounds(const Vector2& offset) override;
 
-    void onBoundsUpdate() override;
+    //void onBoundsUpdate() override;
 
     /**
      * Updates the bounds for this container's child controls.
      */
     bool updateChildBounds() override;
+
+    void measureSize() override;
 
     /**
      * Gets a Layout::Type enum from a matching string.

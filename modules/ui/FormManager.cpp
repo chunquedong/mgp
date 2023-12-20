@@ -62,7 +62,7 @@ void FormManager::resizeEventInternal(unsigned int width, unsigned int height)
         if (form)
         {
             // Dirty the form
-            form->getRoot()->setDirty(Control::DIRTY_BOUNDS | Control::DIRTY_STATE);
+            form->getRoot()->requestLayout();
         }
     }
 }

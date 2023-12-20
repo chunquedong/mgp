@@ -80,9 +80,9 @@ void CheckBox::updateState(State state)
     _image = getTheme()->getImage(_checked ? "checked" : "unchecked");
 }
 
-void CheckBox::updateBounds()
+void CheckBox::measureSize()
 {
-    Label::updateBounds();
+    Label::measureSize();
 
     Vector2 size;
     const Rectangle& selectedRegion = _image->getRegion();

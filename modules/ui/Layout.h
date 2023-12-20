@@ -47,7 +47,12 @@ public:
          * Absolute layout: Controls are not modified at all by this layout.
          * They must be positioned and sized manually.
          */
-        LAYOUT_ABSOLUTE
+        LAYOUT_ABSOLUTE,
+
+        /**
+         * Horizontal layout
+         */
+        LAYOUT_HORIZONTAL,
     };
 
     /**

@@ -81,9 +81,9 @@ void Label::updateState(State state)
     _font = getStyle()->getFont();
 }
 
-void Label::updateBounds()
+void Label::measureSize()
 {
-    Control::updateBounds();
+    Control::measureSize();
 
     if (isAutoSize() && _font)
     {
@@ -105,7 +105,7 @@ void Label::updateBounds()
         {
             setWidthInternal(w + getPadding().left + getPadding().right);
         }
-        if (_autoSizeH = AUTO_WRAP_CONTENT)
+        if (_autoSizeH == AUTO_WRAP_CONTENT)
         {
             setHeightInternal(h + getPadding().top + getPadding().bottom);
         }

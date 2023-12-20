@@ -111,9 +111,9 @@ void RadioButton::updateState(State state)
     _image = getTheme()->getImage(_selected ? "selected" : "unselected");
 }
 
-void RadioButton::updateBounds()
+void RadioButton::measureSize()
 {
-    Label::updateBounds();
+    Label::measureSize();
 
     Vector2 size;
     const Rectangle& selectedRegion = _image->getRegion();

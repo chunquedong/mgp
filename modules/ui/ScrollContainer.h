@@ -40,6 +40,7 @@ public:
      * @see Control::updateAbsoluteBounds
      */
      void updateAbsoluteBounds(const Vector2& offset) override;
+     //bool updateLayout(const Vector2& offset) override;
 
     /**
      * Sets the allowed scroll directions for this container.

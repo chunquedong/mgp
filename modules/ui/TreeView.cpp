@@ -64,6 +64,8 @@ void TreeView::addItemLabel(TreeItem* item, int level) {
     if (item->_contronl.isNull()) {
         item->_contronl = Control::create<Container>("tree_item");
         item->_contronl->setHeight(25);
+        //item->_contronl->setWidth(200);
+        //item->_contronl->setLayout(Layout::LAYOUT_HORIZONTAL);
 
         UPtr<Icon> image = Control::create<Icon>("image");
         image->setImagePath("res/ui/right.png");
@@ -141,6 +143,7 @@ void TreeView::update(float elapsedTime) {
             it.get()->_parent = root.get();
             addItemLabel(it.get(), 1);
         }
+        requestLayout();
     }
     ScrollContainer::update(elapsedTime);
 }

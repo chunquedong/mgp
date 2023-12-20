@@ -523,6 +523,7 @@ public:
      * @param right Width of right margin.
      */
     void setMargin(float top, float right, float bottom, float left);
+    void setMargin(float all);
 
     /**
      * Get this control's margin.
@@ -540,6 +541,7 @@ public:
      * @param right Width of right padding.
      */
     void setPadding(float top, float right, float bottom, float left);
+    void setPadding(float all);
 
     /**
      * Get this control's padding.
@@ -780,7 +782,7 @@ public:
      * @param id The ID of the Control to search for.
      */
     virtual Control* findControl(const char* id);
-
+protected:
     /**
      * Indicates that the bounds of the control are dirty.
      */
@@ -790,7 +792,6 @@ public:
      * Indicates that the state of the control is dirty.
      */
     static const int DIRTY_STATE = 2;
-protected:
 
     /**
      *  Constant value representing an unset or invalid contact index.
@@ -811,7 +812,7 @@ protected:
      * Hidden copy assignment operator.
      */
     Control& operator=(const Control&);
-
+public:
     /**
      * Internal method for setting the X position of the control.
      *
@@ -858,6 +859,11 @@ protected:
      */
     void setHeightInternal(float height);
 
+    /**
+    * dirty bounds
+    */
+    void requestLayout();
+protected:
     /**
      * Touch callback on touch events.  Controls return true if they consume the touch event.
      *
@@ -922,19 +928,24 @@ protected:
      */
     virtual void updateState(State state);
 
+    virtual void measureSize();
+
+    void applyAlignment();
+
     /**
      * Updates the local bounds for this control and its children.
      *
      * Child controls that need to customize their bounds calculation should override this method.
      */
-    virtual void updateBounds();
+    //virtual void updateBounds();
 
     /**
      * Updates the bounds for this container's child controls.
      */
     virtual bool updateChildBounds();
 
-    virtual void onBoundsUpdate();
+
+    // virtual void onBoundsUpdate();
 
     /**
      * Updates the absolute bounds for this control and its children.
@@ -1119,7 +1130,7 @@ protected:
     * update all bounds
     * return true if changed
     */
-    bool updateLayout(const Vector2& offset);
+    virtual bool updateLayout(const Vector2& offset);
 
     virtual bool moveFocus(Direction direction);
 	virtual bool moveFocusDirectional(Direction direction);

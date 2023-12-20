@@ -176,10 +176,47 @@ void ScrollContainer::updateState(Control::State state)
     }
 }
 
-
 void ScrollContainer::updateAbsoluteBounds(const Vector2& offset)
 {
-    Control::updateAbsoluteBounds(offset);
+   Control::updateAbsoluteBounds(offset);
+
+   // Get scrollbar images and diminish clipping bounds to make room for scrollbars.
+   if ((_scroll & SCROLL_HORIZONTAL) == SCROLL_HORIZONTAL)
+   {
+       GP_ASSERT(_scrollBarHorizontal);
+       _viewportBounds.height -= _scrollBarHorizontal->getRegion().height;
+       _viewportClipBounds.height -= _scrollBarHorizontal->getRegion().height;
+   }
+
+   if ((_scroll & SCROLL_VERTICAL) == SCROLL_VERTICAL)
+   {
+       GP_ASSERT(_scrollBarVertical);
+       _viewportBounds.width -= _scrollBarVertical->getRegion().width;
+       _viewportClipBounds.width -= _scrollBarVertical->getRegion().width;
+   }
+
+   // Update scroll position and scrollbars after updating absolute bounds since
+   // computation relies on up-to-date absolute bounds information.
+   //updateScroll();
+}
+
+
+bool ScrollContainer::updateChildBounds()
+{
+    for (size_t i = 0, count = _controls.size(); i < count; ++i)
+    {
+        Control* ctrl = _controls[i];
+        GP_ASSERT(ctrl);
+
+        if (ctrl->isVisible())
+        {
+            ctrl->measureSize();
+            ctrl->applyAlignment();
+        }
+    }
+
+    GP_ASSERT(_layout.get());
+    _layout->update(this);
 
     // Get scrollbar images and diminish clipping bounds to make room for scrollbars.
     if ((_scroll & SCROLL_HORIZONTAL) == SCROLL_HORIZONTAL)
@@ -199,11 +236,7 @@ void ScrollContainer::updateAbsoluteBounds(const Vector2& offset)
     // Update scroll position and scrollbars after updating absolute bounds since
     // computation relies on up-to-date absolute bounds information.
     updateScroll();
-}
 
-
-bool ScrollContainer::updateChildBounds()
-{
     bool result = false;
 
     for (size_t i = 0, count = _controls.size(); i < count; ++i)
@@ -217,15 +250,15 @@ bool ScrollContainer::updateChildBounds()
 
             // If the child bounds have changed, dirty our bounds and all of our
             // parent bounds so that our layout and/or bounds are recomputed.
-            if (changed)
-            {
-                Control* parent = this;
-                while (parent && (parent->isAutoSize() || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
-                {
-                    parent->setDirty(DIRTY_BOUNDS);
-                    parent = parent->_parent;
-                }
-            }
+            // if (changed)
+            // {
+            //     Control* parent = this;
+            //     while (parent && (parent->isAutoSize() || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
+            //     {
+            //         parent->setDirty(DIRTY_BOUNDS);
+            //         parent = parent->_parent;
+            //     }
+            // }
 
             result = result || changed;
         }

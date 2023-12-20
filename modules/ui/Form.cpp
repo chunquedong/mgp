@@ -104,8 +104,8 @@ UPtr<Form> Form::create(const char* url)
 
     // After creation, update our bounds once so code that runs immediately after form
     // creation has access to up-to-date bounds.
-    if (form->_root->updateLayout(Vector2::zero()))
-        form->_root->updateLayout(Vector2::zero());
+    //if (form->_root->updateLayout(Vector2::zero()))
+    form->_root->updateLayout(Vector2::zero());
 
     // Release the theme: its lifetime is controlled by addRef() and release() calls in initialize (above) and ~Control.
     if (theme != Theme::getDefault())
@@ -183,8 +183,8 @@ void Form::update(float elapsedTime)
     // Do a two-pass bounds update:
     //  1. First pass updates leaf controls
     //  2. Second pass updates parent controls that depend on child sizes
-    if (_root->updateLayout(Vector2::zero()))
-        _root->updateLayout(Vector2::zero());
+    //if (_root->updateLayout(Vector2::zero()))
+    _root->updateLayout(Vector2::zero());
 }
 
 void Form::startBatch(BatchableLayer* batch)

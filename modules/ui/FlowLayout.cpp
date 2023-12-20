@@ -80,7 +80,8 @@ void FlowLayout::update(const Container* container)
 
         yPosition = rowY + margin.top;
 
-        control->setPosition(xPosition, yPosition);
+        control->setXInternal(xPosition);
+        control->setYInternal(yPosition);
 
         xPosition += bounds.width + margin.right + _horizontalSpacing;
 

@@ -39,9 +39,9 @@ const char* Icon::getImagePath() {
     return _imagePath.c_str();
 }
 
-void Icon::updateBounds()
+void Icon::measureSize()
 {
-    Control::updateBounds();
+    Control::measureSize();
     if (isAutoSize() && _image)
     {
         unsigned int w = _image->getRegion().width;

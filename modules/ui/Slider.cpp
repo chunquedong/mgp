@@ -325,9 +325,9 @@ void Slider::updateState(State state)
     _trackImage = getTheme()->getImage("track");
 }
 
-void Slider::updateBounds()
+void Slider::measureSize()
 {
-    Label::updateBounds();
+    Label::measureSize();
 
     // Compute height of track (max of track, min/max and marker
     _trackHeight = _markerImage->getRegion().height;

@@ -101,7 +101,7 @@ protected:
     /**
      * @see Control::updateBounds
      */
-    void updateBounds();
+    void measureSize();
 
 private:
 

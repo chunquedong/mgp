@@ -194,7 +194,7 @@ protected:
     /**
      * @see Control::updateBounds
      */
-    void updateBounds();
+    void measureSize();
 
     /**
      * The minimum value for the Slider.

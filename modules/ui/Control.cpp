@@ -488,6 +488,10 @@ bool Control::isEnabledInHierarchy() const
     return true;
 }
 
+void Control::setMargin(float all) {
+    setMargin(all, all, all, all);
+}
+
 void Control::setMargin(float top, float right, float bottom, float left)
 {
     _margin.top = top;
@@ -499,6 +503,10 @@ void Control::setMargin(float top, float right, float bottom, float left)
 const Margin& Control::getMargin() const
 {
     return _margin;
+}
+
+void Control::setPadding(float all) {
+    setPadding(all, all, all, all);
 }
 
 void Control::setPadding(float top, float right, float bottom, float left)
@@ -723,6 +731,11 @@ void Control::controlEvent(Control::Listener::EventType evt)
 void Control::setDirty(int bits, bool recursive)
 {
     _dirtyBits |= bits;
+    if ((bits & DIRTY_BOUNDS) && _parent) {
+        if (!_parent->isDirty(DIRTY_BOUNDS)) {
+            _parent->setDirty(DIRTY_BOUNDS, false);
+        }
+    }
 }
 
 bool Control::isDirty(int bit) const
@@ -770,40 +783,37 @@ bool Control::updateLayout(const Vector2& offset)
     bool dirtyBounds = (_dirtyBits & DIRTY_BOUNDS) != 0;
     _dirtyBits &= ~DIRTY_BOUNDS;
 
-    // If we are a container, always update child bounds first
-    bool changed = updateChildBounds();
+    if (dirtyBounds && !_parent) {
+        this->measureSize();
+    }
 
+    updateAbsoluteBounds(offset);
+
+
+    bool changed = false;
     if (dirtyBounds)
     {
-        // Store old bounds so we can determine if they change
-        Rectangle oldAbsoluteBounds(_absoluteBounds);
-        Rectangle oldAbsoluteClipBounds(_absoluteClipBounds);
-        Rectangle oldViewportBounds(_viewportBounds);
-        Rectangle oldViewportClipBounds(_viewportClipBounds);
-
-        _localBounds.set(_desiredBounds);
-        updateBounds();
-        updateAbsoluteBounds(offset);
-
-        if (_absoluteBounds != oldAbsoluteBounds ||
-            _absoluteClipBounds != oldAbsoluteClipBounds ||
-            _viewportBounds != oldViewportBounds ||
-            _viewportClipBounds != oldViewportClipBounds)
-        {
-            onBoundsUpdate();
-            changed = true;
-        }
+        changed = updateChildBounds();
     }
 
     return changed;
 }
 
-void Control::onBoundsUpdate() {
-
+void Control::requestLayout() {
+    /*Control* parent = this;
+    while (parent)
+    {
+        parent->setDirty(DIRTY_BOUNDS, false);
+        parent = parent->_parent;
+    }*/
+    setDirty(DIRTY_BOUNDS);
 }
 
-void Control::updateBounds()
-{
+// void Control::onBoundsUpdate() {
+
+// }
+
+void Control::measureSize() {
     Toolkit* game = Toolkit::cur();
 
     float leftWidth = 0;
@@ -820,28 +830,40 @@ void Control::updateBounds()
         parentAbsoluteBounds = Rectangle(0, 0, leftWidth, leftHeight);
     }
 
-    const Margin& margin = getMargin();
-
-    // Calculate local unclipped bounds.
-    if (_autoSizeX == AUTO_PERCENT_PARENT)
-        _localBounds.x = _localBounds.x * parentAbsoluteBounds.width + margin.left;
-    if (_autoSizeY == AUTO_PERCENT_PARENT)
-        _localBounds.y = _localBounds.y * parentAbsoluteBounds.height + margin.top;
-
     if (_autoSizeW == AUTO_PERCENT_PARENT)
-        _localBounds.width *= parentAbsoluteBounds.width;
+        _localBounds.width = _desiredBounds.width * parentAbsoluteBounds.width;
     else if (_autoSizeW == AUTO_PERCENT_LEFT)
-        _localBounds.width *= leftWidth;
+        _localBounds.width = _desiredBounds.width * leftWidth - (_margin.right+_margin.left);
+    else if (_autoSizeW == AUTO_SIZE_NONE)
+        _localBounds.width = _desiredBounds.width;
 
     if (_autoSizeH == AUTO_PERCENT_PARENT)
-        _localBounds.height *= parentAbsoluteBounds.height;
+        _localBounds.height = _desiredBounds.height * parentAbsoluteBounds.height;
     else if (_autoSizeH == AUTO_PERCENT_LEFT)
-        _localBounds.height *= leftHeight;
+        _localBounds.height = _desiredBounds.height * leftHeight - (_margin.top + _margin.bottom);
+    else if (_autoSizeH == AUTO_SIZE_NONE)
+        _localBounds.height = _desiredBounds.height;
+
+    if (_autoSizeX == AUTO_PERCENT_PARENT)
+        _localBounds.x = _desiredBounds.x * parentAbsoluteBounds.width;// +margin.left;
+    else
+        _localBounds.x = _desiredBounds.x;
+    if (_autoSizeY == AUTO_PERCENT_PARENT)
+        _localBounds.y = _desiredBounds.y * parentAbsoluteBounds.height;// +margin.top;
+    else
+        _localBounds.y = _desiredBounds.y;
+}
+
+void Control::applyAlignment() {
+    Toolkit* game = Toolkit::cur();
+
+    const Margin& margin = getMargin();
 
     // Apply control alignment
     if (_alignment != Control::ALIGN_TOP_LEFT)
     {
-        const Margin& margin = getMargin();
+        //Toolkit* game = Toolkit::cur();
+        
         const Rectangle& parentBounds = _parent ? _parent->getBounds() : Rectangle(0, 0, game->getDpWidth(), game->getDpHeight());
         //const Border& parentBorder = _parent ? _parent->getBorder(_parent->getState()) : Border::empty();
         const Padding& parentPadding = _parent ? _parent->getPadding() : Padding::empty();
@@ -867,30 +889,34 @@ void Control::updateBounds()
         // Vertical alignment
         if ((_alignment & Control::ALIGN_BOTTOM) == Control::ALIGN_BOTTOM)
         {
-            _localBounds.y = clipHeight - _localBounds.height - margin.bottom;
+            _localBounds.y += clipHeight - _localBounds.height - margin.bottom;
         }
         else if ((_alignment & Control::ALIGN_VCENTER) == Control::ALIGN_VCENTER)
         {
-            _localBounds.y = clipHeight * 0.5f - _localBounds.height * 0.5f + (margin.top - margin.bottom) * 0.5f;
+            _localBounds.y += clipHeight * 0.5f - _localBounds.height * 0.5f + (margin.top - margin.bottom) * 0.5f;
         }
         else if ((_alignment & Control::ALIGN_TOP) == Control::ALIGN_TOP)
         {
-            _localBounds.y = margin.top;
+            _localBounds.y += margin.top;
         }
 
         // Horizontal alignment
         if ((_alignment & Control::ALIGN_RIGHT) == Control::ALIGN_RIGHT)
         {
-            _localBounds.x = clipWidth - _localBounds.width - margin.right;
+            _localBounds.x += clipWidth - _localBounds.width - margin.right;
         }
         else if ((_alignment & Control::ALIGN_HCENTER) == Control::ALIGN_HCENTER)
         {
-            _localBounds.x = clipWidth * 0.5f - _localBounds.width * 0.5f + (margin.left - margin.right) * 0.5f;
+            _localBounds.x += clipWidth * 0.5f - _localBounds.width * 0.5f + (margin.left - margin.right) * 0.5f;
         }
         else if ((_alignment & Control::ALIGN_LEFT) == Control::ALIGN_LEFT)
         {
-            _localBounds.x = margin.left;
+            _localBounds.x += margin.left;
         }
+    }
+    else {
+        _localBounds.x += margin.left;
+        _localBounds.y += margin.top;
     }
 }
 

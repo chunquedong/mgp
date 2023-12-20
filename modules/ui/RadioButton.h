@@ -97,7 +97,7 @@ protected:
     /**
      * @see Control::updateBounds
      */
-    void updateBounds();
+    void measureSize();
 
     /**
      * @see Control::updateAbsoluteBounds

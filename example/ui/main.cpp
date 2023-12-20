@@ -41,7 +41,7 @@ class MainApp : public Game, Control::Listener {
         };
         form->getContent()->addControl(std::move(tree));
 #endif
-#if 1
+#if 0
         UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
         combobox->setWidth(100);
         combobox->setText("Combobox");
@@ -121,7 +121,17 @@ class MainApp : public Game, Control::Listener {
         form->getContent()->addControl(std::move(joystick));
         //SAFE_RELEASE(joystick);
 #endif
-
+#if 1
+        //test scroll
+        UPtr<ScrollContainer> container = Control::create<ScrollContainer>("container2");
+        container->setSize(200, 100);
+        container->setScroll(ScrollContainer::SCROLL_BOTH);
+        UPtr<Button> button2 = Control::create<Button>("testButton2");
+        button2->setText("test\nButton");
+        button2->setSize(200, 100);
+        container->addControl(std::move(button2));
+        form->getContent()->addControl(std::move(container));
+#endif
 #if 0
         UPtr<Font> font = Font::create("res/ui/sans.ttf");
         set button style

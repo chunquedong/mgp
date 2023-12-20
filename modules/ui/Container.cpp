@@ -4,6 +4,7 @@
 #include "AbsoluteLayout.h"
 #include "FlowLayout.h"
 #include "VerticalLayout.h"
+#include "HorizontalLayout.h"
 #include "Label.h"
 #include "Button.h"
 #include "CheckBox.h"
@@ -429,17 +430,31 @@ Control* Container::findInputControl(int x, int y, bool focus, unsigned int cont
 }
 
 
-void Container::onBoundsUpdate() {
-    //setChildrenDirty(DIRTY_BOUNDS, true);
+// void Container::onBoundsUpdate() {
+//     //setChildrenDirty(DIRTY_BOUNDS, true);
+//     for (size_t i = 0, count = _controls.size(); i < count; ++i)
+//     {
+//         Control* ctrl = _controls[i];
+//         ctrl->setDirty(DIRTY_BOUNDS, true);
+//     }
+// }
+
+bool Container::updateChildBounds() {
     for (size_t i = 0, count = _controls.size(); i < count; ++i)
     {
         Control* ctrl = _controls[i];
-        ctrl->setDirty(DIRTY_BOUNDS, true);
-    }
-}
+        GP_ASSERT(ctrl);
 
-bool Container::updateChildBounds()
-{
+        if (ctrl->isVisible())
+        {
+            ctrl->measureSize();
+            ctrl->applyAlignment();
+        }
+    }
+
+    GP_ASSERT(_layout.get());
+    _layout->update(this);
+
     bool result = false;
 
     for (size_t i = 0, count = _controls.size(); i < count; ++i)
@@ -453,15 +468,15 @@ bool Container::updateChildBounds()
 
             // If the child bounds have changed, dirty our bounds and all of our
             // parent bounds so that our layout and/or bounds are recomputed.
-            if (changed)
-            {
-                Control* parent = this;
-                while (parent && (parent->isAutoSize() || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
-                {
-                    parent->setDirty(DIRTY_BOUNDS);
-                    parent = parent->_parent;
-                }
-            }
+            // if (changed)
+            // {
+            //     Control* parent = this;
+            //     while (parent && (parent->isAutoSize() || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
+            //     {
+            //         parent->setDirty(DIRTY_BOUNDS);
+            //         parent = parent->_parent;
+            //     }
+            // }
 
             result = result || changed;
         }
@@ -470,6 +485,40 @@ bool Container::updateChildBounds()
     return result;
 }
 
+void Container::measureSize() {
+    for (size_t i = 0, count = _controls.size(); i < count; ++i)
+    {
+        Control* ctrl = _controls[i];
+        GP_ASSERT(ctrl);
+
+        if (ctrl->isVisible())
+        {
+            ctrl->measureSize();
+        }
+    }
+
+    GP_ASSERT(_layout.get());
+    float prefW = _layout->prefContentWidth(this);
+    prefW += getPadding().left + getPadding().right;
+    float prefH = _layout->prefContentHeight(this);
+    prefH += getPadding().top + getPadding().bottom;
+
+    // Handle automatically sizing based on our children
+    if (_autoSizeW == AUTO_WRAP_CONTENT)
+    {
+        setWidthInternal(prefW);
+    }
+
+    if (_autoSizeH == AUTO_WRAP_CONTENT)
+    {
+        setHeightInternal(prefH);
+    }
+
+    Control::measureSize();
+
+    _leftWidth = _localBounds.width - prefW;
+    _leftHeight = _localBounds.height - prefH;
+}
 
 unsigned int Container::draw(Form* form, const Rectangle& clip, RenderInfo* view)
 {
@@ -745,38 +794,6 @@ bool Container::inContact()
     return false;
 }
 
-
-void Container::updateBounds()
-{
-    GP_ASSERT(_layout.get());
-
-    float prefW = _layout->prefContentWidth(this);
-    prefW += getPadding().left + getPadding().right;
-    float prefH = _layout->prefContentHeight(this);
-    prefH += getPadding().top + getPadding().bottom;
-
-    // Handle automatically sizing based on our children
-    if (_autoSizeW == AUTO_WRAP_CONTENT)
-    {
-        setWidthInternal(prefW);
-    }
-
-    if (_autoSizeH == AUTO_WRAP_CONTENT)
-    {
-        setHeightInternal(prefH);
-    }
-
-    // Compute total bounds of container
-    Control::updateBounds();
-
-    _leftWidth = _localBounds.width - prefW;
-    _leftHeight = _localBounds.height - prefH;
-
-    // Update layout to position children correctly within us
-    _layout->update(this);
-}
-
-
 Layout::Type Container::getLayoutType(const char* layoutString)
 {
     if (!layoutString)
@@ -815,6 +832,8 @@ UPtr<Layout> Container::createLayout(Layout::Type type)
         return FlowLayout::create();
     case Layout::LAYOUT_VERTICAL:
         return VerticalLayout::create();
+    case Layout::LAYOUT_HORIZONTAL:
+        return HorizontalLayout::create();
     default:
         return AbsoluteLayout::create();
     }
