@@ -11,7 +11,7 @@ MenuList::MenuList()
     setLayout(Layout::LAYOUT_VERTICAL);
     setScroll(SCROLL_VERTICAL);
     _className = "MenuList";
-    setHeight(0.8, true);
+    //setHeight(0.8, true);
     setWidth(250);
 }
 
@@ -64,6 +64,10 @@ void MenuList::measureSize() {
     ScrollContainer::measureSize();
     if (_parent) {
         float bottom = _parent->getClip().height;
+        if (_measureBounds.height > bottom) {
+            _measureBounds.height = bottom;
+        }
+
         if (_measureBounds.height + _measureBounds.y > bottom) {
             _measureBounds.y -= _measureBounds.height + _measureBounds.y - bottom;
         }

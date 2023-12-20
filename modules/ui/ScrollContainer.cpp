@@ -406,8 +406,15 @@ void ScrollContainer::updateScroll()
 
     float vWidth = getTheme()->getImage("verticalScrollBar")->getRegion().width;
     float hHeight = getTheme()->getImage("horizontalScrollBar")->getRegion().height;
-    float clipWidth = _absoluteBounds.width - containerPadding.left - containerPadding.right - vWidth;
-    float clipHeight = _absoluteBounds.height - containerPadding.top - containerPadding.bottom - hHeight;
+    float clipWidth = _absoluteBounds.width - containerPadding.left - containerPadding.right;
+    if ((_scroll & SCROLL_VERTICAL) == SCROLL_VERTICAL) {
+        clipWidth -= vWidth;
+    }
+    
+    float clipHeight = _absoluteBounds.height - containerPadding.top - containerPadding.bottom;
+    if ((_scroll & SCROLL_HORIZONTAL) == SCROLL_HORIZONTAL) {
+        clipHeight -= hHeight;
+    }
 
     bool dirty = false;
 
