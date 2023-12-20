@@ -12,6 +12,7 @@ MenuList::MenuList()
     setScroll(SCROLL_VERTICAL);
     _className = "MenuList";
     setHeight(0.8, true);
+    setWidth(250);
 }
 
 MenuList::~MenuList()
@@ -56,6 +57,16 @@ void MenuList::initItems(std::vector<std::string>& items) {
         label->setWidth(1, true);
         label->addListener(this, Listener::CLICK);
         this->addControl(std::move(label));
+    }
+}
+
+void MenuList::measureSize() {
+    ScrollContainer::measureSize();
+    if (_parent) {
+        float bottom = _parent->getClip().height;
+        if (_measureBounds.height + _measureBounds.y > bottom) {
+            _measureBounds.y -= _measureBounds.height + _measureBounds.y - bottom;
+        }
     }
 }
 

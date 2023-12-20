@@ -45,7 +45,9 @@ class MainApp : public Game, Control::Listener {
         UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
         combobox->setWidth(100);
         combobox->setText("Combobox");
-        combobox->getItems() = { "Apple", "Google" };
+        for (int i = 0; i < 20; ++i) {
+            combobox->getItems().push_back("Item:" + std::to_string(i));
+        }
         form->getContent()->addControl(std::move(combobox));
 
 
@@ -121,7 +123,13 @@ class MainApp : public Game, Control::Listener {
         form->getContent()->addControl(std::move(joystick));
         //SAFE_RELEASE(joystick);
 #endif
-
+        UPtr<ComboBox> combobox2 = Control::create<ComboBox>("combobox2");
+        combobox2->setWidth(100);
+        combobox2->setText("Combobox2");
+        for (int i = 0; i < 20; ++i) {
+            combobox2->getItems().push_back("Item:"+std::to_string(i));
+        }
+        form->getContent()->addControl(std::move(combobox2));
 #if 0
         //test scroll
         UPtr<ScrollContainer> containerS = Control::create<ScrollContainer>("container2");

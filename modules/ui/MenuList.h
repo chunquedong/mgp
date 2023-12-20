@@ -20,11 +20,13 @@ protected:
     MenuList();
     ~MenuList();
     
-    virtual void onSerialize(Serializer* serializer);
+    virtual void onSerialize(Serializer* serializer) override;
 
-    virtual void onDeserialize(Serializer* serializer);
+    virtual void onDeserialize(Serializer* serializer) override;
 
-    void controlEvent(Control* control, EventType evt);
+    void controlEvent(Control* control, EventType evt) override;
+
+    void measureSize() override;
 public:
     int getSelectIndex() { return _selectIndex; }
     void initItems(std::vector<std::string>& items);
