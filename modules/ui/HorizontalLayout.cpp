@@ -78,9 +78,7 @@ float HorizontalLayout::prefContentWidth(const Container* container) {
         Control* ctrl = container->getControls()[i];
         if (ctrl->isVisible() && !ctrl->isWidthPercentage())
         {
-            float h = ctrl->getWidth() + ctrl->getMargin().left + ctrl->getMargin().right;
-            if (!ctrl->isXPercentage())
-                h += ctrl->getX();
+            float h = ctrl->getMeasureBufferedWidth();
 
             width += h + _spacing;
         }

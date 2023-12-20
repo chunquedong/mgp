@@ -337,10 +337,10 @@ void Slider::measureSize()
 
     if (_autoSizeH == AUTO_WRAP_CONTENT)
     {
-        float height = _localBounds.height + _trackHeight;
+        float height = _measureBounds.height + _trackHeight;
         if (_valueTextVisible)
             height += getStyle()->getFontSize();
-        setHeightInternal(height);
+        setMeasureContentHeight(height);
     }
 }
 

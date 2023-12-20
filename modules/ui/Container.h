@@ -232,7 +232,8 @@ protected:
     /**
      * Updates the bounds for this container's child controls.
      */
-    bool updateChildBounds() override;
+    virtual void updateChildBounds();
+    bool layoutChildren() override;
 
     void measureSize() override;
 

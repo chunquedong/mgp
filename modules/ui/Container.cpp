@@ -439,22 +439,8 @@ Control* Container::findInputControl(int x, int y, bool focus, unsigned int cont
 //     }
 // }
 
-bool Container::updateChildBounds() {
-    for (size_t i = 0, count = _controls.size(); i < count; ++i)
-    {
-        Control* ctrl = _controls[i];
-        GP_ASSERT(ctrl);
-
-        if (ctrl->isVisible())
-        {
-            ctrl->measureSize();
-            ctrl->applyAlignment();
-        }
-    }
-
-    GP_ASSERT(_layout.get());
-    _layout->update(this);
-
+bool Container::layoutChildren() {
+    updateChildBounds();
     bool result = false;
 
     for (size_t i = 0, count = _controls.size(); i < count; ++i)
@@ -485,7 +471,10 @@ bool Container::updateChildBounds() {
     return result;
 }
 
-void Container::measureSize() {
+void Container::updateChildBounds() {
+    _leftWidth = _localBounds.width - _measureBounds.width;
+    _leftHeight = _localBounds.height - _measureBounds.height;
+
     for (size_t i = 0, count = _controls.size(); i < count; ++i)
     {
         Control* ctrl = _controls[i];
@@ -494,30 +483,44 @@ void Container::measureSize() {
         if (ctrl->isVisible())
         {
             ctrl->measureSize();
+            ctrl->_localBounds = ctrl->_measureBounds;
+            ctrl->applyAlignment();
         }
     }
 
     GP_ASSERT(_layout.get());
-    float prefW = _layout->prefContentWidth(this);
-    prefW += getPadding().left + getPadding().right;
-    float prefH = _layout->prefContentHeight(this);
-    prefH += getPadding().top + getPadding().bottom;
+    _layout->update(this);
+}
 
-    // Handle automatically sizing based on our children
-    if (_autoSizeW == AUTO_WRAP_CONTENT)
-    {
-        setWidthInternal(prefW);
+void Container::measureSize() {
+    if (isWrapContentSize()) {
+        for (size_t i = 0, count = _controls.size(); i < count; ++i)
+        {
+            Control* ctrl = _controls[i];
+            GP_ASSERT(ctrl);
+
+            if (ctrl->isVisible())
+            {
+                ctrl->measureSize();
+            }
+        }
+
+        GP_ASSERT(_layout.get());
+        float prefW = _layout->prefContentWidth(this);
+        float prefH = _layout->prefContentHeight(this);
+
+        // Handle automatically sizing based on our children
+        if (_autoSizeW == AUTO_WRAP_CONTENT)
+        {
+            setMeasureContentWidth(prefW);
+        }
+
+        if (_autoSizeH == AUTO_WRAP_CONTENT)
+        {
+            setMeasureContentHeight(prefH);
+        }
     }
-
-    if (_autoSizeH == AUTO_WRAP_CONTENT)
-    {
-        setHeightInternal(prefH);
-    }
-
     Control::measureSize();
-
-    _leftWidth = _localBounds.width - prefW;
-    _leftHeight = _localBounds.height - prefH;
 }
 
 unsigned int Container::draw(Form* form, const Rectangle& clip, RenderInfo* view)

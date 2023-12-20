@@ -233,6 +233,30 @@ void Control::setWidth(float width, bool percentage)
     }
 }
 
+void Control::setMeasureContentWidth(float w) {
+    _measureBounds.width = w + _padding.left + _padding.right;
+}
+
+void Control::setMeasureContentHeight(float h) {
+    _measureBounds.height = h + _padding.top + _padding.bottom;
+}
+
+float Control::getMeasureBufferedWidth() {
+    float w = _measureBounds.width + _margin.left + _margin.right;
+
+    if (!this->isXPercentage() && (this->getAlignment() & Control::ALIGN_LEFT))
+        w += this->_measureBounds.x;
+    return w;
+}
+
+float Control::getMeasureBufferedHeight() {
+    float h = _measureBounds.height + _margin.top + _margin.bottom;
+
+    if (!this->isYPercentage() && (this->getAlignment() & Control::ALIGN_TOP));
+        h += this->_measureBounds.y;
+    return h;
+}
+
 void Control::setWidthInternal(float width)
 {
     _localBounds.width = width;
@@ -379,8 +403,12 @@ void Control::setAutoSizeX(AutoSize mode)
     }
 }
 
-bool Control::isAutoSize() const {
-    return _autoSizeW != AUTO_SIZE_NONE || _autoSizeH != AUTO_SIZE_NONE;
+// bool Control::isAutoSize() const {
+//     return _autoSizeW != AUTO_SIZE_NONE || _autoSizeH != AUTO_SIZE_NONE;
+// }
+
+bool Control::isWrapContentSize() const {
+    return _autoSizeW == AUTO_WRAP_CONTENT || _autoSizeH == AUTO_WRAP_CONTENT;
 }
 
 void Control::setVisible(bool visible)
@@ -396,12 +424,12 @@ void Control::setVisible(bool visible)
         setDirty(DIRTY_BOUNDS);
 
         // force to update parent boundaries when child is hidden
-        Container* parent = _parent;
-        while (parent && (parent->isAutoSize() || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
-        {
-            parent->setDirty(DIRTY_BOUNDS);
-            parent = parent->_parent;
-        }
+        // Container* parent = _parent;
+        // while (parent && (parent->isAutoSize() || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
+        // {
+        //     parent->setDirty(DIRTY_BOUNDS);
+        //     parent = parent->_parent;
+        // }
     }
 }
 
@@ -764,7 +792,7 @@ void Control::updateState(State state)
     _dirtyBits &= ~DIRTY_STATE;
 }
 
-bool Control::updateChildBounds() {
+bool Control::layoutChildren() {
     return false;
 }
 
@@ -785,6 +813,7 @@ bool Control::updateLayout(const Vector2& offset)
 
     if (dirtyBounds && !_parent) {
         this->measureSize();
+        _localBounds = _measureBounds;
     }
 
     updateAbsoluteBounds(offset);
@@ -793,7 +822,7 @@ bool Control::updateLayout(const Vector2& offset)
     bool changed = false;
     if (dirtyBounds)
     {
-        changed = updateChildBounds();
+        changed = layoutChildren();
     }
 
     return changed;
@@ -814,7 +843,6 @@ void Control::requestLayout() {
 // }
 
 void Control::measureSize() {
-    Toolkit* game = Toolkit::cur();
 
     float leftWidth = 0;
     float leftHeight = 0;
@@ -825,33 +853,34 @@ void Control::measureSize() {
         leftHeight = _parent->_leftHeight;
     }
     else {
+        Toolkit* game = Toolkit::cur();
         leftWidth = game->getDpWidth();
         leftHeight = game->getDpHeight();
         parentAbsoluteBounds = Rectangle(0, 0, leftWidth, leftHeight);
     }
 
     if (_autoSizeW == AUTO_PERCENT_PARENT)
-        _localBounds.width = _desiredBounds.width * parentAbsoluteBounds.width;
+        _measureBounds.width = _desiredBounds.width * parentAbsoluteBounds.width;
     else if (_autoSizeW == AUTO_PERCENT_LEFT)
-        _localBounds.width = _desiredBounds.width * leftWidth - (_margin.right+_margin.left);
+        _measureBounds.width = _desiredBounds.width * leftWidth - (_margin.right+_margin.left);
     else if (_autoSizeW == AUTO_SIZE_NONE)
-        _localBounds.width = _desiredBounds.width;
+        _measureBounds.width = _desiredBounds.width;
 
     if (_autoSizeH == AUTO_PERCENT_PARENT)
-        _localBounds.height = _desiredBounds.height * parentAbsoluteBounds.height;
+        _measureBounds.height = _desiredBounds.height * parentAbsoluteBounds.height;
     else if (_autoSizeH == AUTO_PERCENT_LEFT)
-        _localBounds.height = _desiredBounds.height * leftHeight - (_margin.top + _margin.bottom);
+        _measureBounds.height = _desiredBounds.height * leftHeight - (_margin.top + _margin.bottom);
     else if (_autoSizeH == AUTO_SIZE_NONE)
-        _localBounds.height = _desiredBounds.height;
+        _measureBounds.height = _desiredBounds.height;
 
     if (_autoSizeX == AUTO_PERCENT_PARENT)
-        _localBounds.x = _desiredBounds.x * parentAbsoluteBounds.width;// +margin.left;
+        _measureBounds.x = _desiredBounds.x * parentAbsoluteBounds.width;// +margin.left;
     else
-        _localBounds.x = _desiredBounds.x;
+        _measureBounds.x = _desiredBounds.x;
     if (_autoSizeY == AUTO_PERCENT_PARENT)
-        _localBounds.y = _desiredBounds.y * parentAbsoluteBounds.height;// +margin.top;
+        _measureBounds.y = _desiredBounds.y * parentAbsoluteBounds.height;// +margin.top;
     else
-        _localBounds.y = _desiredBounds.y;
+        _measureBounds.y = _desiredBounds.y;
 }
 
 void Control::applyAlignment() {

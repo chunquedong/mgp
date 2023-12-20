@@ -97,10 +97,7 @@ float VerticalLayout::prefContentHeight(const Container* container) {
         Control* ctrl = container->getControls()[i];
         if (ctrl->isVisible() && !ctrl->isHeightPercentage())
         {
-            float h = ctrl->getHeight() + ctrl->getMargin().bottom + ctrl->getMargin().top;
-            if (!ctrl->isYPercentage())
-                h += ctrl->getY();
-
+            float h = ctrl->getMeasureBufferedHeight();
             height += h + _spacing;
         }
     }

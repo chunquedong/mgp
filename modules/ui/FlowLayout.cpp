@@ -100,9 +100,7 @@ float FlowLayout::prefContentWidth(const Container* container) {
         Control* ctrl = container->getControls()[i];
         if (ctrl->isVisible() && !ctrl->isWidthPercentage())
         {
-            float w = ctrl->getWidth() + ctrl->getMargin().right + ctrl->getMargin().left;
-            if (!ctrl->isXPercentage() && (ctrl->getAlignment() & Control::ALIGN_LEFT))
-                w += ctrl->getX();
+            float w = ctrl->getMeasureBufferedWidth();
             
             width += w + _horizontalSpacing;
         }

@@ -130,7 +130,7 @@ void RadioButton::measureSize()
     if (_autoSizeH == AUTO_WRAP_CONTENT)
     {
         // Text-only width was already measured in Label::update - append image
-        setWidthInternal(_localBounds.height + 5 + _localBounds.width);
+        setMeasureContentWidth(_measureBounds.height + 5 + _measureBounds.width);
     }
 }
 

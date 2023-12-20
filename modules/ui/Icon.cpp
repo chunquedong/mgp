@@ -42,17 +42,17 @@ const char* Icon::getImagePath() {
 void Icon::measureSize()
 {
     Control::measureSize();
-    if (isAutoSize() && _image)
+    if (isWrapContentSize() && _image)
     {
         unsigned int w = _image->getRegion().width;
         unsigned int h = _image->getRegion().height;
         if (_autoSizeW == AUTO_WRAP_CONTENT)
         {
-            setWidthInternal(w + getPadding().left + getPadding().right);
+            setMeasureContentWidth(w);
         }
         if (_autoSizeH == AUTO_WRAP_CONTENT)
         {
-            setHeightInternal(h + getPadding().top + getPadding().bottom);
+            setMeasureContentHeight(h);
         }
     }
 }

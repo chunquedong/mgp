@@ -15,9 +15,7 @@ float Layout::prefContentWidth(const Container* container) {
         Control* ctrl = container->getControls()[i];
         if (ctrl->isVisible() && !ctrl->isWidthPercentage())
         {
-            float w = ctrl->getWidth() + ctrl->getMargin().right + ctrl->getMargin().left;
-            if (!ctrl->isXPercentage() && (ctrl->getAlignment() & Control::ALIGN_LEFT))
-                w += ctrl->getX();
+            float w = ctrl->getMeasureBufferedWidth();
             if (width < w)
                 width = w;
         }
@@ -33,9 +31,7 @@ float Layout::prefContentHeight(const Container* container) {
         Control* ctrl = container->getControls()[i];
         if (ctrl->isVisible() && !ctrl->isHeightPercentage())
         {
-            float h = ctrl->getHeight() + ctrl->getMargin().bottom + ctrl->getMargin().top;
-            if (!ctrl->isYPercentage())
-                h += ctrl->getY();
+            float h = ctrl->getMeasureBufferedHeight();
             if (height < h)
                 height = h;
         }

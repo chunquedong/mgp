@@ -41,7 +41,7 @@ class MainApp : public Game, Control::Listener {
         };
         form->getContent()->addControl(std::move(tree));
 #endif
-#if 0
+#if 1
         UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
         combobox->setWidth(100);
         combobox->setText("Combobox");
@@ -121,16 +121,26 @@ class MainApp : public Game, Control::Listener {
         form->getContent()->addControl(std::move(joystick));
         //SAFE_RELEASE(joystick);
 #endif
-#if 1
+#if 0
         //test scroll
-        UPtr<ScrollContainer> container = Control::create<ScrollContainer>("container2");
-        container->setSize(200, 100);
-        container->setScroll(ScrollContainer::SCROLL_BOTH);
-        UPtr<Button> button2 = Control::create<Button>("testButton2");
-        button2->setText("test\nButton");
-        button2->setSize(200, 100);
-        container->addControl(std::move(button2));
-        form->getContent()->addControl(std::move(container));
+        UPtr<ScrollContainer> containerS = Control::create<ScrollContainer>("container2");
+        containerS->setSize(200, 100);
+        containerS->setScroll(ScrollContainer::SCROLL_BOTH);
+        UPtr<Button> buttonS = Control::create<Button>("testButton2");
+        buttonS->setText("test\nButton");
+        buttonS->setSize(200, 100);
+        containerS->addControl(std::move(buttonS));
+        form->getContent()->addControl(std::move(containerS));
+
+        //test scroll
+        UPtr<ScrollContainer> containerS3 = Control::create<ScrollContainer>("container3");
+        containerS3->setSize(200, 100);
+        containerS3->setScroll(ScrollContainer::SCROLL_BOTH);
+        UPtr<Button> buttonS3 = Control::create<Button>("testButton3");
+        buttonS3->setText("test\nButton");
+        buttonS3->setSize(200, 100);
+        containerS3->addControl(std::move(buttonS3));
+        form->getContent()->addControl(std::move(containerS3));
 #endif
 #if 0
         UPtr<Font> font = Font::create("res/ui/sans.ttf");

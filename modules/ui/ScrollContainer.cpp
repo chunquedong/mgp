@@ -194,44 +194,11 @@ void ScrollContainer::updateAbsoluteBounds(const Vector2& offset)
        _viewportBounds.width -= _scrollBarVertical->getRegion().width;
        _viewportClipBounds.width -= _scrollBarVertical->getRegion().width;
    }
-
-   // Update scroll position and scrollbars after updating absolute bounds since
-   // computation relies on up-to-date absolute bounds information.
-   //updateScroll();
 }
 
-
-bool ScrollContainer::updateChildBounds()
+bool ScrollContainer::layoutChildren()
 {
-    for (size_t i = 0, count = _controls.size(); i < count; ++i)
-    {
-        Control* ctrl = _controls[i];
-        GP_ASSERT(ctrl);
-
-        if (ctrl->isVisible())
-        {
-            ctrl->measureSize();
-            ctrl->applyAlignment();
-        }
-    }
-
-    GP_ASSERT(_layout.get());
-    _layout->update(this);
-
-    // Get scrollbar images and diminish clipping bounds to make room for scrollbars.
-    if ((_scroll & SCROLL_HORIZONTAL) == SCROLL_HORIZONTAL)
-    {
-        GP_ASSERT(_scrollBarHorizontal);
-        _viewportBounds.height -= _scrollBarHorizontal->getRegion().height;
-        _viewportClipBounds.height -= _scrollBarHorizontal->getRegion().height;
-    }
-
-    if ((_scroll & SCROLL_VERTICAL) == SCROLL_VERTICAL)
-    {
-        GP_ASSERT(_scrollBarVertical);
-        _viewportBounds.width -= _scrollBarVertical->getRegion().width;
-        _viewportClipBounds.width -= _scrollBarVertical->getRegion().width;
-    }
+    updateChildBounds();
 
     // Update scroll position and scrollbars after updating absolute bounds since
     // computation relies on up-to-date absolute bounds information.

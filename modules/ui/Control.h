@@ -498,7 +498,8 @@ public:
     void setAutoSizeW(AutoSize mode);
     void setAutoSizeH(AutoSize mode);
 
-    bool isAutoSize() const;
+    //bool isAutoSize() const;
+    bool isWrapContentSize() const;
 
     /**
      * Set the alignment of this control within its parent container.
@@ -833,6 +834,11 @@ public:
      */
     void setYInternal(float x);
 
+    void setMeasureContentWidth(float w);
+    void setMeasureContentHeight(float h);
+    float getMeasureBufferedWidth();
+    float getMeasureBufferedHeight();
+
     /**
      * Internal method for setting the width of the control.
      *
@@ -942,7 +948,7 @@ protected:
     /**
      * Updates the bounds for this container's child controls.
      */
-    virtual bool updateChildBounds();
+    virtual bool layoutChildren();
 
 
     // virtual void onBoundsUpdate();
@@ -1144,6 +1150,11 @@ protected:
      * Local bounds, relative to parent container's clipping window, possibly stored as percentages (see _boundsBits).
      */
     Rectangle _desiredBounds;
+
+    /**
+     * Local bounds of measure result, relative to parent container's clipping window.
+     */
+    Rectangle _measureBounds;
 
     /**
      * Local bounds, relative to parent container's clipping window, and desired size.
