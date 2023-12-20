@@ -121,6 +121,7 @@ class MainApp : public Game, Control::Listener {
         form->getContent()->addControl(std::move(joystick));
         //SAFE_RELEASE(joystick);
 #endif
+
 #if 0
         //test scroll
         UPtr<ScrollContainer> containerS = Control::create<ScrollContainer>("container2");

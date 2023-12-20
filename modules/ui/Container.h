@@ -183,7 +183,7 @@ protected:
      * @param bits The bits to set.
      * @param recursive If true, set the bits recursively on all children and their children.
      */
-    void setDirty(int bits, bool recursive = true) override;
+    void setDirty(int bits, bool recursive = false) override;
 
     /**
      * Constructor.
@@ -233,7 +233,7 @@ protected:
      * Updates the bounds for this container's child controls.
      */
     virtual void updateChildBounds();
-    bool layoutChildren() override;
+    void layoutChildren(bool dirtyBounds) override;
 
     void measureSize() override;
 

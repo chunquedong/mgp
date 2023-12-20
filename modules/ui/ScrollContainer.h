@@ -170,7 +170,7 @@ protected:
     /**
      * Updates the bounds for this container's child controls.
      */
-    bool layoutChildren() override;
+    void layoutChildren(bool dirtyBounds) override;
 
     /**
      * @see Control::draw

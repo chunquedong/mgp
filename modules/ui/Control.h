@@ -868,7 +868,7 @@ public:
     /**
     * dirty bounds
     */
-    void requestLayout();
+    void requestLayout(bool recursive = false);
 protected:
     /**
      * Touch callback on touch events.  Controls return true if they consume the touch event.
@@ -948,7 +948,7 @@ protected:
     /**
      * Updates the bounds for this container's child controls.
      */
-    virtual bool layoutChildren();
+    virtual void layoutChildren(bool dirtyBounds);
 
 
     // virtual void onBoundsUpdate();
@@ -1092,7 +1092,7 @@ protected:
      *
      * @param bits Dirty bits to set.
      */
-    virtual void setDirty(int bits, bool recursive = true);
+    virtual void setDirty(int bits, bool recursive = false);
 
     /**
      * Determines if the specified bit is dirty.
@@ -1136,7 +1136,7 @@ protected:
     * update all bounds
     * return true if changed
     */
-    virtual bool updateLayout(const Vector2& offset);
+    virtual void updateLayout(const Vector2& offset);
 
     virtual bool moveFocus(Direction direction);
 	virtual bool moveFocusDirectional(Direction direction);

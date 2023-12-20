@@ -439,9 +439,10 @@ Control* Container::findInputControl(int x, int y, bool focus, unsigned int cont
 //     }
 // }
 
-bool Container::layoutChildren() {
-    updateChildBounds();
-    bool result = false;
+void Container::layoutChildren(bool dirtyBounds) {
+    if (dirtyBounds) {
+        updateChildBounds();
+    }
 
     for (size_t i = 0, count = _controls.size(); i < count; ++i)
     {
@@ -450,25 +451,9 @@ bool Container::layoutChildren() {
 
         if (ctrl->isVisible())
         {
-            bool changed = ctrl->updateLayout(Vector2());
-
-            // If the child bounds have changed, dirty our bounds and all of our
-            // parent bounds so that our layout and/or bounds are recomputed.
-            // if (changed)
-            // {
-            //     Control* parent = this;
-            //     while (parent && (parent->isAutoSize() || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
-            //     {
-            //         parent->setDirty(DIRTY_BOUNDS);
-            //         parent = parent->_parent;
-            //     }
-            // }
-
-            result = result || changed;
+            ctrl->updateLayout(Vector2());
         }
     }
-
-    return result;
 }
 
 void Container::updateChildBounds() {

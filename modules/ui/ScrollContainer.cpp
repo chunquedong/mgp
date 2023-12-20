@@ -196,15 +196,15 @@ void ScrollContainer::updateAbsoluteBounds(const Vector2& offset)
    }
 }
 
-bool ScrollContainer::layoutChildren()
+void ScrollContainer::layoutChildren(bool dirtyBounds)
 {
-    updateChildBounds();
+    if (dirtyBounds) {
+        updateChildBounds();
 
-    // Update scroll position and scrollbars after updating absolute bounds since
-    // computation relies on up-to-date absolute bounds information.
-    updateScroll();
-
-    bool result = false;
+        // Update scroll position and scrollbars after updating absolute bounds since
+        // computation relies on up-to-date absolute bounds information.
+        updateScroll();
+    }
 
     for (size_t i = 0, count = _controls.size(); i < count; ++i)
     {
@@ -213,25 +213,9 @@ bool ScrollContainer::layoutChildren()
 
         if (ctrl->isVisible())
         {
-            bool changed = ctrl->updateLayout(_scrollPosition);
-
-            // If the child bounds have changed, dirty our bounds and all of our
-            // parent bounds so that our layout and/or bounds are recomputed.
-            // if (changed)
-            // {
-            //     Control* parent = this;
-            //     while (parent && (parent->isAutoSize() || static_cast<Container*>(parent)->getLayout()->getType() != Layout::LAYOUT_ABSOLUTE))
-            //     {
-            //         parent->setDirty(DIRTY_BOUNDS);
-            //         parent = parent->_parent;
-            //     }
-            // }
-
-            result = result || changed;
+            ctrl->updateLayout(_scrollPosition);
         }
     }
-
-    return result;
 }
 
 void ScrollContainer::getBarPadding(int* vertical, int* horizontal) {

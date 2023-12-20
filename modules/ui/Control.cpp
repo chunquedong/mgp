@@ -792,11 +792,10 @@ void Control::updateState(State state)
     _dirtyBits &= ~DIRTY_STATE;
 }
 
-bool Control::layoutChildren() {
-    return false;
+void Control::layoutChildren(bool dirtyBounds) {
 }
 
-bool Control::updateLayout(const Vector2& offset)
+void Control::updateLayout(const Vector2& offset)
 {
     // If our state is currently dirty, update it here so that any rendering state objects needed
     // for bounds computation are accessible.
@@ -818,24 +817,17 @@ bool Control::updateLayout(const Vector2& offset)
 
     updateAbsoluteBounds(offset);
 
-
-    bool changed = false;
-    if (dirtyBounds)
-    {
-        changed = layoutChildren();
-    }
-
-    return changed;
+    layoutChildren(dirtyBounds);
 }
 
-void Control::requestLayout() {
-    /*Control* parent = this;
-    while (parent)
-    {
-        parent->setDirty(DIRTY_BOUNDS, false);
-        parent = parent->_parent;
-    }*/
-    setDirty(DIRTY_BOUNDS);
+void Control::requestLayout(bool recursive) {
+    //Control* parent = this;
+    //while (parent)
+    //{
+    //    parent->setDirty(DIRTY_BOUNDS, false);
+    //    parent = parent->_parent;
+    //}
+    setDirty(DIRTY_BOUNDS, recursive);
 }
 
 // void Control::onBoundsUpdate() {
