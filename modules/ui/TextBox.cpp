@@ -8,7 +8,7 @@ TextBox::TextBox() : _caretLocation(0), _lastKeypress(0), _fontSize(0), _caretIm
     _ctrlPressed(false), _shiftPressed(false)
 {
     _canFocus = true;
-    setPadding(8, 8, 8, 8);
+    setPadding(4, 4, 4, 4);
     _className = "TextBox";
 }
 

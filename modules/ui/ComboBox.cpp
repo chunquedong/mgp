@@ -9,7 +9,7 @@ namespace mgp {
 
 ComboBox::ComboBox()
 {
-    setPadding(8, 8, 8, 8);
+    setPadding(4, 4, 4, 4);
     _className = "ComboBox";
 }
 

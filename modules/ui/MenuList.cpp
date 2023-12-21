@@ -7,7 +7,7 @@ using namespace mgp;
 
 MenuList::MenuList()
 {
-    setPadding(8, 8, 8, 8);
+    setPadding(4);
     setLayout(Layout::LAYOUT_VERTICAL);
     setScroll(SCROLL_VERTICAL);
     _className = "MenuList";
@@ -51,7 +51,7 @@ void MenuList::controlEvent(Control* control, EventType evt) {
 void MenuList::initItems(std::vector<std::string>& items) {
     for (std::string& name : items) {
         UPtr<Button> label = Control::create<Button>((this->_id + "_items").c_str());
-        label->setPadding(5, 5, 5, 5);
+        label->setPadding(4);
         label->setStyleName("MenuItem");
         label->setText(name.c_str());
         label->setWidth(1, Control::AUTO_PERCENT_PARENT);

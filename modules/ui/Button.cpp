@@ -8,7 +8,7 @@ namespace mgp
 Button::Button() : _dataBinding(0)
 {
     _canFocus = true;
-    setPadding(9, 12, 9, 12);
+    setPadding(4, 12, 4, 12);
     _className = "Button";
 }
 

@@ -39,7 +39,7 @@ void TreeView::TreeItem::setChecked(bool v) {
 
 TreeView::TreeView()
 {
-    setPadding(8, 8, 8, 8);
+    setPadding(4, 4, 4, 4);
     setScroll(SCROLL_BOTH);
     root = TreeItem::create(0, "name", {});
     root->expanded = true;
