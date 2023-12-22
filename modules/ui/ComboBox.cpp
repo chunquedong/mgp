@@ -29,13 +29,14 @@ void ComboBox::onDeserialize(Serializer* serializer) {
 void ComboBox::setSelectIndex(int v, bool fireEvent) {
     if (_selectIndex != v) {
         _selectIndex = v;
-        if (fireEvent) this->notifyListeners(Listener::SELECT_CHANGE);
+        
         if (_selectIndex >= 0 && _selectIndex < _items.size()) {
             setText(_items[_selectIndex].c_str());
         }
         else {
             setText("");
         }
+        if (fireEvent) this->notifyListeners(Listener::SELECT_CHANGE);
     }
 }
 
