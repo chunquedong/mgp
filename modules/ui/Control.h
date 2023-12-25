@@ -469,7 +469,7 @@ public:
      *
      * @return The bounds of this control.
      */
-    //const Rectangle& getClipBounds() const;
+    const Rectangle& getAbsoluteClipBounds() const;
 
     /**
      * Get the content area of this control, in screen coordinates, after clipping.
@@ -603,6 +603,9 @@ public:
      * @return This control's current state.
      */
     State getState() const;
+    State _getState() const;
+
+    void setState(State state);
 
     /**
      * Set whether this control consumes input events,
@@ -869,6 +872,8 @@ public:
     * dirty bounds
     */
     void requestLayout(bool recursive = false);
+
+    void setToolTip(const char* tip);
 protected:
     /**
      * Touch callback on touch events.  Controls return true if they consume the touch event.
@@ -1267,10 +1272,15 @@ private:
     AutoSize parseAutoSize(const char* str);
 
     void addSpecificListener(Control::Listener* listener, Control::Listener::EventType eventType);
+    void showToolTip();
 
     bool _styleOverridden;
     Margin _margin;
     Padding _padding;
+
+    std::string _toolTip;
+    double _hoverTime;
+    UPtr<Control> _toolTipControl;
 };
 
 }

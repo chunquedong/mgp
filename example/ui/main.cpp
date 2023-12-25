@@ -122,7 +122,7 @@ class MainApp : public Game, Control::Listener {
         joystick->setSize(100, 100);
         form->getContent()->addControl(std::move(joystick));
         //SAFE_RELEASE(joystick);
-#endif
+
         UPtr<ComboBox> combobox2 = Control::create<ComboBox>("combobox2");
         combobox2->setWidth(100);
         combobox2->setText("Combobox2");
@@ -130,6 +130,12 @@ class MainApp : public Game, Control::Listener {
             combobox2->getItems().push_back("Item:"+std::to_string(i));
         }
         form->getContent()->addControl(std::move(combobox2));
+#endif
+        UPtr<Icon> icon = Control::create<Icon>("Icon");
+        icon->setImagePath("res/image/point.png");
+        icon->setToolTip("Hello World");
+        form->getContent()->addControl(std::move(icon));
+
 #if 0
         //test scroll
         UPtr<ScrollContainer> containerS = Control::create<ScrollContainer>("container2");

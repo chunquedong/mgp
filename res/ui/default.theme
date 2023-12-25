@@ -43,7 +43,7 @@ theme mainMenu
         normalColor = #33b5e5ff
         hoverColor = #66b5e5ff
         activeColor = #88b5e5ff
-        focusColor = #66b5e5ff
+        focusColor = #88b5e5ff
         disabledColor = #ccccccff
         textAlignment = ALIGN_VCENTER_HCENTER
     }
@@ -64,7 +64,7 @@ theme mainMenu
         normalColor = #33b5e5ff
         hoverColor = #66b5e5ff
         activeColor = #88b5e5ff
-        focusColor = #66b5e5ff
+        focusColor = #88b5e5ff
         disabledColor = #ccccccff
         textAlignment = ALIGN_VCENTER_HCENTER
     }
@@ -141,7 +141,7 @@ theme mainMenu
         normalColor = #f9f9f9ff
         hoverColor = #aaaaaaff
         activeColor = #eeeeeeff
-        focusColor = #aaaaaaff
+        focusColor = #eeeeeeff
         disabledColor = #ccccccff
         textColor = #000000ff
     }
@@ -151,7 +151,7 @@ theme mainMenu
         normalColor = #f9f9f9ff
         hoverColor = #aaaaaaff
         activeColor = #eeeeeeff
-        focusColor = #aaaaaaff
+        focusColor = #eeeeeeff
         disabledColor = #ccccccff
         textColor = #000000ff
     }

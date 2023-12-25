@@ -13,7 +13,7 @@ namespace mgp
 class ModalLayer : public Container {
     friend class Control;
 
-    std::vector<bool> _isModal;
+    int _modal = 1;
 public:
 
 protected:
@@ -24,8 +24,9 @@ protected:
 public:
     unsigned int draw(Form* form, const Rectangle& clip, RenderInfo* view);
 
-    void push(Control* content, bool isModal);
+    void add(Control* content, int modal);
     void pop();
+    void remove(Control* content);
 };
 
 }

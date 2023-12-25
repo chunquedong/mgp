@@ -76,9 +76,9 @@ void MenuList::measureSize() {
 
 void MenuList::show(Control* any) {
     GP_ASSERT(any);
-    any->getTopLevelForm()->getOverlay()->push(this, false);
+    any->getTopLevelForm()->getOverlay()->add(this, 1);
 }
 
 void MenuList::close() {
-    this->getTopLevelForm()->getOverlay()->pop();
+    this->getTopLevelForm()->getOverlay()->remove(this);
 }

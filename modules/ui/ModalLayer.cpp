@@ -9,7 +9,6 @@ ModalLayer::ModalLayer()
     setLayout(Layout::LAYOUT_ABSOLUTE);
     this->setVisible(false);
     _className = "ModalLayer";
-    _consumeInputEvents = true;
 }
 
 ModalLayer::~ModalLayer()
@@ -18,7 +17,7 @@ ModalLayer::~ModalLayer()
 
 void ModalLayer::controlEvent(Listener::EventType evt) {
     if (evt == Listener::CLICK) {
-        if (!_isModal.back()) {
+        if (_modal < 2) {
             pop();
         }
     }
@@ -30,12 +29,13 @@ unsigned int ModalLayer::draw(Form* form, const Rectangle& clip, RenderInfo* vie
 }
 
 
-void ModalLayer::push(Control* content, bool isModal) {
+void ModalLayer::add(Control* content, int modal) {
     GP_ASSERT(content);
     addControl(uniqueFromInstant(content));
 
     this->setVisible(true);
-    _isModal.push_back(isModal);
+    _modal = modal;
+    setConsumeInputEvents(_modal > 0);
 }
 
 void ModalLayer::pop() {
@@ -46,5 +46,14 @@ void ModalLayer::pop() {
             this->setVisible(false);
         }
     }
-    _isModal.pop_back();
+}
+
+void ModalLayer::remove(Control* content) {
+    int n = getControlCount();
+    if (n > 0) {
+        removeControl(content);
+        if (n == 1) {
+            this->setVisible(false);
+        }
+    }
 }

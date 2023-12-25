@@ -359,17 +359,15 @@ SPtr<Control> Form::handlePointerPress(int* x, int* y, bool pressed, unsigned in
     // Update active state changes
     if ((ctrl = findInputControl(x, y, false, contactIndex, consumed)).get())
     {
-        if (__activeControl[contactIndex] != ctrl || ctrl->_state != Control::ACTIVE)
+        if (__activeControl[contactIndex] != ctrl || ctrl->_getState() != Control::ACTIVE)
         {
             if (__activeControl[contactIndex].get())
             {
-                __activeControl[contactIndex]->_state = Control::NORMAL;
-                __activeControl[contactIndex]->setDirty(Control::DIRTY_STATE);
+                __activeControl[contactIndex]->setState(Control::NORMAL);
             }
 
             __activeControl[contactIndex] = ctrl.get();
-            ctrl->_state = Control::ACTIVE;
-            ctrl->setDirty(Control::DIRTY_STATE);
+            ctrl->setState(Control::ACTIVE);
         }
 
         ctrl->notifyListeners(Control::Listener::PRESS);
@@ -385,7 +383,7 @@ SPtr<Control> Form::handlePointerRelease(int* x, int* y, bool pressed, unsigned 
 
     SPtr<Control> ctrl;
 
-    Control* active = (__activeControl[contactIndex].get() && __activeControl[contactIndex]->_state == Control::ACTIVE) ? __activeControl[contactIndex].get() : NULL;
+    Control* active = (__activeControl[contactIndex].get() && __activeControl[contactIndex]->_getState() == Control::ACTIVE) ? __activeControl[contactIndex].get() : NULL;
 
     if (active)
     {
@@ -398,8 +396,7 @@ SPtr<Control> Form::handlePointerRelease(int* x, int* y, bool pressed, unsigned 
         screenToForm(x, y);
 
         // No longer any active control
-        active->setDirty(Control::DIRTY_STATE);
-        active->_state = Control::NORMAL;
+        active->setState(Control::NORMAL);
         __activeControl[contactIndex] = NULL;
 
         // Fire release event for the previously active control
@@ -407,7 +404,7 @@ SPtr<Control> Form::handlePointerRelease(int* x, int* y, bool pressed, unsigned 
 
         // If the release event was received on the same control that was
         // originally pressed, fire a click event
-        if (active->_absoluteClipBounds.contains(*x, *y))
+        if (active->getAbsoluteClipBounds().contains(*x, *y))
         {
             ScrollContainer* parent = dynamic_cast<ScrollContainer*>(active->_parent);
             if (!parent || !parent->isScrolling())
@@ -426,17 +423,15 @@ SPtr<Control> Form::handlePointerRelease(int* x, int* y, bool pressed, unsigned 
         {
             ctrl = inputControl;
 
-            if (__activeControl[contactIndex] != ctrl || ctrl->_state != Control::HOVER)
+            if (__activeControl[contactIndex] != ctrl || ctrl->_getState() != Control::HOVER)
             {
                 if (__activeControl[contactIndex].get())
                 {
-                    __activeControl[contactIndex]->_state = Control::NORMAL;
-                    __activeControl[contactIndex]->setDirty(Control::DIRTY_STATE);
+                    __activeControl[contactIndex]->setState(Control::NORMAL);
                 }
 
                 __activeControl[contactIndex] = ctrl;
-                ctrl->_state = Control::HOVER;
-                ctrl->setDirty(Control::DIRTY_STATE);
+                ctrl->setState(Control::HOVER);
             }
         }
         else
@@ -444,8 +439,7 @@ SPtr<Control> Form::handlePointerRelease(int* x, int* y, bool pressed, unsigned 
             // Control no longer active
             if (__activeControl[contactIndex].get())
             {
-                __activeControl[contactIndex]->setDirty(Control::DIRTY_STATE);
-                __activeControl[contactIndex]->_state = Control::NORMAL;
+                __activeControl[contactIndex]->setState(Control::NORMAL);
                 __activeControl[contactIndex] = NULL;
             }
         }
@@ -464,7 +458,7 @@ SPtr<Control> Form::handlePointerMove(int* x, int* y, unsigned int contactIndex,
 
     // Handle hover control changes on move, only if there is no currently active control
     // (i.e. when the mouse or a finger is not down).
-    if (__activeControl[contactIndex].get() && __activeControl[contactIndex]->_state == Control::ACTIVE)
+    if (__activeControl[contactIndex].get() && __activeControl[contactIndex]->_getState() == Control::ACTIVE)
     {
         // Active controls always continue receiving pointer events, even when the pointer
         // is not on top of the control.
@@ -477,17 +471,15 @@ SPtr<Control> Form::handlePointerMove(int* x, int* y, unsigned int contactIndex,
         if (ctrl.get())
         {
             // Update hover control
-            if (__activeControl[contactIndex] != ctrl || ctrl->_state != Control::HOVER)
+            if (__activeControl[contactIndex] != ctrl || ctrl->_getState() != Control::HOVER)
             {
                 if (__activeControl[contactIndex].get())
                 {
-                    __activeControl[contactIndex]->_state = Control::NORMAL;
-                    __activeControl[contactIndex]->setDirty(Control::DIRTY_STATE);
+                    __activeControl[contactIndex]->setState(Control::NORMAL);
                 }
 
                 __activeControl[contactIndex] = ctrl;
-                ctrl->_state = Control::HOVER;
-                ctrl->setDirty(Control::DIRTY_STATE);
+                ctrl->setState(Control::HOVER);
             }
         }
         else
@@ -495,8 +487,7 @@ SPtr<Control> Form::handlePointerMove(int* x, int* y, unsigned int contactIndex,
             // No active/hover control
             if (__activeControl[contactIndex].get())
             {
-                __activeControl[contactIndex]->setDirty(Control::DIRTY_STATE);
-                __activeControl[contactIndex]->_state = Control::NORMAL;
+                __activeControl[contactIndex]->setState(Control::NORMAL);
                 __activeControl[contactIndex] = NULL;
             }
         }
@@ -512,7 +503,7 @@ void Form::verifyRemovedControlState(Control* control)
         __focusControl = NULL;
     }
 
-    if (control->_state == Control::ACTIVE || control->_state == Control::HOVER)
+    if (control->_getState() == Control::ACTIVE || control->_getState() == Control::HOVER)
     {
         for (unsigned int i = 0; i < MotionEvent::MAX_TOUCH_POINTS; ++i)
         {
@@ -521,7 +512,7 @@ void Form::verifyRemovedControlState(Control* control)
                 __activeControl[i] = NULL;
             }
         }
-        control->_state = Control::NORMAL;
+        control->setState(Control::NORMAL);
     }
 }
 
@@ -529,8 +520,8 @@ bool Form::bubblingTouch(SPtr<Control> ctrl, int formX, int formY, bool mouse, u
     // Dispatch the event from the bottom upwards, until a control intersecting the point consumes the event
     while (ctrl.get())
     {
-        int localX = formX - ctrl->_absoluteBounds.x;
-        int localY = formY - ctrl->_absoluteBounds.y;
+        int localX = formX - ctrl->getAbsoluteBounds().x;
+        int localY = formY - ctrl->getAbsoluteBounds().y;
         if (mouse)
         {
             if (ctrl->mouseEvent((MotionEvent::MotionType)evt, localX, localY, wheelDelta))
@@ -568,12 +559,12 @@ bool Form::bubblingTouch(SPtr<Control> ctrl, int formX, int formY, bool mouse, u
                 {
                     if (mouse)
                     {
-                        if (container->mouseEventScroll((MotionEvent::MotionType)evt, formX - tmp->_absoluteBounds.x, formY - tmp->_absoluteBounds.y, wheelDelta))
+                        if (container->mouseEventScroll((MotionEvent::MotionType)evt, formX - tmp->getAbsoluteBounds().x, formY - tmp->getAbsoluteBounds().y, wheelDelta))
                             return true;
                     }
                     else
                     {
-                        if (container->touchEventScroll((MotionEvent::MotionType)evt, formX - tmp->_absoluteBounds.x, formY - tmp->_absoluteBounds.y, contactIndex))
+                        if (container->touchEventScroll((MotionEvent::MotionType)evt, formX - tmp->getAbsoluteBounds().x, formY - tmp->getAbsoluteBounds().y, contactIndex))
                             return true;
                     }
                     break; // scrollable parent container found
@@ -638,7 +629,7 @@ bool Form::pointerEventInternal(bool mouse, int evt, int x, int y, int wheelDelt
         {
             Control* focusControl = ctrl.get();
             while (focusControl && !focusControl->setFocus())
-                focusControl = focusControl->_parent;
+                focusControl = focusControl->getParent();
 
             if (focusControl == NULL)
             {
@@ -649,8 +640,8 @@ bool Form::pointerEventInternal(bool mouse, int evt, int x, int y, int wheelDelt
 
         //notify __focusControl
         if (__focusControl.get()) {
-            int localX = formX - __focusControl->_absoluteBounds.x;
-            int localY = formY - __focusControl->_absoluteBounds.y;
+            int localX = formX - __focusControl->getAbsoluteBounds().x;
+            int localY = formY - __focusControl->getAbsoluteBounds().y;
             if (__focusControl->touchEvent((MotionEvent::MotionType)evt, localX, localY, contactIndex))
                 return true;
         }
@@ -659,7 +650,7 @@ bool Form::pointerEventInternal(bool mouse, int evt, int x, int y, int wheelDelt
             return true;
         }
 
-        if (ctrl->_consumeInputEvents) {
+        if (ctrl->getConsumeInputEvents()) {
             consumed = true;
         }
     }
@@ -701,9 +692,9 @@ bool Form::keyEventInternal(Keyboard::KeyEvent evt, int key)
             switch (key)
             {
             case Keyboard::KEY_TAB:
-                if (__focusControl->_parent)
+                if (__focusControl->getParent())
                 {
-                    if (__focusControl->_parent->moveFocus(__shiftKeyDown ? Container::PREVIOUS : Container::NEXT))
+                    if (__focusControl->getParent()->moveFocus(__shiftKeyDown ? Container::PREVIOUS : Container::NEXT))
                         return true;
                 }
                 break;
@@ -781,7 +772,7 @@ void Form::controlDisabled(Control* control)
         setFocusControl(NULL);
     }
 
-    if (control->_state == Control::ACTIVE || control->_state == Control::HOVER)
+    if (control->_getState() == Control::ACTIVE || control->_getState() == Control::HOVER)
     {
         for (unsigned int i = 0; i < MotionEvent::MAX_TOUCH_POINTS; ++i)
         {
@@ -814,9 +805,9 @@ void Form::setFocusControl(Control* control)
 
         // Set the activeControl property of the control's parent container
         Container* group = NULL;
-        if (__focusControl->_parent)
+        if (__focusControl->getParent())
         {
-            group = __focusControl->_parent;
+            group = __focusControl->getParent();
             group->_activeControl = __focusControl.get();
         }
 

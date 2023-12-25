@@ -5,6 +5,8 @@
 #include "Theme.h"
 #include <algorithm>
 #include "ScrollContainer.h"
+#include "Label.h"
+#include "ModalLayer.h"
 
 namespace mgp
 {
@@ -13,7 +15,8 @@ Control::Control()
     : _id(""), _dirtyBits(DIRTY_BOUNDS | DIRTY_STATE), _consumeInputEvents(true), _alignment(ALIGN_TOP_LEFT),
     _autoSizeX(AUTO_SIZE_NONE), _autoSizeY(AUTO_SIZE_NONE), _autoSizeW(AUTO_WRAP_CONTENT), _autoSizeH(AUTO_WRAP_CONTENT),
     _listeners(NULL), _style(NULL), _visible(true), _opacity(0.0f), _zIndex(-1),
-    _contactIndex(INVALID_CONTACT_INDEX), _focusIndex(-1), _canFocus(false), _state(NORMAL), _parent(NULL), _styleOverridden(false), _className("Control")
+    _contactIndex(INVALID_CONTACT_INDEX), _focusIndex(-1), _canFocus(false), _state(NORMAL), _parent(NULL), _styleOverridden(false), _className("Control"),
+    _hoverTime(0.0)
 {
 #if GP_SCRIPT_ENABLE
     GP_REGISTER_SCRIPT_EVENTS();
@@ -301,10 +304,10 @@ const Rectangle& Control::getAbsoluteBounds() const
     return _absoluteBounds;
 }
 
-// const Rectangle& Control::getClipBounds() const
-// {
-//     return _clipBounds;
-// }
+ const Rectangle& Control::getAbsoluteClipBounds() const
+ {
+     return _absoluteClipBounds;
+ }
 
 const Rectangle& Control::getClip() const
 {
@@ -586,6 +589,11 @@ Control::State Control::getState() const
     return _state;
 }
 
+Control::State Control::_getState() const
+{
+    return _state;
+}
+
 void Control::setConsumeInputEvents(bool consume)
 {
     _consumeInputEvents = consume;
@@ -743,9 +751,27 @@ bool Control::isDirty(int bit) const
     return (_dirtyBits & bit) == bit;
 }
 
+void Control::showToolTip() {
+    UPtr<Label> tip = Control::create<Label>("tooltip");
+    tip->setText(_toolTip.c_str());
+    tip->setPadding(4);
+    tip->setStyleName("MenuItem");
+    auto b = this->getAbsoluteBounds();
+    tip->setPosition(b.x, b.bottom());
+    this->getTopLevelForm()->getOverlay()->add(tip.get(), 0);
+    _toolTipControl = std::move(tip);
+}
+
 void Control::update(float elapsedTime)
 {
-    State state = getState();
+    if (_state == HOVER && _hoverTime > 0 && _toolTip.size() > 0 && System::currentTimeMillis() - _hoverTime > 800 && _toolTipControl.isNull()) {
+        showToolTip();
+    }
+    else if (_state != HOVER && _toolTipControl.get()) {
+        this->getTopLevelForm()->getOverlay()->remove(_toolTipControl.get());
+        _toolTipControl.clear();
+        _hoverTime = 0.0;
+    }
 
     // Update visual state if it's dirty
     if (_dirtyBits & DIRTY_STATE)
@@ -800,6 +826,10 @@ void Control::requestLayout(bool recursive) {
     //    parent = parent->_parent;
     //}
     setDirty(DIRTY_BOUNDS, recursive);
+}
+
+void Control::setToolTip(const char* tip) {
+    _toolTip = tip;
 }
 
 // void Control::onBoundsUpdate() {
@@ -1308,6 +1338,14 @@ bool Control::moveFocus(Direction direction) {
 }
 bool Control::moveFocusDirectional(Direction direction) {
     return false;
+}
+
+void Control::setState(State state) {
+    _state = state;
+    setDirty(Control::DIRTY_STATE);
+    if (_state == HOVER) {
+        _hoverTime = System::currentTimeMillis();
+    }
 }
 
 }
