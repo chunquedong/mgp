@@ -212,6 +212,12 @@ Float BoundingBox::intersectsQuery(const Ray& ray) const
     return dnear;
 }
 
+bool BoundingBox::contains(const Vector3& point) const {
+    return (point.x >= min.x && point.x < max.x) &&
+        (point.y >= min.y && point.y < max.y) &&
+        (point.z >= min.z && point.z < max.z);
+}
+
 bool BoundingBox::isEmpty() const
 {
     //return min.x == max.x && min.y == max.y && min.z == max.z;
@@ -229,6 +235,15 @@ void BoundingBox::merge(const BoundingBox& box)
     max.x = std::max(max.x, box.max.x);
     max.y = std::max(max.y, box.max.y);
     max.z = std::max(max.z, box.max.z);
+}
+
+void BoundingBox::merge(const Vector3& point) {
+    min.x = std::min(min.x, point.x);
+    min.y = std::min(min.y, point.y);
+    min.z = std::min(min.z, point.z);
+    max.x = std::max(max.x, point.x);
+    max.y = std::max(max.y, point.y);
+    max.z = std::max(max.z, point.z);
 }
 
 void BoundingBox::merge(const BoundingSphere& sphere)

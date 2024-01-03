@@ -144,6 +144,8 @@ public:
      */
     Float intersectsQuery(const Ray& ray) const;
 
+    bool contains(const Vector3& point) const;
+
     /**
      * Determines if this bounding box is empty.
      *
@@ -166,6 +168,8 @@ public:
      * @param box The bounding box to merge with.
      */
     void merge(const BoundingBox& box);
+
+    void merge(const Vector3& point);
 
     /**
      * Sets this bounding box to the specified values.
