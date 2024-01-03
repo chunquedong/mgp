@@ -47,6 +47,7 @@ void main()
     #if defined(LIGHTING)
         #if defined(VERTEX_COLOR)
             _baseColor.rgb = v_color;
+            _baseColor.a = 1.0;
         #else
             _baseColor = u_diffuseColor;
         #endif
