@@ -219,6 +219,8 @@ public:
      * @return This bounding box, after the transformation occurs.
      */
     inline BoundingBox& operator*=(const Matrix& matrix);
+
+    void inflate(Float xscale, Float yscale, Float zscale);
 };
 
 /**

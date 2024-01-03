@@ -362,4 +362,16 @@ void BoundingBox::transform(const Matrix& matrix)
     this->max.z = newMax.z;
 }
 
+void BoundingBox::inflate(Float xscale, Float yscale, Float zscale) {
+    Float dx = (max.x - min.x) * (xscale);
+    Float dy = (max.y - min.y) * (yscale);
+    Float dz = (max.z - min.z) * (zscale);
+    min.x -= dx;
+    min.y -= dy;
+    min.z -= dz;
+    max.x += dx;
+    max.y += dy;
+    max.z += dz;
+}
+
 }
