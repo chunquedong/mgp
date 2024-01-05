@@ -112,6 +112,11 @@ public:
     static const int ANIMATE_SCALE_ROTATE = 19;
 
     /**
+    * morpht weights property
+    */
+    static const int ANIMATE_WEIGHTS = 20;
+
+    /**
      * Globally suspends all transform changed events.
      */
     static void suspendTransformChanged();
@@ -819,6 +824,7 @@ public:
      */
     void setAnimationPropertyValue(int propertyId, AnimationValue* value, float blendWeight = 1.0f) override;
 
+    std::vector<Float>& getWeights() { return _weights; }
 protected:
 
     /**
@@ -911,6 +917,10 @@ protected:
      */
     std::list<TransformListener>* _listeners;
 
+    /**
+     * morph weight
+     */
+    std::vector<Float> _weights;
 private:
    
     void applyAnimationValueRotation(AnimationValue* value, unsigned int index, Float blendWeight);

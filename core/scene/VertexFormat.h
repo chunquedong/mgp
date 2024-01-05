@@ -38,7 +38,23 @@ public:
         TEXCOORD6 = 14,
         TEXCOORD7 = 15,
         CUSTEM = 16,
+        MORPHTARGET0,
+        MORPHTARGET1,
+        MORPHTARGET2,
+        MORPHTARGET3,
+        MORPHTARGET4,
+        MORPHTARGET5,
+        MORPHTARGET6,
+        MORPHTARGET7,
+        MORPHNORMAL0,
+        MORPHNORMAL1,
+        MORPHNORMAL2,
+        MORPHNORMAL3,
+        MORPHTANGENT0,
+        MORPHTANGENT1,
     };
+
+    static const int MAX_MORPH_TARGET = 8;
 
     enum DataType {
         INT8 = 0x1400,

@@ -313,7 +313,7 @@ private:
 		}
 
 		//fallback
-		UPtr<Material> mat = Material::create("res/shaders/min.vert", "res/shaders/min.frag");
+		UPtr<Material> mat = Material::create("res/shaders/colored.vert", "res/shaders/colored.frag");
 		mat->getParameter("u_diffuseColor")->setVector4(Vector4(1.0, 0.0, 0.0, 1.0));
 		loadCommonMatrialProperty(cmaterial, mat.get(), model);
 		return mat;
@@ -375,12 +375,12 @@ private:
 		}
 		
 		if (!hasMaterial) {
-			Material* mat = model->setMaterial("res/shaders/min.vert", "res/shaders/min.frag");
+			Material* mat = model->setMaterial("res/shaders/colored.vert", "res/shaders/colored.frag");
 			mat->getParameter("u_diffuseColor")->setVector4(Vector4(1.0, 0.0, 0.0, 1.0));
 		}
 	}
 
-	UPtr<Mesh> loadMeshVertices(std::vector<cgltf_attribute*>& attrs) {
+	UPtr<Mesh> loadMeshVertices(std::vector<cgltf_attribute*>& attrs, cgltf_primitive* primitive) {
 		int vertexCount = 0;
 		std::vector<cgltf_accessor*> accessors;
 		std::vector<VertexFormat::Element> vertexElemets;
@@ -448,6 +448,35 @@ private:
 				vertexCount = attr->data->count;
 			}
 		}
+		
+		if (primitive) {
+			for (int j = 0; j < primitive->targets_count; ++j) {
+				if (j >= VertexFormat::MAX_MORPH_TARGET) break;
+				cgltf_morph_target* target = primitive->targets + j;
+				for (int i = 0; i < target->attributes_count; ++i) {
+					cgltf_attribute* attr = target->attributes + i;
+					cgltf_accessor* accessor = attr->data;
+					VertexFormat::Element element;
+					element.size = cgltf_num_components(accessor->type);
+					std::string name = attr->name;
+					if (attr->type == cgltf_attribute_type_position) {
+						element.usage = (VertexFormat::Usage)(VertexFormat::MORPHTARGET0 + j);
+					}
+					else if (attr->type == cgltf_attribute_type_normal) {
+						element.usage = (VertexFormat::Usage)(VertexFormat::MORPHNORMAL0 + j);
+					}
+					else if (attr->type == cgltf_attribute_type_tangent) {
+						element.usage = (VertexFormat::Usage)(VertexFormat::MORPHTANGENT0 + j);
+					}
+					else {
+						element.usage = VertexFormat::CUSTEM;
+						element.name = name;
+					}
+					vertexElemets.push_back(element);
+					accessors.push_back(accessor);
+				}
+			}
+		}
 
 		VertexFormat format(vertexElemets.data(), vertexElemets.size());
 		UPtr<Mesh> mesh = Mesh::createMesh(format, vertexCount, Mesh::INDEX32);
@@ -478,7 +507,7 @@ private:
 			attrs[j] = attr;
 		}
 
-		UPtr<Mesh> mesh = loadMeshVertices(attrs);
+		UPtr<Mesh> mesh = loadMeshVertices(attrs, primitive);
 		UPtr<Model> model = Model::create(std::move(mesh));
 		loadPrimitive(primitive, model.get());
 		return model;
@@ -489,9 +518,12 @@ private:
 		bool sharedVertexBuf = true;
 		std::map<std::string, cgltf_accessor*> attributeUnique;
 		std::vector<cgltf_attribute*> attrs;
-
 		for (int i = 0; i < cmesh->primitives_count; ++i) {
 			cgltf_primitive* primitive = cmesh->primitives + i;
+			if (primitive->targets_count > 0) {
+				sharedVertexBuf = false;
+				goto label1;
+			}
 			for (int j = 0; j < primitive->attributes_count; ++j) {
 				cgltf_attribute* attr = primitive->attributes + j;
 				cgltf_accessor* old = attributeUnique[attr->name];
@@ -520,12 +552,18 @@ private:
 				}
 				group->getDrawables().push_back(std::move(model));
 			}
+			for (int i = 0; i < cmesh->weights_count; ++i) {
+				node->getWeights().push_back(cmesh->weights[i]);
+			}
 			node->addComponent(std::move(group));
 			return res;
 		}
 		else {
-			UPtr<Mesh> mesh = loadMeshVertices(attrs);
+			UPtr<Mesh> mesh = loadMeshVertices(attrs, NULL);
 			UPtr<Model> model = Model::create(std::move(mesh));
+			for (int i = 0; i < cmesh->weights_count; ++i) {
+				node->getWeights().push_back(cmesh->weights[i]);
+			}
 			for (int i = 0; i < cmesh->primitives_count; ++i) {
 				cgltf_primitive* primitive = cmesh->primitives + i;
 				loadPrimitive(primitive, model.get());
@@ -584,7 +622,7 @@ private:
 			AnimationTarget* target = nodeMap[cchannel->target_node];
 			if (!target) continue;
 
-			unsigned int propertyId = 0;
+			unsigned int propertyId = -1;
 			switch (cchannel->target_path)
 			{
 			case cgltf_animation_path_type_invalid:
@@ -599,16 +637,17 @@ private:
 				propertyId = Transform::ANIMATE_SCALE;
 				break;
 			case cgltf_animation_path_type_weights:
+				propertyId = Transform::ANIMATE_WEIGHTS;
 				break;
 			case cgltf_animation_path_type_max_enum:
 				break;
 			default:
 				break;
 			}
-			if (propertyId == 0) continue;
+			if (propertyId == -1) continue;
 
 			unsigned int keyCount = cchannel->sampler->input->count;
-			if (keyCount != cchannel->sampler->output->count) {
+			if (keyCount > cchannel->sampler->output->count) {
 				printf("ERROR: keyCount != valueCount\n");
 				continue;
 			}
@@ -623,7 +662,7 @@ private:
 				keyTimes[i] = ((out[0] - minTime) / (maxTime-minTime))*1000;
 			}
 
-			unsigned int interpolationType = 0;
+			unsigned int interpolationType = -1;
 			switch (cchannel->sampler->interpolation)
 			{
 			case cgltf_interpolation_type_linear:
@@ -639,11 +678,12 @@ private:
 			default:
 				break;
 			}
-			if (interpolationType == 0) break;
+			if (interpolationType == -1) break;
 
 			int num_comp = cgltf_num_components(cchannel->sampler->output->type);
-			float* keyValues = (float*)malloc(keyCount*num_comp*sizeof(float));
-			for (int i = 0; i < keyCount; ++i) {
+			float valueCount = cchannel->sampler->output->count;
+			float* keyValues = (float*)malloc(valueCount *num_comp*sizeof(float));
+			for (int i = 0; i < valueCount; ++i) {
 				float* out = keyValues+(num_comp*i);
 				cgltf_accessor_read_float(cchannel->sampler->output, i, out, num_comp);
 			}

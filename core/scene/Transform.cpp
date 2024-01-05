@@ -798,6 +798,8 @@ unsigned int Transform::getAnimationPropertyComponentCount(int propertyId) const
             return 7;
         case ANIMATE_SCALE_ROTATE_TRANSLATE:
             return 10;
+        case ANIMATE_WEIGHTS:
+            return _weights.size();
         default:
             return -1;
     }
@@ -855,6 +857,9 @@ void Transform::getAnimationPropertyValue(int propertyId, AnimationValue* value)
             value->setFloats(0, &_scale.x, 3);
             value->setFloats(3, &_rotation.x, 4);
             value->setFloats(7, &_translation.x, 3);
+            break;
+        case ANIMATE_WEIGHTS:
+            value->setFloats(0, _weights.data(), _weights.size());
             break;
         default:
             break;
@@ -942,6 +947,12 @@ void Transform::setAnimationPropertyValue(int propertyId, AnimationValue* value,
             setScale(Curve::lerp(blendWeight, _scale.x, value->getFloat(0)), Curve::lerp(blendWeight, _scale.y, value->getFloat(1)), Curve::lerp(blendWeight, _scale.z, value->getFloat(2)));
             applyAnimationValueRotation(value, 3, blendWeight);
             setTranslation(Curve::lerp(blendWeight, _translation.x, value->getFloat(7)), Curve::lerp(blendWeight, _translation.y, value->getFloat(8)), Curve::lerp(blendWeight, _translation.z, value->getFloat(9)));
+            break;
+        }
+        case ANIMATE_WEIGHTS: {
+            for (int i = 0; i < _weights.size(); ++i) {
+                _weights[i] = Curve::lerp(blendWeight, _weights[i], value->getFloat(i));
+            }
             break;
         }
         default:

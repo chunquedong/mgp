@@ -1,3 +1,7 @@
+#if MORPH_TARGET_COUNT
+    #include "_morph.vert"
+#endif
+
 uniform vec4 u_matrixPalette[SKINNING_JOINT_COUNT * 3];
 
 in vec4 a_blendWeights;
@@ -5,9 +9,9 @@ in vec4 a_blendIndices;
 
 vec4 _skinnedPosition;
 
-void skinPosition(float blendWeight, int matrixIndex)
+void skinPosition(vec3 pos, float blendWeight, int matrixIndex)
 {
-    vec4 position = vec4(a_position, 1.0);
+    vec4 position = vec4(pos, 1.0);
     vec4 tmp;
     tmp.x = dot(position, u_matrixPalette[matrixIndex]);
     tmp.y = dot(position, u_matrixPalette[matrixIndex + 1]);
@@ -18,19 +22,27 @@ void skinPosition(float blendWeight, int matrixIndex)
 
 vec4 getPosition()
 {
+    vec3 pos = a_position;
+#if MORPH_TARGET_COUNT
+    pos = getMorphPosition(pos);
+#endif
+
     _skinnedPosition = vec4(0.0);
     float blendWeight = a_blendWeights[0];
     int matrixIndex = int (a_blendIndices[0]) * 3;
-    skinPosition(blendWeight, matrixIndex);
+    skinPosition(pos, blendWeight, matrixIndex);
+
     blendWeight = a_blendWeights[1];
     matrixIndex = int(a_blendIndices[1]) * 3;
-    skinPosition(blendWeight, matrixIndex);
+    skinPosition(pos, blendWeight, matrixIndex);
+
     blendWeight = a_blendWeights[2];
     matrixIndex = int(a_blendIndices[2]) * 3;
-    skinPosition(blendWeight, matrixIndex);
+    skinPosition(pos, blendWeight, matrixIndex);
+
     blendWeight = a_blendWeights[3];
     matrixIndex = int(a_blendIndices[3]) * 3;
-    skinPosition(blendWeight, matrixIndex);
+    skinPosition(pos, blendWeight, matrixIndex);
     return _skinnedPosition;    
 }
 

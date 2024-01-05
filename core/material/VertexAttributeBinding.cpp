@@ -14,7 +14,7 @@
 #define VERTEX_ATTRIBUTE_BLENDWEIGHTS_NAME          "a_blendWeights"
 #define VERTEX_ATTRIBUTE_BLENDINDICES_NAME          "a_blendIndices"
 #define VERTEX_ATTRIBUTE_TEXCOORD_PREFIX_NAME       "a_texCoord"
-
+#define VERTEX_ATTRIBUTE_MORPHTARGET_NAME           "a_morphTarget"
 
 namespace mgp
 {
@@ -153,6 +153,18 @@ void VertexAttributeObject::init() {
             case VertexFormat::TEXCOORD7:
                 name = VERTEX_ATTRIBUTE_TEXCOORD_PREFIX_NAME;
                 name += '0' + (e.usage - VertexFormat::TEXCOORD0);
+                attrib = effect->getVertexAttribute(name.c_str());
+                break;
+            case VertexFormat::MORPHTARGET0:
+            case VertexFormat::MORPHTARGET1:
+            case VertexFormat::MORPHTARGET2:
+            case VertexFormat::MORPHTARGET3:
+            case VertexFormat::MORPHTARGET4:
+            case VertexFormat::MORPHTARGET5:
+            case VertexFormat::MORPHTARGET6:
+            case VertexFormat::MORPHTARGET7:
+                name = VERTEX_ATTRIBUTE_MORPHTARGET_NAME;
+                name += '0' + (e.usage - VertexFormat::MORPHTARGET0);
                 attrib = effect->getVertexAttribute(name.c_str());
                 break;
             default:

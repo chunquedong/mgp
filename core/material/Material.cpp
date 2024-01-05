@@ -120,6 +120,13 @@ bool Material::initialize(Drawable* drawable, std::vector<Light*>* lights, int l
         }
     }
 
+    if (drawable && drawable->getNode() && drawable->getNode()->getWeights().size() > 0) {
+        if (dynamicDefines.size() > 0) {
+            dynamicDefines += ";";
+        }
+        dynamicDefines += "MORPH_TARGET_COUNT " + std::to_string(drawable->getNode()->getWeights().size());
+    }
+
     if (_dynamicDefines != dynamicDefines) {
         _dynamicDefines = dynamicDefines;
         if (_shaderProgram) {
@@ -344,6 +351,20 @@ void Material::bindCamera(Camera* camera, Rectangle &viewport, Node *node) {
             if (skin) {
                 MaterialParameter* param = getParameter("u_matrixPalette");
                 param->setVector4Array(skin->getMatrixPalette(), skin->getMatrixPaletteSize());
+                param->_temporary = true;
+            }
+        }
+    }
+
+    uniform = _shaderProgram->getUniform("u_morphWeights");
+    if (uniform) {
+        if (node)
+        {
+            char buf[256];
+            for (int i = 0; i < node->getWeights().size(); ++i) {
+                snprintf(buf, 256, "u_morphWeights[%d]", i);
+                MaterialParameter* param = getParameter(buf);
+                param->setFloat(node->getWeights()[i]);
                 param->_temporary = true;
             }
         }

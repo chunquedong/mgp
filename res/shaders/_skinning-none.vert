@@ -1,13 +1,22 @@
+#if MORPH_TARGET_COUNT
+    #include "_morph.vert"
+#endif
+
 #ifdef INSTANCED
     in mat4 a_instanceMatrix;
 #endif
 
 vec4 getPosition()
 {
+    vec3 pos = a_position;
+#if MORPH_TARGET_COUNT
+    pos = getMorphPosition(pos);
+#endif
+
 #ifdef INSTANCED
-    return a_instanceMatrix * vec4(a_position, 1.0);
+    return a_instanceMatrix * vec4(pos, 1.0);
 #else
-    return vec4(a_position, 1.0);
+    return vec4(pos, 1.0);
 #endif
 }
 
