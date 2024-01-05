@@ -546,11 +546,11 @@ bool TerrainPatch::updateMaterial()
 
         if (_layers.size() > 0) {
             MaterialParameter* parameter = material->getParameter("u_surfaceLayerMaps");
-            parameter->setValue((const Texture**)&this->_samplers[0], (unsigned int)this->_samplers.size());
+            parameter->setSamplerArray((const Texture**)&this->_samplers[0], (unsigned int)this->_samplers.size());
         }
         if (_terrain && _terrain->_normalMap) {
             MaterialParameter* parameter = material->getParameter("u_normalMap");
-            parameter->setValue(_terrain->_normalMap);
+            parameter->setSampler(_terrain->_normalMap);
         }
         //TODO u_normalMatrix
 

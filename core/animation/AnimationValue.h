@@ -51,6 +51,9 @@ public:
      */
     void setFloats(unsigned int index, Float* values, unsigned int count);
 
+
+    Float* getData() { return _value; }
+
 private:
 
     /**

@@ -486,33 +486,32 @@ public:
         /** @script{ignore} */
         float* floatPtrValue;
         /** @script{ignore} */
-        int* intPtrValue;
+        int32_t* intPtrValue;
         /** @script{ignore} */
         const Texture* samplerValue;
         /** @script{ignore} */
         const Texture** samplerArrayValue;
         /** @script{ignore} */
         //MethodBinding* method;
+        float floats[16];
     } _value;
     
     enum Type
     {
         NONE,
         FLOAT,
-        FLOAT_ARRAY,
         INT,
-        INT_ARRAY,
         VECTOR2,
         VECTOR3,
         VECTOR4,
         MATRIX,
         SAMPLER,
-        SAMPLER_ARRAY,
         //METHOD
     } _type;
     
     unsigned int _count;
-    bool _dynamic;
+    bool _dynamicAlloc;
+    bool _isArray;
     std::string _name;
     Uniform* _uniform;
     char _loggerDirtyBits;
@@ -531,7 +530,7 @@ void MaterialParameter::bindValue(ClassType* classInstance, ParameterType (Class
         SAFE_RELEASE(_methodBinding);
     }
     _methodBinding = new MethodValueBinding<ClassType, ParameterType>(this, classInstance, valueMethod);
-    _dynamic = true;
+    _dynamicAlloc = true;
     _type = MaterialParameter::NONE;
     _value.intValue = 0;
 }
@@ -545,7 +544,7 @@ void MaterialParameter::bindValue(ClassType* classInstance, ParameterType (Class
         SAFE_RELEASE(_methodBinding);
     }
     _methodBinding = new MethodArrayBinding<ClassType, ParameterType>(this, classInstance, valueMethod, countMethod);
-    _dynamic = true;
+    _dynamicAlloc = true;
     _type = MaterialParameter::NONE;
     _value.intValue = 0;
 }

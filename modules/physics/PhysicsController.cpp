@@ -1400,7 +1400,7 @@ void PhysicsController::DebugDrawer::begin(const Matrix& viewProjection)
 {
     GP_ASSERT(_meshBatch);
     _meshBatch->start();
-    _meshBatch->getMaterial()->getParameter("u_viewProjectionMatrix")->setValue(viewProjection);
+    _meshBatch->getMaterial()->getParameter("u_viewProjectionMatrix")->setMatrix(viewProjection);
 }
 
 void PhysicsController::DebugDrawer::end()

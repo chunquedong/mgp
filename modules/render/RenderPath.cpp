@@ -317,7 +317,7 @@ void RenderPath::bindShadow(std::vector<Light*> *lights, DrawCall* drawCall) {
         char buf[256];
 
         snprintf(buf, 256, "u_directionalLightShadowMap[%d]", i);
-        drawCall->_material->getParameter(buf)->setValue(shadow->getFrameBuffer()->getRenderTarget(0));
+        drawCall->_material->getParameter(buf)->setSampler(shadow->getFrameBuffer()->getRenderTarget(0));
 
         //for (int j = shadow->getCascadeCount()-1; j >= 0; --j) {
         for (int j = 0; j < shadow->getCascadeCount(); ++j) {
@@ -328,10 +328,10 @@ void RenderPath::bindShadow(std::vector<Light*> *lights, DrawCall* drawCall) {
             snprintf(buf, 256, "u_directionalLightSpaceMatrix[%d]", pos);
             Matrix worldViewProj;
             Matrix::multiply(shadow->getCascade(j).lightSpaceMatrix, drawCall->_drawable->getNode()->getWorldMatrix(), &worldViewProj);
-            drawCall->_material->getParameter(buf)->setValue(worldViewProj);
+            drawCall->_material->getParameter(buf)->setMatrix(worldViewProj);
 
             snprintf(buf, 256, "u_directionalLightCascadeDistance[%d]", pos);
-            drawCall->_material->getParameter(buf)->setValue(shadow->getCascade(j).distance);
+            drawCall->_material->getParameter(buf)->setFloat(shadow->getCascade(j).distance);
         }
     }
 

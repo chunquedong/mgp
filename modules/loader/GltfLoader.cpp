@@ -199,7 +199,7 @@ private:
 		cgltf_texture* ctexture = cmaterial->pbr_metallic_roughness.base_color_texture.texture;
 		UPtr<Material> material = Material::create("res/shaders/textured.vert", "res/shaders/textured.frag", define.c_str());
 		UPtr<Texture> texture = loadTexture(ctexture);
-		material->getParameter("u_diffuseTexture")->setValue(texture.get());
+		material->getParameter("u_diffuseTexture")->setSampler(texture.get());
 
 		float* color = cmaterial->pbr_metallic_roughness.base_color_factor;
 		material->getParameter("u_albedo")->setVector3(Vector3(color[0], color[1], color[2]));
@@ -213,22 +213,22 @@ private:
 
 		if (cmaterial->pbr_metallic_roughness.metallic_roughness_texture.texture) {
 			UPtr<Texture> metallic_roughness_texture = loadTexture(cmaterial->pbr_metallic_roughness.metallic_roughness_texture.texture);
-			material->getParameter("u_metallic_roughness_map")->setValue(metallic_roughness_texture.get());
+			material->getParameter("u_metallic_roughness_map")->setSampler(metallic_roughness_texture.get());
 		}
 
 		if (cmaterial->normal_texture.texture) {
 			UPtr<Texture> normal_texture = loadTexture(cmaterial->normal_texture.texture);
-			material->getParameter("u_normalmapTexture")->setValue(normal_texture.get());
+			material->getParameter("u_normalmapTexture")->setSampler(normal_texture.get());
 		}
 
 		if (cmaterial->emissive_texture.texture) {
 			UPtr<Texture> emissive_texture = loadTexture(cmaterial->emissive_texture.texture);
-			material->getParameter("u_emissive_map")->setValue(emissive_texture.get());
+			material->getParameter("u_emissive_map")->setSampler(emissive_texture.get());
 		}
 
 		if (cmaterial->occlusion_texture.texture) {
 			UPtr<Texture> occlusion_texture = loadTexture(cmaterial->occlusion_texture.texture);
-			material->getParameter("u_occlusion_texture")->setValue(occlusion_texture.get());
+			material->getParameter("u_occlusion_texture")->setSampler(occlusion_texture.get());
 		}
 		return material;
 	}
@@ -260,7 +260,7 @@ private:
 				else {
 					UPtr<Material> material = Material::create("res/shaders/textured.vert", "res/shaders/textured.frag");
 					UPtr<Texture> texture = loadTexture(ctexture);
-					material->getParameter("u_diffuseTexture")->setValue(texture.get());
+					material->getParameter("u_diffuseTexture")->setSampler(texture.get());
 					loadCommonMatrialProperty(cmaterial, material.get(), model);
 					return material;
 				}
@@ -302,7 +302,7 @@ private:
 						cgltf_texture* ctexture = _gltf_data->textures+diffuse;
 						UPtr<Texture> texture = loadTexture(ctexture);
 						UPtr<Material> material = Material::create("res/shaders/textured.vert", "res/shaders/textured.frag");
-						material->getParameter("u_diffuseTexture")->setValue(texture.get());
+						material->getParameter("u_diffuseTexture")->setSampler(texture.get());
 						//SAFE_RELEASE(texture);
 						loadCommonMatrialProperty(cmaterial, material.get(), model);
 						return material;

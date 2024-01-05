@@ -107,7 +107,7 @@ namespace mgp
             {
             case Properties::NUMBER:
                 GP_ASSERT(renderState->getParameter(name));
-                renderState->getParameter(name)->setValue(properties->getFloat());
+                renderState->getParameter(name)->setFloat(properties->getFloat());
                 break;
             case Properties::VECTOR2:
             {
@@ -115,7 +115,7 @@ namespace mgp
                 if (properties->getVector2(NULL, &vector2))
                 {
                     GP_ASSERT(renderState->getParameter(name));
-                    renderState->getParameter(name)->setValue(vector2);
+                    renderState->getParameter(name)->setVector2(vector2);
                 }
             }
             break;
@@ -125,7 +125,7 @@ namespace mgp
                 if (properties->getVector3(NULL, &vector3))
                 {
                     GP_ASSERT(renderState->getParameter(name));
-                    renderState->getParameter(name)->setValue(vector3);
+                    renderState->getParameter(name)->setVector3(vector3);
                 }
             }
             break;
@@ -135,7 +135,7 @@ namespace mgp
                 if (properties->getVector4(NULL, &vector4))
                 {
                     GP_ASSERT(renderState->getParameter(name));
-                    renderState->getParameter(name)->setValue(vector4);
+                    renderState->getParameter(name)->setVector4(vector4);
                 }
             }
             break;
@@ -145,7 +145,7 @@ namespace mgp
                 if (properties->getMatrix(NULL, &matrix))
                 {
                     GP_ASSERT(renderState->getParameter(name));
-                    renderState->getParameter(name)->setValue(matrix);
+                    renderState->getParameter(name)->setMatrix(matrix);
                 }
             }
             break;
@@ -194,7 +194,7 @@ namespace mgp
 
                 // Set the sampler parameter.
                 GP_ASSERT(renderState->getParameter(name));
-                Texture* sampler = renderState->getParameter(name)->setValue(path.c_str(), mipmap);
+                Texture* sampler = renderState->getParameter(name)->setSampler(path.c_str(), mipmap);
                 if (sampler)
                 {
                     sampler->setWrapMode(wrapS, wrapT, wrapR);

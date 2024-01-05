@@ -152,7 +152,7 @@ UPtr<SpriteBatch> SpriteBatch::create(Texture* texture, ShaderProgram* effect, u
 
     // Bind the texture to the material as a sampler
     //Texture::Sampler* sampler = Texture::Sampler::create(texture);
-    material->getParameter(samplerUniform->getName())->setValue(texture);
+    material->getParameter(samplerUniform->getName())->setSampler(texture);
     
     // Define the vertex format for the batch
     VertexFormat::Element vertexElements[] =

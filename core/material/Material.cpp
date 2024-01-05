@@ -172,53 +172,53 @@ void Material::bindLights(Camera* camera, std::vector<Light*>* lights, int light
         switch (light->getLightType()) {
         case Light::DIRECTIONAL: {
             snprintf(buf, 256, "u_directionalLightColor[%d]", DIRECTIONAL_LIGHT_COUNT);
-            getParameter(buf)->setValue(light->getColor());
+            getParameter(buf)->setVector3(light->getColor());
 
             snprintf(buf, 256, "u_directionalLightDirection[%d]", DIRECTIONAL_LIGHT_COUNT);
             Vector3 v = light->getNode()->getForwardVector();
             camera->getViewMatrix().transformVector(&v);
-            getParameter(buf)->setValue(v);
+            getParameter(buf)->setVector3(v);
 
             ++DIRECTIONAL_LIGHT_COUNT;
         }
             break;
         case Light::POINT: {
             snprintf(buf, 256, "u_pointLightColor[%d]", POINT_LIGHT_COUNT);
-            getParameter(buf)->setValue(light->getColor());
+            getParameter(buf)->setVector3(light->getColor());
 
             snprintf(buf, 256, "u_pointLightPosition[%d]", POINT_LIGHT_COUNT);
             Vector3 p = light->getNode()->getTranslation();
             camera->getViewMatrix().transformPoint(&p);
-            getParameter(buf)->setValue(p);
+            getParameter(buf)->setVector3(p);
 
             snprintf(buf, 256, "u_pointLightRangeInverse[%d]", POINT_LIGHT_COUNT);
-            getParameter(buf)->setValue(light->getRangeInverse());
+            getParameter(buf)->setFloat(light->getRangeInverse());
 
             ++POINT_LIGHT_COUNT;
         }
             break;
         case Light::SPOT: {
             snprintf(buf, 256, "u_spotLightColor[%d]", SPOT_LIGHT_COUNT);
-            getParameter(buf)->setValue(light->getColor());
+            getParameter(buf)->setVector3(light->getColor());
 
             snprintf(buf, 256, "u_spotLightInnerAngleCos[%d]", SPOT_LIGHT_COUNT);
-            getParameter(buf)->setValue(light->getInnerAngleCos());
+            getParameter(buf)->setFloat(light->getInnerAngleCos());
 
             snprintf(buf, 256, "u_spotLightOuterAngleCos[%d]", SPOT_LIGHT_COUNT);
-            getParameter(buf)->setValue(light->getOuterAngleCos());
+            getParameter(buf)->setFloat(light->getOuterAngleCos());
 
             snprintf(buf, 256, "u_spotLightRangeInverse[%d]", SPOT_LIGHT_COUNT);
-            getParameter(buf)->setValue(light->getRangeInverse());
+            getParameter(buf)->setFloat(light->getRangeInverse());
 
             snprintf(buf, 256, "u_spotLightDirection[%d]", SPOT_LIGHT_COUNT);
             Vector3 sv = light->getNode()->getForwardVector();
             camera->getViewMatrix().transformVector(&sv);
-            getParameter(buf)->setValue(sv);
+            getParameter(buf)->setVector3(sv);
 
             snprintf(buf, 256, "u_spotLightPosition[%d]", SPOT_LIGHT_COUNT);
             Vector3 sp = light->getNode()->getTranslation();
             camera->getViewMatrix().transformPoint(&sp);
-            getParameter(buf)->setValue(sp);
+            getParameter(buf)->setVector3(sp);
 
             ++SPOT_LIGHT_COUNT;
         }
@@ -360,13 +360,14 @@ void Material::bindCamera(Camera* camera, Rectangle &viewport, Node *node) {
     if (uniform) {
         if (node)
         {
-            char buf[256];
-            for (int i = 0; i < node->getWeights().size(); ++i) {
-                snprintf(buf, 256, "u_morphWeights[%d]", i);
-                MaterialParameter* param = getParameter(buf);
-                param->setFloat(node->getWeights()[i]);
-                param->_temporary = true;
+            int n = node->getWeights().size();
+            std::vector<float> weights(n);
+            for (int i = 0; i < n; ++i) {
+                weights[i] = node->getWeights()[i];
             }
+            MaterialParameter* param = getParameter("u_morphWeights");
+            param->setFloatArray(weights.data(), n, true);
+            param->_temporary = true;
         }
     }
 

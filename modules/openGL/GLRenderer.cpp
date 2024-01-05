@@ -934,87 +934,112 @@ bool GLRenderer::bindUniform(MaterialParameter* value, Uniform* uniform, ShaderP
     switch (value->_type)
     {
     case MaterialParameter::FLOAT:
-        GL_ASSERT(glUniform1f(location, value->_value.floatValue));
-        break;
-    case MaterialParameter::FLOAT_ARRAY:
-        GP_ASSERT(value->_value.floatPtrValue);
-        GL_ASSERT(glUniform1fv(location, value->_count, value->_value.floatPtrValue));
+        if (!value->_isArray) {
+            GL_ASSERT(glUniform1f(location, value->_value.floatValue));
+        }
+        else {
+            GP_ASSERT(value->_value.floatPtrValue);
+            GL_ASSERT(glUniform1fv(location, value->_count, value->_value.floatPtrValue));
+        }
         break;
     case MaterialParameter::INT:
-        GL_ASSERT(glUniform1i(location, value->_value.intValue));
-        break;
-    case MaterialParameter::INT_ARRAY:
-        GL_ASSERT(glUniform1iv(location, value->_count, value->_value.intPtrValue));
+        if (!value->_isArray) {
+            GL_ASSERT(glUniform1i(location, value->_value.intValue));
+        }
+        else {
+            GP_ASSERT(value->_value.intPtrValue);
+            GL_ASSERT(glUniform1iv(location, value->_count, value->_value.intPtrValue));
+        }
         break;
     case MaterialParameter::VECTOR2: {
         //Vector2* values2 = reinterpret_cast<Vector2*>(value->_value.floatPtrValue);
-        GP_ASSERT(value->_value.floatPtrValue);
-        GL_ASSERT(glUniform2fv(location, value->_count, value->_value.floatPtrValue));
+        if (!value->_isArray) {
+            GL_ASSERT(glUniform2fv(location, 1, value->_value.floats));
+        }
+        else {
+            GP_ASSERT(value->_value.floatPtrValue);
+            GL_ASSERT(glUniform2fv(location, value->_count, value->_value.floatPtrValue));
+        }
         break;
     }
     case MaterialParameter::VECTOR3: {
         //Vector3* values3 = reinterpret_cast<Vector3*>(value->_value.floatPtrValue);
-        GP_ASSERT(value->_value.floatPtrValue);
-        GL_ASSERT(glUniform3fv(location, value->_count, value->_value.floatPtrValue));
+        if (!value->_isArray) {
+            GL_ASSERT(glUniform3fv(location, 1, value->_value.floats));
+        }
+        else {
+            GP_ASSERT(value->_value.floatPtrValue);
+            GL_ASSERT(glUniform3fv(location, value->_count, value->_value.floatPtrValue));
+        }
         break;
     }
     case MaterialParameter::VECTOR4: {
         //Vector4* values4 = reinterpret_cast<Vector4*>(value->_value.floatPtrValue);
-        GP_ASSERT(value->_value.floatPtrValue);
-        GL_ASSERT(glUniform4fv(location, value->_count, value->_value.floatPtrValue));
+        if (!value->_isArray) {
+            GL_ASSERT(glUniform4fv(location, 1, value->_value.floats));
+        }
+        else {
+            GP_ASSERT(value->_value.floatPtrValue);
+            GL_ASSERT(glUniform4fv(location, value->_count, value->_value.floatPtrValue));
+        }
         break;
     }
     case MaterialParameter::MATRIX: {
         //GL_ASSERT(glUniformMatrix4fv(uniform->_location, 1, GL_FALSE, value.m));
         //Matrix* valuesm = reinterpret_cast<Matrix*>(value->_value.floatPtrValue);
-        GP_ASSERT(value->_value.floatPtrValue);
-        GL_ASSERT(glUniformMatrix4fv(location, value->_count, GL_FALSE, value->_value.floatPtrValue));
+        if (!value->_isArray) {
+            GL_ASSERT(glUniformMatrix4fv(location, 1, GL_FALSE, value->_value.floats));
+        }
+        else {
+            GP_ASSERT(value->_value.floatPtrValue);
+            GL_ASSERT(glUniformMatrix4fv(location, value->_count, GL_FALSE, value->_value.floatPtrValue));
+        }
         break;
     }
     case MaterialParameter::SAMPLER: {
-        const Texture* sampler = value->_value.samplerValue;
-        GP_ASSERT(uniform->_type == GL_SAMPLER_2D || uniform->_type == GL_SAMPLER_CUBE);
-        GP_ASSERT(sampler);
-        GP_ASSERT((sampler->getType() == Texture::TEXTURE_2D && uniform->_type == GL_SAMPLER_2D) ||
-            (sampler->getType() == Texture::TEXTURE_CUBE && uniform->_type == GL_SAMPLER_CUBE));
+        if (!value->_isArray) {
+            const Texture* sampler = value->_value.samplerValue;
+            GP_ASSERT(uniform->_type == GL_SAMPLER_2D || uniform->_type == GL_SAMPLER_CUBE);
+            GP_ASSERT(sampler);
+            GP_ASSERT((sampler->getType() == Texture::TEXTURE_2D && uniform->_type == GL_SAMPLER_2D) ||
+                (sampler->getType() == Texture::TEXTURE_CUBE && uniform->_type == GL_SAMPLER_CUBE));
 
-        GL_ASSERT(glActiveTexture(GL_TEXTURE0 + uniform->_index + arrayOffset));
-
-        // Bind the sampler - this binds the texture and applies sampler state
-        const_cast<Texture*>(sampler)->bind();
-
-        GL_ASSERT(glUniform1i(location, uniform->_index + arrayOffset));
-        break;
-    }
-    case MaterialParameter::SAMPLER_ARRAY: {
-        const Texture** values = value->_value.samplerArrayValue;
-        GP_ASSERT(uniform->_type == GL_SAMPLER_2D || uniform->_type == GL_SAMPLER_CUBE);
-        GP_ASSERT(values);
-
-        // Set samplers as active and load texture unit array
-        GLint units[32];
-        for (unsigned int i = 0; i < value->_count; ++i)
-        {
-            GP_ASSERT((const_cast<Texture*>(values[i])->getType() == Texture::TEXTURE_2D && uniform->_type == GL_SAMPLER_2D) ||
-                (const_cast<Texture*>(values[i])->getType() == Texture::TEXTURE_CUBE && uniform->_type == GL_SAMPLER_CUBE));
-            GL_ASSERT(glActiveTexture(GL_TEXTURE0 + uniform->_index + arrayOffset + i));
+            GL_ASSERT(glActiveTexture(GL_TEXTURE0 + uniform->_index + arrayOffset));
 
             // Bind the sampler - this binds the texture and applies sampler state
-            const_cast<Texture*>(values[i])->bind();
+            const_cast<Texture*>(sampler)->bind();
 
-            units[i] = uniform->_index + arrayOffset + i;
+            GL_ASSERT(glUniform1i(location, uniform->_index + arrayOffset));
         }
+        else {
+            const Texture** values = value->_value.samplerArrayValue;
+            GP_ASSERT(uniform->_type == GL_SAMPLER_2D || uniform->_type == GL_SAMPLER_CUBE);
+            GP_ASSERT(values);
 
-        // Pass texture unit array to GL
-        GL_ASSERT(glUniform1iv(location, value->_count, units));
+            // Set samplers as active and load texture unit array
+            GLint units[32];
+            for (unsigned int i = 0; i < value->_count; ++i)
+            {
+                GP_ASSERT((const_cast<Texture*>(values[i])->getType() == Texture::TEXTURE_2D && uniform->_type == GL_SAMPLER_2D) ||
+                    (const_cast<Texture*>(values[i])->getType() == Texture::TEXTURE_CUBE && uniform->_type == GL_SAMPLER_CUBE));
+                GL_ASSERT(glActiveTexture(GL_TEXTURE0 + uniform->_index + arrayOffset + i));
+
+                // Bind the sampler - this binds the texture and applies sampler state
+                const_cast<Texture*>(values[i])->bind();
+
+                units[i] = uniform->_index + arrayOffset + i;
+            }
+
+            // Pass texture unit array to GL
+            GL_ASSERT(glUniform1iv(location, value->_count, units));
+        }
         break;
-        //case MaterialParameter::METHOD:
+    }
+    //case MaterialParameter::METHOD:
             //if (_value.method)
             //    _value.method->setValue(effect);
             //break;
-    }
     default:
-    {
         if ((value->_loggerDirtyBits & MaterialParameter::PARAMETER_VALUE_NOT_SET) == 0)
         {
             GP_WARN("Material parameter value not set for: '%s' in effect: '%s'.", value->_name.c_str(), effect->getId());
@@ -1022,7 +1047,6 @@ bool GLRenderer::bindUniform(MaterialParameter* value, Uniform* uniform, ShaderP
         }
         return false;
         break;
-    }
     }
     return true;
 }
