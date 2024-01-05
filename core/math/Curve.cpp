@@ -210,6 +210,13 @@ void Curve::evaluate(Float time, Float* dst) const
     evaluate(time, 0.0f, 1.0f, 0.0f, dst);
 }
 
+static void copyFloatToDouble(Float* dst, float *value, int byteSize) {
+    int componentSize = byteSize / 4;
+    for (int i = 0; i < componentSize; ++i) {
+        dst[i] = value[i];
+    }
+}
+
 void Curve::evaluate(Float time, Float startTime, Float endTime, Float loopBlendTime, Float* dst) const
 {
     assert(dst && startTime >= 0.0f && startTime <= endTime && endTime <= 1.0f && loopBlendTime >= 0.0f);
@@ -217,7 +224,7 @@ void Curve::evaluate(Float time, Float startTime, Float endTime, Float loopBlend
     // If there's only one point on the curve, return its value.
     if (_pointCount == 1)
     {
-        memcpy(dst, _points[0].value, _componentSize);
+        copyFloatToDouble(dst, _points[0].value, _componentSize);
         return;
     }
 
@@ -246,12 +253,12 @@ void Curve::evaluate(Float time, Float startTime, Float endTime, Float loopBlend
     // If an exact endpoint was specified, skip interpolation and return the value directly
     if (localTime == _points[min].time)
     {
-        memcpy(dst, _points[min].value, _componentSize);
+        copyFloatToDouble(dst, _points[min].value, _componentSize);
         return;
     }
     if (localTime == _points[max].time)
     {
-        memcpy(dst, _points[max].value, _componentSize);
+        copyFloatToDouble(dst, _points[max].value, _componentSize);
         return;
     }
 
@@ -347,7 +354,7 @@ void Curve::evaluate(Float time, Float startTime, Float endTime, Float loopBlend
         }
         case STEP:
         {
-            memcpy(dst, from->value, _componentSize);
+            copyFloatToDouble(dst, from->value, _componentSize);
             return;
         }
         case QUADRATIC_IN:
