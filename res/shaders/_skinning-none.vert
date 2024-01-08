@@ -1,4 +1,4 @@
-#if MORPH_TARGET_COUNT
+#ifdef MORPH_TARGET_COUNT
     #include "_morph.vert"
 #endif
 
@@ -9,7 +9,7 @@
 vec4 getPosition()
 {
     vec3 pos = a_position;
-#if MORPH_TARGET_COUNT
+#ifdef MORPH_TARGET_COUNT
     pos = getMorphPosition(pos);
 #endif
 

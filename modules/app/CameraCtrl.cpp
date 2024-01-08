@@ -100,7 +100,7 @@ void EditorCameraCtrl::touchEvent(MotionEvent& evt)
             _prevX = evt.x;
             _prevY = evt.y;
 
-            if (evt.button == MotionEvent::right) {
+            if (evt.button == MotionEvent::right || evt.button == MotionEvent::middle) {
                 updateSurfaceDistance();
                 Rectangle& viewport = *sceneView->getViewport();
                 double fovDivisor = tan(MATH_DEG_TO_RAD(_camera->getFieldOfView()) / 2) / (viewport.height / 2);

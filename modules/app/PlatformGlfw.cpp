@@ -330,6 +330,10 @@ static void cursor_position_callback(GLFWwindow* window, double x, double y)
         evt.type = mgp::MotionEvent::touchMove;
         evt.button = mgp::MotionEvent::right;
     }
+    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+        evt.type = mgp::MotionEvent::touchMove;
+        evt.button = mgp::MotionEvent::middle;
+    }
 
     mgp::Platform::mouseEventInternal(evt);
 }
@@ -354,7 +358,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
         evt.button = mgp::MotionEvent::right;
     }
-    else {
+    else if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
         evt.button = mgp::MotionEvent::middle;
     }
 
