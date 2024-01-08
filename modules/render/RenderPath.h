@@ -68,6 +68,7 @@ namespace mgp {
 
 		Renderer* getRenderer() { return _renderer; }
 		void render(Scene* scene, Camera *camera, Rectangle *viewport);
+		void renderDrawables(std::vector<Drawable*>& drawables, Camera* camera, Rectangle* viewport);
 
 		void onResize(int w, int h);
 

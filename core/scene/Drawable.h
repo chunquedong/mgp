@@ -133,8 +133,12 @@ public:
     int getPickMask() { return _pickMask; }
     void setPickMask(int v) { _pickMask = v; }
 
-    int getHighlightType() { return _highlightType; }
-    void setHighlightType(int v) { _highlightType = v; }
+    enum HighlightType
+    {
+        SharedColor, No, Silhouette, AloneColor,
+    };
+    HighlightType getHighlightType() { return _highlightType; }
+    void setHighlightType(HighlightType v) { _highlightType = v; }
 
     bool raycast(RayQuery& query);
     virtual bool doRaycast(RayQuery& query);
@@ -174,7 +178,7 @@ protected:
 
     int _pickMask;
 
-    int _highlightType;
+    HighlightType _highlightType;
 };
 
 class DrawableGroup : public Drawable {

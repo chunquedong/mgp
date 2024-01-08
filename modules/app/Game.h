@@ -39,7 +39,7 @@ class Font;
  *
  * @see http://gameplay3d.github.io/GamePlay/docs/file-formats.html#wiki-Game_Config
  */
-class Game: public Toolkit, public InputListener
+class Game : public Toolkit, public InputListener
 {
     friend class Platform;
     //friend class Gamepad;
@@ -91,7 +91,7 @@ public:
         /**
          * @see Activator::createObject
          */
-        static Serializable *createObject();
+        static Serializable* createObject();
 
         std::string title;
         int width;
@@ -104,7 +104,7 @@ public:
         std::vector<SplashScreen> splashScreens;
         std::string mainScene;
     };
-    
+
     /**
      * The game states.
      */
@@ -127,7 +127,7 @@ public:
 
     /**
      * Gets the single instance of the game.
-     * 
+     *
      * @return The single instance of the game.
      */
     static Game* getInstance();
@@ -137,7 +137,7 @@ public:
      *
      * You would typically use things in your game that you want to stop when the game is paused.
      * This includes things such as game physics and animation.
-     * 
+     *
      * @return The total game time (in milliseconds).
      */
     double getGameTime();
@@ -168,7 +168,7 @@ public:
 
     /**
      * Called to initialize the game, and begin running the game.
-     * 
+     *
      * @return Zero for normal termination, or non-zero if an error occurred.
      */
     int run();
@@ -198,21 +198,21 @@ public:
 
     /**
      * Gets the current frame rate.
-     * 
+     *
      * @return The current frame rate.
      */
     inline unsigned int getFrameRate() const;
 
     /**
      * Gets the game window width.
-     * 
+     *
      * @return The game window width.
      */
     inline unsigned int getWidth() const;
 
     /**
      * Gets the game window height.
-     * 
+     *
      * @return The game window height.
      */
     inline unsigned int getHeight() const;
@@ -221,7 +221,7 @@ public:
     * Screen density scale
     */
     float getScreenScale() const;
-    
+
     /**
     * Request next frame to render.
     * Do nothing in game main loop mode.
@@ -241,12 +241,12 @@ protected:
      *
      * @param display true when virtual keyboard needs to be displayed; false otherwise.
      */
-     virtual void displayKeyboard(bool display);
+    virtual void displayKeyboard(bool display);
 
-    
+
     /**
      * Gets the command line arguments.
-     * 
+     *
      * @param argc The number of command line arguments.
      * @param argv The array of command line arguments.
      * @script{ignore}
@@ -256,7 +256,7 @@ protected:
     /**
      * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.
      * Game time stops while the game is paused. A time offset of zero will fire the time event in the next frame.
-     * 
+     *
      * @param timeOffset The number of game milliseconds in the future to schedule the event to be fired.
      * @param timeListener The TimeListener that will receive the event.
      * @param cookie The cookie data that the time event will contain.
@@ -267,11 +267,11 @@ protected:
     /**
      * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.
      * Game time stops while the game is paused. A time offset of zero will fire the time event in the next frame.
-     * 
+     *
      * The given script function must take a single floating point number, which is the difference between the
      * current game time and the target time (see TimeListener::timeEvent). The function will be executed
      * in the context of the script envionrment that the schedule function was called from.
-     * 
+     *
      * @param timeOffset The number of game milliseconds in the future to schedule the event to be fired.
      * @param function The script function that will receive the event.
      */
@@ -351,6 +351,8 @@ protected:
      * @param elapsedTime The elapsed game time.
      */
     virtual void render(float elapsedTime);
+
+    virtual void onViewRender(SceneView* sceneView);
 
 public:
     std::vector<SceneView*> &getSceneViews() { return _sceneViews; }

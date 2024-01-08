@@ -28,6 +28,34 @@ void RenderQueue::fill(Scene* scene, Camera *camera, Rectangle *viewport, bool v
     scene->visit(this, &RenderQueue::buildRenderQueues);
 }
 
+void RenderQueue::fillDrawables(std::vector<Drawable*>& drawables, Camera *camera, Rectangle *viewport, bool viewFrustumCulling) {
+    _camera = camera;
+    _viewFrustumCulling = viewFrustumCulling;
+
+    //clear
+    for (unsigned int i = 0; i < Drawable::RenderLayer::Count; ++i)
+    {
+        std::vector<Drawable*>& queue = _renderQueues[i];
+        queue.clear();
+    }
+    _lights.clear();
+    
+    // Visit all the nodes in the scene for drawing
+    for (Drawable* drawable : drawables) {
+        if (drawable && drawable->isVisiable())
+        {
+            // Perform view-frustum culling for this node
+            if (dynamic_cast<Model*>(drawable)) {
+                if (_viewFrustumCulling && drawable->getNode() && !drawable->getNode()->getBoundingSphere().intersects(_camera->getFrustum()))
+                    continue;
+            }
+            // Determine which render queue to insert the node into
+            std::vector<Drawable*>* queue = &_renderQueues[(int)drawable->getRenderPass()];
+            queue->push_back(drawable);
+        }
+    }
+}
+
 bool RenderQueue::buildRenderQueues(Node* node) {
     Drawable* drawable = node->getDrawable();
     if (drawable && drawable->isVisiable())

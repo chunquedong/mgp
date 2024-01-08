@@ -778,13 +778,14 @@ void MaterialParameter::applyAnimationValue(AnimationValue* value, float blendWe
 void MaterialParameter::cloneInto(MaterialParameter* materialParameter) const
 {
     GP_ASSERT(materialParameter);
-    materialParameter->_type = _type;
+    //materialParameter->_type = _type;
     materialParameter->_count = _count;
     materialParameter->_dynamicAlloc = _dynamicAlloc;
     materialParameter->_uniform = _uniform;
     switch (_type)
     {
     case NONE:
+        materialParameter->_type = NONE;
         break;
     case FLOAT:
         if (!_isArray) {

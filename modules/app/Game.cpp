@@ -190,10 +190,14 @@ void Game::update(float elapsedTime)
     }
 }
 
+void Game::onViewRender(SceneView* view) {
+    view->render();
+}
+
 void Game::render(float elapsedTime)
 {
     for (auto view : _sceneViews) {
-        view->render();
+        onViewRender(view);
     }
 
     Rectangle* viewport = getView()->getViewport();

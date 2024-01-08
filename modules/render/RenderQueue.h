@@ -22,6 +22,7 @@ public:
     std::vector<Light*> _lights;
     
     void fill(Scene* scene, Camera *camera, Rectangle *viewport, bool viewFrustumCulling = true);
+    void fillDrawables(std::vector<Drawable*>& drawables, Camera *camera, Rectangle *viewport, bool viewFrustumCulling = true);
     void sort();
 
     void beginDrawScene(RenderInfo* view, Drawable::RenderLayer layer);

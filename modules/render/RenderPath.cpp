@@ -264,6 +264,46 @@ void RenderPath::render(Scene* scene, Camera* camera, Rectangle* viewport) {
     }
 }
 
+void RenderPath::renderDrawables(std::vector<Drawable*>& drawables, Camera* camera, Rectangle* viewport) {
+    if (_renderStages.size() == 0) {
+        initForward();
+        for (RenderStage* p : _renderStages) {
+            p->onResize(_width, _height);
+        }
+    }
+
+    GP_ASSERT(camera);
+    GP_ASSERT(viewport);
+    GP_ASSERT(_frameBuffer);
+
+    _renderQueue.fillDrawables(drawables, camera, viewport);
+    //if (_use_shadow) updateShadowMap(scene, camera);
+
+    resetViewport(viewport);
+    _renderQueue.sort();
+
+    _renderView.camera = camera;
+    _renderView.viewport = *viewport;
+    _renderView.wireframe = false;
+    _renderView.lights = &_renderQueue._lights;
+    //_renderView._renderer = _renderer;
+    //_renderView._renderPath = this;
+
+    //_renderer->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0);
+    _previousFrameBuffer = _frameBuffer->bind();
+
+    for (int i = 0; i < _renderStages.size(); ++i) {
+        RenderStage* p = _renderStages[i];
+
+        RenderPass* pass = dynamic_cast<RenderPass*>(p);
+        if (pass && pass->_drawToScreen && _previousFrameBuffer) {
+            _previousFrameBuffer->bind();
+        }
+
+        p->render();
+    }
+}
+
 void RenderPath::createFramebuffer() {
     _frameBuffer = _renderer->createFrameBuffer("main", _width, _height, Texture::RGBA16F).take();
     //_frameBuffer->createDepthStencilTarget();
