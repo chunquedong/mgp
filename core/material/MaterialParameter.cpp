@@ -43,7 +43,7 @@ void MaterialParameter::clearValue()
     }
 
     // Free dynamic data
-    if (_dynamicAlloc && _isArray)
+    if (_dynamicAlloc)
     {
         switch (_type)
         {

@@ -9,12 +9,18 @@
 //#include "objects/CubeMap.h"
 #include <algorithm>
 #include <float.h>
+#include "objects/Instanced.h"
 
 using namespace mgp;
 
 void RenderQueue::fill(Scene* scene, Camera *camera, Rectangle *viewport, bool viewFrustumCulling) {
     _camera = camera;
     _viewFrustumCulling = viewFrustumCulling;
+
+    for (auto it = _instanceds.begin(); it != _instanceds.end(); ++it) {
+        Instanced* instance = dynamic_cast<Instanced*>(it->second->getDrawable());
+        instance->clear();
+    }
 
     //clear
     for (unsigned int i = 0; i < Drawable::RenderLayer::Count; ++i)
@@ -26,6 +32,56 @@ void RenderQueue::fill(Scene* scene, Camera *camera, Rectangle *viewport, bool v
     
     // Visit all the nodes in the scene for drawing
     scene->visit(this, &RenderQueue::buildRenderQueues);
+
+    for (auto it = _instanceds.begin(); it != _instanceds.end(); ++it) {
+        Instanced* instance = dynamic_cast<Instanced*>(it->second->getDrawable());
+        instance->finish();
+        std::vector<Drawable*>* queue = &_renderQueues[(int)instance->getRenderPass()];
+        queue->push_back(instance);
+    }
+}
+
+bool RenderQueue::addInstanced(Drawable* drawble) {
+    DrawableGroup* group = dynamic_cast<DrawableGroup*>(drawble);
+    if (group) {
+        bool rc = false;
+        for (UPtr<Drawable>& draw : group->getDrawables()) {
+            if (addInstanced(draw.get())) {
+                rc = true;
+            }
+        }
+        return rc;
+    }
+
+    if (drawble->getInstanceKey() && drawble->getNode()) {
+        //Model* model = dynamic_cast<Model*>(drawble);
+        //if (!model) return false;
+        auto found = _instanceds.find(drawble->getInstanceKey());
+        Instanced* instance_;
+        if (found == _instanceds.end()) {
+            UPtr<Instanced> instanced(new Instanced());
+            NodeCloneContext ctx;
+            UPtr<Drawable> temp = drawble->clone(ctx);
+            //temp->
+            instanced->setModel(std::move(temp));
+            instance_ = instanced.get();
+            instanced->setRenderPass(drawble->getRenderPass());
+
+            UPtr<Node> node = Node::create("instanced");
+            node->setDrawable(std::move(instanced));
+            _instanceds[drawble->getInstanceKey()] = std::move(node);
+        }
+        else {
+            instance_ = dynamic_cast<Instanced*>(found->second->getDrawable());
+        }
+
+        Matrix worldViewProj;
+        Matrix::multiply(_camera->getViewProjectionMatrix(), drawble->getNode()->getWorldMatrix(), &worldViewProj);
+        instance_->add(worldViewProj);
+
+        return true;
+    }
+    return false;
 }
 
 void RenderQueue::fillDrawables(std::vector<Drawable*>& drawables, Camera *camera, Rectangle *viewport, bool viewFrustumCulling) {
@@ -46,9 +102,11 @@ void RenderQueue::fillDrawables(std::vector<Drawable*>& drawables, Camera *camer
         {
             // Perform view-frustum culling for this node
             if (dynamic_cast<Model*>(drawable)) {
-                if (_viewFrustumCulling && drawable->getNode() && !drawable->getNode()->getBoundingSphere().intersects(_camera->getFrustum()))
+                if (_viewFrustumCulling && drawable->getNode() && !drawable->getNode()->getBoundingSphere().intersects(_camera->getFrustum())) {
                     continue;
+                }
             }
+
             // Determine which render queue to insert the node into
             std::vector<Drawable*>* queue = &_renderQueues[(int)drawable->getRenderPass()];
             queue->push_back(drawable);
@@ -62,9 +120,15 @@ bool RenderQueue::buildRenderQueues(Node* node) {
     {
         // Perform view-frustum culling for this node
         if (dynamic_cast<Model*>(drawable)) {
-            if (_viewFrustumCulling && !node->getBoundingSphere().intersects(_camera->getFrustum()))
+            if (_viewFrustumCulling && !node->getBoundingSphere().intersects(_camera->getFrustum())) {
                 return true;
+            }
         }
+
+        if (addInstanced(drawable)) {
+            return true;
+        }
+
         // Determine which render queue to insert the node into
         std::vector<Drawable*>* queue = &_renderQueues[(int)drawable->getRenderPass()];
         queue->push_back(drawable);

@@ -26,7 +26,12 @@ in vec3 a_position;
 void main()
 {
     vec4 position = getPosition();
+
+#ifndef NO_MVP
     gl_Position = u_worldViewProjectionMatrix * position;
+#else
+    gl_Position = position;
+#endif
 
     #if defined (LIGHTING)
         applyLight(position);

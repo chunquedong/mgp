@@ -8,6 +8,8 @@
 #include "math/Matrix.h"
 #include "Texture.h"
 
+#include <unordered_map>
+
 namespace mgp
 {
 /** Vertex attribute. */
@@ -73,7 +75,7 @@ public:
      * 
      * @return The uniform, or NULL if no such uniform exists.
      */
-    Uniform* getUniform(const char* name) const;
+    Uniform* getUniform(const std::string& name) const;
 
     /**
      * Returns the specified active uniform.
@@ -128,7 +130,7 @@ private:
     ProgramHandle _program;
     std::string _id;
     std::map<std::string, VertexAttributeLoc> _vertexAttributes;
-    mutable std::map<std::string, Uniform*> _uniforms;
+    mutable std::unordered_map<std::string, Uniform*> _uniforms;
     static Uniform _emptyUniform;
 };
 

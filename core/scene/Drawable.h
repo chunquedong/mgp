@@ -148,7 +148,9 @@ public:
     virtual Material* getMainMaterial() const { return NULL; };
 
     virtual double getDistance(Vector3& cameraPosition) const;
-protected:
+
+    void* getInstanceKey() { return _instanceKey; }
+    void setInstanceKey(void* key) { _instanceKey = key; }
 
     /**
      * Clones the drawable and returns a new drawable.
@@ -157,7 +159,7 @@ protected:
      * @return The newly created drawable.
      */
     virtual UPtr<Drawable> clone(NodeCloneContext& context) { return UPtr<Drawable>(NULL); }
-
+protected:
     /**
      * Sets the node this drawable is attached to.
      *
@@ -179,6 +181,8 @@ protected:
     int _pickMask;
 
     HighlightType _highlightType;
+
+    void* _instanceKey;
 };
 
 class DrawableGroup : public Drawable {
@@ -193,6 +197,8 @@ public:
     virtual void update(float elapsedTime) override;
     virtual bool doRaycast(RayQuery& query) override;
     virtual const BoundingSphere* getBoundingSphere() override;
+
+    virtual UPtr<Drawable> clone(NodeCloneContext& context);
 };
 
 class DelayUpdater {

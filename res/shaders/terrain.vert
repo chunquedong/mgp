@@ -39,7 +39,12 @@ void main()
 {
     // Transform position to clip space.
     vec4 position = vec4(a_position, 1.0);
+
+#ifndef NO_MVP
     gl_Position = u_worldViewProjectionMatrix * position;
+#else
+    gl_Position = position;
+#endif
 
     #if defined(LIGHTING)
 

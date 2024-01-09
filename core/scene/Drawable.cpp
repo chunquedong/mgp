@@ -10,7 +10,7 @@ void RenderInfo::draw(DrawCall* drawCall) {
 }
 
 Drawable::Drawable()
-    : _node(NULL), _renderPass(RenderLayer::Qpaque), _lightMask(0), _visiable(true), _pickMask(1), _highlightType(HighlightType::SharedColor)
+    : _node(NULL), _renderPass(RenderLayer::Qpaque), _lightMask(0), _visiable(true), _pickMask(1), _highlightType(HighlightType::SharedColor), _instanceKey(NULL)
 {
 }
 
@@ -151,5 +151,20 @@ const BoundingSphere* mgp::DrawableGroup::getBoundingSphere()
         }
     }
     return &_bounds;
+}
+
+UPtr<Drawable> mgp::DrawableGroup::clone(NodeCloneContext& context) {
+    UPtr<DrawableGroup> ng(new DrawableGroup());
+    ng->_bounds = _bounds;
+
+    NodeCloneContext ctx;
+    for (UPtr<Drawable>& d : _drawables) {
+        auto c = d->clone(ctx);
+        if (c.get()) {
+            ng->_drawables.push_back(std::move(c));
+        }
+    }
+
+    return ng;
 }
 

@@ -14,9 +14,11 @@
 
 namespace mgp
 {
+
 class RenderQueue {
     bool _viewFrustumCulling;
     Camera *_camera;
+    std::map<void*, UPtr<Node> > _instanceds;
 public:
     std::vector<Drawable*> _renderQueues[Drawable::RenderLayer::Count];
     std::vector<Light*> _lights;
@@ -28,6 +30,7 @@ public:
     void beginDrawScene(RenderInfo* view, Drawable::RenderLayer layer);
 protected:
     bool buildRenderQueues(Node* node);
+    bool addInstanced(Drawable* draw);
 };
 }
 

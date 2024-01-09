@@ -21,7 +21,7 @@ ShaderProgram::~ShaderProgram()
     __effectCache.erase(_id);
 
     // Free uniforms.
-    for (std::map<std::string, Uniform*>::iterator itr = _uniforms.begin(); itr != _uniforms.end(); ++itr)
+    for (auto itr = _uniforms.begin(); itr != _uniforms.end(); ++itr)
     {
         SAFE_DELETE(itr->second);
     }
@@ -260,21 +260,21 @@ VertexAttributeLoc ShaderProgram::getVertexAttribute(const char* name) const
     return (itr == _vertexAttributes.end() ? -1 : itr->second);
 }
 
-Uniform* ShaderProgram::getUniform(const char* name) const
+Uniform* ShaderProgram::getUniform(const std::string& name) const
 {
-    std::map<std::string, Uniform*>::const_iterator itr = _uniforms.find(name);
+    auto itr = _uniforms.find(name);
 
 	if (itr != _uniforms.end()) {
 		// Return cached uniform variable
 		return itr->second;
 	}
 
-    size_t len = strlen(name);
+    size_t len = name.size();
     if (len>3 && name[len-1] == ']' && name[len - 3] == '[') {
         // Check for array uniforms ("u_directionalLightColor[0]" -> "u_directionalLightColor")
         std::string parentname = name;
         parentname = parentname.substr(0, len-3);
-        std::map<std::string, Uniform*>::const_iterator itr = _uniforms.find(parentname);
+        auto itr = _uniforms.find(parentname);
 
         if (itr != _uniforms.end()) {
             return itr->second;
@@ -317,7 +317,7 @@ Uniform* ShaderProgram::getUniform(const char* name) const
 Uniform* ShaderProgram::getUniform(unsigned int index) const
 {
     unsigned int i = 0;
-    for (std::map<std::string, Uniform*>::const_iterator itr = _uniforms.begin(); itr != _uniforms.end(); ++itr, ++i)
+    for (auto itr = _uniforms.begin(); itr != _uniforms.end(); ++itr, ++i)
     {
         if (i == index)
         {
