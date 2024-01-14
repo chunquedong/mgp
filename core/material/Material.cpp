@@ -480,6 +480,17 @@ void Material::setShaderDefines(const std::string& defiens) {
     }
 }
 
+void Material::getShaderId(std::string& uniqueId) {
+    uniqueId = vertexShaderPath;
+    uniqueId += ';';
+    uniqueId += fragmentShaderPath;
+    uniqueId += ';';
+    if (shaderDefines.size() > 0)
+    {
+        uniqueId += shaderDefines;
+    }
+}
+
 //void Material::setNodeBinding(Node* node)
 //{
 //    _node = node;

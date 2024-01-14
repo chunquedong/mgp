@@ -16,6 +16,18 @@ using namespace mgp;
 void RenderQueue::fill(Scene* scene, Camera *camera, Rectangle *viewport, bool viewFrustumCulling) {
     _camera = camera;
     _viewFrustumCulling = viewFrustumCulling;
+    _renderInfo.camera = camera;
+    
+    clear();
+    
+    // Visit all the nodes in the scene for drawing
+    scene->visit(this, &RenderQueue::buildRenderQueues);
+
+    endFill();
+}
+
+void RenderQueue::clear() {
+    _renderInfo._drawList.clear();
 
     for (auto it = _instanceds.begin(); it != _instanceds.end(); ++it) {
         Instanced* instance = dynamic_cast<Instanced*>(it->second->getDrawable());
@@ -25,19 +37,26 @@ void RenderQueue::fill(Scene* scene, Camera *camera, Rectangle *viewport, bool v
     //clear
     for (unsigned int i = 0; i < Drawable::RenderLayer::Count; ++i)
     {
-        std::vector<Drawable*>& queue = _renderQueues[i];
+        auto& queue = _renderQueues[i];
         queue.clear();
     }
     _lights.clear();
-    
-    // Visit all the nodes in the scene for drawing
-    scene->visit(this, &RenderQueue::buildRenderQueues);
+}
+
+void RenderQueue::endFill() {
 
     for (auto it = _instanceds.begin(); it != _instanceds.end(); ++it) {
         Instanced* instance = dynamic_cast<Instanced*>(it->second->getDrawable());
         instance->finish();
-        std::vector<Drawable*>* queue = &_renderQueues[(int)instance->getRenderPass()];
-        queue->push_back(instance);
+        instance->draw(&_renderInfo);
+    }
+
+    Vector3 cameraPosition = _camera->getNode()->getTranslationWorld();
+    for (size_t j = 0, ncount = _renderInfo._drawList.size(); j < ncount; ++j)
+    {
+        DrawCall* drawCall = &_renderInfo._drawList[j];
+        drawCall->_distanceToCamera = drawCall->_drawable->getDistance(cameraPosition);
+        _renderQueues[drawCall->_renderLayer].emplace_back(*drawCall);
     }
 }
 
@@ -88,13 +107,7 @@ void RenderQueue::fillDrawables(std::vector<Drawable*>& drawables, Camera *camer
     _camera = camera;
     _viewFrustumCulling = viewFrustumCulling;
 
-    //clear
-    for (unsigned int i = 0; i < Drawable::RenderLayer::Count; ++i)
-    {
-        std::vector<Drawable*>& queue = _renderQueues[i];
-        queue.clear();
-    }
-    _lights.clear();
+    clear();
     
     // Visit all the nodes in the scene for drawing
     for (Drawable* drawable : drawables) {
@@ -107,9 +120,11 @@ void RenderQueue::fillDrawables(std::vector<Drawable*>& drawables, Camera *camer
                 }
             }
 
-            // Determine which render queue to insert the node into
-            std::vector<Drawable*>* queue = &_renderQueues[(int)drawable->getRenderPass()];
-            queue->push_back(drawable);
+            if (addInstanced(drawable)) {
+                continue;
+            }
+
+            drawable->draw(&_renderInfo);
         }
     }
 }
@@ -129,9 +144,7 @@ bool RenderQueue::buildRenderQueues(Node* node) {
             return true;
         }
 
-        // Determine which render queue to insert the node into
-        std::vector<Drawable*>* queue = &_renderQueues[(int)drawable->getRenderPass()];
-        queue->push_back(drawable);
+        drawable->draw(&_renderInfo);
     }
     Light *light = node->getLight();
     if (light) {
@@ -140,10 +153,10 @@ bool RenderQueue::buildRenderQueues(Node* node) {
     return true;
 }
 
-static uint64_t getMaterialId(Vector3& cameraPosition, Drawable* a) {
+static uint64_t getMaterialId(const DrawCall* a) {
 
     uint64_t materialId = 0;
-    Material* material = a->getMainMaterial();
+    Material* material = a->_material;
     if (material) {
         ShaderProgram* program = material->getEffect();
         if (program) {
@@ -153,41 +166,36 @@ static uint64_t getMaterialId(Vector3& cameraPosition, Drawable* a) {
     return materialId;
 }
 
-static double getDistance(Vector3& cameraPosition, Drawable* a) {
-    return a->getDistance(cameraPosition);
+static double getDistance(const DrawCall* a) {
+    return a->_distanceToCamera;
 }
 
-static uint64_t getSortScore(Vector3& cameraPosition, Drawable* a) {
-    uint64_t aid = getMaterialId(cameraPosition, a);
-    uint64_t adis = (uint64_t)getDistance(cameraPosition, a);
+static uint64_t getSortScore(const DrawCall* a) {
+    uint64_t aid = getMaterialId(a);
+    uint64_t adis = (uint64_t)getDistance(a);
     uint64_t mask = 0xFFFF;
     uint64_t score = ((adis & (~mask))) | (aid & mask);
     return score;
 }
 
 void RenderQueue::sort() {
-    Vector3 cameraPosition = _camera->getNode()->getTranslationWorld();
-    std::stable_sort(_renderQueues[Drawable::Qpaque].begin(), _renderQueues[Drawable::Qpaque].end(), [&](Drawable* a, Drawable* b)
+
+    std::stable_sort(_renderQueues[Drawable::Qpaque].begin(), _renderQueues[Drawable::Qpaque].end(), [&](const DrawCall& a, const DrawCall& b)
         {
-            uint64_t as = getSortScore(cameraPosition, a);
-            uint64_t bs = getSortScore(cameraPosition, b);
+            uint64_t as = getSortScore(&a);
+            uint64_t bs = getSortScore(&b);
             return as < bs;
         }
     );
-    std::stable_sort(_renderQueues[Drawable::Transparent].begin(), _renderQueues[Drawable::Transparent].end(), [&](Drawable* a, Drawable* b)
+    std::stable_sort(_renderQueues[Drawable::Transparent].begin(), _renderQueues[Drawable::Transparent].end(), [&](const DrawCall& a, const DrawCall& b)
         {
-            double as = getDistance(cameraPosition, a);
-            double bs = getDistance(cameraPosition, b);
+            double as = getDistance(&a);
+            double bs = getDistance(&b);
             return bs < as;
         }
     );
 }
 
-void RenderQueue::beginDrawScene(RenderInfo* view, Drawable::RenderLayer layer) {
-    std::vector<Drawable*>& queue = _renderQueues[layer];
-    for (size_t j = 0, ncount = queue.size(); j < ncount; ++j)
-    {
-        Drawable *drawble = queue[j];
-        drawble->draw(view);
-    }
+void RenderQueue::getSceneData(RenderInfo* view, Drawable::RenderLayer layer) {
+    view->_drawList.insert(view->_drawList.begin(), _renderQueues[layer].begin(), _renderQueues[layer].end());
 }

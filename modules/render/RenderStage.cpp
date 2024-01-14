@@ -110,7 +110,7 @@ void RenderPass::render() {
         _quadModel->draw(view);
     }
     else {
-        _renderPath->getRenderQueue()->beginDrawScene(view, (Drawable::RenderLayer)_drawType);
+        _renderPath->getRenderQueue()->getSceneData(view, (Drawable::RenderLayer)_drawType);
     }
 
     _renderPath->applyDraw(view);
@@ -145,8 +145,8 @@ void RenderPass::afterRender(RenderInfo* view) {
 
 void RestStage::render() {
     RenderInfo* view = _renderPath->getRenderView();
-    _renderPath->getRenderQueue()->beginDrawScene(view, Drawable::RenderLayer::Custom);
-    _renderPath->getRenderQueue()->beginDrawScene(view, Drawable::RenderLayer::Transparent);
+    _renderPath->getRenderQueue()->getSceneData(view, Drawable::RenderLayer::Custom);
+    _renderPath->getRenderQueue()->getSceneData(view, Drawable::RenderLayer::Transparent);
     //_renderPath->getRenderQueue()->beginDrawScene(view, Drawable::RenderLayer::Overlay);
     _renderPath->applyDraw(view);
 }
@@ -219,14 +219,12 @@ void Redraw::onResize(int w, int h) {
 
 void Redraw::beforeRender(RenderInfo* view) {
     Texture* texture = _renderPath->getTexture("lbuffer.0");
-    std::vector<Drawable*>& queue = _renderPath->getRenderQueue()->_renderQueues[_drawType];
+    std::vector<DrawCall>& queue = _renderPath->getRenderQueue()->_renderQueues[_drawType];
     for (size_t j = 0, ncount = queue.size(); j < ncount; ++j)
     {
-        Drawable* drawble = queue[j];
-        Model* model = dynamic_cast<Model*>(drawble);
-        //TODO
-        if (model) {
-            model->getMaterial()->getParameter("u_lightAcc")->setSampler(texture);
+        DrawCall* drawble = &queue[j];
+        if (drawble->_material) {
+            drawble->_material->getParameter("u_lightAcc")->setSampler(texture);
         }
     }
 }

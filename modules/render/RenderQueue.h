@@ -19,18 +19,20 @@ class RenderQueue {
     bool _viewFrustumCulling;
     Camera *_camera;
     std::map<void*, UPtr<Node> > _instanceds;
+    RenderInfo _renderInfo;
 public:
-    std::vector<Drawable*> _renderQueues[Drawable::RenderLayer::Count];
+    std::vector<DrawCall> _renderQueues[Drawable::RenderLayer::Count];
     std::vector<Light*> _lights;
     
     void fill(Scene* scene, Camera *camera, Rectangle *viewport, bool viewFrustumCulling = true);
     void fillDrawables(std::vector<Drawable*>& drawables, Camera *camera, Rectangle *viewport, bool viewFrustumCulling = true);
     void sort();
-
-    void beginDrawScene(RenderInfo* view, Drawable::RenderLayer layer);
+    void getSceneData(RenderInfo* view, Drawable::RenderLayer layer);
 protected:
     bool buildRenderQueues(Node* node);
     bool addInstanced(Drawable* draw);
+    void clear();
+    void endFill();
 };
 }
 

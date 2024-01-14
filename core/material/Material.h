@@ -302,6 +302,7 @@ public:
     const std::string& getShaderDefines();
     void setShaderDefines(const std::string &defiens);
 
+    void getShaderId(std::string& id);
 private:
 
     /**

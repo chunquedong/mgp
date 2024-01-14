@@ -127,7 +127,7 @@ void Shadow::draw(Scene* scene, Renderer* renderer, Matrix& lightView, Matrix& l
 
     view._overridedMaterial = _material;
     view.isDepthPass = true;
-    renderQueue.beginDrawScene(&view, Drawable::RenderLayer::Qpaque);
+    renderQueue.getSceneData(&view, Drawable::RenderLayer::Qpaque);
 
     for (int i = 0; i < view._drawList.size(); ++i) {
         DrawCall* drawCall = &view._drawList[i];

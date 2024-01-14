@@ -40,6 +40,9 @@ public:
 
     uint64_t _instanceVbo = 0;
     int _instanceCount = 0;
+
+    Drawable::RenderLayer _renderLayer = Drawable::Qpaque;
+    double _distanceToCamera = 0;
 };
 
 class Renderer {
