@@ -56,7 +56,9 @@ void RenderDataManager::endFill() {
     for (size_t j = 0, ncount = _renderInfo._drawList.size(); j < ncount; ++j)
     {
         DrawCall* drawCall = &_renderInfo._drawList[j];
-        drawCall->_distanceToCamera = drawCall->_drawable->getDistance(cameraPosition);
+        if (drawCall->_drawable) {
+            drawCall->_distanceToCamera = drawCall->_drawable->getDistance(cameraPosition);
+        }
         _renderQueues[drawCall->_renderLayer].emplace_back(*drawCall);
     }
 }
@@ -128,6 +130,8 @@ void RenderDataManager::fillDrawables(std::vector<Drawable*>& drawables, Camera 
             drawable->draw(&_renderInfo);
         }
     }
+
+    endFill();
 }
 
 bool RenderDataManager::buildRenderQueues(Node* node) {
