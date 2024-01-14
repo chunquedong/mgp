@@ -52,7 +52,7 @@ void RenderPass::render() {
     Model* _quadModel = RenderPath::fullscreenQuadModel();
 
     
-    RenderInfo* view = _renderPath->getRenderView();
+    RenderData* view = _renderPath->makeRenderDataSet();
     if (_material.get()) {
         view->_overridedMaterial = _material.get();
     }
@@ -107,13 +107,15 @@ void RenderPass::render() {
     if (_drawType == -1) {
         _material->getStateBlock()->setDepthTest(false);
         _quadModel->setMaterial(uniqueFromInstant(_material.get()));
-        _quadModel->draw(view);
+        RenderInfo info;
+        _quadModel->draw(&info);
+        view->_drawList = info._drawList;
     }
     else {
-        _renderPath->getRenderQueue()->getSceneData(view, (Drawable::RenderLayer)_drawType);
+        _renderPath->getRenderDataManager()->getRenderData(view, (Drawable::RenderLayer)_drawType);
     }
 
-    _renderPath->applyDraw(view);
+    _renderPath->commitRenderData();
 
     afterRender(view);
 
@@ -137,18 +139,18 @@ void RenderPass::onResize(int w, int h) {
     }
 }
 
-void RenderPass::beforeRender(RenderInfo* view) {
+void RenderPass::beforeRender(RenderData* view) {
 }
-void RenderPass::afterRender(RenderInfo* view) {
+void RenderPass::afterRender(RenderData* view) {
 }
 
 
 void RestStage::render() {
-    RenderInfo* view = _renderPath->getRenderView();
-    _renderPath->getRenderQueue()->getSceneData(view, Drawable::RenderLayer::Custom);
-    _renderPath->getRenderQueue()->getSceneData(view, Drawable::RenderLayer::Transparent);
-    //_renderPath->getRenderQueue()->beginDrawScene(view, Drawable::RenderLayer::Overlay);
-    _renderPath->applyDraw(view);
+    RenderData* view = _renderPath->makeRenderDataSet();
+    _renderPath->getRenderDataManager()->getRenderData(view, Drawable::RenderLayer::Custom);
+    _renderPath->getRenderDataManager()->getRenderData(view, Drawable::RenderLayer::Transparent);
+    //_renderPath->getRenderDataManager()->beginDrawScene(view, Drawable::RenderLayer::Overlay);
+    _renderPath->commitRenderData();
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -192,12 +194,12 @@ LightShading::LightShading()
     _dstBufferName = "lbuffer";
 }
 
-void LightShading::beforeRender(RenderInfo* view) {
+void LightShading::beforeRender(RenderData* view) {
     Model* _quadModel = RenderPath::fullscreenQuadModel();
     _quadModel->setLightMask(1);
 }
 
-void LightShading::afterRender(RenderInfo* view) {
+void LightShading::afterRender(RenderData* view) {
     Model* _quadModel = RenderPath::fullscreenQuadModel();
     _quadModel->setLightMask(0);
 }
@@ -217,9 +219,9 @@ void Redraw::onResize(int w, int h) {
     _dstFrameBuffer->check();
 }
 
-void Redraw::beforeRender(RenderInfo* view) {
+void Redraw::beforeRender(RenderData* view) {
     Texture* texture = _renderPath->getTexture("lbuffer.0");
-    std::vector<DrawCall>& queue = _renderPath->getRenderQueue()->_renderQueues[_drawType];
+    std::vector<DrawCall>& queue = _renderPath->getRenderDataManager()->_renderQueues[_drawType];
     for (size_t j = 0, ncount = queue.size(); j < ncount; ++j)
     {
         DrawCall* drawble = &queue[j];

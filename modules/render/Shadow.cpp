@@ -8,7 +8,7 @@
 #include "Shadow.h"
 #include "scene/Renderer.h"
 #include "scene/Scene.h"
-#include "RenderQueue.h"
+#include "RenderDataManager.h"
 #include "material/Material.h"
 #include "RenderPath.h"
 #include "scene/Drawable.h"
@@ -115,25 +115,25 @@ void Shadow::draw(Scene* scene, Renderer* renderer, Matrix& lightView, Matrix& l
     Rectangle viewport(0, index*height, width, height);
     renderer->setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
-    RenderInfo view;
+    RenderData view;
     view.camera = cameraNode->getCamera();
     view.viewport = viewport;
     view.wireframe = false;
     view.lights = NULL;
     //view._renderer = renderer;
 
-    RenderQueue renderQueue;
+    RenderDataManager renderQueue;
     renderQueue.fill(scene, _camera, &viewport);
 
     view._overridedMaterial = _material;
     view.isDepthPass = true;
-    renderQueue.getSceneData(&view, Drawable::RenderLayer::Qpaque);
+    renderQueue.getRenderData(&view, Drawable::RenderLayer::Qpaque);
 
     for (int i = 0; i < view._drawList.size(); ++i) {
         DrawCall* drawCall = &view._drawList[i];
         drawCall->_material = _material;
         drawCall->_wireframe = false;
-        drawCall->_material->setParams(&view, drawCall->_drawable);
+        drawCall->_material->setParams(view.lights, view.camera, &view.viewport, drawCall->_drawable);
         renderer->draw(drawCall);
     }
 

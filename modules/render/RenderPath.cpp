@@ -57,7 +57,7 @@ void RenderPath::releaseStatic() {
 
 void RenderPath::updateShadowMap(Scene* scene, Camera* camera) {
     std::map<Light*, Shadow*> curLights;
-    for (Light* light : _renderQueue._lights) {
+    for (Light* light : _renderDataManager._lights) {
         if (light->getLightType() != Light::Type::DIRECTIONAL) {
             continue;
         }
@@ -229,11 +229,11 @@ void RenderPath::render(Scene* scene, Camera* camera, Rectangle* viewport) {
     GP_ASSERT(viewport);
     GP_ASSERT(_frameBuffer);
 
-    _renderQueue.fill(scene, camera, viewport);
+    _renderDataManager.fill(scene, camera, viewport);
     if (_use_shadow) updateShadowMap(scene, camera);
 
     resetViewport(viewport);
-    _renderQueue.sort();
+    _renderDataManager.sort();
 
 #if 0
     Shadow* shaow = _shadowMapCache.begin()->second;
@@ -242,12 +242,12 @@ void RenderPath::render(Scene* scene, Camera* camera, Rectangle* viewport) {
     return;
 #endif
 
-    _renderView.camera = camera;
-    _renderView.viewport = *viewport;
-    _renderView.wireframe = false;
-    _renderView.lights = &_renderQueue._lights;
-    //_renderView._renderer = _renderer;
-    //_renderView._renderPath = this;
+    _renderData.camera = camera;
+    _renderData.viewport = *viewport;
+    _renderData.wireframe = false;
+    _renderData.lights = &_renderDataManager._lights;
+    //_renderData._renderer = _renderer;
+    //_renderData._renderPath = this;
 
     //_renderer->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0);
     _previousFrameBuffer = _frameBuffer->bind();
@@ -276,18 +276,18 @@ void RenderPath::renderDrawables(std::vector<Drawable*>& drawables, Camera* came
     GP_ASSERT(viewport);
     GP_ASSERT(_frameBuffer);
 
-    _renderQueue.fillDrawables(drawables, camera, viewport);
+    _renderDataManager.fillDrawables(drawables, camera, viewport);
     //if (_use_shadow) updateShadowMap(scene, camera);
 
     resetViewport(viewport);
-    _renderQueue.sort();
+    _renderDataManager.sort();
 
-    _renderView.camera = camera;
-    _renderView.viewport = *viewport;
-    _renderView.wireframe = false;
-    _renderView.lights = &_renderQueue._lights;
-    //_renderView._renderer = _renderer;
-    //_renderView._renderPath = this;
+    _renderData.camera = camera;
+    _renderData.viewport = *viewport;
+    _renderData.wireframe = false;
+    _renderData.lights = &_renderDataManager._lights;
+    //_renderData._renderer = _renderer;
+    //_renderData._renderPath = this;
 
     //_renderer->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0);
     _previousFrameBuffer = _frameBuffer->bind();
@@ -400,17 +400,17 @@ Texture* RenderPath::getTexture(const std::string& name) {
     return NULL;
 }
 
-RenderInfo* RenderPath::getRenderView() {
-    _renderView._overridedMaterial = NULL;
-    _renderView._overridedDepthState = 0;
-    _renderView._drawList.clear();
-    _renderView.lights = &_renderQueue._lights;
+RenderData* RenderPath::makeRenderDataSet() {
+    _renderData._overridedMaterial = NULL;
+    _renderData._overridedDepthState = 0;
+    _renderData._drawList.clear();
+    _renderData.lights = &_renderDataManager._lights;
 
-    return &_renderView;
+    return &_renderData;
 }
 
-void RenderPath::applyDraw(RenderInfo* view) {
-
+void RenderPath::commitRenderData() {
+    RenderData* view = &_renderData;
     for (int i = 0; i < view->_drawList.size(); ++i) {
         DrawCall* drawCall = &view->_drawList[i];
         if (view->_overridedMaterial && drawCall->_instanceCount == 0) {
@@ -426,7 +426,7 @@ void RenderPath::applyDraw(RenderInfo* view) {
 
         drawCall->_wireframe = view->wireframe;
 
-        drawCall->_material->setParams(view, drawCall->_drawable);
+        drawCall->_material->setParams(view->lights, view->camera, &view->viewport, drawCall->_drawable);
         if (view->_overridedMaterial == NULL) {
             this->bindShadow(view->lights, drawCall);
         }

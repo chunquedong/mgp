@@ -152,7 +152,9 @@ public:
     /**
     * Set the buildin parameter
     */
-    void setParams(RenderInfo* view, Drawable* drawable);
+    void setParams(std::vector<Light*>* lights,
+        Camera* camera,
+        Rectangle* viewport, Drawable* drawable);
 
     /**
      * Unbinds the render state for this pass.

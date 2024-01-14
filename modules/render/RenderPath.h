@@ -13,7 +13,7 @@
 #include "scene/Scene.h"
 #include "scene/Camera.h"
 #include "scene/Drawable.h"
-#include "RenderQueue.h"
+#include "RenderDataManager.h"
 
 namespace mgp {
 	class Shadow;
@@ -27,10 +27,10 @@ namespace mgp {
 	class RenderPath : public Refable
 	{
 	protected:
-		RenderInfo _renderView;
+		RenderData _renderData;
 
 		Renderer* _renderer;
-		RenderQueue _renderQueue;
+		RenderDataManager _renderDataManager;
 
 		static Model* _quadModel;
 
@@ -56,15 +56,15 @@ namespace mgp {
 	public:
 		RenderPath(Renderer* renderer);
 		~RenderPath();
-		RenderInfo* getRenderView();
-		void applyDraw(RenderInfo* view);
+		RenderData* makeRenderDataSet();
+		void commitRenderData();
 		
 		static Model* fullscreenQuadModel();
 		static void releaseStatic();
 
 		std::vector<RenderStage*>& getRenderStages() { return _renderStages; }
 		FrameBuffer* getFrameBuffer() { return _frameBuffer; }
-		RenderQueue* getRenderQueue() { return &_renderQueue; }
+		RenderDataManager* getRenderDataManager() { return &_renderDataManager; }
 
 		Renderer* getRenderer() { return _renderer; }
 		void render(Scene* scene, Camera *camera, Rectangle *viewport);

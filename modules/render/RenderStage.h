@@ -18,6 +18,7 @@ namespace mgp {
 
 class RenderPath;
 class FrameBuffer;
+class RenderData;
 
 /**
 * Abstract Render Pass
@@ -89,8 +90,8 @@ public:
     virtual void onResize(int w, int h);
 
 protected:
-    virtual void beforeRender(RenderInfo* view);
-    virtual void afterRender(RenderInfo* view);
+    virtual void beforeRender(RenderData* view);
+    virtual void afterRender(RenderData* view);
 };
 
 struct RestStage : public RenderStage {
@@ -105,13 +106,13 @@ struct GBuffer : public RenderPass {
 
 struct LightShading : public RenderPass {
     LightShading();
-    void beforeRender(RenderInfo* view) override;
-    void afterRender(RenderInfo* view) override;
+    void beforeRender(RenderData* view) override;
+    void afterRender(RenderData* view) override;
 };
 
 struct Redraw : public RenderPass {
     Redraw();
-    void beforeRender(RenderInfo* view) override;
+    void beforeRender(RenderData* view) override;
     void onResize(int w, int h) override;
 };
 

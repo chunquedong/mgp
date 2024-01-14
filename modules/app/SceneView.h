@@ -13,7 +13,6 @@
 #include "scene/Scene.h"
 #include "scene/Camera.h"
 #include "scene/Drawable.h"
-#include "render/RenderQueue.h"
 #include "render/RenderPath.h"
 #include "FirstPersonCamera.h"
 #include "CameraCtrl.h"

@@ -10,7 +10,7 @@ void RenderInfo::draw(DrawCall* drawCall) {
 }
 
 Drawable::Drawable()
-    : _node(NULL), _renderPass(RenderLayer::Qpaque), _lightMask(0), _visiable(true), _pickMask(1), _highlightType(HighlightType::SharedColor), _instanceKey(NULL)
+    : _node(NULL), _renderLayer(RenderLayer::Qpaque), _lightMask(0), _visiable(true), _pickMask(1), _highlightType(HighlightType::SharedColor), _instanceKey(NULL)
 {
 }
 

@@ -5,7 +5,7 @@
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE
  *
  */
-#include "RenderQueue.h"
+#include "RenderDataManager.h"
 //#include "objects/CubeMap.h"
 #include <algorithm>
 #include <float.h>
@@ -13,20 +13,21 @@
 
 using namespace mgp;
 
-void RenderQueue::fill(Scene* scene, Camera *camera, Rectangle *viewport, bool viewFrustumCulling) {
+void RenderDataManager::fill(Scene* scene, Camera *camera, Rectangle *viewport, bool viewFrustumCulling) {
     _camera = camera;
     _viewFrustumCulling = viewFrustumCulling;
     _renderInfo.camera = camera;
+    _renderInfo.viewport = *viewport;
     
     clear();
     
     // Visit all the nodes in the scene for drawing
-    scene->visit(this, &RenderQueue::buildRenderQueues);
+    scene->visit(this, &RenderDataManager::buildRenderQueues);
 
     endFill();
 }
 
-void RenderQueue::clear() {
+void RenderDataManager::clear() {
     _renderInfo._drawList.clear();
 
     for (auto it = _instanceds.begin(); it != _instanceds.end(); ++it) {
@@ -43,7 +44,7 @@ void RenderQueue::clear() {
     _lights.clear();
 }
 
-void RenderQueue::endFill() {
+void RenderDataManager::endFill() {
 
     for (auto it = _instanceds.begin(); it != _instanceds.end(); ++it) {
         Instanced* instance = dynamic_cast<Instanced*>(it->second->getDrawable());
@@ -60,7 +61,7 @@ void RenderQueue::endFill() {
     }
 }
 
-bool RenderQueue::addInstanced(Drawable* drawble) {
+bool RenderDataManager::addInstanced(Drawable* drawble) {
     DrawableGroup* group = dynamic_cast<DrawableGroup*>(drawble);
     if (group) {
         bool rc = false;
@@ -103,7 +104,7 @@ bool RenderQueue::addInstanced(Drawable* drawble) {
     return false;
 }
 
-void RenderQueue::fillDrawables(std::vector<Drawable*>& drawables, Camera *camera, Rectangle *viewport, bool viewFrustumCulling) {
+void RenderDataManager::fillDrawables(std::vector<Drawable*>& drawables, Camera *camera, Rectangle *viewport, bool viewFrustumCulling) {
     _camera = camera;
     _viewFrustumCulling = viewFrustumCulling;
 
@@ -129,7 +130,7 @@ void RenderQueue::fillDrawables(std::vector<Drawable*>& drawables, Camera *camer
     }
 }
 
-bool RenderQueue::buildRenderQueues(Node* node) {
+bool RenderDataManager::buildRenderQueues(Node* node) {
     Drawable* drawable = node->getDrawable();
     if (drawable && drawable->isVisiable())
     {
@@ -178,7 +179,7 @@ static uint64_t getSortScore(const DrawCall* a) {
     return score;
 }
 
-void RenderQueue::sort() {
+void RenderDataManager::sort() {
 
     std::stable_sort(_renderQueues[Drawable::Qpaque].begin(), _renderQueues[Drawable::Qpaque].end(), [&](const DrawCall& a, const DrawCall& b)
         {
@@ -196,6 +197,6 @@ void RenderQueue::sort() {
     );
 }
 
-void RenderQueue::getSceneData(RenderInfo* view, Drawable::RenderLayer layer) {
+void RenderDataManager::getRenderData(RenderData* view, Drawable::RenderLayer layer) {
     view->_drawList.insert(view->_drawList.begin(), _renderQueues[layer].begin(), _renderQueues[layer].end());
 }

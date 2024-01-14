@@ -598,28 +598,23 @@ void Material::bind() {
     }
 }
 
-void Material::setParams(RenderInfo* view, Drawable* drawable)
+void Material::setParams(std::vector<Light*>* lights,
+        Camera* camera,
+        Rectangle* viewport, Drawable* drawable)
 {
     int lightMask = 0;
     if (drawable) {
         lightMask = drawable->getLightMask();
     }
 
-    if (view) {
-        if (!initialize(drawable, view->lights, lightMask)) {
-            return;
-        }
-    }
-    else {
-        if (!initialize(drawable, NULL, 0)) {
-            return;
-        }
+    if (!initialize(drawable, lights, lightMask)) {
+        return;
     }
     
-    if (view && view->camera) bindLights(view->camera, view->lights, lightMask);
+    if (camera) bindLights(camera, lights, lightMask);
 
-    if (view && view->camera && drawable && drawable->getNode()) {
-        bindCamera(view->camera, view->viewport, drawable->getNode());
+    if (camera && drawable && drawable->getNode()) {
+        bindCamera(camera, *viewport, drawable->getNode());
     }
     else {
         //printf("DEBUG");

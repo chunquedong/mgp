@@ -21,16 +21,12 @@ class RenderInfo {
 public:
     std::vector<DrawCall> _drawList;
 
-    std::vector<Light*>* lights = NULL;
+    //std::vector<Light*>* lights = NULL;
     Camera* camera = NULL;
     Rectangle viewport;
 
-    Material* _overridedMaterial = NULL;
-    int _overridedDepthState = 0;
-
     bool wireframe = false;
     bool isDepthPass = false;
-
 
     virtual void draw(DrawCall* drawCall);
 };
@@ -121,8 +117,8 @@ public:
     */
     virtual Animation* getAnimation(const char* id = NULL) const { return NULL; };
 
-    RenderLayer getRenderPass() const { return _renderPass; }
-    void setRenderPass(RenderLayer p) { _renderPass = p; }
+    RenderLayer getRenderPass() const { return _renderLayer; }
+    void setRenderPass(RenderLayer p) { _renderLayer = p; }
 
     int getLightMask() const { return _lightMask; }
     void setLightMask(int mask) { _lightMask = mask; }
@@ -172,7 +168,7 @@ protected:
      */
     Node* _node;
 
-    RenderLayer _renderPass;
+    RenderLayer _renderLayer;
 
     int _lightMask;
 
