@@ -168,14 +168,24 @@ TreeView::TreeItem* TreeView::findTreeItem(Control* control, TreeItem* item) {
     return NULL;
 }
 
+void TreeView::checkedChange(TreeItem* item) {
+
+}
+
 void TreeView::controlEvent(Control* control, Listener::EventType evt) {
     if (evt == Listener::CLICK) {
         TreeItem* item = findTreeItem(control, root.get());
 
-        setSelectItem(item);
-
+        bool checkedChanged = false;
         if (CheckBox* checkbox = dynamic_cast<CheckBox*>(control)) {
             item->setChecked(checkbox->isChecked());
+            checkedChanged = true;
+            checkedChange(item);
+        }
+
+        setSelectItem(item);
+
+        if (checkedChanged) {
             _isDirty = true;
             notifyListeners(Control::Listener::VALUE_CHANGED);
         }

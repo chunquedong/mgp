@@ -32,11 +32,10 @@ public:
 
     SPtr<TreeItem> root;
 
-    
-
-private:
+protected:
     TreeItem* _selectItem = NULL;
     bool _isDirty = true;
+private:
     bool _useCheckBox = true;
 public:
 
@@ -56,6 +55,8 @@ protected:
     void update(float elapsedTime);
 
     void controlEvent(Control* control, EventType evt);
+
+    virtual void checkedChange(TreeItem* item);
 private:
     void addItemLabel(TreeItem* item, int level);
 
