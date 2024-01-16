@@ -12,6 +12,7 @@
 #include "RenderStage.h"
 #include "platform/Toolkit.h"
 #include "scene/MeshFactory.h"
+#include "PostEffect.h"
 
 using namespace mgp;
 
@@ -135,7 +136,17 @@ void RenderPath::initDeferred() {
     _renderStages.push_back(post);
 }
 
-void RenderPath::addPostProcess() {}
+void RenderPath::addPostProcess() {
+    if (_use_ssao) {
+        SSAO* ssao = new SSAO(this);
+        _renderStages.push_back(ssao);
+    }
+
+    if (_use_bloom) {
+        Bloom* bloom = new Bloom(this);
+        _renderStages.push_back(bloom);
+    }
+}
 
 void RenderPath::initForward() {
     clearStages();
