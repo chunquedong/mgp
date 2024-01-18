@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <float.h>
+#include <climits>
 
 namespace mgp
 {

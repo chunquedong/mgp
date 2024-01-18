@@ -29,7 +29,7 @@ bool StringUtil::iequals(const String& self, const String &other) {
   if (other.size() != sz)
     return false;
   for (unsigned int i = 0; i < sz; ++i)
-    if (towlower(self[i]) != towlower(other[i]))
+    if (tolower(self[i]) != tolower(other[i]))
       return false;
   return true;
 }
@@ -78,7 +78,7 @@ String StringUtil::substr(const String& self, size_t pos, size_t len) {
 void StringUtil::trimEnd(String& str) {
   int i = str.size()-1;
   for (; i >=0; --i) {
-    if (!iswspace(str[i])) {
+    if (!isspace(str[i])) {
       break;
     }
   }
@@ -90,7 +90,7 @@ void StringUtil::trimEnd(String& str) {
 void StringUtil::trimStart(String& str) {
   int i = 0;
   for (; i < str.size(); ++i) {
-    if (!iswspace(str[i])) {
+    if (!isspace(str[i])) {
       break;
     }
   }
@@ -112,7 +112,7 @@ String StringUtil::toLower(const String& str) {
   for (i = 0; i < str.length(); ++i)
   {
     chrTemp = str[i];
-    chrTemp = towlower(chrTemp);
+    chrTemp = tolower(chrTemp);
     ret.push_back(chrTemp);
   }
   
@@ -125,7 +125,7 @@ String StringUtil::toUpper(const String& str) {
   for (i = 0; i < str.length(); ++i)
   {
     chrTemp = str[i];
-    chrTemp = towupper(chrTemp);
+    chrTemp = toupper(chrTemp);
     ret.push_back(chrTemp);
   }
   

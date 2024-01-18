@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <set>
 #include <type_traits>
+#include <cmath>
 
 #include "Logger.h"
 #include "System.h"

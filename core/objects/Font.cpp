@@ -12,6 +12,7 @@
 #include "base/FileSystem.h"
 #include "material/Material.h"
 #include "material/MaterialParameter.h"
+#include <algorithm>
 
 extern "C" {
 #include "3rd/utf8.h"

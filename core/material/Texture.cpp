@@ -3,7 +3,7 @@
 #include "material/Image.h"
 #include "Texture.h"
 #include "base/FileSystem.h"
-
+#include <algorithm>
 
 namespace mgp
 {

@@ -5,6 +5,7 @@
 #include "platform/Toolkit.h"
 #include "math/Quaternion.h"
 //#include "script/ScriptController.h"
+#include <algorithm>
 
 namespace mgp
 {
