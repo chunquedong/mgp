@@ -3,7 +3,7 @@
 
 // APP
 #include "app/Platform.h"
-//#include "app/Gamepad.h"
+#include "app/Application.h"
 //#include "app/ScreenDisplayer.h"
 #include "app/FirstPersonCamera.h"
 #include "app/SceneView.h"

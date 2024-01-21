@@ -93,8 +93,8 @@ ShaderProgram* ShaderProgram::createFromSource(const char* vshSource, const char
 
 static void replaceDefines(const char* defines, std::string& out)
 {
-    Properties* graphicsConfig = Toolkit::cur()->getConfig()->getNamespace("graphics", true);
-    const char* globalDefines = graphicsConfig ? graphicsConfig->getString("shaderDefines") : NULL;
+    //Properties* graphicsConfig = Toolkit::cur()->getConfig()->getNamespace("graphics", true);
+    const char* globalDefines = NULL;// graphicsConfig ? graphicsConfig->getString("shaderDefines") : NULL;
 
     // Build full semicolon delimited list of defines
     if (globalDefines && strlen(globalDefines) > 0)

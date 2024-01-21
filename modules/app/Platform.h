@@ -9,7 +9,7 @@
 namespace mgp
 {
 
-class Game;
+class Application;
 
 /**
  * Defines a platform abstraction.
@@ -237,12 +237,10 @@ public:
     static int run(const char* title = "MGP Engine", int w = 1920, int h = 1080);
 private:
 
-    //Game* _game;                // The game this platform is interfacing with.
+    //Application* _game;                // The game this platform is interfacing with.
 };
 
 }
-
-#include "app/Game.h"
 
 
 #endif

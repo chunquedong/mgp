@@ -15,7 +15,7 @@ namespace mgp
  */
 class ScriptController
 {
-    friend class Game;
+    friend class Application;
     friend class Platform;
     friend class Script;
     friend class ScriptUtil;

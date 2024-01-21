@@ -26,7 +26,7 @@ typedef unsigned int FrameBufferHandle;
  */
 class GLFrameBuffer : public FrameBuffer
 {
-    friend class Game;
+    friend class Application;
 
 public:
 

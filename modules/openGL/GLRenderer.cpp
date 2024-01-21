@@ -209,7 +209,7 @@ void GLRenderer::enableDepthWrite()
 {
     StateBlock* _defaultState = &stateBlock;
 
-    // Internal method used by Game::clear() to restore depth writing before a
+    // Internal method used by Application::clear() to restore depth writing before a
     // clear operation. This is necessary if the last code to draw before the
     // next frame leaves depth writing disabled.
     if (!_defaultState->_depthWriteEnabled)

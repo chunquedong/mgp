@@ -4,7 +4,7 @@
 
 using namespace mgp;
 
-class MainApp : public Game, Control::Listener {
+class MainApp : public Application, Control::Listener {
     Label* _label = NULL;
     //Button* button;
 
@@ -178,7 +178,7 @@ class MainApp : public Game, Control::Listener {
 
     void render(float elapsedTime) override {
         Renderer::cur()->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL);
-        Game::render(elapsedTime);
+        Application::render(elapsedTime);
     }
 
     void finalize() {

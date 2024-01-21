@@ -14,14 +14,17 @@
 #include "base/Serializable.h"
 #include "InputListener.h"
 
+#include "EventTimer.h"
+#include "Platform.h"
+#include "AppConfig.h"
+
 #ifndef __EMSCRIPTEN__
     #include "audio/AudioController.h"
     #include "physics/PhysicsController.h"
     #include "ai/AIController.h"
 #endif
 
-#include <queue>
-#include <mutex>
+
 
 namespace mgp
 {
@@ -31,6 +34,7 @@ class SceneView;
 class FormManager;
 class Font;
 
+
 /**
  * Defines the base class your game will extend for game initialization, logic and platform delegates.
  *
@@ -39,71 +43,13 @@ class Font;
  *
  * @see http://gameplay3d.github.io/GamePlay/docs/file-formats.html#wiki-Game_Config
  */
-class Game : public Toolkit, public InputListener
+class Application : public Toolkit, public InputListener
 {
     friend class Platform;
     //friend class Gamepad;
     friend class ShutdownListener;
 
 public:
-    /**
-     * Defines a splash screen.
-     */
-    class SplashScreen
-    {
-    public:
-        std::string url;
-        float duration;
-    };
-
-    /**
-     * Game configuration.
-     */
-    class Config : public Serializable, public Refable
-    {
-    public:
-
-        /**
-         * Constructor
-         */
-        Config();
-
-        /**
-         * Destructor
-         */
-        ~Config();
-
-        /**
-         * @see Serializable::getClassName
-         */
-        std::string getClassName();
-
-        /**
-         * @see Serializable::onSerialize
-         */
-        void onSerialize(Serializer* serializer);
-
-        /**
-         * @see Serializable::onDeserialize
-         */
-        void onDeserialize(Serializer* serializer);
-
-        /**
-         * @see Activator::createObject
-         */
-        static Serializable* createObject();
-
-        std::string title;
-        int width;
-        int height;
-        bool fullscreen;
-        bool vsync;
-        size_t multisampling;
-        bool validation;
-        std::string homePath;
-        std::vector<SplashScreen> splashScreens;
-        std::string mainScene;
-    };
 
     /**
      * The game states.
@@ -118,19 +64,19 @@ public:
     /**
      * Constructor.
      */
-    Game();
+    Application();
 
     /**
      * Destructor.
      */
-    virtual ~Game();
+    virtual ~Application();
 
     /**
      * Gets the single instance of the game.
      *
      * @return The single instance of the game.
      */
-    static Game* getInstance();
+    static Application* getInstance();
 
     /**
      * Gets the total game time (in milliseconds). This is the total accumulated game time (unpaused).
@@ -147,24 +93,14 @@ public:
      *
      * @return The current game state.
      */
-    inline State getState() const;
+    inline State getState() const { return _state; }
 
     /**
      * Determines if the game has been initialized.
      *
      * @return true if the game initialization has completed, false otherwise.
      */
-    inline bool isInitialized() const;
-
-    /**
-     * Returns the game configuration object.
-     *
-     * This method returns a Properties object containing the contents
-     * of the game.config file.
-     *
-     * @return The game configuration Properties object.
-     */
-    Properties* getConfig() const;
+    inline bool isInitialized() const { return _initialized; }
 
     /**
      * Called to initialize the game, and begin running the game.
@@ -201,86 +137,56 @@ public:
      *
      * @return The current frame rate.
      */
-    inline unsigned int getFrameRate() const;
-
+    inline unsigned int getFrameRate() const { return _frameRate; }
+public:
     /**
      * Gets the game window width.
      *
      * @return The game window width.
      */
-    inline unsigned int getWidth() const;
+    inline unsigned int getWidth() const { return _width; }
 
     /**
      * Gets the game window height.
      *
      * @return The game window height.
      */
-    inline unsigned int getHeight() const;
+    inline unsigned int getHeight() const { return _height; }
 
     /**
     * Screen density scale
     */
-    float getScreenScale() const;
+    float getScreenScale() const { return Platform::cur->getScreenScale(); }
 
     /**
     * Request next frame to render.
     * Do nothing in game main loop mode.
     */
-    void requestRepaint();
-
-protected:
-    /**
-     * Gets whether mouse input is currently captured.
-     *
-     * @return is the mouse captured.
-     */
-    virtual bool isMouseCaptured();
+    void requestRepaint() { Platform::cur->requestRepaint(); }
 
     /**
-     * Shows or hides the virtual keyboard (if supported).
-     *
-     * @param display true when virtual keyboard needs to be displayed; false otherwise.
-     */
-    virtual void displayKeyboard(bool display);
+    * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.
+    * Application time stops while the game is paused. A time offset of zero will fire the time event in the next frame.
+    *
+    * @param timeOffset The number of game milliseconds in the future to schedule the event to be fired.
+    * @param timeListener The TimeListener that will receive the event.
+    * @param cookie The cookie data that the time event will contain.
+    * @script{ignore}
+    */
+    virtual void schedule(float timeOffset, TimeListener* timeListener, void* cookie = 0) {
+        _eventTimer->schedule(timeOffset, timeListener, cookie);
+    }
 
-
-    /**
-     * Gets the command line arguments.
-     *
-     * @param argc The number of command line arguments.
-     * @param argv The array of command line arguments.
-     * @script{ignore}
-     */
-    void getArguments(int* argc, char*** argv) const;
-
-    /**
-     * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.
-     * Game time stops while the game is paused. A time offset of zero will fire the time event in the next frame.
-     *
-     * @param timeOffset The number of game milliseconds in the future to schedule the event to be fired.
-     * @param timeListener The TimeListener that will receive the event.
-     * @param cookie The cookie data that the time event will contain.
-     * @script{ignore}
-     */
-    void schedule(float timeOffset, TimeListener* timeListener, void* cookie = 0);
-
-    /**
-     * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.
-     * Game time stops while the game is paused. A time offset of zero will fire the time event in the next frame.
-     *
-     * The given script function must take a single floating point number, which is the difference between the
-     * current game time and the target time (see TimeListener::timeEvent). The function will be executed
-     * in the context of the script envionrment that the schedule function was called from.
-     *
-     * @param timeOffset The number of game milliseconds in the future to schedule the event to be fired.
-     * @param function The script function that will receive the event.
-     */
-    void schedule(float timeOffset, const char* function);
 
     /**
      * Clears all scheduled time events.
      */
-    void clearSchedule();
+    virtual void clearSchedule() { _eventTimer->clearSchedule(); }
+
+    virtual bool isMouseCaptured() { return Platform::cur->isMouseCaptured(); }
+
+    virtual void displayKeyboard(bool display) { Platform::cur->displayKeyboard(display); }
+
 protected:
     /**
      * Keyboard callback on keyPress events.
@@ -378,25 +284,11 @@ private:
     };
 
     /**
-     * TimeEvent represents the event that is sent to TimeListeners as a result of calling Game::schedule().
-     */
-    class TimeEvent
-    {
-    public:
-
-        TimeEvent(double time, SPtr<TimeListener> timeListener, void* cookie);
-        bool operator<(const TimeEvent& v) const;
-        double time;
-        SPtr<TimeListener> listener;
-        void* cookie;
-    };
-
-    /**
      * Constructor.
      *
      * @param copy The game to copy.
      */
-    Game(const Game& copy);
+    Application(const Application& copy);
 
     /**
      * Starts the game.
@@ -404,26 +296,18 @@ private:
     bool startup();
 
     /**
-     * Fires the time events that were scheduled to be called.
-     * 
-     * @param frameTime The current game frame time. Used to determine which time events need to be fired.
-     */
-    void fireTimeEvents(double frameTime);
-
-    /**
      * Loads the game configuration.
      */
-    void loadConfig();
+    //void loadConfig();
 
     void drawFps();
 public:
     void showFps(bool v);
-    void keyEventInternal(Keyboard evt);
-    //void touchEventInternal(Touch evt);
-    bool mouseEventInternal(Mouse evt);
-    void resizeEventInternal(unsigned int width, unsigned int height);
-    //void gestureEventInternal(Gesture evt);
-    //void gamepadEventInternal(Gamepad::GamepadEvent evt, Gamepad* gamepad);
+
+    void notifyKeyEvent(Keyboard evt);
+    bool notifyMouseEvent(Mouse evt);
+    void notifyResizeEvent(unsigned int width, unsigned int height);
+
 private:
     bool _initialized;                          // If game has initialized yet.
     State _state;                               // The game state.
@@ -439,7 +323,6 @@ private:
     Vector4 _clearColor;                        // The clear color value last used for clearing the color buffer.
     float _clearDepth;                          // The clear depth value last used for clearing the depth buffer.
     int _clearStencil;                          // The clear stencil value last used for clearing the stencil buffer.
-    Properties* _properties;                    // Game configuration properties object.
 
 protected:
     AnimationController* _animationController;  // Controls the scheduling and running of animations.
@@ -450,6 +333,8 @@ protected:
     AIController* _aiController;                // Controls AI simulation.
     AudioListener* _audioListener;              // The audio listener in 3D space.
 
+    EventTimer* _eventTimer;
+
 #endif
 #if GP_SCRIPT_ENABLE
     ScriptController* _scriptController;        // Controls the scripting engine.
@@ -457,9 +342,6 @@ protected:
 #endif
 
 private:
-    std::priority_queue<TimeEvent, std::vector<TimeEvent>, std::less<TimeEvent> >* _timeEvents;     // Contains the scheduled time events.
-    std::mutex _scheduleLock;
-    
     InputListener* _inputListener;
 protected:
     FormManager* _forms;
@@ -473,8 +355,8 @@ protected:
     friend class ScreenDisplayer;
 };
 
-}
+typedef Application Game;
 
-#include "Game.inl"
+}
 
 #endif

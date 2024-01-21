@@ -127,7 +127,7 @@ class Properties;
  */
 class Properties
 {
-    friend class Game;
+    friend class Application;
 
 public:
 

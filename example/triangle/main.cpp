@@ -39,7 +39,7 @@ static UPtr<Mesh> createTriangleMesh()
     return mesh;
 }
 
-class MainApp : public Game {
+class MainApp : public Application {
 
 
     void initialize() {

@@ -1,7 +1,7 @@
 // Implementation of base platform-agnostic platform functionality.
 #include "base/Base.h"
 #include "Platform.h"
-#include "app/Game.h"
+#include "app/Application.h"
 //#include "script/ScriptController.h"
 #include "PlatformGlfw.h"
 
@@ -15,7 +15,7 @@ namespace mgp
 
         Platform* platform = Platform::cur;
 
-        Game* game = Game::getInstance();
+        Application* game = Application::getInstance();
         GP_ASSERT(game);
         platform->init(title, w, h);
         int result = platform->enterMessagePump();

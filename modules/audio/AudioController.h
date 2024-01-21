@@ -17,7 +17,7 @@ class AudioSource;
  */
 class AudioController
 {
-    friend class Game;
+    friend class Application;
     friend class AudioSource;
 
 public:

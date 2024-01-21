@@ -175,7 +175,7 @@ class Theme: public Refable
     //friend class Control;
     //friend class Form;
     //friend class BorderImage;
-    //friend class Game;
+    //friend class Application;
 
 public:
 

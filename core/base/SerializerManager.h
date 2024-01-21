@@ -10,7 +10,7 @@ namespace mgp
  */
 class SerializerManager
 {
-    friend class Game;
+    friend class Application;
 
 public:
     static void releaseStatic();

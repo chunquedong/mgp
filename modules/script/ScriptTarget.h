@@ -108,7 +108,7 @@ public: \
  */
 class ScriptTarget
 {
-    friend class Game;
+    friend class Application;
 
 public:
 

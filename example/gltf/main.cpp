@@ -4,7 +4,7 @@
 
 using namespace mgp;
 
-class MainApp : public Game {
+class MainApp : public Application {
     void initialize() {
 
         GltfLoader loader;

@@ -20,7 +20,7 @@ class ScriptListener;
  */
 class PhysicsController : public ScriptTarget
 {
-    friend class Game;
+    friend class Application;
     friend class PhysicsConstraint;
     friend class PhysicsRigidBody;
     friend class PhysicsCharacter;

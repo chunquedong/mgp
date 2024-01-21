@@ -20,7 +20,7 @@
 #include <GLFW/glfw3.h>
 
 #include "PlatformGlfw.h"
-#include "app/Game.h"
+#include "app/Application.h"
 
 namespace mgp
 {
@@ -277,7 +277,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     /*if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);*/
 
-    Game::getInstance()->keyEventInternal(evt);
+    Application::getInstance()->notifyKeyEvent(evt);
 }
 
 void character_callback(GLFWwindow* window, unsigned int codepoint)
@@ -286,7 +286,7 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
     evt.evt = Keyboard::KeyEvent::KEY_CHAR;
     evt.key = codepoint;
 
-    Game::getInstance()->keyEventInternal(evt);
+    Application::getInstance()->notifyKeyEvent(evt);
 }
 
 float lastXScale = 0;
@@ -338,7 +338,7 @@ static void cursor_position_callback(GLFWwindow* window, double x, double y)
         evt.button = mgp::MotionEvent::middle;
     }
 
-    Game::getInstance()->mouseEventInternal(evt);
+    Application::getInstance()->notifyMouseEvent(evt);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -365,7 +365,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         evt.button = mgp::MotionEvent::middle;
     }
 
-    Game::getInstance()->mouseEventInternal(evt);
+    Application::getInstance()->notifyMouseEvent(evt);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -385,12 +385,12 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     evt.wheelDelta = yoffset;
 #endif
 
-    Game::getInstance()->mouseEventInternal(evt);
+    Application::getInstance()->notifyMouseEvent(evt);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    Game::getInstance()->resizeEventInternal(width, height);
+    Application::getInstance()->notifyResizeEvent(width, height);
 }
 
 void window_content_scale_callback(GLFWwindow* window, float xscale, float yscale)
@@ -466,7 +466,7 @@ error:
 
 
 static int doFrame(double time, void* userData) {
-    Game* _game = Game::getInstance();
+    Application* _game = Application::getInstance();
     GP_ASSERT(_game);
 
     _game->frame();
@@ -477,13 +477,13 @@ static int doFrame(double time, void* userData) {
     /* Poll for and process events */
     glfwPollEvents();
 
-    return _game->getState() != Game::UNINITIALIZED;
+    return _game->getState() != Application::UNINITIALIZED;
 }
 
 int PlatformGlfw::enterMessagePump()
 {
-    Game* _game = Game::getInstance();
-    if (_game->getState() != Game::RUNNING) {
+    Application* _game = Application::getInstance();
+    if (_game->getState() != Application::RUNNING) {
         int width = getDisplayWidth();
         int height = getDisplayHeight();
         _game->run(width, height);
@@ -499,7 +499,7 @@ int PlatformGlfw::enterMessagePump()
             break;
     }
 
-    if (_game->getState() == Game::RUNNING) {
+    if (_game->getState() == Application::RUNNING) {
         _game->shutdown();
     }
 #endif

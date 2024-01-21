@@ -24,7 +24,7 @@ namespace mgp
  */
 class FrameBuffer : public Refable
 {
-    friend class Game;
+    friend class Application;
 
 public:
     enum Type {

@@ -19,7 +19,7 @@ namespace mgp
 class AudioListener : public Camera::Listener
 {
     friend class AudioController;
-    friend class Game;
+    friend class Application;
 
 public:
 

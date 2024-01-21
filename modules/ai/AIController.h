@@ -14,7 +14,7 @@ namespace mgp
  */
 class AIController
 {
-    friend class Game;
+    friend class Application;
     friend class Node;
 
 public:

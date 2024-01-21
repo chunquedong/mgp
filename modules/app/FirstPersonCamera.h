@@ -26,7 +26,7 @@ public:
     ~FirstPersonCamera();
 
     /**
-     * Initializes the first person camera. Should be called after the Game has been initialized.
+     * Initializes the first person camera. Should be called after the Application has been initialized.
      */
     void initialize(float aspectRatio, float nearPlane = 1.0f, float farPlane = 1000.0f, float fov = 45.0f);
 

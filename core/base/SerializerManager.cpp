@@ -110,7 +110,7 @@ void SerializerManager::registerEnum(const std::string& enumName, EnumToStringCa
 void SerializerManager::registerSystemTypes()
 {
     // Register engine types with
-    //this->registerType("mgp::Game::Config", Game::Config::createObject);
+    //this->registerType("mgp::Application::Config", Application::Config::createObject);
     //this->registerType("mgp::Scene", Scene::createObject);
     //this->registerType("mgp::Node", Node::createObject);
     //this->registerType("mgp::Camera", Camera::createObject);

@@ -1,5 +1,4 @@
 #include "FirstPersonCamera.h"
-#include "app/Game.h"
 
 using namespace mgp;
 

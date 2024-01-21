@@ -1,4 +1,4 @@
-#include "app/Game.h"
+#include "app/Application.h"
 #include "Platform.h"
 #include "base/FileSystem.h"
 #include "render/FrameBuffer.h"
@@ -16,16 +16,6 @@
 //#include "net/HttpClient.hpp"
 #endif
 
-#define SPLASH_DURATION     2.0f
-
-
-// Graphics
-#define GP_GRAPHICS_WIDTH                           1280
-#define GP_GRAPHICS_HEIGHT                          720
-#define GP_GRAPHICS_FULLSCREEN                      false
-#define GP_GRAPHICS_VSYNC                           true
-#define GP_GRAPHICS_MULTISAMPLING                   1
-#define GP_GRAPHICS_VALIDATION                      false
 
 #ifndef __EMSCRIPTEN__
 /** @script{ignore} */
@@ -38,15 +28,15 @@ extern mgp::Renderer* g_rendererInstance;
 namespace mgp
 {
 
-static Game* __gameInstance = NULL;
-double Game::_pausedTimeLast = 0.0;
-double Game::_pausedTimeTotal = 0.0;
-double Game::_timeStart = 0.0;
+static Application* __gameInstance = NULL;
+double Application::_pausedTimeLast = 0.0;
+double Application::_pausedTimeTotal = 0.0;
+double Application::_timeStart = 0.0;
 
 
 void regiseterSerializer() {
     SerializerManager *mgr = SerializerManager::getActivator();
-    mgr->registerType("mgp::Game::Config", Game::Config::createObject);
+    mgr->registerType("mgp::Application::Config", AppConfig::createObject);
     mgr->registerType("mgp::Scene", Scene::createObject);
     mgr->registerType("mgp::Node", Node::createObject);
     mgr->registerType("mgp::Camera", Camera::createObject);
@@ -109,10 +99,10 @@ public:
 };
 #endif
 
-Game::Game()
+Application::Application()
     : _initialized(false), _state(UNINITIALIZED), _pausedCount(0),
     _frameLastFPS(0), _frameCount(0), _frameRate(0), _width(0), _height(0),
-    _clearDepth(1.0f), _clearStencil(0), _properties(NULL),
+    _clearDepth(1.0f), _clearStencil(0),
     _animationController(NULL), 
     #ifndef __EMSCRIPTEN__
     _audioController(NULL),
@@ -121,14 +111,13 @@ Game::Game()
     #if GP_SCRIPT_ENABLE
     _scriptController(NULL), _scriptTarget(NULL),
     #endif
-    _timeEvents(NULL), 
     _inputListener(NULL), _forms(NULL),
     _showFps(true)
 {
     GP_ASSERT(__gameInstance == NULL);
 
     __gameInstance = this;
-    _timeEvents = new std::priority_queue<TimeEvent, std::vector<TimeEvent>, std::less<TimeEvent> >();
+    _eventTimer = new EventTimer();
 
     Toolkit::g_instance = this;
 
@@ -140,7 +129,7 @@ Game::Game()
     printf("MGP 1.0\n");
 }
 
-Game::~Game()
+Application::~Application()
 {
     SerializerManager::releaseStatic();
 
@@ -150,7 +139,7 @@ Game::~Game()
 #endif
     // Do not call any virtual functions from the destructor.
     // Finalization is done from outside this class.
-    SAFE_DELETE(_timeEvents);
+    delete _eventTimer;
 
     __gameInstance = NULL;
 
@@ -167,34 +156,34 @@ Game::~Game()
 
 }
 
-Game* Game::getInstance()
+Application* Application::getInstance()
 {
     GP_ASSERT(__gameInstance);
     return __gameInstance;
 }
 
-void Game::initialize()
+void Application::initialize()
 {
     // stub
 }
 
-void Game::finalize()
+void Application::finalize()
 {
     // stub
 }
 
-void Game::update(float elapsedTime)
+void Application::update(float elapsedTime)
 {
     for (auto view : _sceneViews) {
         view->update(elapsedTime);
     }
 }
 
-void Game::onViewRender(SceneView* view) {
+void Application::onViewRender(SceneView* view) {
     view->render();
 }
 
-void Game::render(float elapsedTime)
+void Application::render(float elapsedTime)
 {
     for (auto view : _sceneViews) {
         onViewRender(view);
@@ -210,7 +199,7 @@ void Game::render(float elapsedTime)
     }
 }
 
-void Game::drawFps() {
+void Application::drawFps() {
     _font->start();
     Rectangle* viewport = getView()->getViewport();
     int padding = 10;
@@ -225,21 +214,21 @@ void Game::drawFps() {
     //Renderer::cur()->drawCallCount();
 }
 
-void Game::showFps(bool v) {
+void Application::showFps(bool v) {
     _showFps = v;
 }
 
-double Game::getGameTime()
+double Application::getGameTime()
 {
     return (System::nanoTicks() / 1000000.0) - _timeStart - _pausedTimeTotal;
 }
 
-int Game::run(int w, int h)
+int Application::run(int w, int h)
 {
     if (_state != UNINITIALIZED)
         return -1;
 
-    loadConfig();
+    //loadConfig();
 
     _width = w;
     _height = h;
@@ -254,7 +243,7 @@ int Game::run(int w, int h)
     return 0;
 }
 
-bool Game::startup()
+bool Application::startup()
 {
     if (_state != UNINITIALIZED)
         return false;
@@ -333,7 +322,7 @@ bool Game::startup()
     return true;
 }
 
-void Game::shutdown()
+void Application::shutdown()
 {
     // Call user finalization.
     if (_state != UNINITIALIZED)
@@ -347,7 +336,7 @@ void Game::shutdown()
 
         //Platform::signalShutdown();
 
-        clearSchedule();
+        _eventTimer->clearSchedule();
 
 		// Call user finalize
         finalize();
@@ -397,14 +386,12 @@ void Game::shutdown()
         Theme::finalize();
 
         // Note: we do not clean up the script controller here
-        // because users can call Game::exit() from a script.
+        // because users can call Application::exit() from a script.
 
         //FrameBuffer::finalize();
         //RenderState::finalize();
 
         _font.clear();
-
-        SAFE_DELETE(_properties);
 
 
         RenderPath::releaseStatic();
@@ -419,7 +406,7 @@ void Game::shutdown()
     }
 }
 
-void Game::pause()
+void Application::pause()
 {
     if (_state == RUNNING)
     {
@@ -442,7 +429,7 @@ void Game::pause()
     ++_pausedCount;
 }
 
-void Game::resume()
+void Application::resume()
 {
     if (_state == PAUSED)
     {
@@ -469,7 +456,7 @@ void Game::resume()
     }
 }
 
-void Game::exit()
+void Application::exit()
 {
     // Only perform a full/clean shutdown if GP_USE_MEM_LEAK_DETECTION is defined.
 	// Every modern OS is able to handle reclaiming process memory hundreds of times
@@ -494,7 +481,7 @@ void Game::exit()
 }
 
 
-void Game::frame()
+void Application::frame()
 {
     if (!_initialized)
     {
@@ -505,17 +492,17 @@ void Game::frame()
             _scriptTarget->fireScriptEvent<void>(GP_GET_SCRIPT_EVENT(GameScriptTarget, initialize));
         #endif
         // Fire first game resize event
-        resizeEventInternal(_width, _height);
+        notifyResizeEvent(_width, _height);
         _initialized = true;
     }
 
-	static double lastFrameTime = Game::getGameTime();
+	static double lastFrameTime = Application::getGameTime();
 	double frameTime = getGameTime();
 
     // Fire time events to scheduled TimeListeners
-    fireTimeEvents(frameTime);
+    _eventTimer->fireTimeEvents();
 
-    if (_state == Game::RUNNING)
+    if (_state == Application::RUNNING)
     {
         GP_ASSERT(_animationController);
 
@@ -567,14 +554,14 @@ void Game::frame()
 
         // Update FPS.
         ++_frameCount;
-        if ((Game::getGameTime() - _frameLastFPS) >= 1000)
+        if ((Application::getGameTime() - _frameLastFPS) >= 1000)
         {
             _frameRate = _frameCount;
             _frameCount = 0;
             _frameLastFPS = getGameTime();
         }
     }
-	else if (_state == Game::PAUSED)
+	else if (_state == Application::PAUSED)
     {
         // Update gamepads.
         //Gamepad::updateInternal(0);
@@ -602,14 +589,14 @@ void Game::frame()
     }
 }
 
-void Game::keyEvent(Keyboard evt) {
+void Application::keyEvent(Keyboard evt) {
     auto cameraCtrl = getView()->getCameraCtrl();
     if (cameraCtrl) {
         cameraCtrl->keyEvent(evt);
     }
 }
 
-bool Game::mouseEvent(Mouse evt) {
+bool Application::mouseEvent(Mouse evt) {
     auto cameraCtrl = getView()->getCameraCtrl();
     if (cameraCtrl) {
         if (cameraCtrl->mouseEvent(evt)) return true;
@@ -619,12 +606,12 @@ bool Game::mouseEvent(Mouse evt) {
     return false;
 }
 
-void Game::resizeEvent(unsigned int width, unsigned int height) {
+void Application::resizeEvent(unsigned int width, unsigned int height) {
     Rectangle vp(0.0f, 0.0f, (float)_width, (float)_height);
     getView()->setViewport(&vp);
 }
 
-void Game::keyEventInternal(Keyboard evt)
+void Application::notifyKeyEvent(Keyboard evt)
 {
     if (_forms->keyEventInternal(evt.evt, evt.key)) {
         return;
@@ -637,7 +624,7 @@ void Game::keyEventInternal(Keyboard evt)
     #endif
 }
 
-bool Game::mouseEventInternal(Mouse evt)
+bool Application::notifyMouseEvent(Mouse evt)
 {
     if (_forms->mouseEventInternal(evt))
         return true;
@@ -652,7 +639,7 @@ bool Game::mouseEventInternal(Mouse evt)
     return false;
 }
 
-void Game::resizeEventInternal(unsigned int width, unsigned int height)
+void Application::notifyResizeEvent(unsigned int width, unsigned int height)
 {
     // Update the width and height of the game
     if (!_initialized || _width != width || _height != height)
@@ -669,205 +656,11 @@ void Game::resizeEventInternal(unsigned int width, unsigned int height)
     _forms->resizeEventInternal(width, height);
 }
 
-//void Game::gamepadEventInternal(Gamepad::GamepadEvent evt, Gamepad* gamepad)
-//{
-//    if (_inputListener) _inputListener->gamepadEvent(evt, gamepad);
-//    if (_scriptTarget)
-//        _scriptTarget->fireScriptEvent<void>(GP_GET_SCRIPT_EVENT(GameScriptTarget, gamepadEvent), evt, gamepad);
-//}
-
-void Game::schedule(float timeOffset, TimeListener* timeListener, void* cookie)
+void Application::ShutdownListener::timeEvent(long timeDiff, void* cookie)
 {
-    GP_ASSERT(_timeEvents);
-    SPtr<TimeListener> listener;
-    listener = timeListener;
-    TimeEvent timeEvent(getGameTime() + timeOffset, listener, cookie);
-    _scheduleLock.lock();
-    _timeEvents->push(timeEvent);
-    _scheduleLock.unlock();
+	Application::getInstance()->shutdown();
 }
 
-void Game::schedule(float timeOffset, const char* function)
-{
-    #if undeclared
-    _scriptController->schedule(timeOffset, function);
-    #endif
-}
-
-void Game::clearSchedule()
-{
-    _scheduleLock.lock();
-    SAFE_DELETE(_timeEvents);
-    _timeEvents = new std::priority_queue<TimeEvent, std::vector<TimeEvent>, std::less<TimeEvent> >();
-    _scheduleLock.unlock();
-}
-
-void Game::fireTimeEvents(double frameTime)
-{
-    std::vector<TimeEvent> toFire;
-    _scheduleLock.lock();
-    while (_timeEvents->size() > 0)
-    {
-        const TimeEvent timeEvent = _timeEvents->top();
-        if (timeEvent.time > frameTime)
-        {
-            break;
-        }
-        //if (timeEvent.listener)
-        //{
-            toFire.push_back(timeEvent);
-        //}
-        _timeEvents->pop();
-    }
-    _scheduleLock.unlock();
-
-    for (auto timeEvent : toFire) {
-        SPtr<TimeListener>& listener = timeEvent.listener;
-        if (!listener.isNull()) {
-            listener->timeEvent(frameTime - timeEvent.time, timeEvent.cookie);
-        }
-    }
-}
-
-Game::TimeEvent::TimeEvent(double time, SPtr<TimeListener> timeListener, void* cookie)
-    : time(time), listener(timeListener), cookie(cookie)
-{
-}
-
-bool Game::TimeEvent::operator<(const TimeEvent& v) const
-{
-    // The first element of std::priority_queue is the greatest.
-    return time > v.time;
-}
-
-Properties* Game::getConfig() const
-{
-    if (_properties == NULL)
-        const_cast<Game*>(this)->loadConfig();
-
-    return _properties;
-}
-
-void Game::loadConfig()
-{
-    if (_properties == NULL)
-    {
-        // Try to load custom config from file.
-        if (FileSystem::fileExists("game.config"))
-        {
-            _properties = Properties::create("game.config").take();
-
-            // Load filesystem aliases.
-            Properties* aliases = _properties->getNamespace("aliases", true);
-            if (aliases)
-            {
-                FileSystem::loadResourceAliases(aliases);
-            }
-        }
-        else
-        {
-            // Create an empty config
-            _properties = new Properties();
-        }
-    }
-}
-
-void Game::ShutdownListener::timeEvent(long timeDiff, void* cookie)
-{
-	Game::getInstance()->shutdown();
-}
-
-
-Game::Config::Config() :
-    title(""),
-    width(GP_GRAPHICS_WIDTH),
-    height(GP_GRAPHICS_HEIGHT),
-    fullscreen(GP_GRAPHICS_FULLSCREEN),
-    vsync(GP_GRAPHICS_VSYNC),
-    multisampling(GP_GRAPHICS_MULTISAMPLING),
-    validation(GP_GRAPHICS_VALIDATION),
-    homePath(GP_ENGINE_HOME_PATH),
-    mainScene("main.scene")
-{
-}
-
-Game::Config::~Config()
-{
-}
-
-Serializable* Game::Config::createObject()
-{
-    return new Game::Config();
-}
-
-std::string Game::Config::getClassName()
-{
-    return "mgp::Game::Config";
-}
-
-void Game::Config::onSerialize(Serializer* serializer)
-{
-    serializer->writeString("title", title.c_str(), "");
-    serializer->writeInt("width", width, 0);
-    serializer->writeInt("height", height, 0);
-    serializer->writeBool("fullscreen", fullscreen, false);
-    serializer->writeBool("vsync", vsync, false);
-    serializer->writeInt("multisampling", (uint32_t)multisampling, 0);
-    serializer->writeBool("validation", validation, false);
-    serializer->writeString("homePath", homePath.c_str(), GP_ENGINE_HOME_PATH);
-    serializer->writeList("splashScreens", splashScreens.size());
-    for (size_t i = 0; i < splashScreens.size(); i++)
-    {
-        std::string splash = std::string(splashScreens[i].url) + ":" + std::to_string(splashScreens[i].duration);
-        serializer->writeString(nullptr, splash.c_str(), "");
-    }
-    serializer->finishColloction();
-    serializer->writeString("mainScene", mainScene.c_str(), "");
-}
-
-void Game::Config::onDeserialize(Serializer* serializer)
-{
-    serializer->readString("title", title, "");
-    width = serializer->readInt("width", 0);
-    height = serializer->readInt("height", 0);
-    fullscreen = serializer->readBool("fullscreen", false);
-    vsync = serializer->readBool("vsync", false);
-    multisampling = serializer->readInt("multisampling", 0);
-    validation = serializer->readBool("validation", false);
-    serializer->readString("homePath", homePath, "");
-    size_t splashScreensCount = serializer->readList("splashScreens");
-    for (size_t i = 0; i < splashScreensCount; i++)
-    {
-        std::string splash;
-        serializer->readString(nullptr, splash, "");
-        if (splash.length() > 0)
-        {
-            SplashScreen splashScreen;
-            size_t semiColonIdx = splash.find(':');
-            if (semiColonIdx == std::string::npos)
-            {
-                splashScreen.url = splash;
-                splashScreen.duration = SPLASH_DURATION;
-            }
-            else
-            {
-                splashScreen.url = splash.substr(0, semiColonIdx);
-                std::string durationStr = splash.substr(semiColonIdx + 1, splash.length() - semiColonIdx);
-                try
-                {
-                    splashScreen.duration = std::stof(durationStr);
-                }
-                catch (...)
-                {
-                    splashScreen.duration = SPLASH_DURATION;
-                }
-            }
-            splashScreens.push_back(splashScreen);
-        }
-    }
-    serializer->finishColloction();
-    serializer->readString("mainScene", mainScene, "");
-}
 
 }
 

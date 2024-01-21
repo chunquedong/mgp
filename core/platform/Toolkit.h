@@ -14,7 +14,7 @@ namespace mgp
 {
     class Properties;
 /**
- * Defines a interface to be scheduled and called back at a later time using Game::schedule().
+ * Defines a interface to be scheduled and called back at a later time using Application::schedule().
  *
  * @script{ignore}
  */
@@ -44,7 +44,7 @@ public:
     /**
      * Gets the game current viewport.
      *
-     * The default viewport is Rectangle(0, 0, Game::getWidth(), Game::getHeight()).
+     * The default viewport is Rectangle(0, 0, Application::getWidth(), Application::getHeight()).
      */
     virtual unsigned int getWidth() const = 0;
     virtual unsigned int getHeight() const = 0;
@@ -60,7 +60,7 @@ public:
      *
      * @return The game configuration Properties object.
      */
-    virtual Properties* getConfig() const = 0;
+    //virtual Properties* getConfig() const = 0;
 
 
     /**
@@ -73,7 +73,7 @@ public:
 
      /**
      * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.
-     * Game time stops while the game is paused. A time offset of zero will fire the time event in the next frame.
+     * Application time stops while the game is paused. A time offset of zero will fire the time event in the next frame.
      * 
      * @param timeOffset The number of game milliseconds in the future to schedule the event to be fired.
      * @param timeListener The TimeListener that will receive the event.
@@ -95,7 +95,7 @@ public:
      * @param argv The array of command line arguments.
      * @script{ignore}
      */
-    virtual void getArguments(int* argc, char*** argv) const = 0;
+    //virtual void getArguments(int* argc, char*** argv) const = 0;
 
 
     /**

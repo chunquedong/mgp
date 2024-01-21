@@ -14,7 +14,7 @@ namespace mgp
  */
 class AnimationController
 {
-    friend class Game;
+    friend class Application;
     friend class Animation;
     friend class AnimationClip;
     friend class SceneLoader;

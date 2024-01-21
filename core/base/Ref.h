@@ -105,7 +105,7 @@ private:
 
     // Memory leak diagnostic data (only included when GP_USE_MEM_LEAK_DETECTION is defined)
 #ifdef GP_USE_REF_TRACE
-    friend class Game;
+    friend class Application;
     friend void* trackRef(Refable* ref);
     friend void untrackRef(Refable* ref);
     static void printLeaks();
