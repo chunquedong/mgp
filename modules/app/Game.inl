@@ -58,23 +58,23 @@ inline unsigned int Game::getHeight() const
 //    return _aiController;
 //}
 inline float Game::getScreenScale() const {
-    return Platform::getScreenScale();
+    return Platform::cur->getScreenScale();
 }
 inline bool Game::isMouseCaptured()
 {
-    return Platform::isMouseCaptured();
+    return Platform::cur->isMouseCaptured();
 }
 inline void Game::displayKeyboard(bool display)
 {
-    Platform::displayKeyboard(display);
+    Platform::cur->displayKeyboard(display);
 }
 inline void Game::getArguments(int* argc, char*** argv) const
 {
-    Platform::getArguments(argc, argv);
+    Platform::cur->getArguments(argc, argv);
 }
 
 inline void Game::requestRepaint() {
-    Platform::requestRepaint();
+    Platform::cur->requestRepaint();
 }
 
 

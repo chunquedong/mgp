@@ -171,7 +171,7 @@ public:
      *
      * @return Zero for normal termination, or non-zero if an error occurred.
      */
-    int run();
+    int run(int w, int h);
 
     /**
      * Pauses the game after being run.
@@ -365,6 +365,11 @@ public:
 
     FormManager* getFormManager() { return _forms; }
 
+
+    /**
+     * Shuts down the game.
+     */
+    void shutdown();
 private:
 
     struct ShutdownListener : public TimeListener
@@ -397,11 +402,6 @@ private:
      * Starts the game.
      */
     bool startup();
-
-    /**
-     * Shuts down the game.
-     */
-    void shutdown();
 
     /**
      * Fires the time events that were scheduled to be called.

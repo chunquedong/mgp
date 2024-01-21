@@ -19,12 +19,14 @@ class Game;
 class Platform
 {
 public:
+    static Platform* cur;
+
     /**
      * Creates a platform for the specified game which it will interact with.
      *
      * @script{ignore}
      */
-    static void init(const char* title, int w, int h);
+    virtual void init(const char* title, int w, int h) = 0;
 
     /**
      * Begins processing the platform messages.
@@ -37,23 +39,23 @@ public:
      *
      * @return The platform message pump return code.
      */
-    static int enterMessagePump();
+    virtual int enterMessagePump() = 0;
 
     /**
      * Swaps the frame buffer on the device.
      */
-    static void swapBuffers();
+    virtual void swapBuffers() = 0;
 
 public:
 
-    static void requestRepaint();
+    virtual void requestRepaint() = 0;
 
     /**
      * This method informs the platform that the game is shutting down
      * and anything platform specific should be shutdown as well or halted
      * This function is called automatically when the game shutdown function is called
      */
-    static void signalShutdown();
+    virtual void signalShutdown() = 0;
 
     /**
      * Indicates whether a programmatic exit is allowed on this platform.
@@ -61,57 +63,57 @@ public:
      *
      * @return whether a programmatic exit is allowed on this platform.
      */
-    static bool canExit();
+    virtual bool canExit() = 0;
 
     /**
      * Gets the display width.
      *
      * @return The display width.
      */
-    static unsigned int getDisplayWidth();
+    //virtual unsigned int getDisplayWidth() = 0;
 
     /**
      * Gets the display height.
      *
      * @return The display height.
      */
-    static unsigned int getDisplayHeight();
+    //virtual unsigned int getDisplayHeight() = 0;
 
     /**
     * Screen density scale
     */
-    static float getScreenScale();
+    virtual float getScreenScale() = 0;
 
     /**
      * Gets whether vertical sync is enabled for the game display.
      *
      * @return true if vsync is enabled; false if not.
      */
-    static bool isVsync();
+    virtual bool isVsync() = 0;
 
     /**
      * Sets whether vertical sync is enable for the game display.
      *
      * @param enable true if vsync is enabled; false if not.
      */
-    static void setVsync(bool enable);
+    virtual void setVsync(bool enable) = 0;
 
     /**
      * Set if multi-sampling is enabled on the platform.
      *
      * @param enabled true sets multi-sampling to be enabled, false to be disabled.
      */
-    static void setMultiSampling(bool enabled);
+    virtual void setMultiSampling(bool enabled) = 0;
 
    /**
     * Is multi-sampling mode enabled.
     */
-    static bool isMultiSampling();
+    virtual bool isMultiSampling() = 0;
 
     /**
      * Whether the platform has mouse support.
      */
-    static bool hasMouse();
+    virtual bool hasMouse() = 0;
 
     /**
      * Enables or disabled mouse capture.
@@ -132,12 +134,12 @@ public:
      *
      * @param captured True to enable mouse capture, false to disable it.
      */
-    static void setMouseCaptured(bool captured);
+    virtual void setMouseCaptured(bool captured) = 0;
 
     /**
      * Determines if mouse capture is currently enabled.
      */
-    static bool isMouseCaptured();
+    virtual bool isMouseCaptured() = 0;
 
     /**
      * Sets the visibility of the platform cursor.
@@ -147,19 +149,19 @@ public:
      *
      * @param visible true to show the platform cursor, false to hide it.
      */
-    static void setCursorVisible(bool visible);
+    virtual void setCursorVisible(bool visible) = 0;
 
     /**
      * Determines whether the platform cursor is currently visible.
      *
      * @return true if the platform cursor is visible, false otherwise.
      */
-    static bool isCursorVisible();
+    virtual bool isCursorVisible() = 0;
 
     /**
      * Whether the platform has accelerometer support.
      */
-    static bool hasAccelerometer();
+    virtual bool hasAccelerometer() = 0;
 
     /**
      * Gets the platform accelerometer values for use as an indication of device
@@ -171,7 +173,7 @@ public:
      * @param pitch The accelerometer pitch. Zero if hasAccelerometer() returns false.
      * @param roll The accelerometer roll. Zero if hasAccelerometer() returns false.
      */
-    static void getAccelerometerValues(float* pitch, float* roll);
+    virtual void getAccelerometerValues(float* pitch, float* roll) = 0;
 
     /**
      * Gets sensor values (raw), if equipped, allowing a distinction between device acceleration
@@ -185,7 +187,7 @@ public:
      * @param gyroY The y-coordinate of the raw gyroscope data.
      * @param gyroZ The z-coordinate of the raw gyroscope data.
      */
-    static void getSensorValues(float* accelX, float* accelY, float* accelZ, float* gyroX, float* gyroY, float* gyroZ);
+    virtual void getSensorValues(float* accelX, float* accelY, float* accelZ, float* gyroX, float* gyroY, float* gyroZ) = 0;
 
     /**
      * Gets the command line arguments.
@@ -193,14 +195,14 @@ public:
      * @param argc The number of command line arguments.
      * @param argv The array of command line arguments.
      */
-    static void getArguments(int* argc, char*** argv);
+    virtual void getArguments(int* argc, char*** argv) = 0;
 
     /**
      * Shows or hides the virtual keyboard (if supported).
      *
      * @param display true when virtual keyboard needs to be displayed and false otherwise.
      */
-    static void displayKeyboard(bool display);
+    virtual void displayKeyboard(bool display) = 0;
 
     /**
      * Opens an URL in an external browser, if available.
@@ -209,97 +211,7 @@ public:
      *
      * @return True if URL was opened successfully, false otherwise.
      */
-    static bool launchURL(const char* url);
-
-//private:
-
-    /**
-     * Internal method used only from static code in various platform implementation.
-     *
-     * @script{ignore}
-     */
-    //static void touchEventInternal(Touch evt);
-
-    /**
-     * Internal method used only from static code in various platform implementation.
-     *
-     * @script{ignore}
-     */
-    static void keyEventInternal(Keyboard evt);
-
-   /**
-     * Internal method used only from static code in various platform implementation.
-     *
-     * @script{ignore}
-     */
-    static bool mouseEventInternal(Mouse evt);
-
-    /**
-     * Internal method used only from static code in various platform implementation.
-     *
-     * @script{ignore}
-     */
-    //static void gestureEventInternal(Gesture evt);
-
-    /**
-     * Internal method used only from static code in various platform implementation.
-     *
-     * @script{ignore}
-     */
-    static void resizeEventInternal(unsigned int width, unsigned int height);
-
-    // /**
-    //  * Internal method used only from static code in various platform implementation.
-    //  *
-    //  * @script{ignore}
-    //  */
-    // static void gamepadEventConnectedInternal(GamepadHandle handle, unsigned int buttonCount, unsigned int joystickCount, unsigned int triggerCount, const char* name);
-
-    // /**
-    //  * Internal method used only from static code in various platform implementation.
-    //  *
-    //  * @script{ignore}
-    //  */
-    // static void gamepadEventDisconnectedInternal(GamepadHandle handle);
-
-    // /**
-    //  * Internal method used only from static code in various platform implementation.
-    //  *
-    //  * @script{ignore}
-    //  */
-    // static void gamepadButtonPressedEventInternal(GamepadHandle handle, Gamepad::ButtonMapping mapping);
-
-    // /**
-    //  * Internal method used only from static code in various platform implementation.
-    //  *
-    //  * @script{ignore}
-    //  */
-    // static void gamepadButtonReleasedEventInternal(GamepadHandle handle, Gamepad::ButtonMapping button);
-
-    // /**
-    //  * Internal method used only from static code in various platform implementation.
-    //  *
-    //  * @script{ignore}
-    //  */
-    // static void gamepadTriggerChangedEventInternal(GamepadHandle handle, unsigned int index, float value);
-
-    // /**
-    //  * Internal method used only from static code in various platform implementation.
-    //  *
-    //  * @script{ignore}
-    //  */
-    // static void gamepadJoystickChangedEventInternal(GamepadHandle handle, unsigned int index, float x, float y);
-
-    // /**
-    //  * Internal method used to poll the platform for the updated Gamepad
-    //  * states such as buttons, joytick and trigger values.
-    //  *
-    //  * Some platforms require to poll the gamepad system to get deltas. 
-    //  *
-    //  * @param gamepad The gamepad to be returned with the latest polled values populated.
-    //  * @script{ignore}
-    //  */
-    // static void pollGamepadState(Gamepad* gamepad);
+    virtual bool launchURL(const char* url) = 0;
 
     /**
      * Displays an open or save dialog using the native platform dialog system.
@@ -313,7 +225,7 @@ public:
      *
      * @script{ignore}
      */
-    static std::string displayFileDialog(size_t mode, const char* title, const char* filterDescription, const char* filterExtensions, const char* initialDirectory);
+    virtual std::string displayFileDialog(size_t mode, const char* title, const char* filterDescription, const char* filterExtensions, const char* initialDirectory) = 0;
 
     /**
      * Internal method used only from static code in various platform implementation.
@@ -322,8 +234,7 @@ public:
      */
     //static void shutdownInternal();
 
-    static int run(const char* title= "MGP Engine", int w = 1920, int h=1080);
-
+    static int run(const char* title = "MGP Engine", int w = 1920, int h = 1080);
 private:
 
     //Game* _game;                // The game this platform is interfacing with.

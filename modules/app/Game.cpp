@@ -234,15 +234,15 @@ double Game::getGameTime()
     return (System::nanoTicks() / 1000000.0) - _timeStart - _pausedTimeTotal;
 }
 
-int Game::run()
+int Game::run(int w, int h)
 {
     if (_state != UNINITIALIZED)
         return -1;
 
     loadConfig();
 
-    _width = Platform::getDisplayWidth();
-    _height = Platform::getDisplayHeight();
+    _width = w;
+    _height = h;
 
     // Start up game systems.
     if (!startup())

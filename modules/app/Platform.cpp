@@ -3,75 +3,26 @@
 #include "Platform.h"
 #include "app/Game.h"
 //#include "script/ScriptController.h"
+#include "PlatformGlfw.h"
 
 namespace mgp
 {
 
-void Platform::keyEventInternal(Keyboard evt)
-{
-    Game::getInstance()->keyEventInternal(evt);
-}
+	Platform* Platform::cur = NULL;
 
-bool Platform::mouseEventInternal(Mouse evt)
-{
-    return Game::getInstance()->mouseEventInternal(evt);
-}
+    int Platform::run(const char* title, int w, int h) {
+        PlatformGlfw glfw;
 
-void Platform::resizeEventInternal(unsigned int width, unsigned int height)
-{
-    Game::getInstance()->resizeEventInternal(width, height);
-}
+        Platform* platform = Platform::cur;
 
-// void Platform::gamepadEventConnectedInternal(GamepadHandle handle,  unsigned int buttonCount, unsigned int joystickCount, unsigned int triggerCount, const char* name)
-// {
-//     Gamepad::add(handle, buttonCount, joystickCount, triggerCount, name);
-// }
+        Game* game = Game::getInstance();
+        GP_ASSERT(game);
+        platform->init(title, w, h);
+        int result = platform->enterMessagePump();
 
-// void Platform::gamepadEventDisconnectedInternal(GamepadHandle handle)
-// {
-//     Gamepad::remove(handle);
-// }
-
-// void Platform::gamepadButtonPressedEventInternal(GamepadHandle handle, Gamepad::ButtonMapping mapping)
-// {
-//     Gamepad* gamepad = Gamepad::getGamepad(handle);
-//     if (gamepad)
-//     {
-//         unsigned int newButtons = gamepad->_buttons | (1 << mapping);
-//         gamepad->setButtons(newButtons);
-//         //Form::gamepadButtonEventInternal(gamepad);
-//     }
-// }
-
-// void Platform::gamepadButtonReleasedEventInternal(GamepadHandle handle, Gamepad::ButtonMapping mapping)
-// {
-//     Gamepad* gamepad = Gamepad::getGamepad(handle);
-//     if (gamepad)
-//     {
-//         unsigned int newButtons = gamepad->_buttons & ~(1 << mapping);
-//         gamepad->setButtons(newButtons);
-//         //Form::gamepadButtonEventInternal(gamepad);
-//     }
-// }
-
-// void Platform::gamepadTriggerChangedEventInternal(GamepadHandle handle, unsigned int index, float value)
-// {
-//     Gamepad* gamepad = Gamepad::getGamepad(handle);
-//     if (gamepad)
-//     {
-//         gamepad->setTriggerValue(index, value);
-//         //Form::gamepadTriggerEventInternal(gamepad, index);
-//     }
-// }
-
-// void Platform::gamepadJoystickChangedEventInternal(GamepadHandle handle, unsigned int index, float x, float y)
-// {
-//     Gamepad* gamepad = Gamepad::getGamepad(handle);
-//     if (gamepad)
-//     {
-//         gamepad->setJoystickValue(index, x, y);
-//         //Form::gamepadJoystickEventInternal(gamepad, index);
-//     }
-// }
-
+#ifndef __EMSCRIPTEN__
+        platform->signalShutdown();
+#endif
+        return result;
+    }
 }

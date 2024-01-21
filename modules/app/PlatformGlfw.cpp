@@ -19,20 +19,23 @@
 //#include <GL/wglew.h>
 #include <GLFW/glfw3.h>
 
-#include "Platform.h"
+#include "PlatformGlfw.h"
 #include "app/Game.h"
 
-
+namespace mgp
+{
 GLFWwindow* window;
 static bool __multiSampling = false;
 
 #ifndef WIN32
-int __argc = 0;
-char** __argv = 0;
+int __argc override;
+char** __argv override;
 #endif
 
-namespace mgp
-{
+PlatformGlfw::PlatformGlfw() {
+    Platform::cur = this;
+}
+
 
 extern int strcmpnocase(const char* s1, const char* s2)
 {
@@ -274,7 +277,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     /*if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);*/
 
-    mgp::Platform::keyEventInternal(evt);
+    Game::getInstance()->keyEventInternal(evt);
 }
 
 void character_callback(GLFWwindow* window, unsigned int codepoint)
@@ -283,7 +286,7 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
     evt.evt = Keyboard::KeyEvent::KEY_CHAR;
     evt.key = codepoint;
 
-    mgp::Platform::keyEventInternal(evt);
+    Game::getInstance()->keyEventInternal(evt);
 }
 
 float lastXScale = 0;
@@ -335,7 +338,7 @@ static void cursor_position_callback(GLFWwindow* window, double x, double y)
         evt.button = mgp::MotionEvent::middle;
     }
 
-    mgp::Platform::mouseEventInternal(evt);
+    Game::getInstance()->mouseEventInternal(evt);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -362,7 +365,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         evt.button = mgp::MotionEvent::middle;
     }
 
-    mgp::Platform::mouseEventInternal(evt);
+    Game::getInstance()->mouseEventInternal(evt);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -382,12 +385,12 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     evt.wheelDelta = yoffset;
 #endif
 
-    mgp::Platform::mouseEventInternal(evt);
+    Game::getInstance()->mouseEventInternal(evt);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    mgp::Platform::resizeEventInternal(width, height);
+    Game::getInstance()->resizeEventInternal(width, height);
 }
 
 void window_content_scale_callback(GLFWwindow* window, float xscale, float yscale)
@@ -396,7 +399,7 @@ void window_content_scale_callback(GLFWwindow* window, float xscale, float yscal
     lastYScale = yscale;
 }
 
-void Platform::init(const char* title, int w, int h)
+void PlatformGlfw::init(const char* title, int w, int h)
 {
     //FileSystem::setResourcePath("./");
 
@@ -477,11 +480,14 @@ static int doFrame(double time, void* userData) {
     return _game->getState() != Game::UNINITIALIZED;
 }
 
-int Platform::enterMessagePump()
+int PlatformGlfw::enterMessagePump()
 {
     Game* _game = Game::getInstance();
-    if (_game->getState() != Game::RUNNING)
-        _game->run();
+    if (_game->getState() != Game::RUNNING) {
+        int width = getDisplayWidth();
+        int height = getDisplayHeight();
+        _game->run(width, height);
+    }
 
 #if __EMSCRIPTEN__
     emscripten_request_animation_frame_loop(doFrame, NULL);
@@ -503,51 +509,51 @@ int Platform::enterMessagePump()
 }
 
 
-void Platform::signalShutdown() 
+void PlatformGlfw::signalShutdown()
 {
     glfwDestroyWindow(window);
     glfwTerminate();
 }
 
-bool Platform::canExit()
+bool PlatformGlfw::canExit()
 {
     return true;
 }
 
-unsigned int Platform::getDisplayWidth()
+unsigned int PlatformGlfw::getDisplayWidth()
 {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     return width;
 }
 
-unsigned int Platform::getDisplayHeight()
+unsigned int PlatformGlfw::getDisplayHeight()
 {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     return height;
 }
 
-float Platform::getScreenScale() {
+float PlatformGlfw::getScreenScale() {
     getContentScale(window);
     return lastXScale > lastYScale ? lastXScale : lastYScale;
 }
 
-bool Platform::isVsync()
+bool PlatformGlfw::isVsync()
 {
     return false;
 }
 
-void Platform::setVsync(bool enable)
+void PlatformGlfw::setVsync(bool enable)
 {
 }
 
-void Platform::swapBuffers()
+void PlatformGlfw::swapBuffers()
 {
     glfwSwapBuffers(window);
 }
 
-void Platform::setMultiSampling(bool enabled)
+void PlatformGlfw::setMultiSampling(bool enabled)
 {
     if (enabled == __multiSampling)
     {
@@ -566,18 +572,18 @@ void Platform::setMultiSampling(bool enabled)
     __multiSampling = enabled;
 }
 
-bool Platform::isMultiSampling()
+bool PlatformGlfw::isMultiSampling()
 {
     return __multiSampling;
 }
 
 
-bool Platform::hasAccelerometer()
+bool PlatformGlfw::hasAccelerometer()
 {
     return false;
 }
 
-void Platform::getAccelerometerValues(float* pitch, float* roll)
+void PlatformGlfw::getAccelerometerValues(float* pitch, float* roll)
 {
     GP_ASSERT(pitch);
     GP_ASSERT(roll);
@@ -586,7 +592,7 @@ void Platform::getAccelerometerValues(float* pitch, float* roll)
     *roll = 0;
 }
 
-void Platform::getSensorValues(float* accelX, float* accelY, float* accelZ, float* gyroX, float* gyroY, float* gyroZ)
+void PlatformGlfw::getSensorValues(float* accelX, float* accelY, float* accelZ, float* gyroX, float* gyroY, float* gyroZ)
 {
     if (accelX)
     {
@@ -619,7 +625,7 @@ void Platform::getSensorValues(float* accelX, float* accelY, float* accelZ, floa
     }
 }
 
-void Platform::getArguments(int* argc, char*** argv)
+void PlatformGlfw::getArguments(int* argc, char*** argv)
 {
     if (argc)
         *argc = __argc;
@@ -627,73 +633,50 @@ void Platform::getArguments(int* argc, char*** argv)
         *argv = __argv;
 }
 
-bool Platform::hasMouse()
+bool PlatformGlfw::hasMouse()
 {
     return true;
 }
 
-void Platform::setMouseCaptured(bool captured)
+void PlatformGlfw::setMouseCaptured(bool captured)
 {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
-bool Platform::isMouseCaptured()
+bool PlatformGlfw::isMouseCaptured()
 {
     //return __mouseCaptured;
     return false;
 }
 
-void Platform::setCursorVisible(bool visible)
+void PlatformGlfw::setCursorVisible(bool visible)
 {
     if (visible)
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 }
 
-bool Platform::isCursorVisible()
+bool PlatformGlfw::isCursorVisible()
 {
     //return __cursorVisible;
     return true;
 }
 
-void Platform::displayKeyboard(bool display)
+void PlatformGlfw::displayKeyboard(bool display)
 {
     // Do nothing.
 }
 
-void Platform::requestRepaint() {
+void PlatformGlfw::requestRepaint() {
     // Do nothing.
 }
 
-//
-//bool Platform::isGestureSupported(Gesture::GestureEvent evt)
-//{
-//    return false;
-//}
-//
-//void Platform::registerGesture(Gesture::GestureEvent evt)
-//{
-//}
-//
-//void Platform::unregisterGesture(Gesture::GestureEvent evt)
-//{
-//}
-//    
-//bool Platform::isGestureRegistered(Gesture::GestureEvent evt)
-//{
-//    return false;
-//}
-
-int Platform::run(const char* title, int w, int h) {
-
-    Game* game = Game::getInstance();
-    GP_ASSERT(game);
-    Platform::init(title, w, h);
-    int result = Platform::enterMessagePump();
-
-#ifndef __EMSCRIPTEN__
-    Platform::signalShutdown();
-#endif
-    return result;
+bool PlatformGlfw::launchURL(const char* url) {
+    //TODO
+    return false;
+}
+std::string PlatformGlfw::displayFileDialog(size_t mode, const char* title, const char* filterDescription, const char* filterExtensions, const char* initialDirectory) {
+    //TODO
+    return "";
 }
 
 }
