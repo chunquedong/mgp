@@ -56,12 +56,13 @@ SerializerJson::~SerializerJson()
         
 UPtr<Serializer> SerializerJson::create(const std::string& path, Stream* stream)
 {
+    jc::JsonAllocator allocator;
+
     size_t length = stream->length();
-    char* buffer = new char[length + 1];
+    char* buffer = (char*)allocator.allocate(length + 1);
     stream->read(buffer, sizeof(char), length);
     buffer[length] = '\0';
 
-    jc::JsonAllocator allocator;
     JsonParser parser(&allocator);
     JsonNode* root = (JsonNode*)parser.parse(buffer);
     if (root == nullptr)
@@ -90,7 +91,7 @@ UPtr<Serializer> SerializerJson::create(const std::string& path, Stream* stream)
         serializer = new SerializerJson(Type::eReader, path, stream, versionMajor, versionMinor, root);
         ((SerializerJson*)serializer)->allocator.swap(allocator);
     }
-    SAFE_DELETE_ARRAY(buffer);
+    //SAFE_DELETE_ARRAY(buffer);
     return UPtr<Serializer>(serializer);
 }
 
@@ -354,7 +355,7 @@ jc::JsonNode* SerializerJson::createNode(jc::JsonNode* parent, const char* prope
 {
     if (((parent->type() == jc::Type::Object) && propertyName) || parent->type() == jc::Type::Array)
     {
-        jc::JsonNode* value = (JsonNode*)allocator.allocate(sizeof(JsonNode));
+        jc::JsonNode* value = allocator.allocNode(jc::Type::Object);
         if (parent->type() == jc::Type::Object) {
             parent->insert_pair(json_strdup(allocator, propertyName), value);
         }
@@ -443,6 +444,10 @@ void SerializerJson::writeObject(const char* propertyName, Serializable *value)
     if (xrefNode == nullptr) {
         _nodes.push(writeNode);
         value->onSerialize(this);
+        auto top = _nodes.top();
+        if (top->type() == jc::Type::Object) {
+            top->reverse();
+        }
         _nodes.pop();
     }
 }
@@ -772,7 +777,7 @@ void SerializerJson::readString(const char* propertyName, std::string& value, co
     jc::JsonNode* node = _nodes.top();
     jc::Value* property = nullptr;
 
-    if (node->type() != jc::Type::Array)
+    if (node->type() == jc::Type::Array)
     {
         size_t arraySize = node->size();
         int i = 0;
@@ -819,7 +824,7 @@ Serializable* SerializerJson::readObject(const char* propertyName)
     jc::JsonNode* parentNode = _nodes.top();
     jc::Value* readNode = nullptr;
     
-    if (parentNode->type() != jc::Type::Array)
+    if (parentNode->type() == jc::Type::Array)
     {
         size_t arraySize = parentNode->size();
         int i = 0;
@@ -936,7 +941,11 @@ size_t SerializerJson::readList(const char* propertyName)
     
     jc::JsonNode* node = _nodes.top();
     jc::Value* list = node->get(propertyName);
-    size_t count = list->size();
+
+    size_t count = 0;
+    if (list) {
+        count = list->size();
+    }
     //if (count > 0)
     //{
     _nodes.push((JsonNode*)list);

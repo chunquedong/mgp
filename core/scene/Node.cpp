@@ -1031,7 +1031,7 @@ void Node::onDeserialize(Serializer* serializer)
     if (componentCount > 0)
     {
         //_components.res(componentCount);
-        for (size_t i = 0; i < _components.size(); i++)
+        for (size_t i = 0; i < componentCount; i++)
         {
             auto ptr = serializer->readObject(nullptr);
             //ptr->addRef();
