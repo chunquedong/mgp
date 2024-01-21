@@ -7,6 +7,12 @@
 
 namespace mgp
 {
+    Platform::Platform() {
+
+    }
+    Platform::~Platform() {
+
+    }
 
 	Platform* Platform::cur = NULL;
 
