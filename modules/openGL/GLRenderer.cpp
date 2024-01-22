@@ -13,7 +13,10 @@ GLenum __gl_error_code = GL_NO_ERROR;
 using namespace mgp;
 
 GLRenderer::GLRenderer() {
-  GLFrameBuffer::initialize();
+}
+
+void GLRenderer::init() {
+    GLFrameBuffer::initialize();
 }
 
 GLRenderer::~GLRenderer() {

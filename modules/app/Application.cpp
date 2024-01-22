@@ -486,14 +486,15 @@ void Application::frame()
     if (!_initialized)
     {
         // Perform lazy first time initialization
+        Renderer::cur()->init();
         initialize();
         #if GP_SCRIPT_ENABLE
         if (_scriptTarget)
             _scriptTarget->fireScriptEvent<void>(GP_GET_SCRIPT_EVENT(GameScriptTarget, initialize));
         #endif
+        _initialized = true;
         // Fire first game resize event
         notifyResizeEvent(_width, _height);
-        _initialized = true;
     }
 
 	static double lastFrameTime = Application::getGameTime();
@@ -642,17 +643,21 @@ bool Application::notifyMouseEvent(Mouse evt)
 void Application::notifyResizeEvent(unsigned int width, unsigned int height)
 {
     // Update the width and height of the game
-    if (!_initialized || _width != width || _height != height)
+    if (_width != width || _height != height)
     {
         _width = width;
         _height = height;
+    }
+
+    if (_initialized) {
         if (_inputListener) _inputListener->resizeEvent(width, height);
 
-        #if GP_SCRIPT_ENABLE
+#if GP_SCRIPT_ENABLE
         if (_scriptTarget)
             _scriptTarget->fireScriptEvent<void>(GP_GET_SCRIPT_EVENT(GameScriptTarget, resizeEvent), width, height);
-        #endif
+#endif
     }
+
     _forms->resizeEventInternal(width, height);
 }
 

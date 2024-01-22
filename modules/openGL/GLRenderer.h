@@ -23,6 +23,8 @@ public:
 	GLRenderer();
     ~GLRenderer();
 
+	void init() override;
+
 	void clear(ClearFlags flags, const Vector4& color = Vector4::zero(), float clearDepth = 1.0, int clearStencil = 0.0) override;
 	void setViewport(int x, int y, int w, int h) override;
 

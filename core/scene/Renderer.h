@@ -66,6 +66,8 @@ public:
         CLEAR_COLOR_DEPTH_STENCIL = CLEAR_COLOR | CLEAR_DEPTH | CLEAR_STENCIL
     };
 
+    virtual void init() = 0;
+
     virtual void clear(ClearFlags flags, const Vector4 &color = Vector4::zero(), float clearDepth = 1.0, int clearStencil = 0.0) = 0;
     virtual void setViewport(int x, int y, int w, int h) = 0;
 

@@ -9,7 +9,7 @@
 namespace mgp
 {
 
-unsigned int GLFrameBuffer::_maxRenderTargets = 0;
+unsigned int GLFrameBuffer::_maxRenderTargets = 8;
 GLFrameBuffer* GLFrameBuffer::_defaultFrameBuffer = NULL;
 GLFrameBuffer* GLFrameBuffer::_currentFrameBuffer = NULL;
 
