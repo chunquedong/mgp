@@ -40,7 +40,7 @@ Terrain::~Terrain()
         SAFE_DELETE(_patches[i]);
     }
     SAFE_RELEASE(_normalMap);
-    SAFE_RELEASE(_heightfield);
+    //SAFE_RELEASE(_heightfield);
 }
 
 UPtr<Terrain> Terrain::create(const char* path)
@@ -59,7 +59,7 @@ UPtr<Terrain> Terrain::create(const char* path, Properties* properties)
     Properties* p = properties;
     Properties* pTerrain = NULL;
     bool externalProperties = (p != NULL);
-    HeightField* heightfield = NULL;
+    UPtr<HeightField> heightfield;
     Vector3 terrainSize;
     int patchSize = 0;
     int detailLevels = 1;
@@ -198,7 +198,7 @@ UPtr<Terrain> Terrain::create(const char* path, Properties* properties)
     // Read 'material'
     materialPath = pTerrain->getString("material", "");
 
-    if (heightfield == NULL)
+    if (heightfield.isNull())
     {
         GP_WARN("Failed to read heightfield heights for terrain definition: %s", path);
         if (!externalProperties)
@@ -226,7 +226,7 @@ UPtr<Terrain> Terrain::create(const char* path, Properties* properties)
     Vector3 scale(terrainSize.x / (heightfield->getColumnCount()-1), terrainSize.y, terrainSize.z / (heightfield->getRowCount()-1));
 
     // Create terrain
-    UPtr<Terrain> terrain = create(heightfield, scale, (unsigned int)patchSize, (unsigned int)detailLevels, skirtScale, normalMap, materialPath.c_str(), pTerrain);
+    UPtr<Terrain> terrain = create(std::move(heightfield), scale, (unsigned int)patchSize, (unsigned int)detailLevels, skirtScale, normalMap, materialPath.c_str(), pTerrain);
 
     if (!externalProperties)
         SAFE_DELETE(p);
@@ -234,23 +234,23 @@ UPtr<Terrain> Terrain::create(const char* path, Properties* properties)
     return terrain;
 }
 
-UPtr<Terrain> Terrain::create(HeightField* heightfield, const Vector3& scale, unsigned int patchSize, unsigned int detailLevels, float skirtScale, const char* normalMapPath, const char* materialPath)
+UPtr<Terrain> Terrain::create(UPtr<HeightField> heightfield, const Vector3& scale, unsigned int patchSize, unsigned int detailLevels, float skirtScale, const char* normalMapPath, const char* materialPath)
 {
-    return create(heightfield, scale, patchSize, detailLevels, skirtScale, normalMapPath, materialPath, NULL);
+    return create(std::move(heightfield), scale, patchSize, detailLevels, skirtScale, normalMapPath, materialPath, NULL);
 }
 
-UPtr<Terrain> Terrain::create(HeightField* heightfield, const Vector3& scale,
+UPtr<Terrain> Terrain::create(UPtr<HeightField> heightfield, const Vector3& scale,
     unsigned int patchSize, unsigned int detailLevels, float skirtScale,
     const char* normalMapPath, const char* materialPath, Properties* properties)
 {
-    GP_ASSERT(heightfield);
+    GP_ASSERT(heightfield.get());
 
     unsigned int width = heightfield->getColumnCount();
     unsigned int height = heightfield->getRowCount();
 
     // Create the terrain object
     Terrain* terrain = new Terrain();
-    terrain->_heightfield = heightfield;
+    terrain->_heightfield = std::move(heightfield);
     terrain->_materialPath = (materialPath == NULL || strlen(materialPath) == 0) ? TERRAIN_MATERIAL : materialPath;
 
     // Store terrain local scaling so it can be applied to the heightfield
@@ -274,6 +274,8 @@ UPtr<Terrain> Terrain::create(HeightField* heightfield, const Vector3& scale,
     // level detail terrain patch.
     unsigned int maxStep = (unsigned int)std::pow(2.0, (double)(detailLevels-1));
 
+    float verticalSkirtSize = skirtScale * (terrain->_heightfield->getHeightMax() - terrain->_heightfield->getHeightMin());
+
     // Create terrain patches
     unsigned int x1, x2, z1, z2;
     unsigned int row = 0, column = 0;
@@ -288,7 +290,9 @@ UPtr<Terrain> Terrain::create(HeightField* heightfield, const Vector3& scale,
             x2 = std::min(x1 + patchSize, width-1);
 
             // Create this patch
-            TerrainPatch* patch = TerrainPatch::create(terrain, terrain->_patches.size(), row, column, heightfield->getArray(), width, height, x1, z1, x2, z2, -halfWidth, -halfHeight, maxStep, skirtScale);
+            TerrainPatch* patch = TerrainPatch::create(terrain, terrain->_patches.size(), row, column, 
+                terrain->_heightfield->getArray(), width, height, 
+                x1, z1, x2, z2, -halfWidth, -halfHeight, maxStep, verticalSkirtSize);
             terrain->_patches.push_back(patch);
 
             // Append the new patch's local bounds to the terrain local bounds

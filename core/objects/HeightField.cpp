@@ -7,7 +7,7 @@ namespace mgp
 {
 
 HeightField::HeightField(unsigned int columns, unsigned int rows)
-    : _array(NULL), _cols(columns), _rows(rows)
+    : _array(NULL), _cols(columns), _rows(rows), _heightMin(0), _heightMax(1.0f)
 {
     _array = new float[columns * rows];
 }
@@ -17,9 +17,12 @@ HeightField::~HeightField()
     SAFE_DELETE_ARRAY(_array);
 }
 
-HeightField* HeightField::create(unsigned int columns, unsigned int rows)
+UPtr<HeightField> HeightField::create(unsigned int columns, unsigned int rows, float heightMin, float heightMax)
 {
-    return new HeightField(columns, rows);
+    UPtr<HeightField> heightfield(new HeightField(columns, rows));
+    heightfield->_heightMin = heightMin;
+    heightfield->_heightMax = heightMax;
+    return heightfield;
 }
 
 /**
@@ -35,24 +38,24 @@ float normalizedHeightPacked(float r, float g, float b)
     return (256.0f*r + g + 0.00390625f*b) / 65536.0f;
 }
 
-HeightField* HeightField::createFromImage(const char* path, float heightMin, float heightMax)
+UPtr<HeightField> HeightField::createFromImage(const char* path, float heightMin, float heightMax)
 {
     return create(path, 0, 0, heightMin, heightMax);
 }
 
-HeightField* HeightField::createFromRAW(const char* path, unsigned int width, unsigned int height, float heightMin, float heightMax)
+UPtr<HeightField> HeightField::createFromRAW(const char* path, unsigned int width, unsigned int height, float heightMin, float heightMax)
 {
     return create(path, width, height, heightMin, heightMax);
 }
 
-HeightField* HeightField::create(const char* path, unsigned int width, unsigned int height, float heightMin, float heightMax)
+UPtr<HeightField> HeightField::create(const char* path, unsigned int width, unsigned int height, float heightMin, float heightMax)
 {
     GP_ASSERT(path);
     GP_ASSERT(heightMax >= heightMin);
 
     float heightScale = heightMax - heightMin;
 
-    HeightField* heightfield = NULL;
+    UPtr<HeightField> heightfield;
 
     // Load height data from image
     std::string ext = FileSystem::getExtension(path);
@@ -61,7 +64,7 @@ HeightField* HeightField::create(const char* path, unsigned int width, unsigned 
         // Normal image
         UPtr<Image> image = Image::create(path);
         if (!image.get())
-            return NULL;
+            return heightfield;
 
         unsigned int pixelSize = 0;
         switch (image->getFormat())
@@ -75,11 +78,11 @@ HeightField* HeightField::create(const char* path, unsigned int width, unsigned 
             default:
                 //SAFE_RELEASE(image);
                 GP_WARN("Unsupported pixel format for heightfield image: %s.", path);
-                return NULL;
+                return heightfield;
         }
 
         // Calculate the heights for each pixel.
-        heightfield = HeightField::create(image->getWidth(), image->getHeight());
+        heightfield = HeightField::create(image->getWidth(), image->getHeight(), heightMin, heightMax);
         float* heights = heightfield->getArray();
         unsigned char* data = image->getData();
         int idx;
@@ -100,7 +103,7 @@ HeightField* HeightField::create(const char* path, unsigned int width, unsigned 
         if (width < 2 || height < 2 || heightMax < 0)
         {
             GP_WARN("Invalid 'width', 'height' or 'heightMax' parameter for RAW heightfield image: %s.", path);
-            return NULL;
+            return heightfield;
         }
 
         // Load raw bytes
@@ -109,7 +112,7 @@ HeightField* HeightField::create(const char* path, unsigned int width, unsigned 
         if (bytes == NULL)
         {
             GP_WARN("Falied to read bytes from RAW heightfield image: %s.", path);
-            return NULL;
+            return heightfield;
         }
 
         // Determine if the RAW file is 8-bit or 16-bit based on file size.
@@ -118,10 +121,10 @@ HeightField* HeightField::create(const char* path, unsigned int width, unsigned 
         {
             GP_WARN("Invalid RAW file - must be 8-bit or 16-bit, but found neither: %s.", path);
             SAFE_DELETE_ARRAY(bytes);
-            return NULL;
+            return heightfield;
         }
 
-        heightfield = HeightField::create(width, height);
+        heightfield = HeightField::create(width, height, heightMin, heightMax);
         float* heights = heightfield->getArray();
 
         if (bits == 16)

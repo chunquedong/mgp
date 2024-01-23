@@ -899,7 +899,7 @@ PhysicsCollisionShape* PhysicsController::createShape(Node* node, const PhysicsC
                 if (dynamic_cast<Terrain*>(node->getDrawable()) == NULL)
                     GP_ERROR("Empty heightfield collision shapes can only be used on nodes that have an attached Terrain.");
                 else
-                    collisionShape = createHeightfield(node, dynamic_cast<Terrain*>(node->getDrawable())->_heightfield, centerOfMassOffset);
+                    collisionShape = createHeightfield(node, dynamic_cast<Terrain*>(node->getDrawable())->_heightfield.get(), centerOfMassOffset);
             }
         }
         break;

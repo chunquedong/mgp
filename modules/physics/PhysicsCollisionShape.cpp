@@ -327,16 +327,15 @@ PhysicsCollisionShape::Definition PhysicsCollisionShape::Definition::create(Node
             else
             {
                 std::string ext = FileSystem::getExtension(imagePath);
-                HeightField* heightfield = NULL;
+                UPtr<HeightField> heightfield;
                 if (ext == ".PNG")
                     heightfield = HeightField::createFromImage(imagePath, minHeight, maxHeight);
                 else if (ext == ".RAW" || ext == ".R16")
                     heightfield = HeightField::createFromRAW(imagePath, (unsigned int)width, (unsigned int)height, minHeight, maxHeight);
 
-                if (heightfield)
+                if (heightfield.get())
                 {
-                    shape = PhysicsCollisionShape::heightfield(heightfield);
-                    SAFE_RELEASE(heightfield);
+                    shape = PhysicsCollisionShape::heightfield(heightfield.get());
                 }
             }
         }

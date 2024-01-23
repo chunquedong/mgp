@@ -26,7 +26,7 @@ namespace mgp
          *
          * @return The new HeightField.
          */
-        static HeightField* create(unsigned int rows, unsigned int columns);
+        static UPtr<HeightField> create(unsigned int rows, unsigned int columns, float heightMin = 0, float heightMax = 1);
 
         /**
          * Creates a HeightField from the specified heightfield image.
@@ -44,7 +44,7 @@ namespace mgp
          *
          * @return The new HeightField.
          */
-        static HeightField* createFromImage(const char* path, float heightMin = 0, float heightMax = 1);
+        static UPtr<HeightField> createFromImage(const char* path, float heightMin = 0, float heightMax = 1);
 
         /**
          * Creates a HeightField from the specified RAW8 or RAW16 file.
@@ -71,7 +71,7 @@ namespace mgp
          *
          * @return The new HeightField.
          */
-        static HeightField* createFromRAW(const char* path, unsigned int width, unsigned int height, float heightMin = 0, float heightMax = 1);
+        static UPtr<HeightField> createFromRAW(const char* path, unsigned int width, unsigned int height, float heightMin = 0, float heightMax = 1);
 
         /**
          * Returns a pointer to the underlying height array.
@@ -114,6 +114,13 @@ namespace mgp
          */
         unsigned int getColumnCount() const;
 
+        float getHeightMin() const {
+            return _heightMin;
+        }
+
+        float getHeightMax() const {
+            return _heightMax;
+        }
     private:
 
         /**
@@ -129,11 +136,13 @@ namespace mgp
         /**
          * Internal method for creating a HeightField.
          */
-        static HeightField* create(const char* path, unsigned int width, unsigned int height, float heightMin, float heightMax);
+        static UPtr<HeightField> create(const char* path, unsigned int width, unsigned int height, float heightMin, float heightMax);
 
         float* _array;
         unsigned int _cols;
         unsigned int _rows;
+        float _heightMin;
+        float _heightMax;
     };
 
 }

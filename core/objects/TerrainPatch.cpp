@@ -262,7 +262,7 @@ void TerrainPatch::addLOD(float* heights, unsigned int width, unsigned int heigh
     }
     VertexFormat format(elements, _terrain->_normalMap ? 2 : 3);
     UPtr<Mesh> mesh = Mesh::createMesh(format, vertexCount);
-    mesh->getVertexBuffer()->setData((char*)vertices, vertexCount* vertexElements);
+    mesh->getVertexBuffer()->setData((char*)vertices, vertexCount* vertexElements * sizeof(float));
     mesh->setBoundingBox(BoundingBox(min, max));
     mesh->setBoundingSphere(BoundingSphere(center, center.distance(max)));
 

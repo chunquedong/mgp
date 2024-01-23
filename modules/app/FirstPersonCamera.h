@@ -104,6 +104,7 @@ class FirstPersonCtrl : public CameraCtrl {
     FirstPersonCamera* _camera;
 public:
     void setFpCamera(FirstPersonCamera* c) { _camera = c; }
+    FirstPersonCamera* getFpCamera() { return _camera; }
 
     void update(float elapsedTime);
 

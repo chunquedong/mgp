@@ -105,9 +105,21 @@ private:
         bool operator() (const Layer* lhs, const Layer* rhs) const;
     };
 
+    /**
+    * @index patch index id
+    * @row row of patch in terrain
+    * @column column of path in terrain
+    * @heights height field data
+    * @hfWidth height field size
+    * @hfHeight height field size
+    * @x1, z2, x2, z2 coordinate in pixcel of height field
+    * @xOffset zOffset coordinate offset in pixcel of height field
+    * @maxStep for LOD
+    * @verticalSkirtSize skirt size value
+    */
     static TerrainPatch* create(Terrain* terrain, unsigned int index,
                                 unsigned int row, unsigned int column,
-                                float* heights, unsigned int width, unsigned int height,
+                                float* heights, unsigned int hfWidth, unsigned int hfHeight,
                                 unsigned int x1, unsigned int z1, unsigned int x2, unsigned int z2,
                                 float xOffset, float zOffset, unsigned int maxStep, float verticalSkirtSize);
 

@@ -158,7 +158,7 @@ public:
      * @param scale A scale to apply to the terrain along the X, Y and Z axes. The terrain and any associated
      *      physics heightfield is scaled by this amount. Pass Vector3::one() to use the exact dimensions and heights
      *      in the supplied height array.
-     * @param patchSize Size of terrain patches (number of quads).
+     * @param patchSize Size of terrain patches (pixel of height field).
      * @param detailLevels Number of detail levels to generate for the terrain (a value of one generates only the base
      *      level, resulting in no LOD at runtime.
      * @param skirtScale A positive value indicates that vertical skirts should be generated at the specified
@@ -172,8 +172,8 @@ public:
      * @return A new Terrain.
      * @script{create}
      */
-    static UPtr<Terrain> create(HeightField* heightfield, const Vector3& scale = Vector3::one(), unsigned int patchSize = 32,
-                           unsigned int detailLevels = 1, float skirtScale = 0.0f, const char* normalMapPath = NULL,
+    static UPtr<Terrain> create(UPtr<HeightField> heightfield, const Vector3& scale = Vector3::one(), unsigned int patchSize = 32,
+                           unsigned int detailLevels = 3, float skirtScale = 0.05f, const char* normalMapPath = NULL,
                            const char* materialPath = NULL);
 
     /**
@@ -306,7 +306,7 @@ private:
     /**
      * Internal method for creating terrain.
      */
-    static UPtr<Terrain> create(HeightField* heightfield, const Vector3& scale,
+    static UPtr<Terrain> create(UPtr<HeightField> heightfield, const Vector3& scale,
         unsigned int patchSize, unsigned int detailLevels, float skirtScale, 
         const char* normalMapPath, const char* materialPath, Properties* properties);
 
@@ -332,7 +332,7 @@ private:
     BoundingBox getBoundingBox(bool worldSpace) const;
 
     std::string _materialPath;
-    HeightField* _heightfield;
+    UPtr<HeightField> _heightfield;
     Vector3 _localScale;
     std::vector<TerrainPatch*> _patches;
     Texture* _normalMap;
