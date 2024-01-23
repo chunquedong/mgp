@@ -124,7 +124,7 @@ Application::Application()
     regiseterSerializer();
     setInputListener(this);
 
-    _timeStart = System::nanoTicks() / 1000000.0;
+    _timeStart = System::millisTicks();
 
     printf("MGP 1.0\n");
 }
@@ -220,7 +220,7 @@ void Application::showFps(bool v) {
 
 double Application::getGameTime()
 {
-    return (System::nanoTicks() / 1000000.0) - _timeStart - _pausedTimeTotal;
+    return System::millisTicks() - _timeStart - _pausedTimeTotal;
 }
 
 int Application::run(int w, int h)
@@ -417,7 +417,7 @@ void Application::pause()
         GP_ASSERT(_aiController);
     #endif
         _state = PAUSED;
-        _pausedTimeLast = System::nanoTicks() / 1000000.0;
+        _pausedTimeLast = System::millisTicks();
         _animationController->pause();
     #ifndef __EMSCRIPTEN__
         _audioController->pause();
@@ -444,7 +444,7 @@ void Application::resume()
             GP_ASSERT(_aiController);
         #endif
             _state = RUNNING;
-            _pausedTimeTotal += System::nanoTicks() / 1000000.0 - _pausedTimeLast;
+            _pausedTimeTotal += System::millisTicks() - _pausedTimeLast;
             _animationController->resume();
 
         #ifndef __EMSCRIPTEN__
@@ -661,7 +661,7 @@ void Application::notifyResizeEvent(unsigned int width, unsigned int height)
     _forms->resizeEventInternal(width, height);
 }
 
-void Application::ShutdownListener::timeEvent(long timeDiff, void* cookie)
+void Application::ShutdownListener::timeEvent(int64_t timeDiff, void* cookie)
 {
 	Application::getInstance()->shutdown();
 }

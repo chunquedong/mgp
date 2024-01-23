@@ -344,7 +344,7 @@ void ScrollContainer::startScrolling(float x, float y, bool resetTime)
 
     if (resetTime)
     {
-        _lastFrameTime = System::currentTimeMillis();
+        _lastFrameTime = System::millisTicks();
     }
 }
 
@@ -369,9 +369,9 @@ void ScrollContainer::updateScroll()
     // Update time.
     if (!_lastFrameTime)
     {
-        _lastFrameTime = System::currentTimeMillis();
+        _lastFrameTime = System::millisTicks();
     }
-    double frameTime = System::currentTimeMillis();
+    double frameTime = System::millisTicks();
     float elapsedTime = (float)(frameTime - _lastFrameTime);
     _lastFrameTime = frameTime;
 
@@ -536,7 +536,7 @@ bool ScrollContainer::touchEventScroll(MotionEvent::MotionType evt, int x, int y
     case MotionEvent::touchMove:
         if (_scrolling && _contactIndex == (int)contactIndex)
         {
-            double gameTime = System::currentTimeMillis();
+            double gameTime = System::millisTicks();
 
             // Calculate the latest movement delta for the next update to use.
             int vx = x - _scrollingLastX;
@@ -602,7 +602,7 @@ bool ScrollContainer::touchEventScroll(MotionEvent::MotionType evt, int x, int y
         {
             _contactIndex = INVALID_CONTACT_INDEX;
             _scrolling = false;
-            double gameTime = System::currentTimeMillis();
+            double gameTime = System::millisTicks();
             float timeSinceLastMove = (float)(gameTime - _scrollingLastTime);
             if (timeSinceLastMove > SCROLL_INERTIA_DELAY)
             {
@@ -741,7 +741,7 @@ bool ScrollContainer::mouseEventScroll(MotionEvent::MotionType evt, int x, int y
         {
             if (_scrollingVelocity.isZero())
             {
-                _lastFrameTime = System::currentTimeMillis();
+                _lastFrameTime = System::millisTicks();
             }
             _scrolling = _scrollingMouseVertically = _scrollingMouseHorizontally = false;
 

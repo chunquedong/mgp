@@ -9,6 +9,8 @@
  */
 #include "System.h"
 
+#include <stdio.h>
+
 using namespace mgp;
 
 #ifndef WIN32
@@ -91,6 +93,7 @@ int64_t System::currentTimeMillis() {
  */
 
 #include <Windows.h>
+#include <time.h>
 
 int64_t System::nanoTicks() {
   /*
@@ -105,25 +108,24 @@ int64_t System::nanoTicks() {
 }
 
 int64_t System::currentTimeMillis() {
-  SYSTEMTIME st;
-  FILETIME ft,ft19700101;
-  LARGE_INTEGER *pli,*pft,ms_from_19700101;
-  
-  st.wYear=1970;
-  st.wMonth=1;
-  st.wDay=1;
-  st.wHour=0;
-  st.wMinute=0;
-  st.wSecond=0;
-  st.wMilliseconds=0;
-  SystemTimeToFileTime(&st,&ft19700101);
-  pft=(LARGE_INTEGER *)&ft19700101;
-  
-  GetLocalTime(&st);
-  SystemTimeToFileTime(&st,&ft);
-  pli=(LARGE_INTEGER *)&ft;
-  ms_from_19700101.QuadPart=(pli->QuadPart - pft->QuadPart)/10000;
-  return ms_from_19700101.QuadPart;
+    struct timeval tv;
+    time_t clock;
+    struct tm tm;
+    SYSTEMTIME wtm;
+    GetLocalTime(&wtm);
+    tm.tm_year = wtm.wYear - 1900;
+    tm.tm_mon = wtm.wMonth - 1;
+    tm.tm_mday = wtm.wDay;
+    tm.tm_hour = wtm.wHour;
+    tm.tm_min = wtm.wMinute;
+    tm.tm_sec = wtm.wSecond;
+    tm.tm_isdst = -1;
+    clock = mktime(&tm);
+    tv.tv_sec = clock;
+    tv.tv_usec = wtm.wMilliseconds * 1000;
+    int64_t millis = ((unsigned long long)tv.tv_sec * 1000 + (unsigned long long)tv.tv_usec / 1000);
+    //printf("%lld\n", millis);
+    return millis;
 }
 #endif
 

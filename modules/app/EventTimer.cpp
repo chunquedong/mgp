@@ -10,18 +10,19 @@ EventTimer::~EventTimer() {
     SAFE_DELETE(_timeEvents);
 }
 
-void EventTimer::schedule(float timeOffset, TimeListener* timeListener, void* cookie)
+void EventTimer::schedule(int64_t timeOffset, TimeListener* timeListener, void* cookie)
 {
     GP_ASSERT(_timeEvents);
     SPtr<TimeListener> listener;
     listener = timeListener;
-    TimeEvent timeEvent(System::currentTimeMillis() + timeOffset, listener, cookie);
+    uint64_t time = System::millisTicks() + timeOffset;
+    TimeEvent timeEvent(time, listener, cookie);
     _scheduleLock.lock();
     _timeEvents->push(timeEvent);
     _scheduleLock.unlock();
 }
 
-void EventTimer::schedule(float timeOffset, const char* function)
+void EventTimer::schedule(int64_t timeOffset, const char* function)
 {
 #if undeclared
     _scriptController->schedule(timeOffset, function);
@@ -38,7 +39,7 @@ void EventTimer::clearSchedule()
 
 void EventTimer::fireTimeEvents()
 {
-    double frameTime = System::currentTimeMillis();
+    int64_t frameTime = System::millisTicks();
     std::vector<TimeEvent> toFire;
     _scheduleLock.lock();
     while (_timeEvents->size() > 0)
@@ -64,7 +65,7 @@ void EventTimer::fireTimeEvents()
     }
 }
 
-EventTimer::TimeEvent::TimeEvent(double time, SPtr<TimeListener> timeListener, void* cookie)
+EventTimer::TimeEvent::TimeEvent(int64_t time, SPtr<TimeListener> timeListener, void* cookie)
     : time(time), listener(timeListener), cookie(cookie)
 {
 }

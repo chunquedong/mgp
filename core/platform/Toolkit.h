@@ -9,6 +9,7 @@
 #define Toolkit_H_
 
 #include "math/Rectangle.h"
+#include "base/System.h"
 
 namespace mgp
 {
@@ -80,7 +81,7 @@ public:
      * @param cookie The cookie data that the time event will contain.
      * @script{ignore}
      */
-    virtual void schedule(float timeOffset, TimeListener* timeListener, void* cookie = 0) = 0;
+    virtual void schedule(int64_t timeOffset, TimeListener* timeListener, void* cookie = 0) = 0;
 
 
     /**

@@ -173,7 +173,7 @@ public:
     * @param cookie The cookie data that the time event will contain.
     * @script{ignore}
     */
-    virtual void schedule(float timeOffset, TimeListener* timeListener, void* cookie = 0) {
+    virtual void schedule(int64_t timeOffset, TimeListener* timeListener, void* cookie = 0) {
         _eventTimer->schedule(timeOffset, timeListener, cookie);
     }
 
@@ -280,7 +280,7 @@ private:
 
     struct ShutdownListener : public TimeListener
     {
-        void timeEvent(long timeDiff, void* cookie);
+        void timeEvent(int64_t timeDiff, void* cookie);
     };
 
     /**

@@ -764,7 +764,7 @@ void Control::showToolTip() {
 
 void Control::update(float elapsedTime)
 {
-    if (_state == HOVER && _hoverTime > 0 && _toolTip.size() > 0 && System::currentTimeMillis() - _hoverTime > 800 && _toolTipControl.isNull()) {
+    if (_state == HOVER && _hoverTime > 0 && _toolTip.size() > 0 && System::millisTicks() - _hoverTime > 800 && _toolTipControl.isNull()) {
         showToolTip();
     }
     else if (_state != HOVER && _toolTipControl.get()) {
@@ -1344,7 +1344,7 @@ void Control::setState(State state) {
     _state = state;
     setDirty(Control::DIRTY_STATE);
     if (_state == HOVER) {
-        _hoverTime = System::currentTimeMillis();
+        _hoverTime = System::millisTicks();
     }
 }
 

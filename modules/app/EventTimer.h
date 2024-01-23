@@ -18,9 +18,9 @@ class EventTimer {
     {
     public:
 
-        TimeEvent(double time, SPtr<TimeListener> timeListener, void* cookie);
+        TimeEvent(int64_t time, SPtr<TimeListener> timeListener, void* cookie);
         bool operator<(const TimeEvent& v) const;
-        double time;
+        uint64_t time;
         SPtr<TimeListener> listener;
         void* cookie;
     };
@@ -40,7 +40,7 @@ public:
      * @param cookie The cookie data that the time event will contain.
      * @script{ignore}
      */
-    void schedule(float timeOffset, TimeListener* timeListener, void* cookie = 0);
+    void schedule(int64_t timeOffset, TimeListener* timeListener, void* cookie = 0);
 
     /**
      * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.
@@ -53,7 +53,7 @@ public:
      * @param timeOffset The number of game milliseconds in the future to schedule the event to be fired.
      * @param function The script function that will receive the event.
      */
-    void schedule(float timeOffset, const char* function);
+    void schedule(int64_t timeOffset, const char* function);
 
     /**
      * Clears all scheduled time events.
