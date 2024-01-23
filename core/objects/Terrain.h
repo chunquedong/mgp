@@ -173,7 +173,7 @@ public:
      * @script{create}
      */
     static UPtr<Terrain> create(UPtr<HeightField> heightfield, const Vector3& scale = Vector3::one(), unsigned int patchSize = 32,
-                           unsigned int detailLevels = 3, float skirtScale = 0.05f, const char* normalMapPath = NULL,
+                           unsigned int detailLevels = 3, float skirtScale = 0.01f, const char* normalMapPath = NULL,
                            const char* materialPath = NULL);
 
     /**

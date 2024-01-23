@@ -28,7 +28,6 @@ class SceneView {
 
 
     bool _useFirstPersonCamera = false;
-    FirstPersonCamera _fpCamera;
     UPtr<CameraCtrl> _cameraCtrl;
 
 public:

@@ -2,87 +2,83 @@
 
 using namespace mgp;
 
-FirstPersonCamera::FirstPersonCamera()
+FPCameraCtrl::FPCameraCtrl()
     : _pitchNode(NULL), _rootNode(NULL)
 {
     
 }
 
-FirstPersonCamera::~FirstPersonCamera()
+FPCameraCtrl::~FPCameraCtrl()
 {
     SAFE_RELEASE(_pitchNode);
     SAFE_RELEASE(_rootNode);
 }
 
-void FirstPersonCamera::initialize(float aspectRatio, float nearPlane, float farPlane, float fov)
-{
+void FPCameraCtrl::setCamera(Camera* camera) {
     SAFE_RELEASE(_pitchNode);
     SAFE_RELEASE(_rootNode);
-    _rootNode = Node::create("FirstPersonCamera_root").take();
-    _pitchNode = Node::create("FirstPersonCamera_pitch").take();
+    _rootNode = Node::create("FirstPersonCtrl_root").take();
+    _pitchNode = Node::create("FirstPersonCtrl_pitch").take();
     _rootNode->addChild(uniqueFromInstant(_pitchNode));
 
-    assert(aspectRatio > 0.0f);
-    UPtr<Camera> camera = Camera::createPerspective(fov, aspectRatio, nearPlane, farPlane);
-    _pitchNode->setCamera(std::move(camera));
-    //SAFE_RELEASE(camera);
+    _pitchNode->setCamera(uniqueFromInstant(camera));
 }
 
-Node* FirstPersonCamera::getRootNode()
+Node* FPCameraCtrl::getRootNode()
 {
     return _rootNode;
 }
 
-Camera* FirstPersonCamera::getCamera()
+Camera* FPCameraCtrl::getCamera()
 {
     if (_pitchNode)
         return _pitchNode->getCamera();
     return NULL;
 }
 
-void FirstPersonCamera::setPosition(const Vector3& position)
+void FPCameraCtrl::setPosition(const Vector3& position)
 {
     _rootNode->setTranslation(position);
 }
 
-const Vector3& FirstPersonCamera::getPosition()
+const Vector3& FPCameraCtrl::getPosition()
 {
     return _rootNode->getTranslation();
 }
 
-void FirstPersonCamera::moveForward(float amount)
+void FPCameraCtrl::moveForward(float amount)
 {
     Vector3 v = _pitchNode->getForwardVectorWorld();
     v.normalize().scale(amount);
     _rootNode->translate(v);
 }
 
-void FirstPersonCamera::moveBackward(float amount)
+void FPCameraCtrl::moveBackward(float amount)
 {
     moveForward(-amount);
 }
 
-void FirstPersonCamera::moveLeft(float amount)
+void FPCameraCtrl::moveLeft(float amount)
 {
     _rootNode->translateLeft(amount);
 }
 
-void FirstPersonCamera::moveRight(float amount)
+void FPCameraCtrl::moveRight(float amount)
 {
     _rootNode->translateLeft(-amount);
 }
 
-void FirstPersonCamera::moveUp(float amount)
+void FPCameraCtrl::moveUp(float amount)
 {
     _rootNode->translateUp(amount);
 }
 
-void FirstPersonCamera::moveDown(float amount)
+void FPCameraCtrl::moveDown(float amount)
 {
     _rootNode->translateUp(-amount);
 }
 
-void FirstPersonCamera::rotate(float yaw, float pitch)
+void FPCameraCtrl::rotate(float yaw, float pitch)
 {
     _rootNode->rotateY(-yaw);
     _pitchNode->rotateX(pitch);
@@ -99,7 +95,7 @@ static const unsigned int MOVE_DOWN = 32;
 static const float MOVE_SPEED = 8.0f;
 static const float UP_DOWN_SPEED = 8.0f;
 
-void FirstPersonCtrl::update(float elapsedTime)
+void FPCameraCtrl::update(float elapsedTime)
 {
     float time = (float)elapsedTime / 1000.0f;
 
@@ -129,24 +125,24 @@ void FirstPersonCtrl::update(float elapsedTime)
         // Up and down
         if (_moveFlags & MOVE_UP)
         {
-            _camera->moveUp(time * UP_DOWN_SPEED);
+            this->moveUp(time * UP_DOWN_SPEED);
         }
         else if (_moveFlags & MOVE_DOWN)
         {
-            _camera->moveDown(time * UP_DOWN_SPEED);
+            this->moveDown(time * UP_DOWN_SPEED);
         }
     }
 
     if (!mouseMove.isZero())
     {
         mouseMove.scale(time * MOVE_SPEED);
-        _camera->moveForward(mouseMove.y);
-        _camera->moveLeft(mouseMove.x);
+        this->moveForward(mouseMove.y);
+        this->moveLeft(mouseMove.x);
     }
 }
 
 
-void FirstPersonCtrl::touchEvent(MotionEvent& evt)
+void FPCameraCtrl::touchEvent(MotionEvent& evt)
 {
     switch (evt.type)
     {
@@ -166,13 +162,13 @@ void FirstPersonCtrl::touchEvent(MotionEvent& evt)
         _prevY = evt.y;
         float pitch = -MATH_DEG_TO_RAD(deltaY * 0.5f);
         float yaw = MATH_DEG_TO_RAD(deltaX * 0.5f);
-        _camera->rotate(yaw, pitch);
+        this->rotate(yaw, pitch);
         break;
     }
     };
 }
 
-void FirstPersonCtrl::keyEvent(Keyboard evt)
+void FPCameraCtrl::keyEvent(Keyboard evt)
 {
     if (evt.evt == Keyboard::KEY_PRESS)
     {
@@ -198,10 +194,10 @@ void FirstPersonCtrl::keyEvent(Keyboard evt)
             _moveFlags |= MOVE_UP;
             break;
         case Keyboard::KEY_PG_UP:
-            _camera->rotate(0, MATH_PIOVER4);
+            this->rotate(0, MATH_PIOVER4);
             break;
         case Keyboard::KEY_PG_DOWN:
-            _camera->rotate(0, -MATH_PIOVER4);
+            this->rotate(0, -MATH_PIOVER4);
             break;
 
         case Keyboard::KEY_ONE:
@@ -235,12 +231,12 @@ void FirstPersonCtrl::keyEvent(Keyboard evt)
     }
 }
 
-bool FirstPersonCtrl::mouseEvent(Mouse evt)
+bool FPCameraCtrl::mouseEvent(Mouse evt)
 {
     switch (evt.type)
     {
     case MotionEvent::wheel:
-        _camera->moveForward(evt.wheelDelta * MOVE_SPEED / 4.0f);
+        this->moveForward(evt.wheelDelta * MOVE_SPEED / 4.0f);
         return true;
     }
     return false;

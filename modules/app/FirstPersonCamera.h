@@ -11,24 +11,21 @@ namespace mgp {
 /**
  * FirstPersonCamera controls a camera like a first person shooter game.
  */
-class FirstPersonCamera
+class FPCameraCtrl : public CameraCtrl
 {
 public:
 
     /**
      * Constructor.
      */
-    FirstPersonCamera();
+    FPCameraCtrl();
 
     /**
      * Destructor.
      */
-    ~FirstPersonCamera();
+    ~FPCameraCtrl();
 
-    /**
-     * Initializes the first person camera. Should be called after the Application has been initialized.
-     */
-    void initialize(float aspectRatio, float nearPlane = 1.0f, float farPlane = 1000.0f, float fov = 45.0f);
+    void setCamera(Camera* camera);
 
     /**
      * Gets root node. May be NULL if not initialized.
@@ -90,22 +87,8 @@ public:
      */
     void rotate(float yaw, float pitch);
 
-private:
 
-    Node* _pitchNode;
-    Node* _rootNode;
-};
-
-
-class FirstPersonCtrl : public CameraCtrl {
-    unsigned int _moveFlags;
-    int _prevX;
-    int _prevY;
-    FirstPersonCamera* _camera;
 public:
-    void setFpCamera(FirstPersonCamera* c) { _camera = c; }
-    FirstPersonCamera* getFpCamera() { return _camera; }
-
     void update(float elapsedTime);
 
     void touchEvent(MotionEvent& evt);
@@ -113,6 +96,15 @@ public:
     void keyEvent(Keyboard evt);
 
     bool mouseEvent(Mouse evt);
+private:
+
+    Node* _pitchNode;
+    Node* _rootNode;
+
+    unsigned int _moveFlags = 0;
+    int _prevX = 0;
+    int _prevY = 0;
 };
+
 }
 #endif

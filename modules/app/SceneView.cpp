@@ -49,7 +49,7 @@ void SceneView::setViewport(Rectangle* rect) {
 void SceneView::setCamera(Camera* c, bool initCameraCtrl) {
     _camera = uniqueFromInstant(c);
     if (!_cameraCtrl.get() && initCameraCtrl) {
-        UPtr<EditorCameraCtrl> cameraCtrl = UPtr<EditorCameraCtrl>(new EditorCameraCtrl());
+        UPtr<EditorCameraCtrl> cameraCtrl(new EditorCameraCtrl());
         cameraCtrl->setCamera(_camera.get());
         cameraCtrl->sceneView = this;
         setCameraCtrl(cameraCtrl.dynamicCastTo<CameraCtrl>());
@@ -66,26 +66,27 @@ void SceneView::initCamera(bool firstPerson, float nearPlane, float farPlane, fl
     if (_viewport.height > 0) {
         aspectRatio = _viewport.width / _viewport.height;
     }
+
+    UPtr<Camera> camera = Camera::createPerspective(fov, aspectRatio, nearPlane, farPlane);
+
     if (firstPerson) {
-        _fpCamera.initialize(aspectRatio, nearPlane, farPlane, fov);
-        _fpCamera.setPosition(Vector3(0, 0, 10));
+        UPtr<FPCameraCtrl> cameraCtrl(new FPCameraCtrl());
+        cameraCtrl->setCamera(camera.get());
+        cameraCtrl->setPosition(Vector3(0, 0, 10));
+
         //_fpCamera.rotate(0.0f, -MATH_DEG_TO_RAD(10));
         if (_scene.get()) {
-            _scene->addNode(uniqueFromInstant(_fpCamera.getRootNode()));
+            _scene->addNode(uniqueFromInstant(cameraCtrl->getRootNode()));
             //_scene->setActiveCamera(_fpCamera.getCamera());
         }
 
-        _useFirstPersonCamera = true;
-        UPtr<FirstPersonCtrl> cameraCtrl = UPtr<FirstPersonCtrl>(new FirstPersonCtrl());
-        cameraCtrl->setFpCamera(&_fpCamera);
         setCameraCtrl(cameraCtrl.dynamicCastTo<CameraCtrl>());
-
-        UPtr<Camera> camera = UPtr<Camera>(_fpCamera.getCamera());
-        setCamera(camera.get());
-        camera.take();
     }
     else {
-        UPtr<Camera> camera = Camera::createPerspective(fov, aspectRatio, nearPlane, farPlane);
+        UPtr<EditorCameraCtrl> cameraCtrl(new EditorCameraCtrl());
+        cameraCtrl->setCamera(camera.get());
+        cameraCtrl->sceneView = this;
+
         if (_scene.get()) {
             Node* cameraNode = _scene->addNode("camera");
             // Attach the camera to a node. This determines the position of the camera.
@@ -94,14 +95,10 @@ void SceneView::initCamera(bool firstPerson, float nearPlane, float farPlane, fl
             //_scene->setActiveCamera(camera);
             // Move the camera to look at the origin.
             cameraNode->translate(0, 0, 10);
-
-            UPtr<EditorCameraCtrl> cameraCtrl = UPtr<EditorCameraCtrl>(new EditorCameraCtrl());
-            cameraCtrl->setCamera(camera.get());
-            cameraCtrl->sceneView = this;
-            setCameraCtrl(cameraCtrl.dynamicCastTo<CameraCtrl>());
         }
-        _useFirstPersonCamera = false;
-        setCamera(camera.get());
-        //SAFE_RELEASE(camera);
+
+        setCameraCtrl(cameraCtrl.dynamicCastTo<CameraCtrl>());
     }
+    _useFirstPersonCamera = firstPerson;
+    setCamera(camera.get());
 }
