@@ -275,6 +275,7 @@ public:
      */
     const Matrix& getProjectionMatrix() const;
 
+    MeshBatch* getBatch() { return _batch; }
 private:
 
     /**

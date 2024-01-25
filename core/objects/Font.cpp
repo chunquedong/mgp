@@ -52,22 +52,40 @@ size_t utf8decode(char const* str, int len, std::wstring& out, int* illegal) {
 namespace mgp
 {
 
-static std::vector<Font*> __fontCache;
+static std::vector<FontCache*> __fontCache;
 
-static ShaderProgram* __fontEffect = NULL;
+//static ShaderProgram* __fontEffect = NULL;
 
-
-
-Font::Font() :
-    _style(PLAIN), _size(25), _spacing(0.0f), textureWidth(256), textureHeight(256), _isStarted(false), shaderProgram(NULL), _outline(0)
+SPtr<FontCache> FontCache::create(const char* path, int fontSize)
 {
-    //shaderProgram = ShaderProgram::createFromFile(FONT_VSH, FONT_FSH);
+    GP_ASSERT(path);
+
+    // Search the font cache for a font with the given path and ID.
+    for (size_t i = 0, count = __fontCache.size(); i < count; ++i)
+    {
+        FontCache* f = __fontCache[i];
+        GP_ASSERT(f);
+        if (f->_path == path && f->_size == fontSize)
+        {
+            // Found a match.
+            f->addRef();
+            return SPtr<FontCache>(f);
+        }
+    }
+
+    FontCache* font = new FontCache();
+    FontFace* face = new FontFace();
+    face->load(path);
+    font->fontFaces.push_back(face);
+    font->_path = path;
+    font->_size = fontSize;
+
+    __fontCache.push_back(font);
+    return SPtr<FontCache>(font);
 }
 
-Font::~Font()
-{
-    // Remove this Font from the font cache.
-    std::vector<Font*>::iterator itr = std::find(__fontCache.begin(), __fontCache.end(), this);
+FontCache::~FontCache() {
+    std::vector<FontCache*>::iterator itr = std::find(__fontCache.begin(), __fontCache.end(), this);
     if (itr != __fontCache.end())
     {
         __fontCache.erase(itr);
@@ -79,17 +97,88 @@ Font::~Font()
     }
     fontTextures.clear();
 
-    for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
-        SpriteBatch* _batch = fontDrawers[i];
-        SAFE_DELETE(_batch);
-    }
-    fontDrawers.clear();
-
     for (size_t i = 0, count = fontFaces.size(); i < count; ++i)
     {
         delete fontFaces[i];
     }
     fontFaces.clear();
+}
+
+FontCache::FontCache() :
+    _style(PLAIN), _size(25), textureWidth(256), textureHeight(256)
+{
+}
+
+bool FontCache::getGlyph(FontInfo& fontInfo, wchar_t c, Glyph& glyph) {
+    uint64_t key = ((uint64_t)c << 8) | (fontInfo.bold);
+    double fontSizeScale = fontInfo.size / (double)_size;
+
+    TextureAtlas* fontTexture = NULL;
+    int textureIndex = 0;
+    auto itr = glyphCache.find(key);
+    if (itr != glyphCache.end()) {
+        glyph = itr->second;
+        fontTexture = fontTextures[glyph.texture];
+        glyph.metrics.scaleMetrics(fontSizeScale);
+    }
+    else {
+        //render char to image
+        if (!fontFaces.at(0)->renderChar(c, fontInfo, _size, glyph)) {
+            return false;
+        }
+
+        //find free space
+        Rectangle rect;
+        for (int i = 0; i < fontTextures.size(); ++i) {
+            TextureAtlas* ft = fontTextures[i];
+            if (ft->addImageData(glyph.imgW, glyph.imgH, glyph.imgData, rect)) {
+                fontTexture = ft;
+                textureIndex = i;
+                break;
+            }
+        }
+
+        //new texture
+        if (fontTexture == NULL) {
+            fontTexture = new TextureAtlas(Texture::Format::RED, textureWidth, textureHeight);
+            fontTexture->getTexture()->setFilterMode(Texture::LINEAR, Texture::LINEAR);
+            //fontTexture->getTexture()->setFilterMode(Texture::NEAREST, Texture::NEAREST);
+            textureIndex = fontTextures.size();
+            fontTextures.push_back(fontTexture);
+
+            bool ok = fontTexture->addImageData(glyph.imgW, glyph.imgH, glyph.imgData, rect);
+            GP_ASSERT(ok);
+        }
+
+        free(glyph.imgData);
+        glyph.imgData = NULL;
+
+        glyph.texture = textureIndex;
+        glyph.imgX = rect.x;
+        glyph.imgY = rect.y;
+
+        glyphCache[key] = glyph;
+
+        glyph.metrics.scaleMetrics(fontSizeScale);
+        //char name[256];
+        //snprintf(name, 256, "fontTexture_%p.png", this);
+        //stbi_write_png(name, textureWidth, textureHeight, 1, fontTexture->data, textureWidth * 1);
+    }
+    return true;
+}
+
+Font::Font() : _spacing(0.0f), _isStarted(false), shaderProgram(NULL), _outline(0)
+{
+    //shaderProgram = ShaderProgram::createFromFile(FONT_VSH, FONT_FSH);
+}
+
+Font::~Font()
+{
+    for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
+        SpriteBatch* _batch = fontDrawers[i];
+        SAFE_DELETE(_batch);
+    }
+    fontDrawers.clear();
 
     if (shaderProgram) {
         shaderProgram->release();
@@ -97,37 +186,16 @@ Font::~Font()
     }
 }
 
-UPtr<Font> Font::create(const char* path, int outline, int fontSize, bool shared)
+UPtr<Font> Font::create(const char* path, int outline, int fontSize)
 {
     GP_ASSERT(path);
 
-    if (shared) {
-        // Search the font cache for a font with the given path and ID.
-        for (size_t i = 0, count = __fontCache.size(); i < count; ++i)
-        {
-            Font* f = __fontCache[i];
-            GP_ASSERT(f);
-            if (f->_path == path && f->_size == fontSize && f->_outline == outline)
-            {
-                // Found a match.
-                f->addRef();
-                return UPtr<Font>(f);
-            }
-        }
-    }
-
     Font* font = new Font();
-    FontFace* face = new FontFace();
-    face->load(path);
-    font->fontFaces.push_back(face);
-    font->_path = path;
+    font->_fontCache = FontCache::create(path, fontSize);
     font->_outline = outline;
-    font->_size = fontSize;
 
-    __fontCache.push_back(font);
     return UPtr<Font>(font);
 }
-
 
 bool Font::isCharacterSupported(int character) const
 {
@@ -155,16 +223,6 @@ void Font::lazyStart()
         if (_batch->isStarted())
             return; // already started
 
-        // Update the projection matrix for our batch to match the current viewport
-        int w = Toolkit::cur()->getDpWidth();
-        int h = Toolkit::cur()->getDpHeight();
-        if (w && h)
-        {
-            Matrix projectionMatrix;
-            Matrix::createOrthographicOffCenter(0, w, h, 0, 0, 1, &projectionMatrix);
-            _batch->setProjectionMatrix(projectionMatrix);
-        }
-
         _batch->start();
     }
 }
@@ -173,6 +231,25 @@ void Font::finish(RenderInfo* view)
 {
     for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
         SpriteBatch* _batch = fontDrawers[i];
+
+        if (view) {
+            int w = view->viewport.width / Toolkit::cur()->getScreenScale();
+            int h = view->viewport.height / Toolkit::cur()->getScreenScale();
+            Matrix projectionMatrix;
+            Matrix::createOrthographicOffCenter(0, w, h, 0, 0, 1, &projectionMatrix);
+            _batch->setProjectionMatrix(projectionMatrix);
+        }
+        else {
+            int w = Toolkit::cur()->getDpWidth();
+            int h = Toolkit::cur()->getDpHeight();
+            if (w && h)
+            {
+                Matrix projectionMatrix;
+                Matrix::createOrthographicOffCenter(0, w, h, 0, 0, 1, &projectionMatrix);
+                _batch->setProjectionMatrix(projectionMatrix);
+            }
+        }
+
         // Finish any font batches that have been started
         if (_batch->isStarted())
             _batch->finish(view);
@@ -193,77 +270,33 @@ bool Font::isStarted() const {
 
 
 bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, const Vector4& color, int previous, const Rectangle* clip) {
-    uint64_t key = ((uint64_t)c << 8) | (fontInfo.bold);
-    double fontSizeScale = fontInfo.size / (double)_size;
 
-    TextureAtlas* fontTexture = NULL;
+    if (!_fontCache->getGlyph(fontInfo, c, glyph)) {
+        return false;
+    }
+
+    double fontSizeScale = fontInfo.size / (double)_fontCache->_size;
+
     SpriteBatch* _batch = NULL;
-    int textureIndex = 0;
-    auto itr = glyphCache.find(key);
-    if (itr != glyphCache.end()) {
-        glyph = itr->second;
-        fontTexture = fontTextures[glyph.texture];
+    if (glyph.texture < fontDrawers.size()) {
         _batch = fontDrawers[glyph.texture];
-        glyph.metrics.scaleMetrics(fontSizeScale);
     }
     else {
-        //render char to image
-        if (!fontFaces.at(0)->renderChar(c, fontInfo, _size, glyph)) {
-            return false;
+        TextureAtlas* fontTexture = _fontCache->fontTextures[glyph.texture];
+        _batch = SpriteBatch::create(fontTexture->getTexture(), shaderProgram).take();
+        _batch->getBatch()->setRenderPass(Drawable::Overlay);
+        auto _cutoffParam = _batch->getMaterial()->getParameter("u_cutoff");
+        _cutoffParam->setVector2(Vector2(0.50, 0.1));
+        if (_outline) {
+            auto u_outline = _batch->getMaterial()->getParameter("u_outline");
+            u_outline->setVector2(Vector2(0.45, 0.1));
         }
-
-        //find free space
-        Rectangle rect;
-        for (int i = 0; i < fontTextures.size(); ++i) {
-            TextureAtlas* ft = fontTextures[i];
-            if (ft->addImageData(glyph.imgW, glyph.imgH, glyph.imgData, rect)) {
-                fontTexture = ft;
-                textureIndex = i;
-                _batch = fontDrawers[i];
-                break;
-            }
-        }
-
-        //new texture
-        if (fontTexture == NULL) {
-            fontTexture = new TextureAtlas(Texture::Format::RED, textureWidth, textureHeight);
-            fontTexture->getTexture()->setFilterMode(Texture::LINEAR, Texture::LINEAR);
-            //fontTexture->getTexture()->setFilterMode(Texture::NEAREST, Texture::NEAREST);
-            textureIndex = fontTextures.size();
-            fontTextures.push_back(fontTexture);
-            _batch = SpriteBatch::create(fontTexture->getTexture(), shaderProgram).take();
-            auto _cutoffParam = _batch->getMaterial()->getParameter("u_cutoff");
-            _cutoffParam->setVector2(Vector2(0.50, 0.1));
-            if (_outline) {
-                auto u_outline = _batch->getMaterial()->getParameter("u_outline");
-                u_outline->setVector2(Vector2(0.45, 0.1));
-            }
-            fontDrawers.push_back(_batch);
-            bool ok = fontTexture->addImageData(glyph.imgW, glyph.imgH, glyph.imgData, rect);
-            GP_ASSERT(ok);
-        }
-
-        free(glyph.imgData);
-        glyph.imgData = NULL;
-
-        glyph.texture = textureIndex;
-        glyph.imgX = rect.x;
-        glyph.imgY = rect.y;
-        
-        glyphCache[key] = glyph;
-
-        glyph.metrics.scaleMetrics(fontSizeScale);
-        //char name[256];
-        //snprintf(name, 256, "fontTexture_%p.png", this);
-        //stbi_write_png(name, textureWidth, textureHeight, 1, fontTexture->data, textureWidth * 1);
+        fontDrawers.push_back(_batch);
+        _batch->start();
     }
 
-    
-    //Texture* texture = fontTexture->texture;
-    //SpriteBatch* _batch = fontTexture->getBatch();
-
     if (previous > 0 && previous < 128 && c < 128) {
-        float kerning = fontFaces.at(0)->getKerning(fontInfo, previous, c);
+        float kerning = _fontCache->fontFaces.at(0)->getKerning(fontInfo, previous, c);
         x += kerning;
     }
 
@@ -273,10 +306,10 @@ bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, c
             glyph.imgW / glyph.imgScale * fontSizeScale,
             glyph.imgH / glyph.imgScale * fontSizeScale,
 
-            (glyph.imgX) / (float)textureWidth,
-            (glyph.imgY) / (float)textureHeight,
-            (glyph.imgX + glyph.imgW) / (float)textureWidth,
-            (glyph.imgY + glyph.imgH) / (float)textureHeight,
+            (glyph.imgX) / (float)_fontCache->textureWidth,
+            (glyph.imgY) / (float)_fontCache->textureHeight,
+            (glyph.imgX + glyph.imgW) / (float)_fontCache->textureWidth,
+            (glyph.imgY + glyph.imgH) / (float)_fontCache->textureHeight,
 
             color, clip);
 
@@ -293,12 +326,11 @@ int Font::drawText(const char* text, float x, float y, const Vector4& color, uns
 
 int Font::drawText(const wchar_t* utext, float x, float y, const Vector4& color, unsigned int fontSize, int utextSize, const Rectangle* clip)
 {
-    GP_ASSERT(_size);
     GP_ASSERT(utext);
 
     if (fontSize == 0)
     {
-        fontSize = _size;
+        fontSize = _fontCache->_size;
     }
     
     lazyStart();
@@ -312,7 +344,7 @@ int Font::drawText(const wchar_t* utext, float x, float y, const Vector4& color,
     fontInfo.bold = 0;
     fontInfo.size = fontSize;
     GlyphMetrics metrics;
-    fontFaces.at(0)->merics(0, fontInfo, metrics);
+    _fontCache->fontFaces.at(0)->merics(0, fontInfo, metrics);
 
     wchar_t previous = 0;
     for (size_t i = 0; i < utextSize; i++)
@@ -360,14 +392,14 @@ void Font::measureText(const char* text, unsigned int fontSize, unsigned int* wi
 
 void Font::measureText(const wchar_t* utext, unsigned int fontSize, unsigned int* width, unsigned int* height, int textLen)
 {
-    GP_ASSERT(_size);
+    //GP_ASSERT(_size);
     GP_ASSERT(utext);
     GP_ASSERT(width);
     GP_ASSERT(height);
 
     if (fontSize == 0)
     {
-        fontSize = _size;
+        fontSize = _fontCache->_size;
     }
 
     if (textLen == 0)
@@ -385,7 +417,7 @@ void Font::measureText(const wchar_t* utext, unsigned int fontSize, unsigned int
     fontInfo.bold = 0;
     fontInfo.size = fontSize;
     GlyphMetrics metrics;
-    fontFaces.at(0)->merics(0, fontInfo, metrics);
+    _fontCache->fontFaces.at(0)->merics(0, fontInfo, metrics);
 
     float maxW = 0;
     for (size_t i = 0; i < textLen; i++)
@@ -409,7 +441,7 @@ void Font::measureText(const wchar_t* utext, unsigned int fontSize, unsigned int
             break;
         default: {
             GlyphMetrics m;
-            if (fontFaces.at(0)->merics(c, fontInfo, m)) {
+            if (_fontCache->fontFaces.at(0)->merics(c, fontInfo, m)) {
                 xPos += (m.horiAdvance + spacing);
             }
             else {
@@ -429,14 +461,14 @@ void Font::measureText(const wchar_t* utext, unsigned int fontSize, unsigned int
 unsigned int Font::getLineHeight(unsigned int fontSize) {
     if (fontSize == 0)
     {
-        fontSize = _size;
+        fontSize = _fontCache->_size;
     }
 
     FontInfo fontInfo;
     fontInfo.bold = 0;
     fontInfo.size = fontSize;
     GlyphMetrics metrics;
-    fontFaces.at(0)->merics(0, fontInfo, metrics);
+    _fontCache->fontFaces.at(0)->merics(0, fontInfo, metrics);
     return metrics.height;
 }
 
@@ -456,7 +488,7 @@ int Font::indexAtCoord(const wchar_t* utext, unsigned int fontSize, bool clipToF
 
     if (fontSize == 0)
     {
-        fontSize = _size;
+        fontSize = _fontCache->_size;
     }
 
     if (textLen == 0)
@@ -472,7 +504,7 @@ int Font::indexAtCoord(const wchar_t* utext, unsigned int fontSize, bool clipToF
     fontInfo.bold = 0;
     fontInfo.size = fontSize;
     GlyphMetrics metrics;
-    fontFaces.at(0)->merics(0, fontInfo, metrics);
+    _fontCache->fontFaces.at(0)->merics(0, fontInfo, metrics);
 
     for (size_t i = 0; i < textLen; i++)
     {
@@ -503,7 +535,7 @@ int Font::indexAtCoord(const wchar_t* utext, unsigned int fontSize, bool clipToF
             break;
         default: {
             GlyphMetrics m;
-            if (fontFaces.at(0)->merics(c, fontInfo, m)) {
+            if (_fontCache->fontFaces.at(0)->merics(c, fontInfo, m)) {
                 xPos += (m.horiAdvance + spacing);
             }
             else {

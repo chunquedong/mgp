@@ -15,15 +15,69 @@
 namespace mgp
 {
 
+class FontCache : public Refable
+{
+    friend class Font;
+public:
+
+    /**
+    * Defines the set of allowable font styles.
+    */
+    enum Style
+    {
+        PLAIN = 0,
+        BOLD = 1,
+        ITALIC = 2,
+        BOLD_ITALIC = 4
+    };
+
+
+    /**
+    * Creates a font from the given bundle.
+    *
+    * If the 'id' parameter is NULL, it is assumed that the Bundle at 'path'
+    * contains exactly one Font resource. If the Bundle does not meet this criteria,
+    * NULL is returned.
+    *
+    * If a font for the given path has already been loaded, the existing font will be
+    * returned with its reference count increased.
+    *
+    * @param path The path to a bundle file containing a font resource.
+    * @param id An optional ID of the font resource within the bundle (NULL for the first/only resource).
+    *
+    * @return The specified Font or NULL if there was an error.
+    * @script{create}
+    */
+    static SPtr<FontCache> create(const char* path, int fontSize = 30);
+
+
+    bool getGlyph(FontInfo& fontInfo, wchar_t ch, Glyph& glyph);
+private:
+    FontCache();
+    ~FontCache();
+
+    std::string _path;
+    Style _style;
+    unsigned int _size;
+
+    int textureWidth;
+    int textureHeight;
+
+    std::vector<TextureAtlas*> fontTextures;
+
+    std::vector<FontFace*> fontFaces;
+
+    std::map<uint64_t, Glyph> glyphCache;
+};
+
 /**
  * Defines a font for text rendering.
  */
 class Font : public Refable, public BatchableLayer
 {
-    friend class Bundle;
-    friend class Text;
-    friend class TextBox;
-
+    //friend class Bundle;
+    //friend class Text;
+    //friend class TextBox;
 public:
 
     /**
@@ -54,8 +108,7 @@ public:
      * @return The specified Font or NULL if there was an error.
      * @script{create}
      */
-    static UPtr<Font> create(const char* path, int outline = 0, int fontSize = 30, bool shared = true);
-
+    static UPtr<Font> create(const char* path, int outline = 0, int fontSize = 30);
 
     /**
      * Determines if this font supports the specified character code.
@@ -127,7 +180,7 @@ public:
     void setCharacterSpacing(float spacing);
 
 
-    int getSize() { return _size; }
+    int getSize() { return _fontCache->_size; }
 
     int getOutline() { return _outline; }
 
@@ -163,22 +216,12 @@ private:
 
     void lazyStart();
 
-    std::string _path;
-    Style _style;
-    unsigned int _size;
-    float _spacing;
     bool _isStarted;
+    float _spacing;
     int _outline;
 
-    int textureWidth;
-    int textureHeight;
-
-    std::vector<TextureAtlas*> fontTextures;
     std::vector<SpriteBatch*> fontDrawers;
-
-    std::vector<FontFace*> fontFaces;
-
-    std::map<uint64_t, Glyph> glyphCache;
+    SPtr<FontCache> _fontCache;
 
     ShaderProgram* shaderProgram;
 };
