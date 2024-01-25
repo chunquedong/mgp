@@ -49,7 +49,7 @@ public:
      * @param control The control to insert.
      * @param index The index at which to insert the control.
      */
-    void insertControl(Control* control, unsigned int index);
+    void insertControl(UPtr<Control> control, unsigned int index);
 
     /**
      * Remove a control at a specific index.

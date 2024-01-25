@@ -195,21 +195,22 @@ unsigned int Container::addControl(UPtr<Control> control)
 	return (unsigned int)( _controls.size() - 1 );
 }
 
-void Container::insertControl(Control* control, unsigned int index)
+void Container::insertControl(UPtr<Control> control, unsigned int index)
 {
-    GP_ASSERT(control);
+    GP_ASSERT(control.get());
 
     if (control->_parent && control->_parent != this)
     {
-        control->_parent->removeControl(control);
+        control->_parent->removeControl(control.get());
     }
 
     if (control->_parent != this)
     {
         std::vector<Control*>::iterator it = _controls.begin() + index;
-        _controls.insert(it, control);
-        control->addRef();
         control->_parent = this;
+        _controls.insert(it, control.take());
+        //control->addRef();
+        
         setDirty(Control::DIRTY_BOUNDS);
     }
 }

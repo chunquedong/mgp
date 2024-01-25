@@ -54,7 +54,7 @@ public:
      * @return The specified Font or NULL if there was an error.
      * @script{create}
      */
-    static UPtr<Font> create(const char* path, int outline = 0, int fontSize = 30);
+    static UPtr<Font> create(const char* path, int outline = 0, int fontSize = 30, bool shared = true);
 
 
     /**

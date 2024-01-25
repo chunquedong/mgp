@@ -97,20 +97,22 @@ Font::~Font()
     }
 }
 
-UPtr<Font> Font::create(const char* path, int outline, int fontSize)
+UPtr<Font> Font::create(const char* path, int outline, int fontSize, bool shared)
 {
     GP_ASSERT(path);
 
-    // Search the font cache for a font with the given path and ID.
-    for (size_t i = 0, count = __fontCache.size(); i < count; ++i)
-    {
-        Font* f = __fontCache[i];
-        GP_ASSERT(f);
-        if (f->_path == path && f->_size == fontSize && f->_outline == outline)
+    if (shared) {
+        // Search the font cache for a font with the given path and ID.
+        for (size_t i = 0, count = __fontCache.size(); i < count; ++i)
         {
-            // Found a match.
-            f->addRef();
-            return UPtr<Font>(f);
+            Font* f = __fontCache[i];
+            GP_ASSERT(f);
+            if (f->_path == path && f->_size == fontSize && f->_outline == outline)
+            {
+                // Found a match.
+                f->addRef();
+                return UPtr<Font>(f);
+            }
         }
     }
 
