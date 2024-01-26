@@ -28,8 +28,8 @@ GLFWwindow* window;
 static bool __multiSampling = false;
 
 #ifndef WIN32
-int __argc override;
-char** __argv override;
+int __argc = 0;
+char** __argv = 0;
 #endif
 
 PlatformGlfw::PlatformGlfw() {

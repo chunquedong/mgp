@@ -105,7 +105,7 @@ FontCache::~FontCache() {
 }
 
 FontCache::FontCache() :
-    _style(PLAIN), _size(25), textureWidth(256), textureHeight(256)
+    _style(PLAIN), _size(25), textureWidth(512), textureHeight(512)
 {
 }
 
@@ -129,7 +129,9 @@ bool FontCache::getGlyph(FontInfo& fontInfo, wchar_t c, Glyph& glyph) {
 
         //find free space
         Rectangle rect;
-        for (int i = 0; i < fontTextures.size(); ++i) {
+        int i = 0;
+        //if (c > 128) i = 1;
+        for (; i < fontTextures.size(); ++i) {
             TextureAtlas* ft = fontTextures[i];
             if (ft->addImageData(glyph.imgW, glyph.imgH, glyph.imgData, rect)) {
                 fontTexture = ft;
@@ -176,6 +178,7 @@ Font::~Font()
 {
     for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
         SpriteBatch* _batch = fontDrawers[i];
+        if (!_batch) continue;
         SAFE_DELETE(_batch);
     }
     fontDrawers.clear();
@@ -220,6 +223,8 @@ void Font::lazyStart()
 {
     for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
         SpriteBatch* _batch = fontDrawers[i];
+        if (!_batch) continue;
+
         if (_batch->isStarted())
             return; // already started
 
@@ -231,6 +236,7 @@ void Font::finish(RenderInfo* view)
 {
     for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
         SpriteBatch* _batch = fontDrawers[i];
+        if (!_batch) continue;
 
         if (view) {
             int w = view->viewport.width / Toolkit::cur()->getScreenScale();
@@ -260,6 +266,7 @@ void Font::finish(RenderInfo* view)
 void Font::setProjectionMatrix(const Matrix& matrix) {
     for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
         SpriteBatch* _batch = fontDrawers[i];
+        if (!_batch) continue;
         _batch->setProjectionMatrix(matrix);
     }
 }
@@ -277,11 +284,11 @@ bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, c
 
     double fontSizeScale = fontInfo.size / (double)_fontCache->_size;
 
-    SpriteBatch* _batch = NULL;
-    if (glyph.texture < fontDrawers.size()) {
-        _batch = fontDrawers[glyph.texture];
+    if (fontDrawers.size() != _fontCache->fontTextures.size()) {
+        fontDrawers.resize(_fontCache->fontTextures.size(), NULL);
     }
-    else {
+    SpriteBatch* _batch = fontDrawers[glyph.texture];
+    if (!_batch) {
         TextureAtlas* fontTexture = _fontCache->fontTextures[glyph.texture];
         _batch = SpriteBatch::create(fontTexture->getTexture(), shaderProgram).take();
         _batch->getBatch()->setRenderPass(Drawable::Overlay);
@@ -291,7 +298,7 @@ bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, c
             auto u_outline = _batch->getMaterial()->getParameter("u_outline");
             u_outline->setVector2(Vector2(0.45, 0.1));
         }
-        fontDrawers.push_back(_batch);
+        fontDrawers[glyph.texture] = _batch;
         _batch->start();
     }
 
@@ -629,8 +636,6 @@ FontLayout::Justify FontLayout::getJustify(const char* justify)
     // Default.
     return Justify::ALIGN_TOP_LEFT;
 }
-
-
 
 void FontLayout::update(Font* font, unsigned int fontSize, const char* text, int textLen, int wrapWidth)
 {

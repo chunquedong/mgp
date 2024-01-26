@@ -332,16 +332,15 @@ protected:
     PhysicsController* _physicsController;      // Controls the simulation of a physics scene and entities.
     AIController* _aiController;                // Controls AI simulation.
     AudioListener* _audioListener;              // The audio listener in 3D space.
-
-    EventTimer* _eventTimer;
-
 #endif
+
 #if GP_SCRIPT_ENABLE
     ScriptController* _scriptController;        // Controls the scripting engine.
     ScriptTarget* _scriptTarget;                // Script target for the game
 #endif
 
 private:
+    EventTimer* _eventTimer;
     InputListener* _inputListener;
 protected:
     FormManager* _forms;

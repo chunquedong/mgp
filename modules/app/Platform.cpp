@@ -17,9 +17,8 @@ namespace mgp
 	Platform* Platform::cur = NULL;
 
     int Platform::run(const char* title, int w, int h) {
-        PlatformGlfw glfw;
-
-        Platform* platform = Platform::cur;
+        PlatformGlfw* platform = new PlatformGlfw();
+        Platform::cur = platform;
 
         Application* game = Application::getInstance();
         GP_ASSERT(game);
@@ -28,6 +27,7 @@ namespace mgp
 
 #ifndef __EMSCRIPTEN__
         platform->signalShutdown();
+        delete platform;
 #endif
         return result;
     }

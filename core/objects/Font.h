@@ -31,25 +31,7 @@ public:
         BOLD_ITALIC = 4
     };
 
-
-    /**
-    * Creates a font from the given bundle.
-    *
-    * If the 'id' parameter is NULL, it is assumed that the Bundle at 'path'
-    * contains exactly one Font resource. If the Bundle does not meet this criteria,
-    * NULL is returned.
-    *
-    * If a font for the given path has already been loaded, the existing font will be
-    * returned with its reference count increased.
-    *
-    * @param path The path to a bundle file containing a font resource.
-    * @param id An optional ID of the font resource within the bundle (NULL for the first/only resource).
-    *
-    * @return The specified Font or NULL if there was an error.
-    * @script{create}
-    */
     static SPtr<FontCache> create(const char* path, int fontSize = 30);
-
 
     bool getGlyph(FontInfo& fontInfo, wchar_t ch, Glyph& glyph);
 private:

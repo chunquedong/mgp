@@ -84,9 +84,11 @@ bool TextureAtlas::addImageData(int imgW, int imgH, const unsigned char* imgData
     //upload image data
     this->texture->setData(this->data, true);
 
-    /*if (pixelSize == 4) {
-        stbi_write_png("TextureAtlas.png", textureWidth, textureHeight, pixelSize, this->data, textureWidth * pixelSize);
-    }*/
+    //if (pixelSize == 1) {
+    //    char buffer[128];
+    //    snprintf(buffer, 128, "TextureAtlas_%p.png", this);
+    //    stbi_write_png(buffer, textureWidth, textureHeight, pixelSize, this->data, textureWidth * pixelSize);
+    //}
     return true;
 }
 
