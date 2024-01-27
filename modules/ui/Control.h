@@ -1262,6 +1262,8 @@ protected:
 
     std::string _styleName;
     std::string _className;
+public:
+    uint64_t _userData = 0;
 private:
 
     /*
