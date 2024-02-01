@@ -650,6 +650,8 @@ public:
         return false;
     }
 
+    std::list<UPtr<Component> >& _getComponents() { return _components; }
+
     void moveChildrenTo(Node* that);
 public:
 
