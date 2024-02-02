@@ -75,35 +75,12 @@ private:
      */
     ~TerrainPatch();
 
-    struct Layer
-    {
-        Layer();
-
-        Layer(const Layer&);
-
-        ~Layer();
-
-        Layer& operator=(const Layer&);
-
-        int index;
-        int row;
-        int column;
-        int textureIndex;
-        Vector2 textureRepeat;
-        int blendIndex;
-        int blendChannel;
-    };
 
     struct Level
     {
         Model* model;
 
         Level();
-    };
-
-    struct LayerCompare
-    {
-        bool operator() (const Layer* lhs, const Layer* rhs) const;
     };
 
     /**
@@ -128,13 +105,6 @@ private:
 
     void resetMesh();
 
-
-    bool setLayer(int index, Texture* texturePath, const Vector2& textureRepeat, Texture* blendPath, int blendChannel);
-
-    void deleteLayer(Layer* layer);
-
-    int addSampler(Texture* path);
-
     unsigned int draw(RenderInfo* view);
 
     bool updateMaterial();
@@ -156,9 +126,8 @@ private:
     unsigned int _index;
     unsigned int _row;
     unsigned int _column;
-    std::vector<Level*> _levels;
-    std::set<Layer*, LayerCompare> _layers;
-    std::vector<Texture*> _samplers;
+    std::vector<Level> _levels;
+
     mutable BoundingBox _boundingBox;
     mutable BoundingBox _boundingBoxWorld;
     mutable Camera* _camera;

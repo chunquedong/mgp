@@ -41,6 +41,18 @@ Terrain::~Terrain()
     }
     SAFE_RELEASE(_normalMap);
     //SAFE_RELEASE(_heightfield);
+
+    for (Layer* lyr : _layers)
+    {
+        delete lyr;
+    }
+    _layers.clear();
+
+    for (Texture* t : _samplers)
+    {
+        SAFE_RELEASE(t);
+    }
+    _samplers.clear();
 }
 
 UPtr<Terrain> Terrain::create(const char* path)
@@ -428,23 +440,35 @@ const Matrix& Terrain::getInverseWorldMatrix() const
     return _inverseWorldMatrix;
 }
 
-bool Terrain::setLayer(int index, Texture* texturePath, const Vector2& textureRepeat, Texture* blendPath, int blendChannel, int row, int column)
+bool Terrain::addLayer(Texture* texturePath, const Vector2& textureRepeat, Texture* blendPath, int blendChannel, int row, int column)
 {
     if (!texturePath)
         return false;
 
-    // Set layer on applicable patches
-    bool result = true;
-    for (size_t i = 0, count = _patches.size(); i < count; ++i)
-    {
-        TerrainPatch* patch = _patches[i];
+    // Load texture sampler
+    int textureIndex = addSampler(texturePath);
+    if (textureIndex == -1)
+        return false;
 
-        if ((row == -1 || (int)patch->_row == row) && (column == -1 || (int)patch->_column == column))
-        {
-            if (!patch->setLayer(index, texturePath, textureRepeat, blendPath, blendChannel))
-                result = false;
-        }
+    // Load blend sampler
+    int blendIndex = -1;
+    if (blendPath)
+    {
+        blendIndex = addSampler(blendPath);
     }
+
+    // Create the layer
+    Layer* layer = new Layer();
+    layer->index = _layers.size();
+    layer->textureIndex = textureIndex;
+    layer->textureRepeat = textureRepeat;
+    layer->blendIndex = blendIndex;
+    layer->blendChannel = blendChannel;
+
+    _layers.push_back(layer);
+
+    // Set layer on applicable patches
+    setMaterialDirty();
 
     bool found = false;
     for (Texture* t : _blendTextures) {
@@ -456,7 +480,7 @@ bool Terrain::setLayer(int index, Texture* texturePath, const Vector2& textureRe
     if (!found) {
         _blendTextures.push_back(texturePath);
     }
-    return result;
+    return true;
 }
 
 bool Terrain::isFlagSet(Flags flag) const
@@ -485,7 +509,7 @@ void Terrain::setFlag(Flags flag, bool on)
         }
     }
 
-    if (flag == DEBUG_PATCHES && changed)
+    if ((flag & DEBUG_PATCHES) && changed)
     {
         // Dirty all materials since they need to be updated to support debug drawing
         for (size_t i = 0, count = _patches.size(); i < count; ++i)
@@ -581,6 +605,72 @@ static float getDefaultHeight(unsigned int width, unsigned int height)
 {
     // When terrain height is not specified, we'll use a default height of ~ 0.3 of the image dimensions
     return ((width + height) * 0.5f) * DEFAULT_TERRAIN_HEIGHT_RATIO;
+}
+
+int Terrain::addSampler(Texture* texture)
+{
+    // TODO: Support shared samplers stored in Terrain class for layers that span all patches
+    // on the terrain (row == col == -1).
+
+    // Load the texture. If this texture is already loaded, it will return
+    // a pointer to the same one, with its ref count incremented.
+    //Texture* texture = Texture::create(path, true).take();
+    if (!texture)
+        return -1;
+
+    // Textures should only be 2D
+    if (texture->getType() != Texture::TEXTURE_2D)
+    {
+        //SAFE_RELEASE(texture);
+        return -1;
+    }
+
+    int firstAvailableIndex = -1;
+    for (size_t i = 0, count = _samplers.size(); i < count; ++i)
+    {
+        Texture* sampler = _samplers[i];
+
+        if (sampler == NULL && firstAvailableIndex == -1)
+        {
+            firstAvailableIndex = (int)i;
+        }
+        else if (sampler == texture)
+        {
+            // A sampler was already added for this texture.
+            // Increase the ref count for the sampler to indicate that a new
+            // layer will be referencing it.
+            //texture->release();
+            sampler->addRef();
+            return (int)i;
+        }
+    }
+
+    // Add a new sampler to the list
+    Texture* sampler = texture;// Texture::Sampler::create(texture);
+    texture->addRef();
+    //texture->release();
+
+    // This may need to be clamp in some cases to prevent edge bleeding?  Possibly a
+    // configuration variable in the future.
+    sampler->setWrapMode(Texture::REPEAT, Texture::REPEAT);
+    sampler->setFilterMode(Texture::LINEAR_MIPMAP_LINEAR, Texture::LINEAR);
+    if (firstAvailableIndex != -1)
+    {
+        _samplers[firstAvailableIndex] = sampler;
+        return firstAvailableIndex;
+    }
+
+    _samplers.push_back(sampler);
+    return (int)(_samplers.size() - 1);
+}
+
+Terrain::Layer::Layer() :
+    index(0), row(-1), column(-1), textureIndex(-1), blendIndex(-1)
+{
+}
+
+Terrain::Layer::~Layer()
+{
 }
 
 }

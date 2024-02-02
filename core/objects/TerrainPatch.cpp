@@ -34,16 +34,10 @@ TerrainPatch::~TerrainPatch()
 {
     for (size_t i = 0, count = _levels.size(); i < count; ++i)
     {
-        Level* level = _levels[i];
-        if (!level) continue;
+        Level& level = _levels[i];
+        if (!level.model) continue;
 
-        SAFE_RELEASE(level->model);
-        SAFE_DELETE(level);
-    }
-
-    while (_layers.size() > 0)
-    {
-        deleteLayer(*_layers.begin());
+        SAFE_RELEASE(level.model);
     }
     
     if (_camera != NULL)
@@ -75,12 +69,12 @@ TerrainPatch* TerrainPatch::create(Terrain* terrain, unsigned int index,
     patch->_zOffset = zOffset;
     patch->_verticalSkirtSize = verticalSkirtSize;
 
-    patch->_levels.resize(detailLevels, nullptr);
+    patch->_levels.resize(detailLevels);
 
     patch->initLOD(detailLevels - 1);
     // Set our bounding box using the base LOD mesh
     BoundingBox& bounds = patch->_boundingBox;
-    bounds.set(patch->_levels[detailLevels - 1]->model->getMesh()->getBoundingBox());
+    bounds.set(patch->_levels[detailLevels - 1].model->getMesh()->getBoundingBox());
 
     return patch;
 }
@@ -88,20 +82,20 @@ TerrainPatch* TerrainPatch::create(Terrain* terrain, unsigned int index,
 void TerrainPatch::resetMesh() {
     for (size_t i = 0, count = _levels.size(); i < count; ++i)
     {
-        Level* level = _levels[i];
-        if (!level) continue;
+        Level& level = _levels[i];
+        if (!level.model) continue;
 
-        SAFE_RELEASE(level->model);
-        SAFE_DELETE(level);
-        _levels[i] = nullptr;
+        SAFE_RELEASE(level.model);
+        //SAFE_DELETE(level);
+        level.model = nullptr;
     }
 
     this->initLOD(this->_detailLevels - 1);
     // Set our bounding box using the base LOD mesh
     BoundingBox& bounds = this->_boundingBox;
-    bounds.set(this->_levels[this->_detailLevels - 1]->model->getMesh()->getBoundingBox());
+    bounds.set(this->_levels[this->_detailLevels - 1].model->getMesh()->getBoundingBox());
 
-    setMaterialDirty();
+    _bits = TERRAINPATCH_DIRTY_ALL;
 }
 
 unsigned int TerrainPatch::getMaterialCount() const
@@ -123,9 +117,9 @@ Material* TerrainPatch::getMaterial(int index) const
         {
             _level = 0;
         }
-        return _levels[_level]->model->getMaterial();
+        return _levels[_level].model->getMaterial();
     }
-    return _levels[index]->model->getMaterial();
+    return _levels[index].model->getMaterial();
 }
 
 void TerrainPatch::initLOD(int dlevel)
@@ -374,137 +368,9 @@ void TerrainPatch::initLOD(int dlevel)
     model->setNode(_terrain->_node);
 
     // Add this level
-    Level* level = new Level();
-    level->model = model.take();
+    Level level;
+    level.model = model.take();
     _levels[dlevel] = level;
-}
-
-void TerrainPatch::deleteLayer(Layer* layer)
-{
-    // Release layer samplers
-    if (layer->textureIndex != -1)
-    {
-        if (_samplers[layer->textureIndex]->getRefCount() == 1)
-        {
-            SAFE_RELEASE(_samplers[layer->textureIndex]);
-        }
-        else
-        {
-            _samplers[layer->textureIndex]->release();
-        }
-    }
-
-    if (layer->blendIndex != -1)
-    {
-        if (_samplers[layer->blendIndex]->getRefCount() == 1)
-        {
-            SAFE_RELEASE(_samplers[layer->blendIndex]);
-        }
-        else
-        {
-            _samplers[layer->blendIndex]->release();
-        }
-    }
-
-    _layers.erase(layer);
-    SAFE_DELETE(layer);
-}
-
-int TerrainPatch::addSampler(Texture* texture)
-{
-    // TODO: Support shared samplers stored in Terrain class for layers that span all patches
-    // on the terrain (row == col == -1).
-
-    // Load the texture. If this texture is already loaded, it will return
-    // a pointer to the same one, with its ref count incremented.
-    //Texture* texture = Texture::create(path, true).take();
-    if (!texture)
-        return -1;
-
-    // Textures should only be 2D
-    if (texture->getType() != Texture::TEXTURE_2D)
-    {
-        //SAFE_RELEASE(texture);
-        return -1;
-    }
-
-    int firstAvailableIndex = -1;
-    for (size_t i = 0, count = _samplers.size(); i < count; ++i)
-    {
-        Texture* sampler = _samplers[i];
-
-        if (sampler == NULL && firstAvailableIndex == -1)
-        {
-            firstAvailableIndex = (int)i;
-        }
-        else if (sampler == texture)
-        {
-            // A sampler was already added for this texture.
-            // Increase the ref count for the sampler to indicate that a new
-            // layer will be referencing it.
-            //texture->release();
-            sampler->addRef();
-            return (int)i;
-        }
-    }
-
-    // Add a new sampler to the list
-    Texture* sampler = texture;// Texture::Sampler::create(texture);
-    texture->addRef();
-    //texture->release();
-
-    // This may need to be clamp in some cases to prevent edge bleeding?  Possibly a
-    // configuration variable in the future.
-    sampler->setWrapMode(Texture::REPEAT, Texture::REPEAT);
-    sampler->setFilterMode(Texture::LINEAR_MIPMAP_LINEAR, Texture::LINEAR);
-    if (firstAvailableIndex != -1)
-    {
-        _samplers[firstAvailableIndex] = sampler;
-        return firstAvailableIndex;
-    }
-
-    _samplers.push_back(sampler);
-    return (int)(_samplers.size()-1);
-}
-
-bool TerrainPatch::setLayer(int index, Texture* texturePath, const Vector2& textureRepeat, Texture* blendPath, int blendChannel)
-{
-    // If there is an existing layer at this index, delete it
-    for (std::set<Layer*, LayerCompare>::iterator itr = _layers.begin(); itr != _layers.end(); ++itr)
-    {
-        Layer* layer = *itr;
-        if (layer->index == index)
-        {
-            deleteLayer(layer);
-            break;
-        }
-    }
-
-    // Load texture sampler
-    int textureIndex = addSampler(texturePath);
-    if (textureIndex == -1)
-        return false;
-
-    // Load blend sampler
-    int blendIndex = -1;
-    if (blendPath)
-    {
-        blendIndex = addSampler(blendPath);
-    }
-
-    // Create the layer
-    Layer* layer = new Layer();
-    layer->index = index;
-    layer->textureIndex = textureIndex;
-    layer->textureRepeat = textureRepeat;
-    layer->blendIndex = blendIndex;
-    layer->blendChannel = blendChannel;
-
-    _layers.insert(layer);
-
-    _bits |= TERRAINPATCH_DIRTY_MATERIAL;
-
-    return true;
 }
 
 std::string TerrainPatch::passCallback(Material *pass, void* cookie)
@@ -522,8 +388,8 @@ std::string TerrainPatch::passCreated(Material* pass)
     // non-constant array access in the shader. This is due to the fact that non-constant array access
     // in GLES is very slow on some hardware.
     std::ostringstream defines;
-    defines << "LAYER_COUNT " << _layers.size();
-    defines << ";SAMPLER_COUNT " << _samplers.size();
+    defines << "LAYER_COUNT " << _terrain->_layers.size();
+    defines << ";SAMPLER_COUNT " << _terrain->_samplers.size();
 
     if (_terrain->isFlagSet(Terrain::DEBUG_PATCHES))
     {
@@ -543,9 +409,9 @@ std::string TerrainPatch::passCreated(Material* pass)
     // Rebuild layer lists while we're at it.
     //
     int layerIndex = 0;
-    for (std::set<Layer*, LayerCompare>::iterator itr = _layers.begin(); itr != _layers.end(); ++itr, ++layerIndex)
+    for (auto itr = _terrain->_layers.begin(); itr != _terrain->_layers.end(); ++itr, ++layerIndex)
     {
-        Layer* layer = *itr;
+        Terrain::Layer* layer = *itr;
 
         defines << ";TEXTURE_INDEX_" << layerIndex << " " << layer->textureIndex;
         defines << ";TEXTURE_REPEAT_" << layerIndex << " vec2(" << layer->textureRepeat.x << "," << layer->textureRepeat.y << ")";
@@ -562,7 +428,7 @@ std::string TerrainPatch::passCreated(Material* pass)
 
 bool TerrainPatch::updateLevelMaterial(int level) {
 
-    if (!_levels[level]) return false;
+    if (!_levels[level].model) return false;
 
     UPtr<Material> material = Material::create(_terrain->_materialPath.c_str(), &passCallback, this);
     GP_ASSERT(material.get());
@@ -575,9 +441,9 @@ bool TerrainPatch::updateLevelMaterial(int level) {
 
     //material->setNodeBinding(_terrain->_node);
 
-    if (_layers.size() > 0) {
+    if (_terrain->_layers.size() > 0) {
         MaterialParameter* parameter = material->getParameter("u_surfaceLayerMaps");
-        parameter->setSamplerArray((const Texture**)&this->_samplers[0], (unsigned int)this->_samplers.size());
+        parameter->setSamplerArray((const Texture**)&_terrain->_samplers[0], (unsigned int)_terrain->_samplers.size());
     }
     if (_terrain && _terrain->_normalMap) {
         MaterialParameter* parameter = material->getParameter("u_normalMap");
@@ -586,7 +452,7 @@ bool TerrainPatch::updateLevelMaterial(int level) {
     //TODO u_normalMatrix
 
     // Set material on this lod level
-    _levels[level]->model->setMaterial(std::move(material));
+    _levels[level].model->setMaterial(std::move(material));
     return true;
 }
 
@@ -614,8 +480,8 @@ void TerrainPatch::updateNodeBindings()
     //__currentPatchIndex = _index;
     for (size_t i = 0, count = _levels.size(); i < count; ++i)
     {
-        if (!_levels[i]) continue;
-        _levels[i]->model->setNode(_terrain->_node);
+        if (!_levels[i].model) continue;
+        _levels[i].model->setNode(_terrain->_node);
     }
     //__currentPatchIndex = -1;
 }
@@ -640,13 +506,13 @@ unsigned int TerrainPatch::draw(RenderInfo* view)
     // Compute the LOD level from the camera's perspective
     _level = computeLOD(camera, bounds);
 
-    if (!_levels[_level]) {
+    if (!_levels[_level].model) {
         initLOD(_level);
         updateLevelMaterial(_level);
     }
 
     // Draw the model for the current LOD
-    return _levels[_level]->model->draw(view);
+    return _levels[_level].model->draw(view);
 }
 
 const BoundingBox& TerrainPatch::getBoundingBox(bool worldSpace) const
@@ -750,22 +616,9 @@ float TerrainPatch::computeHeight(float* heights, unsigned int width, unsigned i
     return heights[z * width + x] * _terrain->_localScale.y;
 }
 
-TerrainPatch::Layer::Layer() :
-    index(0), row(-1), column(-1), textureIndex(-1), blendIndex(-1)
-{
-}
-
-TerrainPatch::Layer::~Layer()
-{
-}
-
 TerrainPatch::Level::Level() : model(NULL)
 {
 }
 
-bool TerrainPatch::LayerCompare::operator() (const Layer* lhs, const Layer* rhs) const
-{
-    return (lhs->index < rhs->index);
-}
 
 }

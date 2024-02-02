@@ -259,7 +259,7 @@ public:
      *
      * @script{ignore}
      */
-    bool setLayer(int index, Texture* texture, const Vector2& textureRepeat = Vector2::one(),
+    bool addLayer(Texture* texture, const Vector2& textureRepeat = Vector2::one(),
         Texture* blendPath = NULL, int blendChannel = 0,
         int row = -1, int column = -1);
 
@@ -340,6 +340,26 @@ private:
      * Returns the local bounding box for this patch, at the base LOD level.
      */
     //BoundingBox getBoundingBox(bool worldSpace) const;
+    int addSampler(Texture* texture);
+
+    struct Layer
+    {
+        Layer();
+
+        Layer(const Layer&) = delete;
+
+        ~Layer();
+
+        Layer& operator=(const Layer&) = delete;
+
+        int index;
+        int row;
+        int column;
+        int textureIndex;
+        Vector2 textureRepeat;
+        int blendIndex;
+        int blendChannel;
+    };
 
     std::string _materialPath;
     UPtr<HeightField> _heightfield;
@@ -352,6 +372,10 @@ private:
     BoundingBox _boundingBox;
 
     std::vector<Texture*> _blendTextures;
+    std::vector<Layer*> _layers;
+    std::vector<Texture*> _samplers;
+public:
+    void* _userData = nullptr;
 };
 
 }
