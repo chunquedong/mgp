@@ -343,13 +343,13 @@ void Texture::setData(const unsigned char* data, bool copyMem)
 
     if (_data == data) return;
 
+    free((void*)_data);
     if (copyMem) {
         _data = data;
         Renderer::cur()->updateTexture(this);
         _data = NULL;
     }
     else {
-        free((void*)_data);
         this->_data = data;
     }
 }

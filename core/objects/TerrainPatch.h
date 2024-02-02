@@ -9,6 +9,7 @@ namespace mgp
 {
 
 class Terrain;
+class HeightField;
 
 /**
  * Defines a single patch for a Terrain.
@@ -16,7 +17,7 @@ class Terrain;
 class TerrainPatch : public Camera::Listener
 {
     friend class Terrain;
-    friend class TerrainAutoBindingResolver;
+    //friend class TerrainAutoBindingResolver;
 
 public:
 
@@ -119,24 +120,25 @@ private:
     */
     static TerrainPatch* create(Terrain* terrain, unsigned int index,
                                 unsigned int row, unsigned int column,
-                                float* heights, unsigned int hfWidth, unsigned int hfHeight,
                                 unsigned int x1, unsigned int z1, unsigned int x2, unsigned int z2,
-                                float xOffset, float zOffset, unsigned int maxStep, float verticalSkirtSize);
+                                float xOffset, float zOffset, unsigned int detailLevels, float verticalSkirtSize);
 
-    void addLOD(float* heights, unsigned int width, unsigned int height,
-                unsigned int x1, unsigned int z1, unsigned int x2, unsigned int z2,
-                float xOffset, float zOffset, unsigned int step, float verticalSkirtSize);
+    void initLOD(int dlevel);
 
 
-    bool setLayer(int index, const char* texturePath, const Vector2& textureRepeat, const char* blendPath, int blendChannel);
+    void resetMesh();
+
+
+    bool setLayer(int index, Texture* texturePath, const Vector2& textureRepeat, Texture* blendPath, int blendChannel);
 
     void deleteLayer(Layer* layer);
 
-    int addSampler(const char* path);
+    int addSampler(Texture* path);
 
     unsigned int draw(RenderInfo* view);
 
     bool updateMaterial();
+    bool updateLevelMaterial(int level);
 
     unsigned int computeLOD(Camera* camera, const BoundingBox& worldBounds);
 
@@ -162,6 +164,17 @@ private:
     mutable Camera* _camera;
     mutable unsigned int _level;
     mutable int _bits;
+    HeightField* _heightfield = nullptr;
+
+    unsigned int _x1;
+    unsigned int _z1;
+    unsigned int _x2;
+    unsigned int _z2;
+    float _xOffset;
+    float _zOffset;
+    unsigned int _maxStep;
+    float _verticalSkirtSize;
+    int _detailLevels;
 };
 
 }

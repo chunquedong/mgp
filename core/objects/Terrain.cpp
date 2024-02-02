@@ -272,7 +272,7 @@ UPtr<Terrain> Terrain::create(UPtr<HeightField> heightfield, const Vector3& scal
     // Compute the maximum step size, which is a function of our lowest level of detail.
     // This determines how many vertices will be skipped per triange/quad on the lowest
     // level detail terrain patch.
-    unsigned int maxStep = (unsigned int)std::pow(2.0, (double)(detailLevels-1));
+    //unsigned int maxStep = (unsigned int)std::pow(2.0, (double)(detailLevels-1));
 
     float verticalSkirtSize = skirtScale * (terrain->_heightfield->getHeightMax() - terrain->_heightfield->getHeightMin());
 
@@ -291,8 +291,7 @@ UPtr<Terrain> Terrain::create(UPtr<HeightField> heightfield, const Vector3& scal
 
             // Create this patch
             TerrainPatch* patch = TerrainPatch::create(terrain, terrain->_patches.size(), row, column, 
-                terrain->_heightfield->getArray(), width, height, 
-                x1, z1, x2, z2, -halfWidth, -halfHeight, maxStep, verticalSkirtSize);
+                x1, z1, x2, z2, -halfWidth, -halfHeight, detailLevels, verticalSkirtSize);
             terrain->_patches.push_back(patch);
 
             // Append the new patch's local bounds to the terrain local bounds
@@ -301,7 +300,7 @@ UPtr<Terrain> Terrain::create(UPtr<HeightField> heightfield, const Vector3& scal
     }
 
     // Read additional layer information from properties (if specified)
-    if (properties)
+    /*if (properties)
     {
         // Parse terrain layers
         Properties* lp;
@@ -372,10 +371,10 @@ UPtr<Terrain> Terrain::create(UPtr<HeightField> heightfield, const Vector3& scal
             }
         }
     }
-
+    */
     // Load materials for all patches
-    for (size_t i = 0, count = terrain->_patches.size(); i < count; ++i)
-        terrain->_patches[i]->updateMaterial();
+    //for (size_t i = 0, count = terrain->_patches.size(); i < count; ++i)
+    //    terrain->_patches[i]->updateMaterial();
 
     return UPtr<Terrain>(terrain);
 }
@@ -429,7 +428,7 @@ const Matrix& Terrain::getInverseWorldMatrix() const
     return _inverseWorldMatrix;
 }
 
-bool Terrain::setLayer(int index, const char* texturePath, const Vector2& textureRepeat, const char* blendPath, int blendChannel, int row, int column)
+bool Terrain::setLayer(int index, Texture* texturePath, const Vector2& textureRepeat, Texture* blendPath, int blendChannel, int row, int column)
 {
     if (!texturePath)
         return false;
@@ -445,6 +444,17 @@ bool Terrain::setLayer(int index, const char* texturePath, const Vector2& textur
             if (!patch->setLayer(index, texturePath, textureRepeat, blendPath, blendChannel))
                 result = false;
         }
+    }
+
+    bool found = false;
+    for (Texture* t : _blendTextures) {
+        if (t == blendPath) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        _blendTextures.push_back(texturePath);
     }
     return result;
 }
@@ -482,6 +492,13 @@ void Terrain::setFlag(Flags flag, bool on)
         {
             _patches[i]->setMaterialDirty();
         }
+    }
+}
+
+void Terrain::setMaterialDirty() {
+    for (size_t i = 0, count = _patches.size(); i < count; ++i)
+    {
+        _patches[i]->setMaterialDirty();
     }
 }
 
@@ -545,6 +562,13 @@ unsigned int Terrain::draw(RenderInfo* view)
 
 void Terrain::update(float elapsedTime) {
 
+}
+
+void Terrain::resetMesh() {
+    for (size_t i = 0, count = _patches.size(); i < count; ++i)
+    {
+        _patches[i]->resetMesh();
+    }
 }
 
 UPtr<Drawable> Terrain::clone(NodeCloneContext& context)

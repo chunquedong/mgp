@@ -377,7 +377,7 @@ void PhysicsRigidBody::transformChanged(Transform* transform, long cookie)
         Terrain* terrain = dynamic_cast<Terrain*>(_node->getDrawable());
         if (terrain)
         {
-            const Vector3& tScale = terrain->_localScale;
+            const Vector3& tScale = terrain->getLocalScale();
             scale.set(scale.x * tScale.x, scale.y * tScale.y, scale.z * tScale.z);
         }
 

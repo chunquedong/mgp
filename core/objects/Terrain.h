@@ -83,11 +83,11 @@ class TerrainAutoBindingResolver;
  */
 class Terrain : public Drawable, public Transform::Listener
 {
-    friend class Node;
-    friend class PhysicsController;
-    friend class PhysicsRigidBody;
+    //friend class Node;
+    //friend class PhysicsController;
+    //friend class PhysicsRigidBody;
     friend class TerrainPatch;
-    friend class TerrainAutoBindingResolver;
+    //friend class TerrainAutoBindingResolver;
 
 public:
 
@@ -109,14 +109,14 @@ public:
          */
         FRUSTUM_CULLING = 2,
 
-         /**
-          * Enables level of detail (on by default).
-          *
-          * This flag enables or disables level of detail, however it does nothing if
-          * "detailLevels" was not set to a value greater than 1 in the terrain
-          * properties file at creation time.
-          */
-         LEVEL_OF_DETAIL = 8
+        /**
+         * Enables level of detail (on by default).
+         *
+         * This flag enables or disables level of detail, however it does nothing if
+         * "detailLevels" was not set to a value greater than 1 in the terrain
+         * properties file at creation time.
+         */
+        LEVEL_OF_DETAIL = 8
     };
 
     /**
@@ -173,8 +173,8 @@ public:
      * @script{create}
      */
     static UPtr<Terrain> create(UPtr<HeightField> heightfield, const Vector3& scale = Vector3::one(), unsigned int patchSize = 32,
-                           unsigned int detailLevels = 3, float skirtScale = 0.01f, const char* normalMapPath = NULL,
-                           const char* materialPath = NULL);
+        unsigned int detailLevels = 3, float skirtScale = 0.01f, const char* normalMapPath = NULL,
+        const char* materialPath = NULL);
 
     /**
      * Determines if the specified terrain flag is currently set.
@@ -188,6 +188,7 @@ public:
      * @param on True to turn the flag on, false to turn it off.
      */
     void setFlag(Flags flag, bool on);
+    void setMaterialDirty();
 
     /**
      * Gets the total number of terrain patches.
@@ -258,9 +259,9 @@ public:
      *
      * @script{ignore}
      */
-    bool setLayer(int index, const char* texturePath, const Vector2& textureRepeat = Vector2::one(),
-                  const char* blendPath = NULL, int blendChannel = 0,
-                  int row = -1, int column = -1);
+    bool setLayer(int index, Texture* texture, const Vector2& textureRepeat = Vector2::one(),
+        Texture* blendPath = NULL, int blendChannel = 0,
+        int row = -1, int column = -1);
 
     /**
      * @see Drawable#draw
@@ -269,7 +270,13 @@ public:
 
     void update(float elapsedTime);
 
-protected:
+    HeightField* getHeightfield() { return _heightfield.get(); }
+
+    const Vector3& getLocalScale() {
+        return _localScale;
+    }
+
+    void resetMesh();
 
     /**
      * @see Drawable::setNode
@@ -281,6 +288,9 @@ protected:
      */
     UPtr<Drawable> clone(NodeCloneContext& context);
 
+    std::vector<Texture*> getBlendTexture() {
+        return _blendTextures;
+    }
 private:
 
     /**
@@ -329,7 +339,7 @@ private:
     /**
      * Returns the local bounding box for this patch, at the base LOD level.
      */
-    BoundingBox getBoundingBox(bool worldSpace) const;
+    //BoundingBox getBoundingBox(bool worldSpace) const;
 
     std::string _materialPath;
     UPtr<HeightField> _heightfield;
@@ -340,6 +350,8 @@ private:
     mutable Matrix _inverseWorldMatrix;
     mutable unsigned int _dirtyFlags;
     BoundingBox _boundingBox;
+
+    std::vector<Texture*> _blendTextures;
 };
 
 }
