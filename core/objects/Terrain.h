@@ -259,7 +259,7 @@ public:
      *
      * @script{ignore}
      */
-    bool addLayer(Texture* texture, const Vector2& textureRepeat = Vector2::one(),
+    bool addLayer(const char* texturePath, const Vector2& textureRepeat = Vector2::one(),
         Texture* blendPath = NULL, int blendChannel = 0,
         int row = -1, int column = -1);
 
@@ -291,6 +291,12 @@ public:
     std::vector<Texture*> getBlendTexture() {
         return _blendTextures;
     }
+
+    /**
+     * Returns the terrain's inverse world matrix, used for transforming world-space positions
+     * to local positions for height lookups.
+     */
+    const Matrix& getInverseWorldMatrix() const;
 private:
 
     /**
@@ -329,12 +335,6 @@ private:
      * @see Transform::Listener::transformChanged.
      */
     void transformChanged(Transform* transform, long cookie);
-
-    /**
-     * Returns the terrain's inverse world matrix, used for transforming world-space positions
-     * to local positions for height lookups.
-     */
-    const Matrix& getInverseWorldMatrix() const;
 
     /**
      * Returns the local bounding box for this patch, at the base LOD level.

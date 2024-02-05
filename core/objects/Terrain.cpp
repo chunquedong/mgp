@@ -440,13 +440,14 @@ const Matrix& Terrain::getInverseWorldMatrix() const
     return _inverseWorldMatrix;
 }
 
-bool Terrain::addLayer(Texture* texturePath, const Vector2& textureRepeat, Texture* blendPath, int blendChannel, int row, int column)
+bool Terrain::addLayer(const char* texturePath, const Vector2& textureRepeat, Texture* blendPath, int blendChannel, int row, int column)
 {
     if (!texturePath)
         return false;
 
     // Load texture sampler
-    int textureIndex = addSampler(texturePath);
+    auto texture = Texture::create(texturePath, true);
+    int textureIndex = addSampler(texture.get());
     if (textureIndex == -1)
         return false;
 
@@ -478,7 +479,7 @@ bool Terrain::addLayer(Texture* texturePath, const Vector2& textureRepeat, Textu
         }
     }
     if (!found) {
-        _blendTextures.push_back(texturePath);
+        _blendTextures.push_back(blendPath);
     }
     return true;
 }
@@ -653,7 +654,9 @@ int Terrain::addSampler(Texture* texture)
     // This may need to be clamp in some cases to prevent edge bleeding?  Possibly a
     // configuration variable in the future.
     sampler->setWrapMode(Texture::REPEAT, Texture::REPEAT);
-    sampler->setFilterMode(Texture::LINEAR_MIPMAP_LINEAR, Texture::LINEAR);
+    if (sampler->isMipmapped()) {
+        sampler->setFilterMode(Texture::LINEAR_MIPMAP_LINEAR, Texture::LINEAR);
+    }
     if (firstAvailableIndex != -1)
     {
         _samplers[firstAvailableIndex] = sampler;
