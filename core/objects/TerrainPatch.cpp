@@ -366,6 +366,7 @@ void TerrainPatch::initLOD(int dlevel)
     UPtr<Model> model = Model::create(std::move(mesh));
     //mesh->release();
     model->setNode(_terrain->_node);
+    model->setLightMask(_terrain->getLightMask());
 
     // Add this level
     Level level;
@@ -450,6 +451,8 @@ bool TerrainPatch::updateLevelMaterial(int level) {
         parameter->setSampler(_terrain->_normalMap);
     }
     //TODO u_normalMatrix
+
+    material->getParameter("u_specularExponent")->setFloat(10.0);
 
     // Set material on this lod level
     _levels[level].model->setMaterial(std::move(material));

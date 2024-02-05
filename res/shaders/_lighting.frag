@@ -1,5 +1,5 @@
 
-#if !defined(BUMPED)
+#if !defined(BUMPED) && !defined(NORMAL_MAP)
     in vec3 v_normalVector;
 #endif
 
@@ -166,6 +166,8 @@ vec3 getLitPixel()
 {
     #if defined(BUMPED)
         vec3 normalVector = normalize(texture(u_normalmapTexture, v_texCoord).rgb * 2.0 - 1.0);
+    #elif defined(NORMAL_MAP)
+        vec3 normalVector = _normalVector;
     #elif defined(SIMPLE_BUMPED)
         vec3 normalVector = getNormalFromMap(v_normalVector);
     #else

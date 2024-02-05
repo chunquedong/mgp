@@ -116,6 +116,8 @@ void applyLight(vec4 position) {
         vec3 binormalVector = normalize(inverseTransposeWorldViewMatrix * binormal);
         mat3 tangentSpaceTransformMatrix = mat3(tangentVector.x, binormalVector.x, normalVector.x, tangentVector.y, binormalVector.y, normalVector.y, tangentVector.z, binormalVector.z, normalVector.z);
         initLightDirection(position, tangentSpaceTransformMatrix);
+    #elif defined(NORMAL_MAP)
+        initLightDirection(position);
     #else
         v_normalVector = normalVector;
         initLightDirection(position);

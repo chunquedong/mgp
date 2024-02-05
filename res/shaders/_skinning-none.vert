@@ -32,7 +32,11 @@ vec4 getPosition()
     
     vec3 getNormal()
     {
-        return a_normal;
+        #if defined(NORMAL_MAP)
+            return vec3(0.0, 0.0, 0.0);
+        #else
+            return a_normal;
+        #endif
     }
 
     #if defined(BUMPED)

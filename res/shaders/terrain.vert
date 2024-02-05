@@ -58,6 +58,9 @@ void main()
 
     // Pass base texture coord
     v_texCoord0 = a_texCoord0;
+    
+    //flip Y
+    v_texCoord0.y = 1.0 - v_texCoord0.y;
 
     // Pass repeated texture coordinates for each layer
     #if LAYER_COUNT > 0

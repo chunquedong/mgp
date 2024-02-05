@@ -26,9 +26,7 @@ precision mediump float;
 
 ///////////////////////////////////////////////////////////
 // Varyings
-#if defined(LIGHTING)
-    #include "_lighting.frag"
-#endif
+
 
 in vec2 v_texCoord0;
 
@@ -47,6 +45,11 @@ out vec4 FragColor;
 ///////////////////////////////////////////////////////////
 // Variables
 vec4 _baseColor;
+vec3 _normalVector;
+
+#if defined(LIGHTING)
+    #include "_lighting.frag"
+#endif
 
 #if (LAYER_COUNT > 1)
     void blendLayer(sampler2D textureMap, vec2 texCoord, float alphaBlend)
@@ -82,8 +85,8 @@ void main()
 
     #if defined(LIGHTING)
         #if defined(NORMAL_MAP)
-            v_normalVector = texture(u_normalMap, v_texCoord0).xyz * 2.0 - 1.0;
-            v_normalVector = (u_inverseTransposeWorldViewMatrix * vec4(v_normalVector.x, v_normalVector.y, v_normalVector.z, 0)).xyz;
+            _normalVector = texture(u_normalMap, v_texCoord0).xyz * 2.0 - 1.0;
+            _normalVector = (u_inverseTransposeWorldViewMatrix * vec4(_normalVector.x, _normalVector.y, _normalVector.z, 0)).xyz;
         #endif
         FragColor.a = _baseColor.a;
         FragColor.rgb = getLitPixel();

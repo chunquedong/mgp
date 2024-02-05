@@ -297,6 +297,8 @@ public:
      * to local positions for height lookups.
      */
     const Matrix& getInverseWorldMatrix() const;
+
+    void generateNormalMap();
 private:
 
     /**

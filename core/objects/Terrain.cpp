@@ -641,7 +641,7 @@ int Terrain::addSampler(Texture* texture)
             // Increase the ref count for the sampler to indicate that a new
             // layer will be referencing it.
             //texture->release();
-            sampler->addRef();
+            //sampler->addRef();
             return (int)i;
         }
     }
@@ -674,6 +674,178 @@ Terrain::Layer::Layer() :
 
 Terrain::Layer::~Layer()
 {
+}
+
+
+static void calculateNormal(
+    float x1, float y1, float z1,
+    float x2, float y2, float z2,
+    float x3, float y3, float z3,
+    Vector3* normal)
+{
+    Vector3 E(x1, y1, z1);
+    Vector3 F(x2, y2, z2);
+    Vector3 G(x3, y3, z3);
+
+    Vector3 P, Q;
+    Vector3::subtract(F, E, &P);
+    Vector3::subtract(G, E, &Q);
+
+    Vector3::cross(Q, P, normal);
+}
+
+static float normalizedHeightPacked(float r, float g, float b)
+{
+    // This formula is intended for 24-bit packed heightmap images (that are generated
+    // with gameplay-encoder. However, it is also compatible with normal grayscale 
+    // heightmap images, with an error of approximately 0.4%. This can be seen by
+    // setting r=g=b=x and comparing the grayscale height expression to the packed
+    // height expression: the error is 2^-8 + 2^-16 which is just under 0.4%.
+    return (256.0f*r + g + 0.00390625f*b) / 65536.0f;
+}
+
+void Terrain::generateNormalMap()
+{
+    // Load the input heightmap
+    int _resolutionX = _heightfield->getColumnCount();
+    int _resolutionY = _heightfield->getRowCount();
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // NOTE: This method assumes the heightmap geometry is generated as follows.
+    //
+    //   -----------
+    //  | / | / | / |
+    //  |-----------|
+    //  | / | / | / |
+    //  |-----------|
+    //  | / | / | / |
+    //   -----------
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct NormalPixel
+    {
+        unsigned char r, g, b, a;
+    };
+    NormalPixel* normalPixels = new NormalPixel[_resolutionX * _resolutionY];
+
+    struct Face
+    {
+        Vector3 normal1;
+        Vector3 normal2;
+    };
+
+    int progressMax = (_resolutionX-1) * (_resolutionY-1) + _resolutionX * _resolutionY;
+    int progress = 0;
+
+    Vector2 scale(_localScale.x, _localScale.z);
+
+    // First calculate all face normals for the heightmap
+    //LOG(1, "Calculating normals... 0%%");
+    Face* faceNormals = new Face[(_resolutionX - 1) * (_resolutionY - 1)];
+    Vector3 v1, v2;
+    for (int z = 0; z < _resolutionY-1; z++)
+    {
+        for (int x = 0; x < _resolutionX-1; x++)
+        {
+            float topLeftHeight = _heightfield->getHeight(x, z);
+            float bottomLeftHeight = _heightfield->getHeight(x, z + 1);
+            float bottomRightHeight = _heightfield->getHeight(x + 1, z + 1);
+            float topRightHeight = _heightfield->getHeight(x + 1, z);
+
+            // Triangle 1
+            calculateNormal(
+                (float)x*scale.x, bottomLeftHeight, (float)(z + 1)*scale.y,
+                (float)x*scale.x, topLeftHeight, (float)z*scale.y,
+                (float)(x + 1)*scale.x, topRightHeight, (float)z*scale.y,
+                &faceNormals[z*(_resolutionX-1)+x].normal1);
+
+            // Triangle 2
+            calculateNormal(
+                (float)x*scale.x, bottomLeftHeight, (float)(z + 1)*scale.y,
+                (float)(x + 1)*scale.x, topRightHeight, (float)z*scale.y,
+                (float)(x + 1)*scale.x, bottomRightHeight, (float)(z + 1)*scale.y,
+                &faceNormals[z*(_resolutionX-1)+x].normal2);
+
+            ++progress;
+            //LOG(1, "\rCalculating normals... %d%%", (int)(((float)progress / progressMax) * 100));
+        }
+    }
+
+    // Smooth normals by taking an average for each vertex
+    Vector3 normal;
+    for (int z = 0; z < _resolutionY; z++)
+    {
+        for (int x = 0; x < _resolutionX; x++)
+        {
+            // Reset normal sum
+            normal.set(0, 0, 0);
+
+            if (x > 0)
+            {
+                if (z > 0)
+                {
+                    // Top left
+                    normal.add(faceNormals[(z-1)*(_resolutionX-1) + (x-1)].normal2);
+                }
+
+                if (z < (_resolutionY - 1))
+                {
+                    // Bottom left
+                    normal.add(faceNormals[z*(_resolutionX-1) + (x - 1)].normal1);
+                    normal.add(faceNormals[z*(_resolutionX-1) + (x - 1)].normal2);
+                }
+            }
+
+            if (x < (_resolutionX - 1))
+            {
+                if (z > 0)
+                {
+                    // Top right
+                    normal.add(faceNormals[(z-1)*(_resolutionX-1) + x].normal1);
+                    normal.add(faceNormals[(z-1)*(_resolutionX-1) + x].normal2);
+                }
+
+                if (z < (_resolutionY - 1))
+                {
+                    // Bottom right
+                    normal.add(faceNormals[z*(_resolutionX-1) + x].normal1);
+                }
+            }
+
+            // We don't have to worry about weighting the normals by
+            // the surface area of the triangles since a heightmap 
+            // guarantees that all triangles have the same surface area.
+            normal.normalize();
+
+            // Store this vertex normal
+            NormalPixel& pixel = normalPixels[z*_resolutionX + x];
+            pixel.r = (unsigned char)((normal.x + 1.0f) * 0.5f * 255.0f);
+            pixel.g = (unsigned char)((normal.y + 1.0f) * 0.5f * 255.0f);
+            pixel.b = (unsigned char)((normal.z + 1.0f) * 0.5f * 255.0f);
+            pixel.a = 1.0;
+
+            ++progress;
+            //LOG(1, "\rCalculating normals... %d%%", (int)(((float)progress / progressMax) * 100));
+        }
+    }
+
+    //LOG(1, "\rCalculating normals... Done.\n");
+
+    // Create and save an image for the normal map
+    UPtr<Texture> texture = Texture::create(Texture::Format::RGBA, _resolutionX, _resolutionY, 
+        (const unsigned char*)normalPixels, true);
+    texture->setWrapMode(Texture::CLAMP, Texture::CLAMP);
+    if (_normalMap) {
+        SAFE_RELEASE(_normalMap);
+    }
+    _normalMap = texture.take();
+
+    // Free temp data
+    delete[] normalPixels;
+    normalPixels = NULL;
+
+    this->resetMesh();
 }
 
 }
