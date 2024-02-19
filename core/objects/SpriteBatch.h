@@ -276,6 +276,10 @@ public:
     const Matrix& getProjectionMatrix() const;
 
     MeshBatch* getBatch() { return _batch; }
+
+    void setRenderLayer(Drawable::RenderLayer renderLayer) {
+        _renderLayer = renderLayer;
+    }
 private:
 
     /**
@@ -299,6 +303,8 @@ private:
     float _textureWidthRatio;
     float _textureHeightRatio;
     mutable Matrix _projectionMatrix;
+
+    Drawable::RenderLayer _renderLayer;
 };
 
 }

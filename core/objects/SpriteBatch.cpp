@@ -3,6 +3,7 @@
 #include "platform/Toolkit.h"
 #include "material/Material.h"
 #include "material/MaterialParameter.h"
+#include "scene/Renderer.h"
 
 // Default size of a newly created sprite batch
 #define SPRITE_BATCH_DEFAULT_SIZE 128
@@ -26,7 +27,7 @@ namespace mgp
 static ShaderProgram* __spriteEffect = NULL;
 
 SpriteBatch::SpriteBatch()
-    : _batch(NULL), _sampler(NULL), _textureWidthRatio(0.0f), _textureHeightRatio(0.0f)
+    : _batch(NULL), _sampler(NULL), _textureWidthRatio(0.0f), _textureHeightRatio(0.0f), _renderLayer(Drawable::Overlay), _customEffect(false)
 {
 }
 
@@ -418,7 +419,19 @@ void SpriteBatch::finish(RenderInfo* view)
 {
     // Finish and draw the batch
     _batch->finish();
+
+    int i = 0;
+    if (view) {
+        i = view->_drawList.size();
+    }
+
     _batch->draw(view, NULL);
+
+    if (view) {
+        for (; i < view->_drawList.size(); ++i) {
+            view->_drawList[i]._renderLayer = _renderLayer;
+        }
+    }
 }
 
 StateBlock* SpriteBatch::getStateBlock() const
