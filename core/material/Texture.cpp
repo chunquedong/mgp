@@ -21,7 +21,8 @@ public:
 static std::vector<Texture*> __textureCache;
 
 Texture::Texture() : _handle(0), _format(UNKNOWN), _type((Texture::Type)0), _width(0), _height(0), _arrayDepth(0), _mipmapped(false), _cached(false), _compressed(false),
-    _wrapS(Texture::REPEAT), _wrapT(Texture::REPEAT), _wrapR(Texture::REPEAT), _minFilter(Texture::NEAREST), _magFilter(Texture::LINEAR), _data(NULL)
+    _wrapS(Texture::REPEAT), _wrapT(Texture::REPEAT), _wrapR(Texture::REPEAT), _minFilter(Texture::NEAREST), _magFilter(Texture::LINEAR),
+    _keepMemory(false), _dataDirty(false), _data(NULL)
 {
 }
 
@@ -76,6 +77,8 @@ bool Texture::load(const char* path) {
     _width = image->getWidth();
     _height = image->getHeight();
     _data = image->getData();
+    image->setData(NULL);
+    _dataDirty = true;
     
     //image->release();
     return true;
@@ -206,6 +209,7 @@ UPtr<Texture> Texture::create(Format format, unsigned int width, unsigned int he
     }
     else {
         texture->_data = data;
+        texture->_dataDirty = true;
     }
     return UPtr<Texture>(texture);
 }
@@ -341,17 +345,36 @@ void Texture::setData(const unsigned char* data, bool copyMem)
     // Don't work with any compressed or cached textures
     GP_ASSERT(data);
 
-    if (_data == data) return;
+    if (_data == data) {
+        _dataDirty = true;
+        return;
+    }
 
     free((void*)_data);
     if (copyMem) {
-        _data = data;
-        Renderer::cur()->updateTexture(this);
-        _data = NULL;
+        if (!_keepMemory) {
+            _data = data;
+            Renderer::cur()->updateTexture(this);
+            _data = NULL;
+            _dataDirty = false;
+        }
+        else {
+            int bpp = getFormatBPP(_format);
+            int size = bpp * _width * _height;
+            unsigned char* t = (unsigned char*)malloc(size);
+            memcpy(t, data, size);
+            this->_data = t;
+            _dataDirty = true;
+        }
     }
     else {
         this->_data = data;
+        _dataDirty = true;
     }
+}
+
+void Texture::setKeepMemory(bool b) {
+    _keepMemory = b;
 }
 
 Texture::Format Texture::getFormat() const
@@ -598,10 +621,13 @@ void Texture::setFilterMode(Filter minificationFilter, Filter magnificationFilte
 
 void Texture::bind()
 {
-    if (_data) {
+    if (_dataDirty && _data) {
+        _dataDirty = false;
         Renderer::cur()->updateTexture(this);
-        free((void*)_data);
-        _data = NULL;
+        if (!_keepMemory) {
+            free((void*)_data);
+            _data = NULL;
+        }
     }
 
     if (!this->isMipmapped()) {

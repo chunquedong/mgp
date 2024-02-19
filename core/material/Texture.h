@@ -307,6 +307,8 @@ public:
     void bind();
 
     void setSize(unsigned int width, unsigned int height);
+
+    void setKeepMemory(bool b);
 private:
 
     /**
@@ -350,6 +352,8 @@ private:
     //int _internalFormat;
     //unsigned int _texelType;
     //size_t _bpp;
+    bool _keepMemory;
+    bool _dataDirty;
 private:
     TextureHandle _handle;
     const unsigned char* _data;

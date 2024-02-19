@@ -31,6 +31,7 @@ Terrain::Terrain() : Drawable(),
     _heightfield(NULL), _normalMap(NULL), _flags(FRUSTUM_CULLING | LEVEL_OF_DETAIL),
     _dirtyFlags(DIRTY_FLAG_INVERSE_WORLD)
 {
+    setLightMask(1);
 }
 
 Terrain::~Terrain()
