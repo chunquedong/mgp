@@ -72,9 +72,10 @@ public:
     static UPtr<Mesh> createLines(Vector3* points, unsigned int pointCount);
 
     static UPtr<Mesh> createCube(float size = 1.0f);
+    static UPtr<Mesh> createCube2(float size = 1.0f);
     static UPtr<Mesh> createSimpleCube();
     static UPtr<Mesh> createSpherical(int subdivision = 64);
-
+    static UPtr<Mesh> createTorus(int radial_resolution, int tubular_resolution, float radius, float thickness);
     static UPtr<Mesh> createCone(float radius, float height);
     static UPtr<Mesh> createCylinder(float radius, float height);
 

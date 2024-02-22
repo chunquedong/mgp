@@ -212,6 +212,117 @@ UPtr<Mesh> MeshFactory::createCube(float size)
     return mesh;
 }
 
+UPtr<Mesh> MeshFactory::createCube2(float size)
+{
+    float a = size * 0.5f;
+    float vertices[] =
+    {
+        -a, -a,  a,
+         a, -a,  a,
+        -a,  a,  a,
+         a,  a,  a,
+        -a,  a,  a,
+         a,  a,  a,
+        -a,  a, -a,
+         a,  a, -a,
+        -a,  a, -a,
+         a,  a, -a,
+        -a, -a, -a,
+         a, -a, -a,
+        -a, -a, -a,
+         a, -a, -a,
+        -a, -a,  a,
+         a, -a,  a,
+         a, -a,  a,
+         a, -a, -a,
+         a,  a,  a,
+         a,  a, -a,
+        -a, -a, -a,
+        -a, -a,  a,
+        -a,  a, -a,
+        -a,  a,  a,
+    };
+    short indices[] =
+    {
+        0, 1, 2, 2, 1, 3, 4, 5, 6, 6, 5, 7, 8, 9, 10, 10, 9, 11, 12, 13, 14, 14, 13, 15, 16, 17, 18, 18, 17, 19, 20, 21, 22, 22, 21, 23
+    };
+    unsigned int vertexCount = 24;
+    unsigned int indexCount = 36;
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3),
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 1), vertexCount);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+    mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
+    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->getIndexBuffer()->setData((char*)indices, sizeof(indices));
+    return mesh;
+}
+
+UPtr<Mesh> MeshFactory::createTorus(int radial_resolution, int tubular_resolution, float radius, float thickness)
+{
+    std::vector<float> vertices;
+    std::vector<uint16_t> indices;
+
+    // generate vertices
+    for (size_t i = 0; i < radial_resolution; i++) {
+        for (size_t j = 0; j < tubular_resolution; j++) {
+            float u = (float)j / tubular_resolution * MATH_PI * 2.0;
+            float v = (float)i / radial_resolution * MATH_PI * 2.0;
+            float x = (radius + thickness * std::cos(v)) * std::cos(u);
+            float y = (radius + thickness * std::cos(v)) * std::sin(u);
+            float z = thickness * std::sin(v);
+            vertices.push_back(x);
+            vertices.push_back(y);
+            vertices.push_back(z);
+        }
+    }
+
+    // add quad faces
+    for (int i = 0; i < radial_resolution; i++) {
+        int i_next = (i + 1) % radial_resolution;
+        for (int j = 0; j < tubular_resolution; j++) {
+            int j_next = (j + 1) % tubular_resolution;
+            int i0 = i * tubular_resolution + j;
+            int i1 = i * tubular_resolution + j_next;
+            int i2 = i_next * tubular_resolution + j_next;
+            int i3 = i_next * tubular_resolution + j;
+            indices.push_back(i0);
+            indices.push_back(i1);
+            indices.push_back(i2);
+
+            indices.push_back(i0);
+            indices.push_back(i2);
+            indices.push_back(i3);
+        }
+    }
+
+    unsigned int vertexCount = vertices.size() / 3;
+    unsigned int indexCount = indices.size();
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3),
+        //VertexFormat::Element(VertexFormat::NORMAL, 3),
+        //VertexFormat::Element(VertexFormat::TEXCOORD0, 2)
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 1), vertexCount);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+    mesh->getVertexBuffer()->setData((char*)vertices.data(), vertexCount * 3 * sizeof(float));
+    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->getIndexBuffer()->setData((char*)indices.data(), indices.size() * sizeof(uint16_t));
+
+    return mesh;
+}
+
 UPtr<Mesh> MeshFactory::createSimpleCube()
 {
     float vertices[] =

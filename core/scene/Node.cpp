@@ -248,6 +248,7 @@ UPtr<Node> Node::remove()
     _nextSibling.clear();
     _prevSibling = NULL;
     _parent = NULL;
+    _scene = NULL;
 
     if (parent && parent->_dirtyBits & NODE_DIRTY_HIERARCHY)
     {
