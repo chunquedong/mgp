@@ -191,7 +191,7 @@ Float Transform::getRotation(Vector3* axis) const
  */
 Vector3 Transform::getEulerAngles() {
     Vector3 v;
-    _rotation.computeEuler(&v.x, &v.y, &v.z);
+    _rotation.computeEuler(&v.y, &v.x, &v.z);
     return v;
 }
 
@@ -204,7 +204,7 @@ void Transform::setEulerAngles(const Vector3& eularAngles) {
     //if (isStatic())
     //    return;
 
-    Quaternion::createFromEuler(eularAngles.x, eularAngles.y, eularAngles.z, &_rotation);
+    Quaternion::createFromEuler(eularAngles.y, eularAngles.x, eularAngles.z, &_rotation);
     dirty(DIRTY_ROTATION);
 }
 

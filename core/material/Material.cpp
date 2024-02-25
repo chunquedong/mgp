@@ -709,7 +709,7 @@ StateBlock* Material::getStateBlock() const
     return (StateBlock*)(&_state);
 }
 
-MaterialParameter* Material::getParameter(const char* name) const
+MaterialParameter* Material::getParameter(const char* name, bool add) const
 {
     GP_ASSERT(name);
 
@@ -724,6 +724,8 @@ MaterialParameter* Material::getParameter(const char* name) const
             return param;
         }
     }
+
+    if (!add) return NULL;
 
     // Create a new parameter and store it in our list.
     param = new MaterialParameter(name);

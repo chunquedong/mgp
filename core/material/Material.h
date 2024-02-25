@@ -232,7 +232,7 @@ public:
      *
      * @return A MaterialParameter for the specified name.
      */
-    MaterialParameter* getParameter(const char* name) const;
+    MaterialParameter* getParameter(const char* name, bool add = true) const;
 
     /**
      * Gets the number of material parameters.
