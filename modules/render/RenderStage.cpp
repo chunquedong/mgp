@@ -151,6 +151,10 @@ void RestStage::render() {
     _renderPath->getRenderDataManager()->getRenderData(view, Drawable::RenderLayer::Transparent);
     //_renderPath->getRenderDataManager()->beginDrawScene(view, Drawable::RenderLayer::Overlay);
     _renderPath->commitRenderData();
+
+    if (_renderPath->onRendered) {
+        _renderPath->onRendered();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////

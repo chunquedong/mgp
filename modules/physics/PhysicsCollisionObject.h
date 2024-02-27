@@ -272,6 +272,9 @@ public:
         return name;
     }
 
+    int getGroup() { return _group; }
+    int getMask() { return _mask; }
+
     /**
      * Sets the physics collision object for this node using the data from the Properties object defined at the specified URL,
      * where the URL is of the format "<file-path>.<extension>#<namespace-id>/<namespace-id>/.../<namespace-id>"

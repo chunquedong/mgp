@@ -15,6 +15,8 @@
 #include "scene/Drawable.h"
 #include "RenderDataManager.h"
 
+#include <functional>
+
 namespace mgp {
 	class Shadow;
 	struct RenderStage;
@@ -82,6 +84,8 @@ namespace mgp {
 		void addFrameBuffer(FrameBuffer* frameBuffer);
 		FrameBuffer* getFrameBuffer(const std::string& name);
 		Texture* getTexture(const std::string& name);
+
+		std::function<void()> onRendered;
 	protected:
 
 		virtual void addPostProcess();
