@@ -574,7 +574,7 @@ Vector3 Node::getTranslationWorld() const
     return translation;
 }
 
-void Node::setWorldPosition(Vector3& v)
+void Node::setWorldPosition(const Vector3& v)
 {
     Vector3 translation;
     getWorldMatrix().getTranslation(&translation);

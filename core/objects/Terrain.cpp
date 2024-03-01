@@ -472,15 +472,17 @@ bool Terrain::addLayer(const char* texturePath, const Vector2& textureRepeat, Te
     // Set layer on applicable patches
     setMaterialDirty();
 
-    bool found = false;
-    for (Texture* t : _blendTextures) {
-        if (t == blendPath) {
-            found = true;
-            break;
+    if (blendPath) {
+        bool found = false;
+        for (Texture* t : _blendTextures) {
+            if (t == blendPath) {
+                found = true;
+                break;
+            }
         }
-    }
-    if (!found) {
-        _blendTextures.push_back(blendPath);
+        if (!found) {
+            _blendTextures.push_back(blendPath);
+        }
     }
     return true;
 }

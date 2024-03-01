@@ -88,7 +88,7 @@ void SceneView::initCamera(bool firstPerson, float nearPlane, float farPlane, fl
         cameraCtrl->sceneView = this;
 
         if (_scene.get()) {
-            Node* cameraNode = _scene->addNode("camera");
+            Node* cameraNode = _scene->addNode("__camera");
             // Attach the camera to a node. This determines the position of the camera.
             cameraNode->setCamera(uniqueFromInstant(camera.get()));
             // Make this the active camera of the scene.

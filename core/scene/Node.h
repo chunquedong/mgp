@@ -366,7 +366,7 @@ public:
      */
     Vector3 getTranslationWorld() const;
 
-    void setWorldPosition(Vector3 &v);
+    void setWorldPosition(const Vector3 &v);
 
     /**
      * Gets the translation vector (or position) of this Node in view space.
