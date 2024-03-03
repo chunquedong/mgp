@@ -235,13 +235,13 @@ UPtr<Drawable> Model::clone(NodeCloneContext& context)
     }
     if (getMaterial())
     {
-        UPtr<Material> materialClone = getMaterial()->clone(context);
+        /*UPtr<Material> materialClone = getMaterial()->clone(context);
         if (!materialClone.get())
         {
             GP_ERROR("Failed to clone material for model.");
             return model.dynamicCastTo<Drawable>();
-        }
-        model->setMaterial(std::move(materialClone));
+        }*/
+        model->setMaterial(uniqueFromInstant(getMaterial()));
         //materialClone->release();
     }
 
@@ -250,8 +250,8 @@ UPtr<Drawable> Model::clone(NodeCloneContext& context)
     {
         if (_partMaterials[i].get())
         {
-            UPtr<Material> materialClone = _partMaterials[i]->clone(context);
-            model->setMaterial(std::move(materialClone), i);
+            //UPtr<Material> materialClone = _partMaterials[i]->clone(context);
+            model->setMaterial(uniqueFromInstant(_partMaterials[i].get()), i);
             //materialClone->release();
         }
     }

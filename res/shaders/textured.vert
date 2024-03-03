@@ -2,7 +2,9 @@
 #include "_lighting_def.glsl"
 
 ///////////////////////////////////////////////////////////
-uniform mat4 u_worldViewProjectionMatrix;
+#ifndef NO_MVP
+    uniform mat4 u_worldViewProjectionMatrix;
+#endif
 
 #if defined(TEXTURE_REPEAT)
     uniform vec2 u_textureRepeat;
@@ -35,7 +37,11 @@ out vec2 v_texCoord;
 void main()
 {
     vec4 position = getPosition();
+#ifndef NO_MVP
     gl_Position = u_worldViewProjectionMatrix * position;
+#else
+    gl_Position = position;
+#endif
 
     #if defined(LIGHTING)
         applyLight(position);

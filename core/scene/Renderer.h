@@ -36,6 +36,7 @@ public:
     VertexAttributeBinding *_vertexAttributeArray = 0;
     Material* _material = 0;
     Drawable* _drawable = 0;
+    void* _mesh = 0;
     bool _wireframe = false;
 
     uint64_t _instanceVbo = 0;

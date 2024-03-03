@@ -47,6 +47,12 @@ void Instanced::finish() {
     Renderer::cur()->setBufferData(_instanceVbo, 0, 0, (const char*)_instanceMatrix.data(), _instanceCount * 16 * sizeof(float), 0);
 }
 
+void Instanced::setDrawCall(DrawCall* drawCall) {
+    drawCall->_instanceVbo = _instanceVbo;
+    drawCall->_instanceCount = _instanceCount;
+    drawCall->_drawable = this;
+}
+
 unsigned int Instanced::draw(RenderInfo *view) {
     int pos = view->_drawList.size();
 

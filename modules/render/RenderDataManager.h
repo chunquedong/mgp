@@ -12,6 +12,8 @@
 #include "scene/Scene.h"
 #include "scene/Camera.h"
 
+#include "objects/Instanced.h"
+
 namespace mgp
 {
 
@@ -32,12 +34,30 @@ public:
 
 class RenderDataManager {
     bool _viewFrustumCulling;
-    Camera *_camera;
-    std::map<void*, UPtr<Node> > _instanceds;
+    bool _useInstanced;
+    Camera *_camera = NULL;
+
+    struct InstanceKey {
+        void* mesh;
+        void* material;
+        bool operator<(const InstanceKey& b) const {
+            if (this->mesh != b.mesh) {
+                return this->mesh < b.mesh;
+            }
+            return material < b.material;
+        }
+    };
+
+    std::map<InstanceKey, std::vector<DrawCall*> > _groupByInstance;
+    std::vector<InstanceKey> _orderedInstance;
+    std::map<InstanceKey, UPtr<Instanced> > _instanceds;
     RenderInfo _renderInfo;
+
 public:
     std::vector<DrawCall> _renderQueues[Drawable::RenderLayer::Count];
     std::vector<Light*> _lights;
+
+    RenderDataManager();
     
     void fill(Scene* scene, Camera *camera, Rectangle *viewport, bool viewFrustumCulling = true);
     void fillDrawables(std::vector<Drawable*>& drawables, Camera *camera, Rectangle *viewport, bool viewFrustumCulling = true);
@@ -45,7 +65,9 @@ public:
     void getRenderData(RenderData* view, Drawable::RenderLayer layer);
 protected:
     bool buildRenderQueues(Node* node);
-    bool addInstanced(Drawable* draw);
+    void addInstanced(DrawCall* drawCall);
+    void setInstanced(Instanced* instance_, std::vector<DrawCall*>& list);
+    void filterInstanced();
     void clear();
     void endFill();
 };

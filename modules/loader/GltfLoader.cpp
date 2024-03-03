@@ -97,6 +97,7 @@ static void decodeDracoMeshes(DracoCache* dracoCache, cgltf_data* _gltf_data) {
 
 class GltfLoaderImp {
 	std::map<cgltf_node*, Node*> nodeMap;
+	std::map<cgltf_mesh*, Model*> meshRes;
 	std::string baseDir;
 	cgltf_data* _gltf_data;
 #ifdef GLTFIO_DRACO_SUPPORTED
@@ -241,6 +242,8 @@ private:
 		if (cmaterial->alpha_mode == cgltf_alpha_mode_blend) {
 			material->getStateBlock()->setBlend(true);
 			model->setRenderPass(Drawable::Transparent);
+			material->setShaderDefines(material->getShaderDefines() + ";TEXTURE_DISCARD_ALPHA");
+			material->getParameter("u_alphaCutoff")->setFloat(0.1);
 		}
 		else if (cmaterial->alpha_mode == cgltf_alpha_mode_mask) {
 			material->setShaderDefines(material->getShaderDefines()+";TEXTURE_DISCARD_ALPHA");
@@ -710,12 +713,22 @@ private:
 		m.set(matrix);
 		node->setMatrix(m);
 
-		UPtr<Model> model;
+		
 		Model* tempModel = NULL;
 		if (cnode->mesh) {
-			tempModel = loadMesh(cnode->mesh, node);
+			auto found = meshRes.find(cnode->mesh);
+			if (found != meshRes.end()) {
+				tempModel =  found->second;
+				NodeCloneContext context;
+				node->setDrawable(tempModel->clone(context));
+			}
+			else {
+				tempModel = loadMesh(cnode->mesh, node);
+				meshRes[cnode->mesh] = tempModel;
+			}
 		}
 		if (cnode->skin) {
+			UPtr<Model> model;
 			UPtr<MeshSkin> skin = loadSkin(cnode->skin);
 			if (!tempModel) {
 				model = UPtr<Model>(new Model());

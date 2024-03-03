@@ -145,9 +145,6 @@ public:
 
     virtual double getDistance(Vector3& cameraPosition) const;
 
-    void* getInstanceKey() { return _instanceKey; }
-    void setInstanceKey(void* key) { _instanceKey = key; }
-
     /**
      * Clones the drawable and returns a new drawable.
      *
@@ -177,8 +174,6 @@ protected:
     int _pickMask;
 
     HighlightType _highlightType;
-
-    void* _instanceKey;
 };
 
 class DrawableGroup : public Drawable {

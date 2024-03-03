@@ -9,9 +9,13 @@
 //#include "objects/CubeMap.h"
 #include <algorithm>
 #include <float.h>
-#include "objects/Instanced.h"
+
 
 using namespace mgp;
+
+RenderDataManager::RenderDataManager(): _viewFrustumCulling(true), _useInstanced(true) {
+
+}
 
 void RenderDataManager::fill(Scene* scene, Camera *camera, Rectangle *viewport, bool viewFrustumCulling) {
     _camera = camera;
@@ -31,9 +35,11 @@ void RenderDataManager::clear() {
     _renderInfo._drawList.clear();
 
     for (auto it = _instanceds.begin(); it != _instanceds.end(); ++it) {
-        Instanced* instance = dynamic_cast<Instanced*>(it->second->getDrawable());
+        Instanced* instance = it->second.get();
         instance->clear();
     }
+    _groupByInstance.clear();
+    _orderedInstance.clear();
 
     //clear
     for (unsigned int i = 0; i < Drawable::RenderLayer::Count; ++i)
@@ -45,65 +51,101 @@ void RenderDataManager::clear() {
 }
 
 void RenderDataManager::endFill() {
-
-    for (auto it = _instanceds.begin(); it != _instanceds.end(); ++it) {
-        Instanced* instance = dynamic_cast<Instanced*>(it->second->getDrawable());
-        instance->finish();
-        instance->draw(&_renderInfo);
-    }
-
-    Vector3 cameraPosition = _camera->getNode()->getTranslationWorld();
     for (size_t j = 0, ncount = _renderInfo._drawList.size(); j < ncount; ++j)
     {
         DrawCall* drawCall = &_renderInfo._drawList[j];
-        if (drawCall->_drawable) {
-            drawCall->_distanceToCamera = drawCall->_drawable->getDistance(cameraPosition);
+        addInstanced(drawCall);
+    }
+
+    filterInstanced();
+
+    //init _distanceToCamera
+    Vector3 cameraPosition = _camera->getNode()->getTranslationWorld();
+    for (unsigned int i = 0; i < Drawable::RenderLayer::Count; ++i)
+    {
+        auto& queue = _renderQueues[i];
+        for (auto it = queue.begin(); it != queue.end(); ++it) {
+            if (it->_drawable) {
+                it->_distanceToCamera = it->_drawable->getDistance(cameraPosition);
+            }
         }
+    }
+}
+
+void RenderDataManager::setInstanced(Instanced* instance_, std::vector<DrawCall*>& list) {
+    int count = 0;
+    for (int i = 0; i < list.size(); ++i) {
+        DrawCall* drawCall = list[i];
+        Drawable* drawable = drawCall->_drawable;
+        if (drawable && drawable->getNode()) {
+            Matrix worldViewProj;
+            Matrix::multiply(_camera->getViewProjectionMatrix(), drawable->getNode()->getWorldMatrix(), &worldViewProj);
+            instance_->add(worldViewProj);
+            ++count;
+        }
+        else {
+            _renderQueues[drawCall->_renderLayer].emplace_back(*drawCall);
+        }
+    }
+
+    if (count) {
+        instance_->finish();
+        DrawCall* drawCall = list[0];
+
+        Material* m = drawCall->_material;
+        std::string define = m->getShaderDefines();
+        if (define.find("INSTANCED") == std::string::npos) {
+            define += ";INSTANCED;NO_MVP";
+            m->setShaderDefines(define);
+        }
+
+        instance_->setDrawCall(drawCall);
         _renderQueues[drawCall->_renderLayer].emplace_back(*drawCall);
     }
 }
 
-bool RenderDataManager::addInstanced(Drawable* drawble) {
-    DrawableGroup* group = dynamic_cast<DrawableGroup*>(drawble);
-    if (group) {
-        bool rc = false;
-        for (UPtr<Drawable>& draw : group->getDrawables()) {
-            if (addInstanced(draw.get())) {
-                rc = true;
+void RenderDataManager::filterInstanced() {
+    for (auto it = _orderedInstance.begin(); it != _orderedInstance.end(); ++it) {
+        const InstanceKey& key = *it;
+        std::vector<DrawCall*>& list = _groupByInstance[key];
+        if (list.size() > 1) {
+            if (_useInstanced) {
+                auto found = _instanceds.find(key);
+                Instanced* instance_;
+                if (found == _instanceds.end()) {
+                    UPtr<Instanced> instanced(new Instanced());
+                    instance_ = instanced.get();
+                    _instanceds[key] = std::move(instanced);
+                }
+                else {
+                    instance_ = found->second.get();
+                    //instance_->clear();
+                }
+
+                setInstanced(instance_, list);
+            }
+            else {
+                for (int i = 0; i < list.size(); ++i) {
+                    DrawCall* drawCall = list[i];
+                    _renderQueues[drawCall->_renderLayer].emplace_back(*drawCall);
+                }
             }
         }
-        return rc;
-    }
-
-    if (drawble->getInstanceKey() && drawble->getNode()) {
-        //Model* model = dynamic_cast<Model*>(drawble);
-        //if (!model) return false;
-        auto found = _instanceds.find(drawble->getInstanceKey());
-        Instanced* instance_;
-        if (found == _instanceds.end()) {
-            UPtr<Instanced> instanced(new Instanced());
-            NodeCloneContext ctx;
-            UPtr<Drawable> temp = drawble->clone(ctx);
-            //temp->
-            instanced->setModel(std::move(temp));
-            instance_ = instanced.get();
-            instanced->setRenderPass(drawble->getRenderPass());
-
-            UPtr<Node> node = Node::create("instanced");
-            node->setDrawable(std::move(instanced));
-            _instanceds[drawble->getInstanceKey()] = std::move(node);
-        }
         else {
-            instance_ = dynamic_cast<Instanced*>(found->second->getDrawable());
+            DrawCall* drawCall = list[0];
+            _renderQueues[drawCall->_renderLayer].emplace_back(*drawCall);
         }
-
-        Matrix worldViewProj;
-        Matrix::multiply(_camera->getViewProjectionMatrix(), drawble->getNode()->getWorldMatrix(), &worldViewProj);
-        instance_->add(worldViewProj);
-
-        return true;
     }
-    return false;
+}
+
+void RenderDataManager::addInstanced(DrawCall* drawCall) {
+    InstanceKey key = {
+        drawCall->_mesh, drawCall->_material
+    };
+    if (_groupByInstance.find(key) == _groupByInstance.end()) {
+        _orderedInstance.push_back(key);
+    }
+    _groupByInstance[key].push_back(drawCall);
 }
 
 void RenderDataManager::fillDrawables(std::vector<Drawable*>& drawables, Camera *camera, Rectangle *viewport, bool viewFrustumCulling) {
@@ -123,10 +165,6 @@ void RenderDataManager::fillDrawables(std::vector<Drawable*>& drawables, Camera 
                 }
             }
 
-            if (addInstanced(drawable)) {
-                continue;
-            }
-
             drawable->draw(&_renderInfo);
         }
     }
@@ -143,10 +181,6 @@ bool RenderDataManager::buildRenderQueues(Node* node) {
             if (_viewFrustumCulling && !node->getBoundingSphere().intersects(_camera->getFrustum())) {
                 return true;
             }
-        }
-
-        if (addInstanced(drawable)) {
-            return true;
         }
 
         drawable->draw(&_renderInfo);

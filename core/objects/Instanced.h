@@ -24,7 +24,7 @@ public:
     void clear();
     void add(const Matrix& matrix);
     void finish();
-
+    void setDrawCall(DrawCall* drawCall);
     unsigned int draw(RenderInfo *view) override;
 };
 
