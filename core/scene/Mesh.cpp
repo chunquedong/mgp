@@ -471,7 +471,7 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
             drawCall._material = material;
             drawCall._primitiveType = mesh->getPrimitiveType();
             drawCall._vertexCount = mesh->getVertexCount();
-            if (drawable) drawCall._renderLayer = drawable->getRenderPass();
+            if (drawable) drawCall._renderLayer = drawable->getRenderLayer();
             else drawCall._renderLayer = Drawable::Overlay;
             drawCall._mesh = mesh;
 
@@ -521,7 +521,7 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
             drawCall._vertexCount = mesh->getVertexCount();
             drawCall._indexCount = part->_indexCount;
             drawCall._indexBufferOffset = part->_bufferOffset;
-            if (drawable) drawCall._renderLayer = drawable->getRenderPass();
+            if (drawable) drawCall._renderLayer = drawable->getRenderLayer();
             else drawCall._renderLayer = Drawable::Overlay;
             //drawCall._instanceVbo = view->_instanceVbo;
             //drawCall._instanceCount = view->_instanceCount;

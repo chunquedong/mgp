@@ -117,8 +117,8 @@ public:
     */
     virtual Animation* getAnimation(const char* id = NULL) const { return NULL; };
 
-    RenderLayer getRenderPass() const { return _renderLayer; }
-    void setRenderPass(RenderLayer p) { _renderLayer = p; }
+    RenderLayer getRenderLayer() const { return _renderLayer; }
+    void setRenderLayer(RenderLayer p) { _renderLayer = p; }
 
     int getLightMask() const { return _lightMask; }
     void setLightMask(int mask) { _lightMask = mask; }

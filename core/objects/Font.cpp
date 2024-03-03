@@ -291,7 +291,7 @@ bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, c
     if (!_batch) {
         TextureAtlas* fontTexture = _fontCache->fontTextures[glyph.texture];
         _batch = SpriteBatch::create(fontTexture->getTexture(), shaderProgram).take();
-        _batch->getBatch()->setRenderPass(Drawable::Overlay);
+        _batch->getBatch()->setRenderLayer(Drawable::Overlay);
         auto _cutoffParam = _batch->getMaterial()->getParameter("u_cutoff");
         _cutoffParam->setVector2(Vector2(0.50, 0.1));
         if (_outline) {

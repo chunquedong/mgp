@@ -241,7 +241,7 @@ private:
 
 		if (cmaterial->alpha_mode == cgltf_alpha_mode_blend) {
 			material->getStateBlock()->setBlend(true);
-			model->setRenderPass(Drawable::Transparent);
+			model->setRenderLayer(Drawable::Transparent);
 			material->setShaderDefines(material->getShaderDefines() + ";TEXTURE_DISCARD_ALPHA");
 			material->getParameter("u_alphaCutoff")->setFloat(0.1);
 		}
