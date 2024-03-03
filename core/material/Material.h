@@ -154,7 +154,7 @@ public:
     */
     void setParams(std::vector<Light*>* lights,
         Camera* camera,
-        Rectangle* viewport, Drawable* drawable);
+        Rectangle* viewport, Drawable* drawable, int instanced);
 
     /**
      * Unbinds the render state for this pass.
@@ -322,7 +322,7 @@ private:
      */
     ~Material();
 
-    bool initialize(Drawable* drawable, std::vector<Light*>* lights, int lightMask);
+    bool initialize(Drawable* drawable, std::vector<Light*>* lights, int lightMask, int instanced);
     void bindCamera(Camera* camera, Rectangle& viewport, Node* node);
     void bindLights(Camera* camera, std::vector<Light*>* lights, int lightMask);
 

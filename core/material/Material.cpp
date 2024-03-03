@@ -74,7 +74,7 @@ UPtr<Material> Material::create(Properties* materialProperties)
     return create(materialProperties, (PassCallback)NULL, NULL);
 }
 
-bool Material::initialize(Drawable* drawable, std::vector<Light*>* lights, int lightMask)
+bool Material::initialize(Drawable* drawable, std::vector<Light*>* lights, int lightMask, int instanced)
 {
     std::string dynamicDefines;
     if (lights && vertexShaderPath.size() > 0) {
@@ -125,6 +125,13 @@ bool Material::initialize(Drawable* drawable, std::vector<Light*>* lights, int l
             dynamicDefines += ";";
         }
         dynamicDefines += "MORPH_TARGET_COUNT " + std::to_string(drawable->getNode()->getWeights().size());
+    }
+
+    if (instanced) {
+        if (dynamicDefines.size() > 0) {
+            dynamicDefines += ";";
+        }
+        dynamicDefines += "INSTANCED;NO_MVP";
     }
 
     if (_dynamicDefines != dynamicDefines) {
@@ -573,7 +580,7 @@ ShaderProgram* Material::getEffect() const {
 
 void Material::bind() {
     if (!_shaderProgram) {
-        initialize(NULL, NULL, 0);
+        initialize(NULL, NULL, 0, 0);
     }
     GP_ASSERT(_shaderProgram);
     // Bind our effect.
@@ -600,14 +607,14 @@ void Material::bind() {
 
 void Material::setParams(std::vector<Light*>* lights,
         Camera* camera,
-        Rectangle* viewport, Drawable* drawable)
+        Rectangle* viewport, Drawable* drawable, int instanced)
 {
     int lightMask = 0;
     if (drawable) {
         lightMask = drawable->getLightMask();
     }
 
-    if (!initialize(drawable, lights, lightMask)) {
+    if (!initialize(drawable, lights, lightMask, instanced)) {
         return;
     }
     

@@ -133,7 +133,8 @@ void Shadow::draw(Scene* scene, Renderer* renderer, Matrix& lightView, Matrix& l
         DrawCall* drawCall = &view._drawList[i];
         drawCall->_material = _material;
         drawCall->_wireframe = false;
-        drawCall->_material->setParams(view.lights, view.camera, &view.viewport, drawCall->_drawable);
+        int instanced = drawCall->_instanceCount > 0 ? 1 : 0;
+        drawCall->_material->setParams(view.lights, view.camera, &view.viewport, drawCall->_drawable, instanced);
         renderer->draw(drawCall);
     }
 

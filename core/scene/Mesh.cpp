@@ -486,7 +486,7 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
                 if (view->wireframe || view->isDepthPass) break;
             }
             else {
-                drawCall._material->setParams(NULL, NULL, NULL, drawable);
+                drawCall._material->setParams(NULL, NULL, NULL, drawable, 0);
                 Renderer::cur()->draw(&drawCall);
             }
         }
@@ -532,7 +532,7 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
                 if (view->wireframe || view->isDepthPass) break;
             }
             else {
-                drawCall._material->setParams(NULL, NULL, NULL, drawable);
+                drawCall._material->setParams(NULL, NULL, NULL, drawable, 0);
                 Renderer::cur()->draw(&drawCall);
             }
         }

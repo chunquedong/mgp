@@ -7,6 +7,8 @@
  */
 #include "RenderDataManager.h"
 //#include "objects/CubeMap.h"
+#include "base/StringUtil.h"
+
 #include <algorithm>
 #include <float.h>
 
@@ -72,6 +74,10 @@ void RenderDataManager::endFill() {
     }
 }
 
+void RenderDataManager::addToQueue(DrawCall* drawCall) {
+    _renderQueues[drawCall->_renderLayer].emplace_back(*drawCall);
+}
+
 void RenderDataManager::setInstanced(Instanced* instance_, std::vector<DrawCall*>& list) {
     int count = 0;
     for (int i = 0; i < list.size(); ++i) {
@@ -84,23 +90,15 @@ void RenderDataManager::setInstanced(Instanced* instance_, std::vector<DrawCall*
             ++count;
         }
         else {
-            _renderQueues[drawCall->_renderLayer].emplace_back(*drawCall);
+            addToQueue(drawCall);
         }
     }
 
     if (count) {
         instance_->finish();
         DrawCall* drawCall = list[0];
-
-        Material* m = drawCall->_material;
-        std::string define = m->getShaderDefines();
-        if (define.find("INSTANCED") == std::string::npos) {
-            define += ";INSTANCED;NO_MVP";
-            m->setShaderDefines(define);
-        }
-
         instance_->setDrawCall(drawCall);
-        _renderQueues[drawCall->_renderLayer].emplace_back(*drawCall);
+        addToQueue(drawCall);
     }
 }
 
@@ -127,13 +125,13 @@ void RenderDataManager::filterInstanced() {
             else {
                 for (int i = 0; i < list.size(); ++i) {
                     DrawCall* drawCall = list[i];
-                    _renderQueues[drawCall->_renderLayer].emplace_back(*drawCall);
+                    addToQueue(drawCall);
                 }
             }
         }
         else {
             DrawCall* drawCall = list[0];
-            _renderQueues[drawCall->_renderLayer].emplace_back(*drawCall);
+            addToQueue(drawCall);
         }
     }
 }

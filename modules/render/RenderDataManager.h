@@ -67,6 +67,7 @@ protected:
     bool buildRenderQueues(Node* node);
     void addInstanced(DrawCall* drawCall);
     void setInstanced(Instanced* instance_, std::vector<DrawCall*>& list);
+    void addToQueue(DrawCall* drawCall);
     void filterInstanced();
     void clear();
     void endFill();

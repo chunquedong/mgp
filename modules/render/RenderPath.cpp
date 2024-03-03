@@ -437,7 +437,8 @@ void RenderPath::commitRenderData() {
 
         drawCall->_wireframe = view->wireframe;
 
-        drawCall->_material->setParams(view->lights, view->camera, &view->viewport, drawCall->_drawable);
+        int instanced = drawCall->_instanceCount > 0 ? 1 : 0;
+        drawCall->_material->setParams(view->lights, view->camera, &view->viewport, drawCall->_drawable, instanced);
         if (view->_overridedMaterial == NULL) {
             this->bindShadow(view->lights, drawCall);
         }
