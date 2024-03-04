@@ -96,6 +96,9 @@ void TerrainPatch::resetMesh() {
     bounds.set(this->_levels[this->_detailLevels - 1].model->getMesh()->getBoundingBox());
 
     _bits = TERRAINPATCH_DIRTY_ALL;
+
+    _hasPositinCache = false;
+    _positionCache.clear();
 }
 
 unsigned int TerrainPatch::getMaterialCount() const
@@ -623,5 +626,65 @@ TerrainPatch::Level::Level() : model(NULL)
 {
 }
 
+void TerrainPatch::genLayerVertex(std::vector<float>& position, int layerIndex, int random, float randomRange) {
+    if (_level == 0 && _levels[_level].model) {
+        if (_hasPositinCache) {
+            position.insert(position.end(), _positionCache.begin(), _positionCache.end());
+            return;
+        }
+
+        auto layer =_terrain->_layers.at(layerIndex);
+        Texture* blendTexture = _terrain->_samplers[layer->blendIndex];
+        int bbp = Texture::getFormatBPP(blendTexture->getFormat());
+        unsigned char* blendData = (unsigned char*)blendTexture->lock();
+        int channel = layer->blendChannel;
+
+        Mesh* mesh = _levels[_level].model->getMesh();
+        const VertexFormat& format = mesh->getVertexFormat();
+        const VertexFormat::Element posAttr = format.getElement(0);
+        const VertexFormat::Element uvAttr = format.getElement(format.getElementCount()-1);
+        const float* buffer = (float*)mesh->getVertexBuffer()->_data;
+        int n = mesh->getVertexCount();
+        int vertexSize = format.getVertexSize();
+        for (int i = 0; i < n; ++i) {
+            int p2 = i * uvAttr.stride + uvAttr.offset;
+            p2 /= 4;
+            float u = buffer[p2];
+            float v = 1.0f- buffer[p2 + 1];
+            u = MATH_CLAMP(u, 0, 1.0f);
+            v = MATH_CLAMP(v, 0, 1.0f);
+
+            int tx = u * (blendTexture->getWidth()-1);
+            int ty = v * (blendTexture->getHeight()-1);
+            unsigned char value = blendData[(tx + ty * blendTexture->getWidth()) * bbp + channel];
+            if (value > 128) {
+                int p1 = i * posAttr.stride + posAttr.offset;
+                p1 /= 4;
+                float x = buffer[p1];
+                float y = buffer[p1 + 1];
+                float z = buffer[p1 + 2];
+
+                if (random) {
+                    int randomCount = (value / 255.0) * random;
+                    for (int k = 0; k < random; ++k) {
+                        float r = ((rand() / (float)RAND_MAX) - 0.5) * randomRange;
+                        float r2 = ((rand() / (float)RAND_MAX) - 0.5) * randomRange;
+                        _positionCache.push_back(x+r);
+                        _positionCache.push_back(y);
+                        _positionCache.push_back(z+r);
+                    }
+                }
+                else {
+                    _positionCache.push_back(x);
+                    _positionCache.push_back(y);
+                    _positionCache.push_back(z);
+                }
+            }
+        }
+
+        _hasPositinCache = true;
+        position.insert(position.end(), _positionCache.begin(), _positionCache.end());
+    }
+}
 
 }

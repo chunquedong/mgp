@@ -297,6 +297,7 @@ UPtr<Terrain> Terrain::create(UPtr<HeightField> heightfield, const Vector3& scal
         z1 = z;
         z2 = std::min(z1 + patchSize, height-1);
 
+        column = 0;
         for (unsigned int x = 0; x < width-1; x = x2, ++column)
         {
             x1 = x;

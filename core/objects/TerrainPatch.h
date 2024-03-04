@@ -53,6 +53,7 @@ public:
      */
     static std::string passCallback(Material* pass, void* cookie);
 
+    void genLayerVertex(std::vector<float>& position, int layer, int random, float randomRange);
 private:
 
     /**
@@ -144,6 +145,9 @@ private:
     unsigned int _maxStep;
     float _verticalSkirtSize;
     int _detailLevels;
+
+    std::vector<float> _positionCache;
+    bool _hasPositinCache = false;
 };
 
 }

@@ -263,6 +263,10 @@ public:
         Texture* blendPath = NULL, int blendChannel = 0,
         int row = -1, int column = -1);
 
+    int getLayerCount() {
+        return _layers.size();
+    }
+
     /**
      * @see Drawable#draw
      */
