@@ -392,6 +392,7 @@ std::string TerrainPatch::passCreated(Material* pass)
     // non-constant array access in the shader. This is due to the fact that non-constant array access
     // in GLES is very slow on some hardware.
     std::ostringstream defines;
+    defines << "NO_SPECULAR;";
     defines << "LAYER_COUNT " << _terrain->_layers.size();
     defines << ";SAMPLER_COUNT " << _terrain->_samplers.size();
 
@@ -455,7 +456,7 @@ bool TerrainPatch::updateLevelMaterial(int level) {
     }
     //TODO u_normalMatrix
 
-    material->getParameter("u_specularExponent")->setFloat(10.0);
+    //material->getParameter("u_specularExponent")->setFloat(1.0);
 
     // Set material on this lod level
     _levels[level].model->setMaterial(std::move(material));
@@ -671,7 +672,7 @@ void TerrainPatch::genLayerVertex(std::vector<float>& position, int layerIndex, 
                         float r2 = ((rand() / (float)RAND_MAX) - 0.5) * randomRange;
                         _positionCache.push_back(x+r);
                         _positionCache.push_back(y);
-                        _positionCache.push_back(z+r);
+                        _positionCache.push_back(z+r2);
                     }
                 }
                 else {

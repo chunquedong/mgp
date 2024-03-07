@@ -19,9 +19,9 @@
     #endif
 #endif
 
-#if !defined(NO_SPECULAR)
-    in vec3 v_cameraDirection;
+in vec3 v_cameraDirection;
 
+#if !defined(NO_SPECULAR)
     #if !defined(PBR)
         uniform float u_specularExponent;
     #endif

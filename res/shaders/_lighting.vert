@@ -19,9 +19,7 @@
     #endif
 #endif
 
-#if !defined(NO_SPECULAR)
-    out vec3 v_cameraDirection;
-#endif
+out vec3 v_cameraDirection;
 
 #if defined(SHADOW)
     out vec4 v_position;
@@ -37,9 +35,7 @@ void initLightDirection(vec4 position, mat3 tangentSpaceTransformMatrix)
 {
     vec3 cameraPosition = vec3(0.0, 0.0, 0.0);
 
-    #if !defined(NO_SPECULAR) || (POINT_LIGHT_COUNT > 0) || (SPOT_LIGHT_COUNT > 0) || defined(SHADOW)
-        vec4 positionWorldViewSpace = u_worldViewMatrix * position;
-    #endif
+    vec4 positionWorldViewSpace = u_worldViewMatrix * position;
     
     #if (DIRECTIONAL_LIGHT_COUNT > 0)
     for (int i = 0; i < DIRECTIONAL_LIGHT_COUNT; ++i)
@@ -66,19 +62,15 @@ void initLightDirection(vec4 position, mat3 tangentSpaceTransformMatrix)
     }
     #endif
     
-    #if !defined(NO_SPECULAR)
-        // Compute camera direction and transform it to tangent space.
-        v_cameraDirection = tangentSpaceTransformMatrix * (cameraPosition - positionWorldViewSpace.xyz);
-    #endif
+    // Compute camera direction and transform it to tangent space.
+    v_cameraDirection = tangentSpaceTransformMatrix * (cameraPosition - positionWorldViewSpace.xyz);
 }
 #else
 void initLightDirection(vec4 position)
 {
     vec3 cameraPosition = vec3(0.0, 0.0, 0.0);
 
-    #if !defined(NO_SPECULAR) || (POINT_LIGHT_COUNT > 0) || (SPOT_LIGHT_COUNT > 0) || defined(SHADOW)
-	    vec4 positionWorldViewSpace = u_worldViewMatrix * position;
-    #endif
+	vec4 positionWorldViewSpace = u_worldViewMatrix * position;
 
     #if (POINT_LIGHT_COUNT > 0)
     for (int i = 0; i < POINT_LIGHT_COUNT; ++i)
@@ -96,9 +88,7 @@ void initLightDirection(vec4 position)
     }
     #endif
 
-    #if !defined(NO_SPECULAR)
-	    v_cameraDirection = cameraPosition - positionWorldViewSpace.xyz;
-    #endif
+	v_cameraDirection = cameraPosition - positionWorldViewSpace.xyz;
 }
 
 #endif
