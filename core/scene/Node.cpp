@@ -812,16 +812,17 @@ const BoundingSphere& Node::getBoundingSphere() const
                 // since joint parent nodes that are not in the matrix palette do not need to
                 // be considered as directly transforming vertices on the GPU (they can instead
                 // be applied directly to the bounding volume transformation below).
-                GP_ASSERT(model->getSkin()->getRootJoint());
-                Node* jointParent = model->getSkin()->getRootJoint()->getParent();
-                if (jointParent)
-                {
-                    // TODO: Should we protect against the case where joints are nested directly
-                    // in the node hierachy of the model (this is normally not the case)?
-                    Matrix boundsMatrix;
-                    Matrix::multiply(getWorldMatrix(), jointParent->getWorldMatrix(), &boundsMatrix);
-                    _bounds.transform(boundsMatrix);
-                    applyWorldTransform = false;
+                if (model->getSkin()->getRootJoint()) {
+                    Node* jointParent = model->getSkin()->getRootJoint()->getParent();
+                    if (jointParent)
+                    {
+                        // TODO: Should we protect against the case where joints are nested directly
+                        // in the node hierachy of the model (this is normally not the case)?
+                        Matrix boundsMatrix;
+                        Matrix::multiply(getWorldMatrix(), jointParent->getWorldMatrix(), &boundsMatrix);
+                        _bounds.transform(boundsMatrix);
+                        applyWorldTransform = false;
+                    }
                 }
             }
             if (applyWorldTransform)

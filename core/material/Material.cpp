@@ -234,7 +234,7 @@ void Material::bindLights(Camera* camera, std::vector<Light*>* lights, int light
     }
 }
 
-void Material::bindCamera(Camera* camera, Rectangle &viewport, Node *node) {
+void Material::bindCamera(Camera* camera, Rectangle &viewport, Node *node, Drawable* drawable) {
     
     GP_ASSERT(camera);
     GP_ASSERT(node);
@@ -351,7 +351,7 @@ void Material::bindCamera(Camera* camera, Rectangle &viewport, Node *node) {
 
     uniform = _shaderProgram->getUniform("u_matrixPalette");
     if (uniform) {
-        Model* model = dynamic_cast<Model*>(node->getDrawable());
+        Model* model = dynamic_cast<Model*>(drawable);
         if (model)
         {
             MeshSkin* skin = model->getSkin();
@@ -621,7 +621,7 @@ void Material::setParams(std::vector<Light*>* lights,
     if (camera) bindLights(camera, lights, lightMask);
 
     if (camera && drawable && drawable->getNode()) {
-        bindCamera(camera, *viewport, drawable->getNode());
+        bindCamera(camera, *viewport, drawable->getNode(), drawable);
     }
     else {
         //printf("DEBUG");

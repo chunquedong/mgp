@@ -20,6 +20,7 @@ public:
 	bool lighting = false;
 	UPtr<Scene> load(const std::string &file);
 	UPtr<Scene> loadFromBuf(const char* file_data, size_t file_size);
+	std::vector<SPtr<MeshSkin> > loadSkins(const std::string& file);
 };
 }
 

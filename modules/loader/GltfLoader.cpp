@@ -100,9 +100,15 @@ class GltfLoaderImp {
 	std::map<cgltf_mesh*, Model*> meshRes;
 	std::string baseDir;
 	cgltf_data* _gltf_data;
+
+public:
+	std::map<cgltf_skin*, SPtr<MeshSkin> > _skins;
+
+private:
 #ifdef GLTFIO_DRACO_SUPPORTED
 	DracoCache* _dracoCache = NULL;
 #endif
+
 public:
 	~GltfLoaderImp() {
 #ifdef GLTFIO_DRACO_SUPPORTED
@@ -591,6 +597,11 @@ private:
 	}
 
 	UPtr<MeshSkin> loadSkin(cgltf_skin* cskin) {
+		auto it = _skins.find(cskin);
+		if (it != _skins.end()) {
+			return uniqueFromInstant(it->second.get());
+		}
+
 		MeshSkin* skin = new MeshSkin();
 		int num_comp = cgltf_num_components(cskin->inverse_bind_matrices->type);
 		float* matrix = (float*)malloc(cskin->inverse_bind_matrices->count * num_comp * sizeof(float));
@@ -608,11 +619,19 @@ private:
 			skin->setJoint(joint, i);
 		}
 
-		BoneJoint* skeleton = getJoint(cskin->skeleton);
-		assert(skeleton);
-		skeleton->remove();
-		skin->setRootJoint(skeleton);
-		
+		if (cskin->skeleton) {
+			BoneJoint* skeleton = getJoint(cskin->skeleton);
+			assert(skeleton);
+			skin->setRootJoint(skeleton);
+		}
+		else if (cskin->joints_count) {
+			BoneJoint* skeleton = getJoint(cskin->joints[0]);
+			if (skeleton) {
+				skin->setRootJoint(skeleton);
+			}
+		}
+		SPtr<MeshSkin> sskin; sskin = skin;
+		_skins[cskin] = sskin;
 		return UPtr<MeshSkin>(skin);
 	}
 
@@ -662,7 +681,8 @@ private:
 			for (int i = 0; i < keyCount; ++i) {
 				float out[16];
 				cgltf_accessor_read_float(cchannel->sampler->input, i, out, 1);
-				keyTimes[i] = ((out[0] - minTime) / (maxTime-minTime))*1000;
+				//keyTimes[i] = ((out[0] - minTime) / (maxTime-minTime))*1000;
+				keyTimes[i] = out[0] * 1000;
 			}
 
 			unsigned int interpolationType = -1;
@@ -779,6 +799,7 @@ private:
 				Node* node = BoneJoint::create(joint->name).take();
 				nodeMap[joint] = node;
 			}
+			loadSkin(skin);
 		}
 
 		for (int i = 0; i < cscene->nodes_count; ++i) {
@@ -786,6 +807,13 @@ private:
 			UPtr<Node> node = loadNode(cnode);
 			scene->addNode(std::move(node));
 			//SAFE_RELEASE(node);
+		}
+
+		for (auto it = _skins.begin(); it != _skins.end(); ++it) {
+			Node* rootJoint = (it->second)->getRootJoint();
+			if (rootJoint) {
+				rootJoint->remove();
+			}
 		}
 
 		for (int i = 0; i < data->animations_count; ++i) {
@@ -797,6 +825,16 @@ private:
 		return scene;
 	}
 };
+
+std::vector<SPtr<MeshSkin> > GltfLoader::loadSkins(const std::string& file) {
+	GltfLoaderImp imp;
+	imp.load(file.c_str());
+	std::vector<SPtr<MeshSkin> > skins;
+	for (auto it = imp._skins.begin(); it != imp._skins.end(); ++it) {
+		skins.push_back(it->second);
+	}
+	return skins;
+}
 
 UPtr<Scene> GltfLoader::load(const std::string& file) {
 	GltfLoaderImp imp;

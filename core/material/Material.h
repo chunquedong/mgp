@@ -323,7 +323,7 @@ private:
     ~Material();
 
     bool initialize(Drawable* drawable, std::vector<Light*>* lights, int lightMask, int instanced);
-    void bindCamera(Camera* camera, Rectangle& viewport, Node* node);
+    void bindCamera(Camera* camera, Rectangle& viewport, Node* node, Drawable* drawable);
     void bindLights(Camera* camera, std::vector<Light*>* lights, int lightMask);
 
     std::string name;
