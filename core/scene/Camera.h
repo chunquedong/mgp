@@ -407,7 +407,7 @@ private:
     mutable Matrix _inverseViewProjection;
     mutable Frustum _bounds;
     mutable int _bits;
-    Node* _node;
+    //Node* _node;
     std::list<Camera::Listener*>* _listeners;
 };
 

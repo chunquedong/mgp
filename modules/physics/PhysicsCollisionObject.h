@@ -392,7 +392,7 @@ protected:
     /**
      * Pointer to Node contained by this collision object.
      */ 
-    Node* _node;
+    //Node* _node;
     
     /**
      * The PhysicsCollisionObject's collision shape.

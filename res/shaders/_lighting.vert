@@ -21,21 +21,15 @@
 
 out vec3 v_cameraDirection;
 
-#if defined(SHADOW)
-    out vec4 v_position;
-#endif
-
-#if defined(SIMPLE_BUMPED)
+#if defined(SIMPLE_BUMPED) || defined(SHADOW)
     out vec3 v_positionViewSpace;
 #endif
 
 
 #if defined(BUMPED)
-void initLightDirection(vec4 position, mat3 tangentSpaceTransformMatrix)
+void initLightDirection(vec4 positionWorldViewSpace, mat3 tangentSpaceTransformMatrix)
 {
     vec3 cameraPosition = vec3(0.0, 0.0, 0.0);
-
-    vec4 positionWorldViewSpace = u_worldViewMatrix * position;
     
     #if (DIRECTIONAL_LIGHT_COUNT > 0)
     for (int i = 0; i < DIRECTIONAL_LIGHT_COUNT; ++i)
@@ -66,11 +60,9 @@ void initLightDirection(vec4 position, mat3 tangentSpaceTransformMatrix)
     v_cameraDirection = tangentSpaceTransformMatrix * (cameraPosition - positionWorldViewSpace.xyz);
 }
 #else
-void initLightDirection(vec4 position)
+void initLightDirection(vec4 positionWorldViewSpace)
 {
     vec3 cameraPosition = vec3(0.0, 0.0, 0.0);
-
-	vec4 positionWorldViewSpace = u_worldViewMatrix * position;
 
     #if (POINT_LIGHT_COUNT > 0)
     for (int i = 0; i < POINT_LIGHT_COUNT; ++i)
@@ -93,7 +85,7 @@ void initLightDirection(vec4 position)
 
 #endif
 
-void applyLight(vec4 position) {
+void applyLight(vec4 positionViewSpace) {
     vec3 normal = getNormal();
     // Transform the normal, tangent and binormals to view space.
     mat3 inverseTransposeWorldViewMatrix = mat3(u_inverseTransposeWorldViewMatrix[0].xyz, u_inverseTransposeWorldViewMatrix[1].xyz, u_inverseTransposeWorldViewMatrix[2].xyz);
@@ -105,20 +97,15 @@ void applyLight(vec4 position) {
         vec3 tangentVector  = normalize(inverseTransposeWorldViewMatrix * tangent);
         vec3 binormalVector = normalize(inverseTransposeWorldViewMatrix * binormal);
         mat3 tangentSpaceTransformMatrix = mat3(tangentVector.x, binormalVector.x, normalVector.x, tangentVector.y, binormalVector.y, normalVector.y, tangentVector.z, binormalVector.z, normalVector.z);
-        initLightDirection(position, tangentSpaceTransformMatrix);
+        initLightDirection(positionViewSpace, tangentSpaceTransformMatrix);
     #elif defined(NORMAL_MAP)
-        initLightDirection(position);
+        initLightDirection(positionViewSpace);
     #else
         v_normalVector = normalVector;
-        initLightDirection(position);
+        initLightDirection(positionViewSpace);
     #endif
 
-    #if ((DIRECTIONAL_LIGHT_COUNT > 0) && defined(SHADOW))
-        v_position = position;
-    #endif
-
-    #if defined(SIMPLE_BUMPED)
-        vec4 positionViewSpace = u_worldViewMatrix * position;
+    #if defined(SIMPLE_BUMPED) || defined(SHADOW)
         v_positionViewSpace = positionViewSpace.xyz / positionViewSpace.w;
     #endif
 }

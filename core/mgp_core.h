@@ -48,7 +48,6 @@
 #include "scene/Camera.h"
 #include "scene/Light.h"
 #include "scene/Node.h"
-#include "scene/BoneJoint.h"
 #include "scene/Scene.h"
 #include "objects/Font.h"
 #include "objects/SpriteBatch.h"

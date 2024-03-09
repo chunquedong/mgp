@@ -6,6 +6,8 @@
     in mat4 a_instanceMatrix;
 #endif
 
+uniform mat4 u_worldViewMatrix;
+
 vec4 getPosition()
 {
     vec3 pos = a_position;
@@ -16,7 +18,7 @@ vec4 getPosition()
 #ifdef INSTANCED
     return a_instanceMatrix * vec4(pos, 1.0);
 #else
-    return vec4(pos, 1.0);
+    return u_worldViewMatrix * vec4(pos, 1.0);
 #endif
 }
 

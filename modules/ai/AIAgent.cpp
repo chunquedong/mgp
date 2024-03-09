@@ -6,7 +6,7 @@ namespace mgp
 {
 
 AIAgent::AIAgent()
-    : _stateMachine(NULL), _node(NULL), _enabled(true), _listener(NULL), _next(NULL)
+    : _stateMachine(NULL), _enabled(true), _listener(NULL), _next(NULL)
 {
     _stateMachine = new AIStateMachine(this);
 }

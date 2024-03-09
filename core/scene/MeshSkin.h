@@ -3,14 +3,23 @@
 
 #include "math/Matrix.h"
 #include "scene/Transform.h"
+//#include "scene/Component.h"
+#include "scene/Node.h"
 
 namespace mgp
 {
-
-class Bundle;
-class Model;
 class Node;
-class BoneJoint;
+
+class BoneJoint {
+public:
+    std::string _name;
+    SPtr<Node> _node;
+    //inverseBindMatrices
+    Matrix _bindPose;
+
+    void write(Stream* file);
+    bool read(Stream* file);
+};
 
 /**
  * Defines the skin for a mesh.
@@ -20,30 +29,9 @@ class BoneJoint;
  * a skeleton on joints that will influence the vertex position
  * and which the joints can be animated.
  */
-class MeshSkin : public Transform::Listener, public Refable
+class MeshSkin : public Refable
 {
-    friend class Bundle;
-    friend class Model;
-    friend class BoneJoint;
-    friend class Node;
-    friend class Scene;
-
 public:
-
-    /**
-     * Returns the bind shape matrix.
-     * 
-     * @return The bind shape matrix.
-     */
-    const Matrix& getBindShape() const;
-
-    /**
-     * Sets the bind shape of this skin.
-     * 
-     * @param matrix An array of 16 floats.
-     */
-    void setBindShape(const float* matrix);
-
     /**
      * Returns the number of joints in this MeshSkin.
      */
@@ -56,23 +44,14 @@ public:
      * 
      * @return The joint.
      */
-    BoneJoint* getJoint(unsigned int index) const;
-
-    /**
-     * Returns the joint with the given ID.
-     * 
-     * @param id The ID of the joint to search for.
-     * 
-     * @return The joint, or NULL if not found.
-     */
-    BoneJoint* getJoint(const char* id) const;
+    BoneJoint* getJoint(unsigned int index);
 
     /**
      * Returns the root most joint for this MeshSkin.
      *
      * @return The root joint.
      */
-    BoneJoint* getRootJoint() const;
+    Node* getRootJoint() const;
 
     /**
      * Sets the root joint for this MeshSkin.
@@ -81,21 +60,14 @@ public:
      *
      * @param joint The root joint.
      */
-    void setRootJoint(BoneJoint* joint);
-
-    /**
-     * Returns the index of the specified joint in this MeshSkin.
-     *
-     * @return The index of the joint in this MeshSkin, or -1 if the joint does not belong to this MeshSkin.
-     */
-    int getJointIndex(BoneJoint* joint) const;
+    void setRootJoint(Node* joint);
 
     /**
      * Returns the pointer to the Vector4 array for the purpose of binding to a shader.
      * 
      * @return The pointer to the matrix palette.
      */
-    Vector4* getMatrixPalette() const;
+    Vector4* getMatrixPalette(const Matrix* viewMatrix) const;
 
     /**
      * Returns the number of elements in the matrix palette array.
@@ -106,15 +78,7 @@ public:
      */
     unsigned int getMatrixPaletteSize() const;
 
-    /**
-     * Returns our parent Model.
-     */
-    Model* getModel() const;
-
-    /**
-     * Handles transform change events for joints.
-     */
-    void transformChanged(Transform* transform, long cookie);
+    void rebindJoins();
 
     void write(Stream* file);
     bool read(Stream* file);
@@ -136,7 +100,7 @@ public:
     /**
      * Constructor.
      */
-    MeshSkin(const MeshSkin&);
+    MeshSkin(const MeshSkin&) = delete;
 
     /**
      * Destructor.
@@ -146,7 +110,7 @@ public:
     /**
      * Hidden copy assignment operator.
      */
-    MeshSkin& operator=(const MeshSkin&);
+    MeshSkin& operator=(const MeshSkin&) = delete;
 
     /**
      * Clones the MeshSkin and the joints that it references.
@@ -165,49 +129,20 @@ public:
      */
     void setJointCount(unsigned int jointCount);
 
-    /**
-     * Sets the joint at the given index and increments the ref count.
-     * 
-     * @param joint The joint to be set.
-     * @param index The index in the joints vector.
-     */
-    void setJoint(BoneJoint* joint, unsigned int index);
-
-    /**
-     * Sets the root node of this mesh skin.
-     * 
-     * @param node The node to set as the root node, may be NULL.
-     */
-    void setRootNode(Node* node);
-
-    /**
-     * Clears the list of joints and releases each joint.
-     */
-    void clearJoints();
 private:
-    Matrix _bindShape;
-    std::vector<BoneJoint*> _joints;
+
+    std::vector<BoneJoint> _joints;
 
     //for calculate node boundBox
-    BoneJoint* _rootJoint;
+    SPtr<Node> _rootJoint;
 
-    //std::vector<std::string> _jointsIdRef;
-    //Matrix* _jointsBindPose;
     std::string name;
-    
-    // Pointer to the root node of the mesh skin.
-    // The purpose is so that the joint hierarchy doesn't need to be in the scene.
-    // If the joints are not in the scene then something has to hold a reference to it.
-    // _rootJoint parent tree root. Node.findNode come here
-    //not _rootNode is not null, it must not in scene
-    Node* _rootNode;
 
     // Pointer to the array of palette matrices.
     // This array is passed to the vertex shader as a uniform.
     // Each 4x3 row-wise matrix is represented as 3 Vector4's.
     // The number of Vector4's is (_joints.size() * 3).
     Vector4* _matrixPalette;
-    Model* _model;
 };
 
 }

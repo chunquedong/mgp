@@ -214,7 +214,7 @@ private:
     float _gain;
     float _pitch;
     Vector3 _velocity;
-    Node* _node;
+    //Node* _node;
 };
 
 }

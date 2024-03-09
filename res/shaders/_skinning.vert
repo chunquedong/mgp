@@ -2,6 +2,7 @@
     #include "_morph.vert"
 #endif
 
+
 uniform vec4 u_matrixPalette[SKINNING_JOINT_COUNT * 3];
 
 in vec4 a_blendWeights;

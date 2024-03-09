@@ -10,6 +10,8 @@ class Node;
 class Component
 {
     friend void doFree(Component* p);
+protected:
+    Node* _node;
 public:
     Component();
 protected:
@@ -19,7 +21,7 @@ public:
     /**
      * Sets the node associated with this camera.
      */
-    virtual void setNode(Node* node) {}
+    virtual void setNode(Node* node) { _node = node; }
 };
 
 //For UniquePtr<>

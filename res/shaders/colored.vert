@@ -8,7 +8,7 @@
 #endif
 
 ///////////////////////////////////////////////////////////
-uniform mat4 u_worldViewProjectionMatrix;
+uniform mat4 u_projectionMatrix;
 in vec3 a_position;
 
 #if defined(SKINNING)
@@ -26,12 +26,7 @@ in vec3 a_position;
 void main()
 {
     vec4 position = getPosition();
-
-#ifndef NO_MVP
-    gl_Position = u_worldViewProjectionMatrix * position;
-#else
-    gl_Position = position;
-#endif
+    gl_Position = u_projectionMatrix * position;
 
     #if defined (LIGHTING)
         applyLight(position);

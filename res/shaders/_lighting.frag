@@ -27,11 +27,7 @@ in vec3 v_cameraDirection;
     #endif
 #endif
 
-#if defined(SHADOW)
-    in vec4 v_position;
-#endif
-
-#if defined(SIMPLE_BUMPED)
+#if defined(SIMPLE_BUMPED) || defined(SHADOW)
     in vec3 v_positionViewSpace;
 #endif
 
@@ -118,7 +114,7 @@ vec3 getNormalFromMap(vec3 normalVector)
     {
         int cascadeLayer = findCascadeLayer(lightIndex);
         int globalIndex = (lightIndex * SHADOW_CASCADE_COUNT) + cascadeLayer;
-        vec4 fragPosLightSpace = u_directionalLightSpaceMatrix[globalIndex] * v_position;
+        vec4 fragPosLightSpace = u_directionalLightSpaceMatrix[globalIndex] * vec4(v_positionViewSpace, 1.0);
 
         // perform perspective divide
         vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;

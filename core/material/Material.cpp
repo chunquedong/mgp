@@ -234,28 +234,8 @@ void Material::bindLights(Camera* camera, std::vector<Light*>* lights, int light
     }
 }
 
-void Material::bindCamera(Camera* camera, Rectangle &viewport, Node *node, Drawable* drawable) {
-    
-    GP_ASSERT(camera);
-    GP_ASSERT(node);
-
-    Uniform *uniform = _shaderProgram->getUniform("u_worldViewProjectionMatrix");
-    if (uniform) {
-        Matrix worldViewProj;
-        Matrix::multiply(camera->getViewProjectionMatrix(), node->getWorldMatrix(), &worldViewProj);
-        MaterialParameter* param = getParameter("u_worldViewProjectionMatrix");
-        param->setMatrix(worldViewProj);
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_worldMatrix");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_worldMatrix");
-        param->setMatrix(node->getWorldMatrix());
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_viewMatrix");
+void Material::bindCamera(Camera* camera, Rectangle& viewport) {
+    Uniform* uniform = uniform = _shaderProgram->getUniform("u_viewMatrix");
     if (uniform) {
         MaterialParameter* param = getParameter("u_worldMatrix");
         param->setMatrix(camera->getViewMatrix());
@@ -277,7 +257,75 @@ void Material::bindCamera(Camera* camera, Rectangle &viewport, Node *node, Drawa
         param->setMatrix(m);
         param->_temporary = true;
     }
+
+    uniform = _shaderProgram->getUniform("u_viewProjectionMatrix");
+    if (uniform) {
+        MaterialParameter* param = getParameter("u_viewProjectionMatrix");
+        param->setMatrix(camera->getViewProjectionMatrix());
+        param->_temporary = true;
+    }
+
+
+    uniform = _shaderProgram->getUniform("u_cameraPosition");
+    if (uniform) {
+        MaterialParameter* param = getParameter("u_cameraPosition");
+        param->setVector3(camera->getNode()->getTranslationWorld());
+        param->_temporary = true;
+    }
+
+    uniform = _shaderProgram->getUniform("u_nearPlane");
+    if (uniform) {
+        MaterialParameter* param = getParameter("u_nearPlane");
+        param->setFloat(camera->getNearPlane());
+        param->_temporary = true;
+    }
+
+    uniform = _shaderProgram->getUniform("u_farPlane");
+    if (uniform) {
+        MaterialParameter* param = getParameter("u_farPlane");
+        param->setFloat(camera->getFarPlane());
+        param->_temporary = true;
+    }
+
+
+    uniform = _shaderProgram->getUniform("u_viewport");
+    if (uniform) {
+        MaterialParameter* param = getParameter("u_viewport");
+        Vector2 vp(viewport.width, viewport.height);
+        param->setVector2(vp);
+        param->_temporary = true;
+    }
+
+
+    uniform = _shaderProgram->getUniform("u_time");
+    if (uniform) {
+        MaterialParameter* param = getParameter("u_time");
+        double milliTime = Toolkit::cur()->getGameTime();
+        param->setFloat(milliTime / (double)1000);
+        param->_temporary = true;
+    }
+}
+
+void Material::bindNode(Camera* camera, Node *node, Drawable* drawable) {
     
+    GP_ASSERT(camera);
+    GP_ASSERT(node);
+
+    Uniform *uniform = _shaderProgram->getUniform("u_worldViewProjectionMatrix");
+    if (uniform) {
+        Matrix worldViewProj;
+        Matrix::multiply(camera->getViewProjectionMatrix(), node->getWorldMatrix(), &worldViewProj);
+        MaterialParameter* param = getParameter("u_worldViewProjectionMatrix");
+        param->setMatrix(worldViewProj);
+        param->_temporary = true;
+    }
+
+    uniform = _shaderProgram->getUniform("u_worldMatrix");
+    if (uniform) {
+        MaterialParameter* param = getParameter("u_worldMatrix");
+        param->setMatrix(node->getWorldMatrix());
+        param->_temporary = true;
+    }
 
     uniform = _shaderProgram->getUniform("u_worldViewMatrix");
     if (uniform) {
@@ -285,13 +333,6 @@ void Material::bindCamera(Camera* camera, Rectangle &viewport, Node *node, Drawa
         Matrix::multiply(camera->getViewMatrix(), node->getWorldMatrix(), &worldViewProj);
         MaterialParameter* param = getParameter("u_worldViewMatrix");
         param->setMatrix(worldViewProj);
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_viewProjectionMatrix");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_viewProjectionMatrix");
-        param->setMatrix(camera->getViewProjectionMatrix());
         param->_temporary = true;
     }
 
@@ -328,26 +369,6 @@ void Material::bindCamera(Camera* camera, Rectangle &viewport, Node *node, Drawa
         param->_temporary = true;
     }
 
-    uniform = _shaderProgram->getUniform("u_cameraPosition");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_cameraPosition");
-        param->setVector3(camera->getNode()->getTranslationWorld());
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_nearPlane");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_nearPlane");
-        param->setFloat(camera->getNearPlane());
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_farPlane");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_farPlane");
-        param->setFloat(camera->getFarPlane());
-        param->_temporary = true;
-    }
 
     uniform = _shaderProgram->getUniform("u_matrixPalette");
     if (uniform) {
@@ -357,7 +378,7 @@ void Material::bindCamera(Camera* camera, Rectangle &viewport, Node *node, Drawa
             MeshSkin* skin = model->getSkin();
             if (skin) {
                 MaterialParameter* param = getParameter("u_matrixPalette");
-                param->setVector4Array(skin->getMatrixPalette(), skin->getMatrixPaletteSize());
+                param->setVector4Array(skin->getMatrixPalette(&camera->getViewMatrix()), skin->getMatrixPaletteSize());
                 param->_temporary = true;
             }
         }
@@ -386,22 +407,6 @@ void Material::bindCamera(Camera* camera, Rectangle &viewport, Node *node, Drawa
         param->_temporary = true;
     }
 
-    uniform = _shaderProgram->getUniform("u_viewport");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_viewport");
-        Vector2 vp(viewport.width, viewport.height);
-        param->setVector2(vp);
-        param->_temporary = true;
-    }
-
-
-    uniform = _shaderProgram->getUniform("u_time");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_time");
-        double milliTime = Toolkit::cur()->getGameTime();
-        param->setFloat(milliTime / (double)1000);
-        param->_temporary = true;
-    }
 }
 
 UPtr<Material> Material::create(Properties* materialProperties, PassCallback callback, void* cookie)
@@ -620,8 +625,11 @@ void Material::setParams(std::vector<Light*>* lights,
     
     if (camera) bindLights(camera, lights, lightMask);
 
-    if (camera && drawable && drawable->getNode()) {
-        bindCamera(camera, *viewport, drawable->getNode(), drawable);
+    if (camera && drawable) {
+        bindCamera(camera, *viewport);
+        if (drawable && drawable->getNode()) {
+            bindNode(camera, drawable->getNode(), drawable);
+        }
     }
     else {
         //printf("DEBUG");

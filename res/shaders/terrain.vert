@@ -4,7 +4,7 @@
 
 ///////////////////////////////////////////////////////////
 // Uniforms
-uniform mat4 u_worldViewProjectionMatrix;
+uniform mat4 u_projectionMatrix;
 
 ///////////////////////////////////////////////////////////
 // Attributes
@@ -38,13 +38,10 @@ out vec2 v_texCoord0;
 void main()
 {
     // Transform position to clip space.
-    vec4 position = vec4(a_position, 1.0);
+    vec4 position = getPosition();
 
-#ifndef NO_MVP
-    gl_Position = u_worldViewProjectionMatrix * position;
-#else
-    gl_Position = position;
-#endif
+    gl_Position = u_projectionMatrix * position;
+
 
     #if defined(LIGHTING)
 

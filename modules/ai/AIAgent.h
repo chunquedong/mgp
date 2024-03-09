@@ -163,7 +163,7 @@ private:
     void update(float elapsedTime);
 
     AIStateMachine* _stateMachine;
-    Node* _node;
+    //Node* _node;
     bool _enabled;
     Listener* _listener;
     AIAgent* _next;

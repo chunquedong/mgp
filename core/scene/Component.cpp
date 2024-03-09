@@ -3,7 +3,7 @@
 namespace mgp
 {
 
-Component::Component()
+Component::Component(): _node(NULL)
 {
 }
 Component::~Component()

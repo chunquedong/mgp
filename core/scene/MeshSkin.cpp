@@ -1,7 +1,6 @@
-#include "base/Base.h"
 #include "MeshSkin.h"
-#include "BoneJoint.h"
-#include "Model.h"
+#include "base/Base.h"
+#include "Node.h"
 
 // The number of rows in each palette matrix.
 #define PALETTE_ROWS 3
@@ -9,26 +8,24 @@
 namespace mgp
 {
 
+void BoneJoint::write(Stream* file) {
+    file->writeStr(this->_name);
+    file->write((char*)&_bindPose.m, sizeof(_bindPose.m));
+}
+bool BoneJoint::read(Stream* file) {
+    _name = file->readStr();
+    file->read(&_bindPose, sizeof(Matrix), 1);
+    return true;
+}
+
 MeshSkin::MeshSkin()
-    : _rootJoint(NULL), _rootNode(NULL), _matrixPalette(NULL), _model(NULL)
+    : _rootJoint(0), _matrixPalette(NULL)
 {
 }
 
 MeshSkin::~MeshSkin()
 {
-    clearJoints();
-
     SAFE_DELETE_ARRAY(_matrixPalette);
-}
-
-const Matrix& MeshSkin::getBindShape() const
-{
-    return _bindShape;
-}
-
-void MeshSkin::setBindShape(const float* matrix)
-{
-    _bindShape.set(matrix);
 }
 
 unsigned int MeshSkin::getJointCount() const
@@ -36,89 +33,35 @@ unsigned int MeshSkin::getJointCount() const
     return (unsigned int)_joints.size();
 }
 
-BoneJoint* MeshSkin::getJoint(unsigned int index) const
+BoneJoint* MeshSkin::getJoint(unsigned int index)
 {
     GP_ASSERT(index < _joints.size());
-    return _joints[index];
-}
-
-BoneJoint* MeshSkin::getJoint(const char* id) const
-{
-    GP_ASSERT(id);
-
-    for (size_t i = 0, count = _joints.size(); i < count; ++i)
-    {
-        BoneJoint* j = _joints[i];
-        if (j && j->getName() != NULL && strcmp(j->getName(), id) == 0)
-        {
-            return j;
-        }
-    }
-
-    return NULL;
+    return &(_joints[index]);
 }
 
 UPtr<MeshSkin> MeshSkin::clone(NodeCloneContext &context) const
 {
     MeshSkin* skin = new MeshSkin();
-    skin->_bindShape = _bindShape;
-    if (_rootNode && _rootJoint)
-    {
-        const unsigned int jointCount = getJointCount();
-        skin->setJointCount(jointCount);
-
-        GP_ASSERT(skin->_rootNode == NULL);
-        
-        // Check if the root node has already been cloned.
-        if (Node* rootNode = context.findClonedNode(_rootNode))
-        {
-            skin->_rootNode = rootNode;
-            rootNode->addRef();
-        }
-        else
-        {
-            skin->_rootNode = _rootNode->cloneRecursive(context).take();
-        }
-        
-        Node* node = NULL;
-        if (strcmp(skin->_rootNode->getName(), _rootJoint->getName()) == 0)
-        {
-            node = skin->_rootNode;
-        }
-        else
-        {
-            node = skin->_rootNode->findNode(_rootJoint->getName());
-        }
-        GP_ASSERT(node);
-        skin->_rootJoint = static_cast<BoneJoint*>(node);
-        for (unsigned int i = 0; i < jointCount; ++i)
-        {
-            BoneJoint* oldJoint = getJoint(i);
-            GP_ASSERT(oldJoint);
-            
-            BoneJoint* newJoint = static_cast<BoneJoint*>(skin->_rootNode->findNode(oldJoint->getName()));
-            if (!newJoint)
-            {
-                if (strcmp(skin->_rootJoint->getName(), oldJoint->getName()) == 0)
-                    newJoint = static_cast<BoneJoint*>(skin->_rootJoint);
-            }
-            GP_ASSERT(newJoint);
-            skin->setJoint(newJoint, i);
-        }
+    const unsigned int jointCount = getJointCount();
+    skin->setJointCount(jointCount);
+    
+    skin->_rootJoint = _rootJoint;
+    for (unsigned int i = 0; i < jointCount; ++i)
+    {  
+        BoneJoint* newJoint = skin->getJoint(i);
+        *newJoint = _joints[i];
     }
+    
     return UPtr<MeshSkin>(skin);
 }
 
 void MeshSkin::setJointCount(unsigned int jointCount)
 {
-    // Erase the joints vector and release all joints.
-    clearJoints();
-
     // Resize the joints vector and initialize to NULL.
     _joints.resize(jointCount);
     for (unsigned int i = 0; i < jointCount; i++)
     {
-        _joints[i] = NULL;
+        _joints[i]._node = NULL;
     }
 
     // Rebuild the matrix palette. Each matrix is 3 rows of Vector4.
@@ -136,33 +79,25 @@ void MeshSkin::setJointCount(unsigned int jointCount)
     }
 }
 
-void MeshSkin::setJoint(BoneJoint* joint, unsigned int index)
-{
-    GP_ASSERT(index < _joints.size());
-
-    if (_joints[index])
-    {
-        _joints[index]->removeSkin(this);
-        SAFE_RELEASE(_joints[index]);
-    }
-
-    _joints[index] = joint;
-
-    if (joint)
-    {
-        joint->addRef();
-        joint->addSkin(this);
-    }
-}
-
-Vector4* MeshSkin::getMatrixPalette() const
+Vector4* MeshSkin::getMatrixPalette(const Matrix* viewMatrix) const
 {
     GP_ASSERT(_matrixPalette);
 
     for (size_t i = 0, count = _joints.size(); i < count; i++)
     {
-        GP_ASSERT(_joints[i]);
-        _joints[i]->updateJointMatrix(getBindShape(), &_matrixPalette[i * PALETTE_ROWS]);
+        BoneJoint* joint = (BoneJoint*) & (_joints[i]);
+
+        Matrix t;
+        Matrix::multiply(joint->_node->getWorldMatrix(), joint->_bindPose, &t);
+
+        Matrix::multiply(*viewMatrix, t, &t);
+        
+        //Matrix::multiply(t, bindShape, &t);
+
+        Vector4* matrixPalette = &_matrixPalette[i * PALETTE_ROWS];
+        matrixPalette[0].set(t.m[0], t.m[4], t.m[8], t.m[12]);
+        matrixPalette[1].set(t.m[1], t.m[5], t.m[9], t.m[13]);
+        matrixPalette[2].set(t.m[2], t.m[6], t.m[10], t.m[14]);
     }
     return _matrixPalette;
 }
@@ -172,134 +107,43 @@ unsigned int MeshSkin::getMatrixPaletteSize() const
     return (unsigned int)_joints.size() * PALETTE_ROWS;
 }
 
-Model* MeshSkin::getModel() const
+Node* MeshSkin::getRootJoint() const
 {
-    return _model;
+    return _rootJoint.get();
 }
 
-BoneJoint* MeshSkin::getRootJoint() const
+void MeshSkin::setRootJoint(Node* joint)
 {
-    return _rootJoint;
-}
-
-void MeshSkin::setRootJoint(BoneJoint* joint)
-{
-    if (_rootJoint)
-    {
-        if (_rootJoint->getParent())
-        {
-            _rootJoint->getParent()->removeListener(this);
-        }
-    }
-
     _rootJoint = joint;
-
-    // If the root joint has a parent node, register for its transformChanged event
-    if (_rootJoint && _rootJoint->getParent())
-    {
-        _rootJoint->getParent()->addListener(this, 1);
-    }
-
-    Node* newRootNode = _rootJoint;
-    if (newRootNode)
-    {
-        // Find the top level parent node of the root joint
-        for (Node* node = newRootNode->getParent(); node != NULL; node = node->getParent())
-        {
-            if (node->getParent() == NULL)
-            {
-                newRootNode = node;
-                break;
-            }
-        }
-    }
-    setRootNode(newRootNode);
 }
 
-void MeshSkin::transformChanged(Transform* transform, long cookie)
-{
-    switch (cookie)
-    {
-    case 1:
-        // The direct parent of our joint hierarchy has changed.
-        // Dirty the bounding volume for our model's node. This special
-        // case allows us to have much tighter bounding volumes for
-        // skinned meshes by only considering local skin/joint transformations
-        // during bounding volume computation instead of fully resolved
-        // joint transformations.
-        if (_model && _model->getNode())
-        {
-            _model->getNode()->setBoundsDirty();
-        }
-        break;
+void MeshSkin::rebindJoins() {
+    Node* rootNode = _rootJoint.get();
+    GP_ASSERT(rootNode);
+
+    for (int i = 0; i < _joints.size(); ++i) {
+        Node* node = rootNode->findNode(_joints[i]._name.c_str());
+        GP_ASSERT(node);
+        _joints[i]._node = node;
     }
-}
-
-int MeshSkin::getJointIndex(BoneJoint* joint) const
-{
-    for (size_t i = 0, count = _joints.size(); i < count; ++i)
-    {
-        if (_joints[i] == joint)
-        {
-            return (int)i;
-        }
-    }
-
-    return -1;
-}
-
-void MeshSkin::setRootNode(Node* node)
-{
-    if (_rootNode != node)
-    {
-        SAFE_RELEASE(_rootNode);
-        _rootNode = node;
-        if (_rootNode)
-        {
-            _rootNode->addRef();
-        }
-    }
-}
-
-void MeshSkin::clearJoints()
-{
-    setRootJoint(NULL);
-
-    for (size_t i = 0, count = _joints.size(); i < count; ++i)
-    {
-        SAFE_RELEASE(_joints[i]);
-    }
-    _joints.clear();
 }
 
 void MeshSkin::write(Stream* file) {
-    file->write((char*)&_bindShape.m, sizeof(_bindShape.m));
+    //file->write((char*)&_bindShape.m, sizeof(_bindShape.m));
     file->writeUInt16(_joints.size());
-
-    dynamic_cast<BoneJoint*>(_rootJoint)->write(file);
-
-    for (BoneJoint* join : _joints) {
-        file->writeStr(join->getName());
+    for (BoneJoint& join : _joints) {
+        join.write(file);
     }
-//    for (Joint* join : _joints) {
-//        file->write((char*)&join->_bindPose.m, sizeof(join->_bindPose.m));
-//    }
 }
 bool MeshSkin::read(Stream* file) {
     MeshSkin* skin = this;
-    file->read((char*)&skin->_bindShape.m, sizeof(skin->_bindShape.m));
+    //file->read((char*)&skin->_bindShape.m, sizeof(skin->_bindShape.m));
     int size = file->readUInt16();
     skin->setJointCount(size);
-
-    skin->_rootJoint = BoneJoint::read(file);
     for (int i = 0; i < size; ++i) {
-        std::string id = file->readStr();
-        Node *node = skin->_rootJoint->findNode(id.c_str());
-        BoneJoint *joint = dynamic_cast<BoneJoint*>(node);
-        skin->setJoint(joint, i);
+        _joints[i].read(file);
     }
-//    skin->_jointsBindPose = new Matrix[size];
-//    file->read(skin->_jointsBindPose, sizeof(Matrix), size);
+    rebindJoins();
     return true;
 }
 

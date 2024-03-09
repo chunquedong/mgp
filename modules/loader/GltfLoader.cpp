@@ -14,8 +14,6 @@
 #define CGLTF_IMPLEMENTATION
 #include "cgltf.h"
 
-#include "scene/BoneJoint.h"
-
 #include "material/MaterialParameter.h"
 #include "base/FileSystem.h"
 #include "material/Image.h"
@@ -587,10 +585,10 @@ private:
 		}
 	}
 
-	BoneJoint* getJoint(cgltf_node* cnode) {
+	Node* getJointNode(cgltf_node* cnode) {
 		auto it = nodeMap.find(cnode);
 		if (it != nodeMap.end()) {
-			return dynamic_cast<BoneJoint*>(it->second);
+			return (it->second);
 		}
 		
 		return NULL;
@@ -612,24 +610,21 @@ private:
 
 		skin->setJointCount(cskin->joints_count);
 		for (int i = 0; i < cskin->joints_count; ++i) {
-			BoneJoint* joint = getJoint(cskin->joints[i]);
+			Node* joint = getJointNode(cskin->joints[i]);
 			if (!joint) continue;
 			Matrix m(matrix+(i*16));
-			joint->setInverseBindPose(m);
-			skin->setJoint(joint, i);
+			BoneJoint* bone = skin->getJoint(i);
+			bone->_node = joint;
+			bone->_name = cskin->joints[i]->name;
+			bone->_bindPose = m;
 		}
 
 		if (cskin->skeleton) {
-			BoneJoint* skeleton = getJoint(cskin->skeleton);
+			Node* skeleton = getJointNode(cskin->skeleton);
 			assert(skeleton);
 			skin->setRootJoint(skeleton);
 		}
-		else if (cskin->joints_count) {
-			BoneJoint* skeleton = getJoint(cskin->joints[0]);
-			if (skeleton) {
-				skin->setRootJoint(skeleton);
-			}
-		}
+
 		SPtr<MeshSkin> sskin; sskin = skin;
 		_skins[cskin] = sskin;
 		return UPtr<MeshSkin>(skin);
@@ -796,7 +791,9 @@ private:
 			cgltf_skin* skin = data->skins + i;
 			for (int j = 0; j < skin->joints_count; ++j) {
 				cgltf_node* joint = skin->joints[j];
-				Node* node = BoneJoint::create(joint->name).take();
+				Node* node = Node::create(joint->name).take();
+				node->setRecursiveUpdate(false);
+				node->setBoneJoint(true);
 				nodeMap[joint] = node;
 			}
 			loadSkin(skin);
@@ -811,8 +808,12 @@ private:
 
 		for (auto it = _skins.begin(); it != _skins.end(); ++it) {
 			Node* rootJoint = (it->second)->getRootJoint();
-			if (rootJoint) {
-				rootJoint->remove();
+			if (!rootJoint && it->second->getJointCount() > 0) {
+				rootJoint = it->second->getJoint(0)->_node.get();
+				while (rootJoint && rootJoint->getParent() && rootJoint->getParent()->isBoneJoint()) {
+					rootJoint = rootJoint->getParent();
+				}
+				it->second->setRootJoint(rootJoint);
 			}
 		}
 

@@ -79,7 +79,7 @@ namespace mgp {
 		virtual void initDeferred();
 		virtual void initForward();
 
-		void bindShadow(std::vector<Light*>* lights, DrawCall* drawCall);
+		void bindShadow(std::vector<Light*>* lights, DrawCall* drawCall, Camera* camera);
 
 		void addFrameBuffer(FrameBuffer* frameBuffer);
 		FrameBuffer* getFrameBuffer(const std::string& name);

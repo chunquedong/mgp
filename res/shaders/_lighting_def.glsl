@@ -22,7 +22,6 @@
     #endif
 
     uniform mat4 u_inverseTransposeWorldViewMatrix;
-    uniform mat4 u_worldViewMatrix;
 
     #if (DIRECTIONAL_LIGHT_COUNT > 0)
         uniform vec3 u_directionalLightColor[DIRECTIONAL_LIGHT_COUNT];

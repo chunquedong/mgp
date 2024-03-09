@@ -163,7 +163,7 @@ protected:
     /**
      * Node this drawable is attached to.
      */
-    Node* _node;
+    //Node* _node;
 
     RenderLayer _renderLayer;
 

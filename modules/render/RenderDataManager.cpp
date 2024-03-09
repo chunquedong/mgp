@@ -85,7 +85,7 @@ void RenderDataManager::setInstanced(Instanced* instance_, std::vector<DrawCall*
         Drawable* drawable = drawCall->_drawable;
         if (drawable && drawable->getNode()) {
             Matrix worldViewProj;
-            Matrix::multiply(_camera->getViewProjectionMatrix(), drawable->getNode()->getWorldMatrix(), &worldViewProj);
+            Matrix::multiply(_camera->getViewMatrix(), drawable->getNode()->getWorldMatrix(), &worldViewProj);
             instance_->add(worldViewProj);
             ++count;
         }

@@ -382,7 +382,7 @@ private:
         /** @script{ignore} */
         Spot* _spot;
     };
-    Node* _node;
+    //Node* _node;
 };
 
 }

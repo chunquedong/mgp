@@ -1,17 +1,9 @@
 #include "base/Base.h"
 #include "scene/Node.h"
-//#include "audio/AudioSource.h"
 #include "Scene.h"
-#include "BoneJoint.h"
-//#include "physics/PhysicsRigidBody.h"
-//#include "physics/PhysicsVehicle.h"
-//#include "physics/PhysicsVehicleWheel.h"
-//#include "physics/PhysicsGhostObject.h"
-//#include "physics/PhysicsCharacter.h"
 #include "objects/Terrain.h"
 #include "platform/Toolkit.h"
 #include "Drawable.h"
-//#include "ui/Form.h"
 #include "base/Ref.h"
 #include "material/MaterialParameter.h"
 
@@ -34,7 +26,7 @@ namespace mgp
 Node::Node(const char* id)
     : _scene(NULL), _parent(NULL), _enabled(true), _tags(NULL),
     _userObject(NULL),
-    _dirtyBits(NODE_DIRTY_ALL), _static(false), 
+    _dirtyBits(NODE_DIRTY_ALL), _static(false), _recursiveUpdate(true), _isBoneJoint(false), 
     _childCount(0), _prevSibling(NULL)
 {
 #ifdef GP_SCRIPT
@@ -68,9 +60,13 @@ Node::~Node()
     }*/
     _components.clear();
 
-    for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
+    /*for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
         child->_parent = NULL;
         child->remove();
+    }*/
+    while (_firstChild.get())
+    {
+        removeChild(_firstChild.get());
     }
     _firstChild.clear();
     _nextSibling.clear();
@@ -301,28 +297,6 @@ Node* Node::findNode(const char* id, bool recursive, bool exactMatch) const
 Node* Node::findNode(const char* id, bool recursive, bool exactMatch, bool skipSkin) const
 {
     GP_ASSERT(id);
-
-    // If not skipSkin hierarchy, try searching the skin hierarchy
-    if (!skipSkin)
-    {
-        // If the drawable is a model with a mesh skin, search the skin's hierarchy as well.
-        Node* rootNode = NULL;
-        Model* model = dynamic_cast<Model*>(getDrawable());
-        if (model)
-        {
-            if (model->getSkin() != NULL && (rootNode = model->getSkin()->_rootNode) != NULL)
-            {
-                if ((exactMatch && rootNode->_name == id) || (!exactMatch && rootNode->_name.find(id) == 0))
-                    return rootNode;
-
-                Node* match = rootNode->findNode(id, true, exactMatch, true);
-                if (match)
-                {
-                    return match;
-                }
-            }
-        }
-    }
     // Search immediate children first.
     for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
         // Does this child's ID match?
@@ -356,24 +330,6 @@ unsigned int Node::findNodes(const char* id, std::vector<Node*>& nodes, bool rec
 
     // If the drawable is a model with a mesh skin, search the skin's hierarchy as well.
     unsigned int count = 0;
-
-    if (!skipSkin)
-    {
-        Node* rootNode = NULL;
-        Model* model = dynamic_cast<Model*>(getDrawable());
-        if (model)
-        {
-            if (model->getSkin() != NULL && (rootNode = model->getSkin()->_rootNode) != NULL)
-            {
-                if ((exactMatch && rootNode->_name == id) || (!exactMatch && rootNode->_name.find(id) == 0))
-                {
-                    nodes.push_back(rootNode);
-                    ++count;
-                }
-                count += rootNode->findNodes(id, nodes, recursive, exactMatch, true);
-            }
-        }
-    }
 
     // Search immediate children first.
     for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
@@ -500,10 +456,12 @@ bool Node::isEnabledInHierarchy() const
 
 void Node::update(float elapsedTime)
 {
-    for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
-        if (child->isEnabled())
-        {
-            child->update(elapsedTime);
+    if (_recursiveUpdate) {
+        for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
+            if (child->isEnabled())
+            {
+                child->update(elapsedTime);
+            }
         }
     }
 
@@ -654,19 +612,6 @@ Animation* Node::getAnimation(const char* id) const
     Model* model = dynamic_cast<Model*>(getDrawable());
     if (model)
     {
-        // Check to see if there's any animations with the ID on the joints.
-        MeshSkin* skin = model->getSkin();
-        if (skin)
-        {
-            Node* rootNode = skin->_rootNode;
-            if (rootNode)
-            {
-                animation = rootNode->getAnimation(id);
-                if (animation)
-                    return animation;
-            }
-        }
-
         // Check to see if any of the model's material parameter's has an animation
         // with the given ID.
         Material* material = model->getMaterial();
@@ -813,13 +758,14 @@ const BoundingSphere& Node::getBoundingSphere() const
                 // be considered as directly transforming vertices on the GPU (they can instead
                 // be applied directly to the bounding volume transformation below).
                 if (model->getSkin()->getRootJoint()) {
-                    Node* jointParent = model->getSkin()->getRootJoint()->getParent();
+                    Node* jointParent = model->getSkin()->getRootJoint();
                     if (jointParent)
                     {
                         // TODO: Should we protect against the case where joints are nested directly
                         // in the node hierachy of the model (this is normally not the case)?
                         Matrix boundsMatrix;
-                        Matrix::multiply(getWorldMatrix(), jointParent->getWorldMatrix(), &boundsMatrix);
+                        //Matrix::multiply(getWorldMatrix(), jointParent->getWorldMatrix(), &boundsMatrix);
+                        boundsMatrix = jointParent->getWorldMatrix();
                         _bounds.transform(boundsMatrix);
                         applyWorldTransform = false;
                     }

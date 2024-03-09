@@ -355,7 +355,7 @@ void RenderPath::finalize() {
 }
 
 
-void RenderPath::bindShadow(std::vector<Light*> *lights, DrawCall* drawCall) {
+void RenderPath::bindShadow(std::vector<Light*> *lights, DrawCall* drawCall, Camera* camera) {
     Uniform* uniform = drawCall->_material->getEffect()->getUniform("u_directionalLightShadowMap");
     if (!uniform) return;
 
@@ -378,7 +378,7 @@ void RenderPath::bindShadow(std::vector<Light*> *lights, DrawCall* drawCall) {
 
             snprintf(buf, 256, "u_directionalLightSpaceMatrix[%d]", pos);
             Matrix worldViewProj;
-            Matrix::multiply(shadow->getCascade(j).lightSpaceMatrix, drawCall->_drawable->getNode()->getWorldMatrix(), &worldViewProj);
+            Matrix::multiply(shadow->getCascade(j).lightSpaceMatrix, camera->getInverseViewMatrix(), &worldViewProj);
             drawCall->_material->getParameter(buf)->setMatrix(worldViewProj);
 
             snprintf(buf, 256, "u_directionalLightCascadeDistance[%d]", pos);
@@ -440,7 +440,7 @@ void RenderPath::commitRenderData() {
         int instanced = drawCall->_instanceCount > 0 ? 1 : 0;
         drawCall->_material->setParams(view->lights, view->camera, &view->viewport, drawCall->_drawable, instanced);
         if (view->_overridedMaterial == NULL) {
-            this->bindShadow(view->lights, drawCall);
+            this->bindShadow(view->lights, drawCall, view->camera);
         }
 
         _renderer->draw(drawCall);

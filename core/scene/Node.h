@@ -674,6 +674,12 @@ public:
      * Marks the bounding volume of the node as dirty.
      */
     void setBoundsDirty();
+
+
+    void setRecursiveUpdate(bool r) { _recursiveUpdate = r; }
+    bool getRecursiveUpdate() { return _recursiveUpdate; }
+    void setBoneJoint(bool r) { _isBoneJoint = r; }
+    bool isBoneJoint() { return _isBoneJoint; }
 protected:
     /**
      * Clones a single node and its data but not its children.
@@ -771,12 +777,12 @@ private:
     /**
      * Hidden copy constructor.
      */
-    Node(const Node& copy);
+    Node(const Node& copy) = delete;
 
     /**
      * Hidden copy assignment operator.
      */
-    Node& operator=(const Node&);
+    Node& operator=(const Node&) = delete;
 
     //PhysicsCollisionObject* setCollisionObject(Properties* properties);
 
@@ -803,6 +809,8 @@ protected:
     /** If this node is enabled. Maybe different if parent is enabled/disabled. */
     bool _enabled; 
     bool _static;
+    bool _recursiveUpdate;
+    bool _isBoneJoint;
     /** Tags assigned to this node. */
     std::map<std::string, std::string>* _tags;
 

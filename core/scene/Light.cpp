@@ -10,28 +10,28 @@
 namespace mgp
 {
 
-Light::Light() : _type(DIRECTIONAL), _node(NULL), _lightMask(1), 
+Light::Light() : _type(DIRECTIONAL), _lightMask(1), 
     _lighting(Lighting::eRealtime), _shadows(Shadows::eNone), _color(LIGHT_COLOR),  _intensity(LIGHT_INTENSITY)
 {
     _directional = new Directional(LIGHT_COLOR);
 }
 
 Light::Light(Light::Type type, const Vector3& color) :
-    _type(type), _node(NULL), _lightMask(1),
+    _type(type), _lightMask(1),
     _lighting(Lighting::eRealtime), _shadows(Shadows::eNone), _color(LIGHT_COLOR),  _intensity(LIGHT_INTENSITY)
 {
     _directional = new Directional(color);
 }
 
 Light::Light(Light::Type type, const Vector3& color, float range) :
-    _type(type), _node(NULL), _lightMask(1),
+    _type(type), _lightMask(1),
     _lighting(Lighting::eRealtime), _shadows(Shadows::eNone), _color(LIGHT_COLOR),  _intensity(LIGHT_INTENSITY)
 {
     _point = new Point(color, range);
 }
 
 Light::Light(Light::Type type, const Vector3& color, float range, float innerAngle, float outerAngle) :
-    _type(type), _node(NULL), _lightMask(1),
+    _type(type), _lightMask(1),
     _lighting(Lighting::eRealtime), _shadows(Shadows::eNone), _color(LIGHT_COLOR),  _intensity(LIGHT_INTENSITY)
 {
     _spot = new Spot(color, range, innerAngle, outerAngle);

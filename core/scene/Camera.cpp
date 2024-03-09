@@ -26,19 +26,19 @@ namespace mgp
 {
 
 Camera::Camera() : _type(PERSPECTIVE), _fieldOfView(CAMERA_FIELD_OF_VIEW), _aspectRatio(1), _nearPlane(CAMERA_CLIP_PLANE_NEAR), _farPlane(CAMERA_CLIP_PLANE_FAR),
-    _bits(CAMERA_DIRTY_ALL), _node(NULL), _listeners(NULL) {
+    _bits(CAMERA_DIRTY_ALL), _listeners(NULL) {
 
 }
 
 Camera::Camera(float fieldOfView, float aspectRatio, float nearPlane, float farPlane)
     : _type(PERSPECTIVE), _fieldOfView(fieldOfView), _aspectRatio(aspectRatio), _nearPlane(nearPlane), _farPlane(farPlane),
-    _bits(CAMERA_DIRTY_ALL), _node(NULL), _listeners(NULL)
+    _bits(CAMERA_DIRTY_ALL), _listeners(NULL)
 {
 }
 
 Camera::Camera(float zoomX, float zoomY, float aspectRatio, float nearPlane, float farPlane)
     : _type(ORTHOGRAPHIC), _aspectRatio(aspectRatio), _nearPlane(nearPlane), _farPlane(farPlane),
-	_bits(CAMERA_DIRTY_ALL), _node(NULL), _listeners(NULL)
+	_bits(CAMERA_DIRTY_ALL), _listeners(NULL)
 {
     // Orthographic camera.
     _zoom[0] = zoomX;
