@@ -680,6 +680,8 @@ public:
     bool getRecursiveUpdate() { return _recursiveUpdate; }
     void setBoneJoint(bool r) { _isBoneJoint = r; }
     bool isBoneJoint() { return _isBoneJoint; }
+    void setSerializable(bool r) { _isSerializable = r; }
+    bool isSerializable() { return _isSerializable; }
 protected:
     /**
      * Clones a single node and its data but not its children.
@@ -800,17 +802,19 @@ protected:
     /** The nodes previous sibiling. */
     Node* _prevSibling;
 
-    /** The number of child nodes. */
-    unsigned int _childCount;
-
     /** The nodes parent. */
     Node* _parent;
+
+    /** The number of child nodes. */
+    unsigned int _childCount;
 
     /** If this node is enabled. Maybe different if parent is enabled/disabled. */
     bool _enabled; 
     bool _static;
     bool _recursiveUpdate;
     bool _isBoneJoint;
+    bool _isSerializable;
+
     /** Tags assigned to this node. */
     std::map<std::string, std::string>* _tags;
 

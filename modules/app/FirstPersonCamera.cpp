@@ -20,6 +20,7 @@ void FPCameraCtrl::setCamera(Camera* camera) {
     _rootNode = Node::create("FirstPersonCtrl_root").take();
     _pitchNode = Node::create("FirstPersonCtrl_pitch").take();
     _rootNode->addChild(uniqueFromInstant(_pitchNode));
+    _rootNode->setSerializable(false);
 
     _pitchNode->setCamera(uniqueFromInstant(camera));
 }

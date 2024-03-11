@@ -211,7 +211,7 @@ void SerializerJson::writeVector(const char* propertyName, const Vector2& value,
     //json_push_back(array, json_new_f(nullptr, value.y));
     //json_push_back(node, array);
 
-    jc::JsonNode* array = (JsonNode*)allocator.allocate(sizeof(JsonNode));
+    jc::JsonNode* array = (JsonNode*)allocator.allocNode(jc::Type::Array);
     auto p1 = json_new_f(allocator, value.x);
     auto p2 = json_new_f(allocator, value.y);
     array->append(p1);
@@ -236,7 +236,7 @@ void SerializerJson::writeVector(const char* propertyName, const Vector3& value,
     json_push_back(array, json_new_f(nullptr, value.z));
     json_push_back(node, array);*/
 
-    jc::JsonNode* array = (JsonNode*)allocator.allocate(sizeof(JsonNode));
+    jc::JsonNode* array = (JsonNode*)allocator.allocNode(jc::Type::Array);
     auto p1 = json_new_f(allocator, value.x);
     auto p2 = json_new_f(allocator, value.y);
     auto p3 = json_new_f(allocator, value.z);
@@ -264,7 +264,7 @@ void SerializerJson::writeVector(const char* propertyName, const Vector4& value,
     json_push_back(array, json_new_f(nullptr, value.w));
     json_push_back(node, array);*/
 
-    jc::JsonNode* array = (JsonNode*)allocator.allocate(sizeof(JsonNode));
+    jc::JsonNode* array = (JsonNode*)allocator.allocNode(jc::Type::Array);
     auto p1 = json_new_f(allocator, value.x);
     auto p2 = json_new_f(allocator, value.y);
     auto p3 = json_new_f(allocator, value.z);
@@ -343,7 +343,7 @@ void SerializerJson::writeMatrix(const char* propertyName, const Matrix& value, 
     //json_push_back(array, json_new_f(nullptr, value.m[15]));
     //json_push_back(node, array);
 
-    jc::JsonNode* array = (JsonNode*)allocator.allocate(sizeof(JsonNode));
+    jc::JsonNode* array = (JsonNode*)allocator.allocNode(jc::Type::Array);
     for (int i = 15; i >= 0; --i) {
         auto p1 = json_new_f(allocator, value.m[i]);
         array->insert(p1);

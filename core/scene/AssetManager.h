@@ -33,6 +33,7 @@ private:
     ~AssetManager();
 
 public:
+    void setPath(const std::string& path);
     void clear();
 
     template<typename T>

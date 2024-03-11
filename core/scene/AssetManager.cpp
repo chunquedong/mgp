@@ -34,6 +34,10 @@ AssetManager::~AssetManager() {
 
 }
 
+void AssetManager::setPath(const std::string& path) {
+   this->path = path;
+}
+
 void AssetManager::clear() {
   std::lock_guard<std::mutex> lock_guard(mutex);
   for (int i=0; i<rt_count; ++i) {

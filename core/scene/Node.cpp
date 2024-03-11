@@ -26,7 +26,7 @@ namespace mgp
 Node::Node(const char* id)
     : _scene(NULL), _parent(NULL), _enabled(true), _tags(NULL),
     _userObject(NULL),
-    _dirtyBits(NODE_DIRTY_ALL), _static(false), _recursiveUpdate(true), _isBoneJoint(false), 
+    _dirtyBits(NODE_DIRTY_ALL), _static(false), _recursiveUpdate(true), _isBoneJoint(false), _isSerializable(true),
     _childCount(0), _prevSibling(NULL)
 {
 #ifdef GP_SCRIPT
@@ -921,14 +921,22 @@ void Node::onSerialize(Serializer* serializer)
     serializer->writeVector("position", getTranslation(), SCENEOBJECT_POSITION);
     serializer->writeVector("eulerAngles", getEulerAngles(), SCENEOBJECT_EULER_ANGLES);
     serializer->writeVector("scale", getScale(), SCENEOBJECT_SCALE);
-    if (getChildCount() > 0)
-    {
-        serializer->writeList("children", getChildCount());
-        for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
+
+    bool serializableCount = 0;
+    for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
+        if (child->isSerializable()) {
+            serializableCount++;
+        }
+    }
+
+    serializer->writeList("children", serializableCount);
+    for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
+        if (child->isSerializable()) {
             serializer->writeObject(nullptr, child);
         }
-        serializer->finishColloction();
     }
+    serializer->finishColloction();
+    
     if (_components.size() > 0)
     {
         serializer->writeList("components", _components.size());
