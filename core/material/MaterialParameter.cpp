@@ -1078,14 +1078,14 @@ void MaterialParameter::onDeserialize(Serializer* serializer) {
     }
     case MaterialParameter::SAMPLER: {
         if (!_isArray) {
-            Texture* tex = dynamic_cast<Texture*>(serializer->readObject("value"));
+            Texture* tex = dynamic_cast<Texture*>(serializer->readObject("value").take());
             _value.samplerValue = tex;
         }
         else {
             int size = serializer->readList("value");
             std::vector<Texture*> samplaers;
             for (int i = 0; i < size; ++i) {
-                Texture* tex = dynamic_cast<Texture*>(serializer->readObject("value"));
+                Texture* tex = dynamic_cast<Texture*>(serializer->readObject("value").take());
                 samplaers.push_back(tex);
             }
             serializer->finishColloction();

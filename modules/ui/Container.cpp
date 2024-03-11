@@ -100,7 +100,7 @@ void Container::onDeserialize(Serializer* serializer) {
 
     int size = serializer->readList("_children");
     for (int i = 0; i < size; ++i) {
-        Serializable* control = serializer->readObject(NULL);
+        Serializable* control = serializer->readObject(NULL).take();
 
         // Add the new control to the form.
         if (control)

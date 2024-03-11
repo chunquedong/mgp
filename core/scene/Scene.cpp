@@ -102,7 +102,7 @@ UPtr<Scene> Scene::create(const char* id)
 UPtr<Scene> Scene::load(const char* filePath)
 {
     auto rs = SerializerJson::createReader(filePath);
-    UPtr<Scene> scene = UPtr<Scene>(dynamic_cast<Scene*>(rs->readObject(NULL)));
+    UPtr<Scene> scene = UPtr<Scene>(dynamic_cast<Scene*>(rs->readObject(NULL).take()));
     rs->close();
     return scene;
 }
@@ -362,7 +362,7 @@ void Scene::onDeserialize(Serializer* serializer)
 {
     serializer->readString("name", _name, SCENE_NAME);
     _streaming = serializer->readBool("streaming", SCENE_STREAMING);
-    Node *node = (Node*)serializer->readObject("root");
+    Node *node = (Node*)serializer->readObject("root").take();
     _rootNode = UPtr<Node>(node);
     _rootNode->_scene = this;
 

@@ -4,6 +4,7 @@
 #include "base/Ref.h"
 #include "base/Stream.h"
 #include "base/Serializable.h"
+#include "base/Resource.h"
 
 namespace mgp
 {
@@ -16,7 +17,7 @@ class Image;
 /**
  * Defines a standard texture.
  */
-class Texture : public Refable, public Serializable
+class Texture : public Resource, public Serializable
 {
     friend class Sampler;
     friend class CompressedTexture;
@@ -272,17 +273,22 @@ public:
     /**
      * @see Serializable::getClassName
      */
-    std::string getClassName();
+    std::string getClassName() override;
 
     /**
      * @see Serializable::onSerialize
      */
-    void onSerialize(Serializer* serializer);
+    void onSerialize(Serializer* serializer) override;
 
     /**
      * @see Serializable::onDeserialize
      */
-    void onDeserialize(Serializer* serializer);
+    void onDeserialize(Serializer* serializer) override;
+
+    void write(Stream* file) override;
+    bool read(Stream* file) override;
+
+    void copyFrom(Texture* that);
 
     /**
      * Sets the wrap mode for this sampler.
@@ -309,17 +315,17 @@ public:
     void setSize(unsigned int width, unsigned int height);
 
     void setKeepMemory(bool b);
-private:
+
 
     /**
      * Constructor.
      */
     Texture();
-
+private:
     /**
      * Copy constructor.
      */
-    Texture(const Texture& copy);
+    Texture(const Texture& copy) = delete;
 
     /**
      * Destructor.
@@ -329,7 +335,7 @@ private:
     /**
      * Hidden copy assignment operator.
      */
-    Texture& operator=(const Texture&);
+    Texture& operator=(const Texture&) = delete;
 
     std::string _path;
     

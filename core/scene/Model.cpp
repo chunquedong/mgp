@@ -292,18 +292,18 @@ std::string Model::getClassName() {
 
 
 void Model::onSerialize(Serializer* serializer) {
-    if (_mesh.get()) serializer->writeString("mesh", _mesh->getName().c_str(), "");
+    if (_mesh.get()) serializer->writeString("mesh", _mesh->getId().c_str(), "");
     else serializer->writeString("mesh", "", "");
         
-    if (_skin.get()) serializer->writeString("skin", _skin->getName().c_str(), "");
+    if (_skin.get()) serializer->writeString("skin", _skin->getId().c_str(), "");
     else serializer->writeString("skin", "", "");
 
-    if (_material.get()) serializer->writeString("material", _material->getName().c_str(), "");
+    if (_material.get()) serializer->writeString("material", _material->getId().c_str(), "");
     else serializer->writeString("material", "", "");
 
     serializer->writeList("partMaterials", _partMaterials.size());
     for (int i=0; i<_partMaterials.size(); ++i) {
-        if (_partMaterials[i].get()) serializer->writeString(NULL, _partMaterials[i]->getName().c_str(), NULL);
+        if (_partMaterials[i].get()) serializer->writeString(NULL, _partMaterials[i]->getId().c_str(), NULL);
         else serializer->writeString(NULL, "", NULL);
     }
     serializer->finishColloction();

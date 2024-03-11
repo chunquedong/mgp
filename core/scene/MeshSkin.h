@@ -5,6 +5,7 @@
 #include "scene/Transform.h"
 //#include "scene/Component.h"
 #include "scene/Node.h"
+#include "base/Resource.h"
 
 namespace mgp
 {
@@ -29,7 +30,7 @@ public:
  * a skeleton on joints that will influence the vertex position
  * and which the joints can be animated.
  */
-class MeshSkin : public Refable
+class MeshSkin : public Resource
 {
 public:
     /**
@@ -83,12 +84,6 @@ public:
     void write(Stream* file);
     bool read(Stream* file);
 
-    void setName(const std::string &name) {
-        this->name = name;
-    }
-    const std::string &getName() {
-        return name;
-    }
 
 //private:
 
@@ -136,7 +131,7 @@ private:
     //for calculate node boundBox
     SPtr<Node> _rootJoint;
 
-    std::string name;
+    //std::string name;
 
     // Pointer to the array of palette matrices.
     // This array is passed to the vertex shader as a uniform.

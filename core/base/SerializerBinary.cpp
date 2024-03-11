@@ -19,11 +19,10 @@ unsigned char SerializerBinary::BIT_XREF = 0x02;
 unsigned char SerializerBinary::BIT_DEFAULT = 0x04;
 
 SerializerBinary::SerializerBinary(Type type,
-                                   const std::string& path,
                                    Stream* stream,
                                    uint32_t versionMajor,
                                    uint32_t versionMinor) : 
-    Serializer(type, path, stream, versionMajor, versionMinor)
+    Serializer(type, stream, versionMajor, versionMinor)
 {
 }
     
@@ -31,7 +30,7 @@ SerializerBinary::~SerializerBinary()
 {
 }
     
-UPtr<Serializer> SerializerBinary::create(const std::string& path, Stream* stream)
+UPtr<Serializer> SerializerBinary::create(Stream* stream)
 {
     // Read the binary file header info.
     const char magicNumber[9] = GP_ENGINE_MAGIC_NUMBER;
@@ -43,10 +42,10 @@ UPtr<Serializer> SerializerBinary::create(const std::string& path, Stream* strea
     unsigned char version[2];
     if (stream->read(version, sizeof(unsigned char), 2) != 2)
     {
-        GP_WARN("Failed to read version from binary file: %s", path.c_str());
+        GP_WARN("Failed to read version from binary file");
         return UPtr<Serializer>();
     }
-    Serializer* serializer = new SerializerBinary(Type::eReader, path, stream, version[0], version[1]);
+    Serializer* serializer = new SerializerBinary(Type::eReader, stream, version[0], version[1]);
     return UPtr<Serializer>(serializer);
 }
 
@@ -64,7 +63,7 @@ UPtr<Serializer> SerializerBinary::createWriter(const std::string& path)
     if (stream->write(version, sizeof(unsigned char), 2) != 2)
         GP_WARN("Unable to write binary file version.");
 
-    Serializer* serializer = new SerializerBinary(Type::eWriter, path, stream, version[0], version[1]);
+    Serializer* serializer = new SerializerBinary(Type::eWriter, stream, version[0], version[1]);
 
     return UPtr<Serializer>(serializer);
 }
@@ -73,6 +72,10 @@ void SerializerBinary::close()
 {
     if (_stream)
         _stream->close();
+}
+
+void SerializerBinary::flush() {
+
 }
     
 Serializer::Format SerializerBinary::getFormat() const
@@ -572,7 +575,7 @@ void SerializerBinary::readMap(const char* propertyName, std::vector<std::string
 
 }
 
-Serializable* SerializerBinary::readObject(const char* propertyName)
+UPtr<Serializable> SerializerBinary::readObject(const char* propertyName)
 {
     GP_ASSERT(_type == Type::eReader);
     
@@ -582,7 +585,7 @@ Serializable* SerializerBinary::readObject(const char* propertyName)
     unsigned long xrefAddress = 0L;
     if (bit == BIT_NULL)
     {
-        return nullptr;
+        return UPtr<Serializable>();
     }
     else if (bit == BIT_XREF)
     {
@@ -590,7 +593,10 @@ Serializable* SerializerBinary::readObject(const char* propertyName)
         std::map<unsigned long, Serializable*>::const_iterator itr = _xrefs.find(xrefAddress);
         if (itr != _xrefs.end())
         {
-            return itr->second;
+            Serializable* ref = itr->second;
+            Refable* refable = dynamic_cast<Refable*>(ref);
+            if (refable) refable->addRef();
+            return UPtr<Serializable>(ref);
         }
     }
     
@@ -602,7 +608,7 @@ Serializable* SerializerBinary::readObject(const char* propertyName)
     if (value == nullptr)
     {
         GP_ERROR("Failed to deserialize binary class: %s for propertyName:%s", className.c_str(), propertyName);
-        return value;
+        return UPtr<Serializable>();
     }
     
     // Deserialize the properties
@@ -613,7 +619,7 @@ Serializable* SerializerBinary::readObject(const char* propertyName)
         _xrefs[xrefAddress] = value;
     }
     
-    return value;
+    return UPtr<Serializable>(value);
 }
 
 size_t SerializerBinary::readList(const char* propertyName)

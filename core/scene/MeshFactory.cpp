@@ -60,7 +60,7 @@ UPtr<Mesh> MeshFactory::createQuadFullscreen()
         GP_ERROR("Failed to create mesh.");
         return UPtr<Mesh>(NULL);
     }
-
+    mesh->setId("QuadFullscreen");
     mesh->_primitiveType = Mesh::TRIANGLE_STRIP;
     mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
 
@@ -87,7 +87,7 @@ UPtr<Mesh> MeshFactory::createPlane() {
         GP_ERROR("Failed to create mesh.");
         return UPtr<Mesh>(NULL);
     }
-
+    mesh->setId("Plane");
     mesh->_primitiveType = Mesh::TRIANGLE_STRIP;
     mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
 
@@ -206,6 +206,7 @@ UPtr<Mesh> MeshFactory::createCube(float size)
         GP_ERROR("Failed to create mesh.");
         return UPtr<Mesh>(NULL);
     }
+    mesh->setId("Cube");
     mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
     Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
     mesh->getIndexBuffer()->setData((char*)indices, sizeof(indices));
@@ -258,6 +259,7 @@ UPtr<Mesh> MeshFactory::createCube2(float size)
         GP_ERROR("Failed to create mesh.");
         return UPtr<Mesh>(NULL);
     }
+    mesh->setId("Cube2");
     mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
     Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
     mesh->getIndexBuffer()->setData((char*)indices, sizeof(indices));
@@ -357,6 +359,7 @@ UPtr<Mesh> MeshFactory::createSimpleCube()
         GP_ERROR("Failed to create mesh.");
         return UPtr<Mesh>(NULL);
     }
+    mesh->setId("SimpleCube");
     mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
     mesh->_primitiveType = Mesh::TRIANGLES;
     return mesh;

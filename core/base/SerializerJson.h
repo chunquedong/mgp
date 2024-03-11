@@ -26,11 +26,13 @@ public:
      * @return The new json serializer.
      */
     static UPtr<Serializer> createWriter(const std::string& path);
+    static UPtr<Serializer> create(Stream* stream);
 
     /**
      * @see Serializer::close
      */
     void close();
+    void flush();
     
     /**
      * @see Serializer::getFormat
@@ -189,7 +191,7 @@ public:
     /**
      * @see Serializer::readObject
      */
-    Serializable* readObject(const char* propertyName);
+    UPtr<Serializable> readObject(const char* propertyName);
 
     /**
      * @see Serializer::readList
@@ -219,8 +221,8 @@ public:
     
 protected:
     
-    SerializerJson(Type type, const std::string& path, Stream* stream, uint32_t versionMajor, uint32_t versionMinor, jc::JsonNode* root);
-    static UPtr<Serializer> create(const std::string& path, Stream* stream);
+    SerializerJson(Type type, Stream* stream, uint32_t versionMajor, uint32_t versionMinor, jc::JsonNode* root);
+    
     
 private:
     

@@ -23,11 +23,13 @@ public:
      * @return The new binary serializer.
      */
     static UPtr<Serializer> createWriter(const std::string& path);
-    
+    static UPtr<Serializer> create(Stream* stream);
+
     /**
      * @see Serializer::close
      */
     void close();
+    void flush();
     
     /**
      * @see Serializer::getFormat
@@ -185,7 +187,7 @@ public:
     /**
      * @see Serializer::readObject
      */
-    Serializable* readObject(const char* propertyName);
+    UPtr<Serializable> readObject(const char* propertyName);
 
     /**
      * @see Serializer::readList
@@ -215,8 +217,8 @@ public:
     
 protected:
     
-    SerializerBinary(Type type, const std::string& path, Stream* stream, uint32_t versionMajor, uint32_t versionMinor);
-    static UPtr<Serializer> create(const std::string& path, Stream* stream);
+    SerializerBinary(Type type, Stream* stream, uint32_t versionMajor, uint32_t versionMinor);
+    
     void writeLengthPrefixedString(const char* str);
     void readLengthPrefixedString(std::string& str);
     

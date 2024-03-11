@@ -4,6 +4,8 @@
 #include "Texture.h"
 #include "base/FileSystem.h"
 #include <algorithm>
+#include "base/SerializerJson.h"
+#include "scene/AssetManager.h"
 
 namespace mgp
 {
@@ -573,7 +575,8 @@ std::string Texture::getClassName() {
  * @see Serializable::onSerialize
  */
 void Texture::onSerialize(Serializer* serializer) {
-    serializer->writeString("path", getPath(), "");
+    serializer->writeString("id", _id.c_str(), "");
+    serializer->writeString("path", _path.c_str(), "");
     serializer->writeEnum("minFilter", "mgp::Texture::Filter", static_cast<int>(_minFilter), -1);
     serializer->writeEnum("magFilter", "mgp::Texture::Filter", static_cast<int>(_magFilter), -1);
 
@@ -590,10 +593,17 @@ void Texture::onSerialize(Serializer* serializer) {
  * @see Serializable::onDeserialize
  */
 void Texture::onDeserialize(Serializer* serializer) {
-    std::string path;
-    serializer->readString("path", path, "");
-
-    this->load(path.c_str());
+    serializer->readString("id", _id, "");
+    serializer->readString("path", _path, "");
+    if (_path.size() > 0) {
+        this->load(_path.c_str());
+    }
+    else {
+        UPtr<Texture> t  = AssetManager::getInstance()->load<Texture>(_id, AssetManager::rt_textureData);
+        this->_data = t->_data;
+        this->setData(t->_data);
+        t->_data = NULL;
+    }
     _minFilter = static_cast<Texture::Filter>(serializer->readEnum("minFilter", "mgp::Texture::Filter", -1));
     _magFilter = static_cast<Texture::Filter>(serializer->readEnum("magFilter", "mgp::Texture::Filter", -1));
 
@@ -604,6 +614,44 @@ void Texture::onDeserialize(Serializer* serializer) {
     _format = static_cast<Texture::Format>(serializer->readEnum("format", "mgp::Texture::Format", RGBA8888));
     _type = static_cast<Texture::Type>(serializer->readEnum("type", "mgp::Texture::Type", TEXTURE_2D));
     _mipmapped = serializer->readBool("mipmap", false);
+}
+
+void Texture::write(Stream* file) {
+    if (!_data) return;
+    int bpp = getFormatBPP(_format);
+    int size = bpp * _width * _height;
+    file->write((const char*)_data, size);
+}
+
+bool Texture::read(Stream* file) {
+    GP_ASSERT(_data == NULL);
+    int bpp = getFormatBPP(_format);
+    int size = bpp * _width * _height;
+    _data = (const unsigned char*)malloc(size);
+    file->read((char*)_data, size);
+    return true;
+}
+
+void Texture::copyFrom(Texture* that) {
+    _path = that->_path;
+    _minFilter = that->_minFilter;
+    _magFilter = that->_magFilter;
+
+    _wrapS = that->_wrapS;
+    _wrapT = that->_wrapT;
+    _wrapR = that->_wrapR;
+
+    _format = that->_format;
+    _type = that->_type;
+    _mipmapped = that->_mipmapped;
+    _arrayDepth = that->_arrayDepth;
+    _cached = that->_cached;
+    _compressed = that->_compressed;
+    _keepMemory = that->_keepMemory;
+    _dataDirty = that->_dataDirty;
+
+    _handle = that->_handle;
+    _data = that->_data;
 }
 
 void Texture::setWrapMode(Wrap wrapS, Wrap wrapT, Wrap wrapR)

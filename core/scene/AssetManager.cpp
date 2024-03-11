@@ -6,6 +6,8 @@
 #include "MeshSkin.h"
 #include "../base/SerializerJson.h"
 #include "../animation/Animation.h"
+#include "material/Texture.h"
+#include "material/Image.h"
 
 using namespace mgp;
 
@@ -41,7 +43,7 @@ void AssetManager::setPath(const std::string& path) {
 void AssetManager::clear() {
   std::lock_guard<std::mutex> lock_guard(mutex);
   for (int i=0; i<rt_count; ++i) {
-    std::map<std::string, Refable*> &map = resourceMap[i];
+    auto &map = resourceMap[i];
     for (auto it = map.begin(); it != map.end(); ++it) {
       if (it->second) {
         it->second->release();
@@ -49,6 +51,10 @@ void AssetManager::clear() {
     }
     map.clear();
   }
+}
+
+void AssetManager::beginSave() {
+    _saved.clear();
 }
 
 void AssetManager::remove(const std::string &name, ResType type) {
@@ -62,24 +68,24 @@ void AssetManager::remove(const std::string &name, ResType type) {
   }
 }
 
-UPtr<Refable> AssetManager::load(const std::string &name, ResType type) {
-    if (name.size() == 0) return UPtr<Refable>(NULL);
+UPtr<Resource> AssetManager::load(const std::string &name, ResType type) {
+    if (name.size() == 0) return UPtr<Resource>(NULL);
 
     std::lock_guard<std::mutex> lock_guard(mutex);
     auto itr = this->resourceMap[type].find(name);
     if (itr != this->resourceMap[type].end()) {
-        Refable* res = itr->second;
+        Resource* res = itr->second;
         res->addRef();
-        return UPtr<Refable>(res);
+        return UPtr<Resource>(res);
     }
-    Refable* res = NULL;
+    Resource* res = NULL;
     switch (type) {
         case rt_mesh: {
             std::string file = path + "/" + name + ".mesh";
             UPtr<Stream> s = FileSystem::open(file.c_str());
             Mesh *mesh = Mesh::create(VertexFormat(NULL, 0)).take();
             mesh->read(s.get());
-            mesh->setName(name);
+            mesh->setId(name);
             s->close();
             //delete s;
             res = mesh;
@@ -90,7 +96,7 @@ UPtr<Refable> AssetManager::load(const std::string &name, ResType type) {
             UPtr<Stream> s = FileSystem::open(file.c_str());
             MeshSkin* mesh = new MeshSkin();
             mesh->read(s.get());
-            mesh->setName(name);
+            mesh->setId(name);
             s->close();
             //delete s;
             res = mesh;
@@ -99,9 +105,9 @@ UPtr<Refable> AssetManager::load(const std::string &name, ResType type) {
         case rt_materail: {
             std::string file = path + "/" + name + ".material";
             auto stream = SerializerJson::createReader(file);
-            Material *m = dynamic_cast<Material*>(stream->readObject(nullptr));
+            Material *m = dynamic_cast<Material*>(stream->readObject(nullptr).take());
             stream->close();
-            m->setName(name);
+            m->setId(name);
             res = m;
             break;
         }
@@ -110,10 +116,19 @@ UPtr<Refable> AssetManager::load(const std::string &name, ResType type) {
             UPtr<Stream> s = FileSystem::open(file.c_str());
             Animation* mesh = new Animation("");
             mesh->read(s.get());
-            mesh->setName(name);
+            mesh->setId(name);
             s->close();
             //delete s;
             res = mesh;
+            break;
+        }
+        case rt_textureData: {
+            std::string file = path + "/" + name + ".texture";
+            UPtr<Stream> s = FileSystem::open(file.c_str());
+            Texture* m = new Texture();
+            m->read(s.get());
+            m->setId(name);
+            res = m;
             break;
         }
     }
@@ -121,38 +136,50 @@ UPtr<Refable> AssetManager::load(const std::string &name, ResType type) {
         res->addRef();
         this->resourceMap[type][name] = res;
     }
-    return UPtr<Refable>(res);
+    return UPtr<Resource>(res);
 }
 
-void AssetManager::save(const std::string &name, Refable *res) {
-     if (res == NULL) return;
+void AssetManager::save(Resource* res) {
+    if (res == NULL) return;
+    std::string name = res->getId();
+    if (name.size() == 0) return;
 
-     if (Mesh *mesh = dynamic_cast<Mesh*>(res)) {
+    if (_saved[name]) return;
+
+    if (Mesh *mesh = dynamic_cast<Mesh*>(res)) {
         std::string file = path + "/" + name + ".mesh";
         UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
         mesh->write(s.get());
         s->close();
         //delete s;
-      }
-      else if (MeshSkin *mesh = dynamic_cast<MeshSkin*>(res)) {
+    }
+    else if (MeshSkin *mesh = dynamic_cast<MeshSkin*>(res)) {
         std::string file = path + "/" + name + ".skin";
         UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
         mesh->write(s.get());
         s->close();
         //delete s;
-      }
-      else if (Material *m = dynamic_cast<Material*>(res)) {
-          std::string file = path + "/" + name + ".material";
-          auto stream = SerializerJson::createWriter(file);
-          stream->writeObject(nullptr, m);
-          stream->close();
-      }
-      else if (Animation *mesh = dynamic_cast<Animation*>(res)) {
-       std::string file = path + "/" + name + ".anim";
-       UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
-       mesh->write(s.get());
-       s->close();
-       //delete s;
-     }
+    }
+    else if (Material *m = dynamic_cast<Material*>(res)) {
+        std::string file = path + "/" + name + ".material";
+        auto stream = SerializerJson::createWriter(file);
+        stream->writeObject(nullptr, m);
+        stream->close();
+    }
+    else if (Animation *mesh = dynamic_cast<Animation*>(res)) {
+        std::string file = path + "/" + name + ".anim";
+        UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
+        mesh->write(s.get());
+        s->close();
+        //delete s;
+    }
+    else if (Texture* texture = dynamic_cast<Texture*>(res)) {
+        std::string file = path + "/" + name + ".texture";
+        UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
+        texture->write(s.get());
+        s->close();
+    }
+
+    _saved[name] = 1;
 }
 

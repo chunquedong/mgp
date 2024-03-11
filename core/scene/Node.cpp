@@ -977,7 +977,7 @@ void Node::onDeserialize(Serializer* serializer)
     if (childCount > 0)
     {
         for (size_t i = 0; i < childCount; i++) {
-            auto ptr = serializer->readObject(nullptr);
+            auto ptr = serializer->readObject(nullptr).take();
             //ptr->addRef();
             this->addChild(UPtr<Node>(dynamic_cast<Node*>(ptr)));
         }
@@ -989,7 +989,7 @@ void Node::onDeserialize(Serializer* serializer)
         //_components.res(componentCount);
         for (size_t i = 0; i < componentCount; i++)
         {
-            auto ptr = serializer->readObject(nullptr);
+            auto ptr = serializer->readObject(nullptr).take();
             //ptr->addRef();
             UPtr<Component> comp(dynamic_cast<Component*>(ptr));
             comp->setNode(this);

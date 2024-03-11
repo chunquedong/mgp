@@ -7,6 +7,7 @@
 #include "MaterialParameter.h"
 #include "platform/Toolkit.h"
 #include "scene/Scene.h"
+#include "base/SerializerJson.h"
 
 namespace mgp
 {
@@ -421,7 +422,7 @@ UPtr<Material> Material::create(Properties* materialProperties, PassCallback cal
     // Create new material from the file passed in.
     Material* material = new Material();
 
-    material->setName(materialProperties->getId());
+    material->setId(materialProperties->getId());
 
     // Load uniform value parameters for this material.
     loadRenderState(material, materialProperties);
@@ -521,11 +522,17 @@ void Material::getShaderId(std::string& uniqueId) {
 //    _paramBinding.setParameterAutoBinding(name, autoBinding);
 //}
 
-UPtr<Material> Material::clone(NodeCloneContext &context) const
+UPtr<Material> Material::clone() const
 {
     Material* material = new Material();
+    material->copyFrom(this);
+    return UPtr<Material>(material);
+}
 
-    for (std::vector<MaterialParameter*>::const_iterator it = _parameters.begin(); it != _parameters.end(); ++it)
+void Material::copyFrom(const Material* src) {
+    Material* material = this;
+    material->_parameters.clear();
+    for (std::vector<MaterialParameter*>::const_iterator it = src->_parameters.begin(); it != src->_parameters.end(); ++it)
     {
         const MaterialParameter* param = *it;
         GP_ASSERT(param);
@@ -542,24 +549,25 @@ UPtr<Material> Material::clone(NodeCloneContext &context) const
     }
 
     // Clone our state block
-    _state.cloneInto(material->getStateBlock());
+    material->_state.cloneInto(src->getStateBlock());
 
     //_paramBinding.cloneInto(&material->_paramBinding, context);
 
-    if (_shaderProgram) {
-        _shaderProgram->addRef();
-        material->_shaderProgram = _shaderProgram;
+    if (src->_shaderProgram) {
+        src->_shaderProgram->addRef();
+        if (material->_shaderProgram) {
+            material->_shaderProgram->release();
+        }
+        material->_shaderProgram = src->_shaderProgram;
     }
 
-    material->name = this->name;
-    material->vertexShaderPath = this->vertexShaderPath;
-    material->fragmentShaderPath = this->fragmentShaderPath;
-    material->shaderDefines = this->shaderDefines;
+    //material->name = this->name;
+    material->vertexShaderPath = src->vertexShaderPath;
+    material->fragmentShaderPath = src->fragmentShaderPath;
+    material->shaderDefines = src->shaderDefines;
 
-    if (_nextPass.get()) material->_nextPass = _nextPass->clone(context);
-    return UPtr<Material>(material);
+    if (src->_nextPass.get()) material->_nextPass = src->_nextPass->clone();
 }
-
 
 ShaderProgram* Material::getEffect() const {
     return _shaderProgram;
@@ -708,10 +716,23 @@ void Material::onDeserialize(Serializer* serializer) {
 
     int size = serializer->readList("parameters");
     for (int i = 0; i < size; ++i) {
-        MaterialParameter* p = dynamic_cast<MaterialParameter*>(serializer->readObject(NULL));
+        MaterialParameter* p = dynamic_cast<MaterialParameter*>(serializer->readObject(NULL).take());
         _parameters.push_back(p);
     }
     serializer->finishColloction();
+}
+
+void Material::write(Stream* file) {
+    auto stream = SerializerJson::create(file);
+    stream->writeObject(nullptr, this);
+    stream->flush();
+}
+
+bool Material::read(Stream* file) {
+    auto stream = SerializerJson::create(file);
+    UPtr<Material> m = stream->readObject(nullptr).dynamicCastTo<Material>();
+    this->copyFrom(m.get());
+    return true;
 }
 
 void Material::setStateBlock(StateBlock* state)

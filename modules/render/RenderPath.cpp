@@ -39,7 +39,6 @@ Model* RenderPath::fullscreenQuadModel() {
     if (_quadModel == NULL)
     {
         UPtr<Mesh> mesh = MeshFactory::createQuadFullscreen();
-        mesh->setName("QuadFullscreen");
         _quadModel = Model::create(std::move(mesh)).take();
         Node* node = Node::create("QuadFullscreen").take();
         node->setDrawable(UPtr<Drawable>(_quadModel));

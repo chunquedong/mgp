@@ -5,6 +5,7 @@
 #include "base/Properties.h"
 #include "base/Serializable.h"
 #include "StateBlock.h"
+#include "base/Resource.h"
 
 namespace mgp
 {
@@ -24,7 +25,7 @@ class ShaderProgram;
  *
  * @see http://gameplay3d.github.io/GamePlay/docs/file-formats.html#wiki-Materials
  */
-class Material : public Refable, public Serializable
+class Material : public Resource, public Serializable
 {
     friend class MaterialParamBinding;
     friend class Node;
@@ -112,13 +113,6 @@ public:
      */
     //void setNodeBinding(Node* node);
 
-    void setName(const std::string &name) {
-        this->name = name;
-    }
-    const std::string &getName() {
-        return name;
-    }
-
     /**
      * Returns the effect for this Pass.
      */
@@ -188,6 +182,8 @@ public:
      */
     void onDeserialize(Serializer* serializer);
 
+    void write(Stream* file);
+    bool read(Stream* file);
 
     /**
      * Sets the fixed-function render state of this object to the state contained
@@ -292,8 +288,8 @@ public:
      * @return The newly created material.
      * @script{create}
      */
-    UPtr<Material> clone(NodeCloneContext& context) const;
-
+    UPtr<Material> clone() const;
+    void copyFrom(const Material* m);
 
     /**
      * Creates a new material with optional pass callback function.
@@ -327,7 +323,7 @@ private:
     void bindNode(Camera* camera, Node* node, Drawable* drawable);
     void bindLights(Camera* camera, std::vector<Light*>* lights, int lightMask);
 
-    std::string name;
+    //std::string name;
     ShaderProgram* _shaderProgram;
     std::string vertexShaderPath;
     std::string fragmentShaderPath;

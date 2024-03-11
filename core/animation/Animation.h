@@ -5,6 +5,7 @@
 #include "base/Ptr.h"
 #include "base/Properties.h"
 #include "math/Curve.h"
+#include "base/Resource.h"
 
 namespace mgp
 {
@@ -25,20 +26,13 @@ class AnimationChannel;
  *
  * @see http://gameplay3d.github.io/GamePlay/docs/file-formats.html#wiki-Animation
  */
-class Animation : public Refable
+class Animation : public Resource
 {
     friend class AnimationClip;
     friend class AnimationTarget;
     friend class Bundle;
 
 public:
-
-    /**
-     * Gets the Animation's ID.
-     *
-     * @return The Animation's ID.
-     */
-    const char* getName() const;
 
     /**
      * Gets the Animation's duration.
@@ -119,9 +113,6 @@ public:
     void write(Stream* file);
     bool read(Stream* file);
 
-    void setName(const std::string& name) {
-        this->_id = name;
-    }
 
     void update(float percentComplete, unsigned int clipStart, unsigned int clipEnd, unsigned int loopBlendTime, float blendWeight);
 
@@ -216,7 +207,7 @@ public:
 
 
     AnimationController* _controller;       // The AnimationController that this Animation will run on.
-    std::string _id;                        // The Animation's ID.
+    //std::string _id;                        // The Animation's ID.
     unsigned long _duration;                // the length of the animation (in milliseconds).
     std::vector<AnimationChannel*> _channels;        // The channels within this Animation.
     AnimationClip* _defaultClip;            // The Animation's default clip.

@@ -7,9 +7,9 @@
 namespace mgp
 {
 
-Serializer::Serializer(Type type, const std::string& path, Stream* stream, uint32_t versionMajor, uint32_t versionMinor) : 
+Serializer::Serializer(Type type, Stream* stream, uint32_t versionMajor, uint32_t versionMinor) : 
     _type(type),
-    _path(path),
+    //_path(path),
     _stream(stream)
 {
     _version[0] = versionMajor;
@@ -28,19 +28,29 @@ UPtr<Serializer> Serializer::createReader(const std::string& path)
     if (!stream)
         return UPtr<Serializer>();
 
-    UPtr<Serializer> serializer = SerializerBinary::create(path, stream);
+    UPtr<Serializer> serializer = SerializerBinary::create(stream);
     if (!serializer.get())
     {
         stream->rewind();
-        serializer = SerializerJson::create(path, stream);
+        serializer = SerializerJson::create(stream);
     }
     return serializer;
 }
 
-std::string Serializer::getPath() const
-{
-    return _path;
+UPtr<Serializer> Serializer::createReader(Stream* stream) {
+    UPtr<Serializer> serializer = SerializerBinary::create(stream);
+    if (!serializer.get())
+    {
+        stream->rewind();
+        serializer = SerializerJson::create(stream);
+    }
+    return serializer;
 }
+
+//std::string Serializer::getPath() const
+//{
+//    return _path;
+//}
    
 uint32_t Serializer::getVersionMajor() const
 {

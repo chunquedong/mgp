@@ -17,7 +17,7 @@ namespace mgp
 {
 
 Animation::Animation(const char* id, AnimationTarget* target, int propertyId, unsigned int keyCount, unsigned int* keyTimes, float* keyValues, unsigned int type)
-    : _controller(AnimationController::cur()), _id(id), _duration(0L), _defaultClip(NULL), _clips(NULL)
+    : _controller(AnimationController::cur()), Resource(id), _duration(0L), _defaultClip(NULL), _clips(NULL)
 {
     createChannel(target, propertyId, keyCount, keyTimes, keyValues, type);
 
@@ -27,7 +27,7 @@ Animation::Animation(const char* id, AnimationTarget* target, int propertyId, un
 }
 
 Animation::Animation(const char* id, AnimationTarget* target, int propertyId, unsigned int keyCount, unsigned int* keyTimes, float* keyValues, float* keyInValue, float* keyOutValue, unsigned int type)
-    : _controller(AnimationController::cur()), _id(id), _duration(0L), _defaultClip(NULL), _clips(NULL)
+    : _controller(AnimationController::cur()), Resource(id), _duration(0L), _defaultClip(NULL), _clips(NULL)
 {
     createChannel(target, propertyId, keyCount, keyTimes, keyValues, keyInValue, keyOutValue, type);
     // Release the animation because a newly created animation has a ref count of 1 and the channels hold the ref to animation.
@@ -36,7 +36,7 @@ Animation::Animation(const char* id, AnimationTarget* target, int propertyId, un
 }
 
 Animation::Animation(const char* id)
-    : _controller(AnimationController::cur()), _id(id), _duration(0L), _defaultClip(NULL), _clips(NULL)
+    : _controller(AnimationController::cur()), Resource(id), _duration(0L), _defaultClip(NULL), _clips(NULL)
 {
 }
 
@@ -73,12 +73,6 @@ Animation::~Animation()
         _clips->clear();
     }
     SAFE_DELETE(_clips);
-}
-
-
-const char* Animation::getName() const
-{
-    return _id.c_str();
 }
 
 unsigned long Animation::getDuration() const
@@ -329,7 +323,7 @@ Animation* Animation::clone(AnimationChannel* channel, AnimationTarget* target)
 {
     GP_ASSERT(channel);
 
-    Animation* animation = new Animation(getName());
+    Animation* animation = new Animation("");
 
     AnimationChannel* channelCopy = new KeyframeChannel(*dynamic_cast<KeyframeChannel*>(channel), animation, target);
     animation->addChannel(channelCopy);

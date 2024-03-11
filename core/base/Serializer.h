@@ -65,6 +65,7 @@ public:
      * @param path The path to load a serialized object from.
      */
     static UPtr<Serializer> createReader(const std::string& path);
+    static UPtr<Serializer> createReader(Stream* stream);
 
     /**
      * Gets the file path for the reader/writer.
@@ -77,6 +78,7 @@ public:
      * Closes the stream once you are done reading/writing.
      */
     virtual void close() = 0;
+    virtual void flush() = 0;
 
     /**
      * Gets the serializer format.
@@ -411,7 +413,7 @@ public:
      * @param propertyName The property to read. If nullptr a new object is created.
      * @return The object that is read into.
      */
-    virtual Serializable* readObject(const char* propertyName) = 0;
+    virtual UPtr<Serializable> readObject(const char* propertyName) = 0;
 
     /**
      * Reads a list of objects.
@@ -463,10 +465,10 @@ protected:
         eWriter
     };
 
-    Serializer(Type type, const std::string& path, Stream* stream, uint32_t versionMajor, uint32_t versionMinor);
+    Serializer(Type type, Stream* stream, uint32_t versionMajor, uint32_t versionMinor);
 
     Type _type;
-    std::string _path;
+    //std::string _path;
     Stream* _stream;
     uint32_t _version[2];
     

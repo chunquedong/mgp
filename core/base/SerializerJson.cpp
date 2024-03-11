@@ -39,12 +39,11 @@ static JsonNode* json_new_a(jc::JsonAllocator& allocator, const char* s) {
 }
 
 SerializerJson::SerializerJson(Type type,
-                               const std::string& path,
                                Stream* stream,
                                uint32_t versionMajor,
                                uint32_t versionMinor,
                                jc::JsonNode* root) :
-    Serializer(type, path, stream, versionMajor, versionMinor), 
+    Serializer(type, stream, versionMajor, versionMinor), 
     _root(root)
 {
     _nodes.push(root);
@@ -54,7 +53,7 @@ SerializerJson::~SerializerJson()
 {
 }
         
-UPtr<Serializer> SerializerJson::create(const std::string& path, Stream* stream)
+UPtr<Serializer> SerializerJson::create(Stream* stream)
 {
     jc::JsonAllocator allocator;
 
@@ -88,7 +87,7 @@ UPtr<Serializer> SerializerJson::create(const std::string& path, Stream* stream)
             std::string minor = version.substr(2, 1);
             versionMinor = std::stoi(minor);
         }
-        serializer = new SerializerJson(Type::eReader, path, stream, versionMajor, versionMinor, root);
+        serializer = new SerializerJson(Type::eReader, stream, versionMajor, versionMinor, root);
         ((SerializerJson*)serializer)->allocator.swap(allocator);
     }
     //SAFE_DELETE_ARRAY(buffer);
@@ -113,7 +112,7 @@ UPtr<Serializer> SerializerJson::createWriter(const std::string& path)
     root->insert_pair("version", json_new_a(allocator, version.c_str()));
     //json_push_back(root, json_new_a("version", version.c_str()));
 
-    Serializer* serializer = new SerializerJson(Type::eWriter, path, stream, GP_ENGINE_VERSION_MAJOR, GP_ENGINE_VERSION_MINOR, root);
+    Serializer* serializer = new SerializerJson(Type::eWriter, stream, GP_ENGINE_VERSION_MAJOR, GP_ENGINE_VERSION_MINOR, root);
     ((SerializerJson*)serializer)->allocator.swap(allocator);
     return UPtr<Serializer>(serializer);
 }
@@ -122,16 +121,19 @@ void SerializerJson::close()
 {
     if (_stream)
     {
-        if (_type == Type::eWriter)
-        {
-            std::string str;
-            _root->to_json(str);
-            _stream->write(str.c_str(), sizeof(char), str.length());
-            //json_free(buffer);
-        }
-        //if (_root)
-        //    json_delete(_root);
+        flush();
         _stream->close();
+    }
+}
+
+void SerializerJson::flush() {
+    if (_type == Type::eWriter && _root)
+    {
+        std::string str;
+        _root->to_json(str);
+        _stream->write(str.c_str(), sizeof(char), str.length());
+        //json_free(buffer);
+        _root = NULL;
     }
 }
 
@@ -817,7 +819,7 @@ void SerializerJson::readString(const char* propertyName, std::string& value, co
     }
 }
 
-Serializable* SerializerJson::readObject(const char* propertyName)
+UPtr<Serializable> SerializerJson::readObject(const char* propertyName)
 {
     GP_ASSERT(_type == Type::eReader);
     
@@ -842,11 +844,11 @@ Serializable* SerializerJson::readObject(const char* propertyName)
     {
         jc::Value* propertyNode = parentNode->get(propertyName);
         if (propertyNode == nullptr)
-            return nullptr;
+            return UPtr<Serializable>();
         if (propertyNode->type() != jc::Type::Object)
         {
             GP_WARN("Invalid json object for propertyName:%s", propertyName);
-            return nullptr;
+            return UPtr<Serializable>();
         }
         readNode = propertyNode;
     }
@@ -882,13 +884,15 @@ Serializable* SerializerJson::readObject(const char* propertyName)
             if (itr != _xrefsRead.end())
             {
                 Serializable* ref = itr->second;
-                return ref;
+                Refable* refable = dynamic_cast<Refable*>(ref);
+                if (refable) refable->addRef();
+                return UPtr<Serializable>(ref);
             }
             else
             {
                 GP_WARN("Unresolved xref:%u for class:%s", xrefAddress, className);
                 //json_free(className);
-                return nullptr;
+                return UPtr<Serializable>();
             }
         }
     }
@@ -898,7 +902,7 @@ Serializable* SerializerJson::readObject(const char* propertyName)
     {
         GP_WARN("Failed to deserialize json object:%s for class:", className);
         //json_free(className);
-        return nullptr;
+        return UPtr<Serializable>();
     }
     //json_free(className);
 
@@ -909,7 +913,7 @@ Serializable* SerializerJson::readObject(const char* propertyName)
     if (xrefAddress)
         _xrefsRead[xrefAddress] = value;
 
-    return value;
+    return UPtr<Serializable>(value);
 }
 
 void SerializerJson::readMap(const char* propertyName, std::vector<std::string> &keys)

@@ -9,6 +9,7 @@
 #include "math/BoundingBox.h"
 #include "math/BoundingSphere.h"
 #include "Drawable.h"
+#include "base/Resource.h"
 
 namespace mgp
 {
@@ -47,7 +48,7 @@ struct RenderBuffer {
  * Defines a mesh supporting various vertex formats and 1 or more
  * MeshPart(s) to define how the vertices are connected.
  */
-class Mesh : public Refable
+class Mesh : public Resource
 {
     friend class Model;
     friend class Bundle;
@@ -282,13 +283,6 @@ public:
      */
     virtual ~Mesh();
 
-    void setName(const std::string &name) {
-        this->_name = name;
-    }
-    const std::string &getName() {
-        return _name;
-    }
-
     void write(Stream* file);
     bool read(Stream* file);
 
@@ -352,7 +346,6 @@ private:
     void computeBounds();
 
     std::string _url;
-    std::string _name;
 
     std::vector<MeshPart> _parts;
     
