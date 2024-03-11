@@ -74,7 +74,7 @@ struct RenderPass : public RenderStage {
     * create new frame buffer as dstBuffer
     */
     float _newDstBufferSize = 0;
-    Texture::Format _newDstBufferFormat = Texture::UNKNOWN;
+    Image::Format _newDstBufferFormat = Image::UNKNOWN;
 
     bool _useScreenViewport = false;
     bool _drawToScreen = false;

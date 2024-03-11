@@ -171,11 +171,11 @@ UPtr<Image> Image::createHDR(const char* path, bool flipY) {
     switch (n)
     {
     case 4:
-        image->_format = Image::RGBAF;
+        image->_format = Image::RGBA16F;
         break;
 
     case 3:
-        image->_format = Image::RGBF;
+        image->_format = Image::RGB16F;
         break;
 
     default:
@@ -243,6 +243,9 @@ bool Image::save(const char* file, const char* format) {
     case Image::RGBA:
         pixelSize = 4;
         break;
+    default:
+        GP_WARN("unsupport save image: %d", _format);
+        return false;
     }
 
     if (strcmp(format, "png") == 0) {
@@ -260,18 +263,8 @@ bool Image::save(const char* file, const char* format) {
 UPtr<Image> Image::create(unsigned int width, unsigned int height, Image::Format format, unsigned char* data, bool copy)
 {
     GP_ASSERT(width > 0 && height > 0);
-    GP_ASSERT(format >= RGB && format <= RGBA);
 
-    unsigned int pixelSize = 0;
-    switch(format)
-    {
-    case Image::RGB:
-        pixelSize = 3;
-        break;
-    case Image::RGBA:
-        pixelSize = 4;
-        break;
-    }
+    unsigned int pixelSize = getFormatBPP(format);
 
     Image* image = new Image();
 
@@ -281,7 +274,7 @@ UPtr<Image> Image::create(unsigned int width, unsigned int height, Image::Format
     image->_height = height;
     image->_format = format;
 
-    if (copy) {
+    if (copy && data) {
         image->_data = (unsigned char*)malloc(dataSize);
         if (data)
             memcpy(image->_data, data, dataSize);
@@ -303,4 +296,83 @@ Image::~Image()
    free(_data);
 }
 
+size_t Image::getFormatBPP(Format format)
+{
+    switch (format)
+    {
+    case Image::UNKNOWN:
+        return 1;
+        //auto size type
+    case Image::RGB:
+        return 3;
+    case Image::RGBA:
+        return 4;
+    case Image::ALPHA:
+        return 1;
+    case Image::RED:
+        return 1;
+    case Image::RG:
+        return 2;
 
+        //fix size type
+    case Image::RGB888:
+        return 3;
+    case Image::RGB565:
+        return 2;
+    case Image::RGBA4444:
+        return 2;
+    case Image::RGBA5551:
+        return 2;
+    case Image::RGBA8888:
+        return 4;
+
+        //depth
+    case Image::DEPTH:
+        return 4;
+    case Image::DEPTH24_STENCIL8:
+        return 4;
+
+        //float type
+    case Image::RGB16F:
+        return 6;
+    case Image::RGBA16F:
+        return 8;
+    case Image::R16F:
+        return 2;
+    case Image::R11F_G11F_B10F:
+        return 4;
+    case Image::RGB9_E5:
+        return 4;
+    case Image::RGB32F:
+        return 4 * 3;
+    case Image::RGBA32F:
+        return 4 * 4;
+    case Image::RG16F:
+        return 4 * 2;
+    default:
+        return 0;
+    }
+}
+
+void Image::write(Stream* file) {
+    if (!_data) return;
+    int bpp = getFormatBPP(_format);
+    int size = bpp * _width * _height;
+    file->writeUInt16(_format);
+    file->writeUInt16(_width);
+    file->writeUInt16(_height);
+    file->write((const char*)_data, size);
+}
+
+bool Image::read(Stream* file) {
+    _format = (Format)file->readUInt16();
+    _width = file->readUInt16();
+    _height = file->readUInt16();
+
+    GP_ASSERT(_data == NULL);
+    int bpp = getFormatBPP(_format);
+    int size = bpp * _width * _height;
+    _data = (unsigned char*)malloc(size);
+    file->read((char*)_data, size);
+    return true;
+}

@@ -22,18 +22,15 @@ public:
 
 static std::vector<Texture*> __textureCache;
 
-Texture::Texture() : _handle(0), _format(UNKNOWN), _type((Texture::Type)0), _width(0), _height(0), _arrayDepth(0), _mipmapped(false), _cached(false), _compressed(false),
+Texture::Texture() : _handle(0), _format(Image::UNKNOWN), _type((Texture::Type)0), _width(0), _height(0), _arrayDepth(0), _mipmapped(false), _cached(false), _compressed(false),
     _wrapS(Texture::REPEAT), _wrapT(Texture::REPEAT), _wrapR(Texture::REPEAT), _minFilter(Texture::NEAREST), _magFilter(Texture::LINEAR),
-    _keepMemory(false), _dataDirty(false), _data(NULL)
+    _keepMemory(false), _dataDirty(true)
 {
 }
 
 Texture::~Texture()
 {
-    if (_data) {
-        free((void*)_data);
-        _data = NULL;
-    }
+    _datas.clear();
     Renderer::cur()->deleteTexture(this);
 
     // Remove ourself from the texture cache.
@@ -47,40 +44,17 @@ Texture::~Texture()
     }
 }
 
-static Texture::Format imageFormatToTexture(Image::Format imgFormat) {
-    Texture::Format _format;
-    switch (imgFormat)
-    {
-    case Image::RGB:
-        _format = Texture::RGB;
-        break;
-    case Image::RGBA:
-        _format = Texture::RGBA;
-        break;
-    case Image::RGBF:
-        _format = Texture::RGB16F;
-        break;
-    case Image::RGBAF:
-        _format = Texture::RGBA16F;
-        break;
-    default:
-        GP_ERROR("Unsupported image format (%d).", imgFormat);
-        _format = Texture::UNKNOWN;
-    }
-    return _format;
-}
 
 bool Texture::load(const char* path) {
     UPtr<Image> image = Image::create(path);
     if (!image.get()) {
         return false;
     }
-    _format = imageFormatToTexture(image->getFormat());
+    _format = image->getFormat();
     _width = image->getWidth();
     _height = image->getHeight();
-    _data = image->getData();
-    image->setData(NULL);
-    _dataDirty = true;
+
+    _datas.push_back(SPtr<Image>(image.take()));
     
     //image->release();
     return true;
@@ -128,7 +102,7 @@ UPtr<Texture> Texture::create(const char* path, bool generateMipmaps)
                 bool flipY = false;
                 UPtr<Image> image = Image::create(path, flipY);
                 if (image.get())
-                    texture = create(image.get(), generateMipmaps);
+                    texture = create(std::move(image), generateMipmaps);
                 //SAFE_RELEASE(image);
             }
             else if (tolower(ext[1]) == 'p' && tolower(ext[2]) == 'v' && tolower(ext[3]) == 'r')
@@ -165,23 +139,38 @@ UPtr<Texture> Texture::create(const char* path, bool generateMipmaps)
     return UPtr<Texture>(NULL);
 }
 
-UPtr<Texture> Texture::create(Image* image, bool generateMipmaps, bool copyData)
+UPtr<Texture> Texture::create(UPtr<Image> image, bool generateMipmaps)
 {
-    GP_ASSERT( image );
-    const unsigned char* data = image->getData();
+    Texture* texture = new Texture();
+    // Set initial minification filter based on whether or not mipmaping was enabled.
+    Filter minFilter;
+    if (image->getFormat() == Image::DEPTH)
+    {
+        minFilter = NEAREST;
+    }
+    else
+    {
+        minFilter = generateMipmaps ? NEAREST_MIPMAP_LINEAR : LINEAR;
+    }
 
-    Texture::Format _format = imageFormatToTexture(image->getFormat());
-    image->setData(NULL);
-    return create(_format, image->getWidth(), image->getHeight(), data, generateMipmaps, TEXTURE_2D, false);
+    texture->_format = image->getFormat();
+    texture->_type = TEXTURE_2D;
+    texture->_width = image->getWidth();
+    texture->_height = image->getHeight();
+    texture->_minFilter = minFilter;
+    texture->_mipmapped = generateMipmaps;
+    
+    texture->_datas.push_back(SPtr<Image>(image.take()));
+    return UPtr<Texture>(texture);
 }
 
-UPtr<Texture> Texture::create(Format format, unsigned int width, unsigned int height, const unsigned char* data,
+UPtr<Texture> Texture::create(Image::Format format, unsigned int width, unsigned int height, const unsigned char* data,
     bool generateMipmaps, Texture::Type type, bool copyData, unsigned int arrayDepth)
 {
     Texture* texture = new Texture();
     // Set initial minification filter based on whether or not mipmaping was enabled.
     Filter minFilter;
-    if (format == Texture::DEPTH)
+    if (format == Image::DEPTH)
     {
     	minFilter = NEAREST;
     }
@@ -190,13 +179,12 @@ UPtr<Texture> Texture::create(Format format, unsigned int width, unsigned int he
     	minFilter = generateMipmaps ? NEAREST_MIPMAP_LINEAR : LINEAR;
     }
 
-    if (type == Texture::TEXTURE_CUBE || format == Texture::DEPTH) {
+    if (type == Texture::TEXTURE_CUBE || format == Image::DEPTH) {
         texture->_wrapR = CLAMP;
         texture->_wrapS = CLAMP;
         texture->_wrapT = CLAMP;
     }
 
-    texture->_handle = 0;
     texture->_format = format;
     texture->_type = type;
     texture->_width = width;
@@ -204,7 +192,9 @@ UPtr<Texture> Texture::create(Format format, unsigned int width, unsigned int he
     texture->_arrayDepth = arrayDepth;
     texture->_minFilter = minFilter;
     texture->_mipmapped = generateMipmaps;
-    if (copyData) {
+
+    UPtr<Image> image = Image::create(width, height, format, (unsigned char*)data, copyData);
+    /*if (copyData) {
         texture->_data = data;
         Renderer::cur()->updateTexture(texture);
         texture->_data = NULL;
@@ -212,129 +202,41 @@ UPtr<Texture> Texture::create(Format format, unsigned int width, unsigned int he
     else {
         texture->_data = data;
         texture->_dataDirty = true;
-    }
+    }*/
+    texture->_datas.push_back(SPtr<Image>(image.take()));
+
     return UPtr<Texture>(texture);
 }
 
-size_t Texture::getFormatBPP(Texture::Format format)
-{
-    switch (format)
-    {
-    case Texture::UNKNOWN:
-        return 0;
-        //auto size type
-    case Texture::RGB:
-        return 3;
-    case Texture::RGBA:
-        return 4;
-    case Texture::ALPHA:
-        return 1;
-    case Texture::RED:
-        return 1;
-    case Texture::RG:
-        return 2;
-
-        //fix size type
-    case Texture::RGB888:
-        return 3;
-    case Texture::RGB565:
-        return 2;
-    case Texture::RGBA4444:
-        return 2;
-    case Texture::RGBA5551:
-        return 2;
-    case Texture::RGBA8888:
-        return 4;
-
-        //depth
-    case Texture::DEPTH:
-        return 4;
-    case Texture::DEPTH24_STENCIL8:
-        return 4;
-
-        //float type
-    case Texture::RGB16F:
-        return 6;
-    case Texture::RGBA16F:
-        return 8;
-    case Texture::R16F:
-        return 2;
-    case Texture::R11F_G11F_B10F:
-        return 4;
-    case Texture::RGB9_E5:
-        return 4;
-    case Texture::RGB32F:
-        return 4*3;
-    case Texture::RGBA32F:
-        return 4 * 4;
-    case Texture::RG16F:
-        return 4 * 2;
-    default:
-        return 0;
-    }
-}
-
 UPtr<Texture> Texture::loadCubeMap(const char* faces[]) {
+    Texture* texture = new Texture();
+
     unsigned char* data = NULL;
     int width;
     int height;
-    Format format;
+    Image::Format format;
     for (int i=0; i<6; ++i) {
         const char *url = faces[i];
         UPtr<Image> image = Image::create(url, false);
         if (!image.get()) {
             GP_ERROR("image load fail: %s\n", url);
+            texture->release();
             return UPtr<Texture>(nullptr);
         }
-        int bpp = 4;
-        switch (image->getFormat())
-        {
-        case Image::RGB:
-            format = Texture::RGB;
-            bpp = 3;
-            break;
-        case Image::RGBA:
-            format = Texture::RGBA;
-            bpp = 4;
-            break;
-        case Image::RGBF:
-            format = Texture::RGB16F;
-            bpp = 3*4;
-            break;
-        case Image::RGBAF:
-            format = Texture::RGBA16F;
-            bpp = 4*4;
-            break;
-        default:
-            GP_ERROR("Unsupported image format (%d).", image->getFormat());
-            return UPtr<Texture>(NULL);
-        }
-
-        width = image->getWidth();
-        height = image->getHeight();
-        int imageDataSize = image->getWidth() * image->getHeight() * bpp;
-        if (!data) {
-            data = (unsigned char*)malloc(imageDataSize * 6);
-        }
-
-        memcpy(data+(imageDataSize*i), image->getData(), imageDataSize);
-
-        //SAFE_RELEASE(image);
+        
+        texture->_datas.push_back(SPtr<Image>(image.take()));
     }
 
-    Texture *texture = new Texture();
     texture->_type = TEXTURE_CUBE;
     texture->_format = format;
     texture->_width = width;
     texture->_height = height;
-    texture->_data = data;
+
     texture->_minFilter = NEAREST;
     texture->_wrapR = CLAMP;
     texture->_wrapS = CLAMP;
     texture->_wrapT = CLAMP;
-    Renderer::cur()->updateTexture(texture);
-    texture->_data = NULL;
-    free(data);
+
     return UPtr<Texture>(texture);
 }
 
@@ -346,42 +248,36 @@ void Texture::setData(const unsigned char* data, bool copyMem)
 {
     // Don't work with any compressed or cached textures
     GP_ASSERT(data);
-
-    if (_data == data) {
+    Image* image = _datas.at(0).get();
+    if (image->getData() == data) {
         _dataDirty = true;
         return;
     }
 
-    free((void*)_data);
     if (copyMem) {
         if (!_keepMemory) {
-            _data = data;
+            image->setData((unsigned char*)data);
             Renderer::cur()->updateTexture(this);
-            _data = NULL;
+            image->_data = NULL;
             _dataDirty = false;
         }
         else {
-            int bpp = getFormatBPP(_format);
+            int bpp = Image::getFormatBPP(_format);
             int size = bpp * _width * _height;
             unsigned char* t = (unsigned char*)malloc(size);
             memcpy(t, data, size);
-            this->_data = t;
+            image->setData(t);
             _dataDirty = true;
         }
     }
     else {
-        this->_data = data;
+        image->setData((unsigned char*)data);
         _dataDirty = true;
     }
 }
 
 void Texture::setKeepMemory(bool b) {
     _keepMemory = b;
-}
-
-Texture::Format Texture::getFormat() const
-{
-    return _format;
 }
 
 Texture::Type Texture::getType() const
@@ -392,6 +288,10 @@ Texture::Type Texture::getType() const
 const char* Texture::getPath() const
 {
     return _path.c_str();
+}
+
+Image::Format Texture::getFormat() const {
+    return _format;
 }
 
 unsigned int Texture::getWidth() const
@@ -430,29 +330,29 @@ Serializable* Texture::createObject() {
 
 std::string Texture::enumToString(const std::string& enumName, int value)
 {
-    if (enumName.compare("mgp::Texture::Format") == 0)
+    if (enumName.compare("mgp::Image::Format") == 0)
     {
         switch (value)
         {
-            case static_cast<int>(Format::UNKNOWN) :
+            case static_cast<int>(Image::UNKNOWN) :
                 return "UNKNOWN";
             //case static_cast<int>(Format::RGB) :
             //    return "RGB";
-            case static_cast<int>(Format::RGB888) :
+            case static_cast<int>(Image::RGB888) :
                 return "RGB888";
-            case static_cast<int>(Format::RGB565) :
+            case static_cast<int>(Image::RGB565) :
                 return "RGB565";
             //case static_cast<int>(Format::RGBA) :
             //    return "RGBA";
-            case static_cast<int>(Format::RGBA8888) :
+            case static_cast<int>(Image::RGBA8888) :
                 return "RGBA8888";
-            case static_cast<int>(Format::RGBA4444) :
+            case static_cast<int>(Image::RGBA4444) :
                 return "RGBA4444";
-            case static_cast<int>(Format::RGBA5551) :
+            case static_cast<int>(Image::RGBA5551) :
                 return "RGBA5551";
-            case static_cast<int>(Format::ALPHA) :
+            case static_cast<int>(Image::ALPHA) :
                 return "ALPHA";
-            case static_cast<int>(Format::DEPTH) :
+            case static_cast<int>(Image::DEPTH) :
                 return "DEPTH";
             default:
                 return "RGBA";
@@ -507,30 +407,30 @@ std::string Texture::enumToString(const std::string& enumName, int value)
 
 int Texture::enumParse(const std::string& enumName, const std::string& str)
 {
-    if (enumName.compare("mgp::Texture::Format") == 0)
+    if (enumName.compare("mgp::Image::Format") == 0)
     {
         if (str.compare("UNKNOWN") == 0)
-            return static_cast<int>(Format::UNKNOWN);
+            return static_cast<int>(Image::UNKNOWN);
         else if (str.compare("RGB888") == 0)
-            return static_cast<int>(Format::RGB888);
+            return static_cast<int>(Image::RGB888);
         else if (str.compare("RGB565") == 0)
-            return static_cast<int>(Format::RGB565);
+            return static_cast<int>(Image::RGB565);
         else if (str.compare("RGB") == 0)
-            return static_cast<int>(Format::RGB);
+            return static_cast<int>(Image::RGB);
         else if (str.compare("RGBA") == 0)
-            return static_cast<int>(Format::RGBA);
+            return static_cast<int>(Image::RGBA);
         else if (str.compare("RGB565") == 0)
-            return static_cast<int>(Format::RGBA8888);
+            return static_cast<int>(Image::RGBA8888);
         else if (str.compare("RGBA8888") == 0)
-            return static_cast<int>(Format::RGBA4444);
+            return static_cast<int>(Image::RGBA4444);
         else if (str.compare("RGBA4444") == 0)
-            return static_cast<int>(Format::RGBA5551);
+            return static_cast<int>(Image::RGBA5551);
         else if (str.compare("RGBA5551") == 0)
-            return static_cast<int>(Format::ALPHA);
+            return static_cast<int>(Image::ALPHA);
         else if (str.compare("ALPHA") == 0)
-            return static_cast<int>(Format::RGB565);
+            return static_cast<int>(Image::RGB565);
         else if (str.compare("DEPTH") == 0)
-            return static_cast<int>(Format::DEPTH);
+            return static_cast<int>(Image::DEPTH);
     }
     else if (enumName.compare("mgp::Texture::Filter") == 0)
     {
@@ -575,7 +475,19 @@ std::string Texture::getClassName() {
  * @see Serializable::onSerialize
  */
 void Texture::onSerialize(Serializer* serializer) {
-    serializer->writeString("id", _id.c_str(), "");
+
+    if (_path.size() == 0) {
+        serializer->writeList("images", _datas.size());
+        for (auto& image : _datas) {
+            serializer->writeString(NULL, image->getId().c_str(), "");
+        }
+        serializer->finishColloction();
+    }
+    else {
+        serializer->writeList("images", 0);
+        serializer->finishColloction();
+    }
+
     serializer->writeString("path", _path.c_str(), "");
     serializer->writeEnum("minFilter", "mgp::Texture::Filter", static_cast<int>(_minFilter), -1);
     serializer->writeEnum("magFilter", "mgp::Texture::Filter", static_cast<int>(_magFilter), -1);
@@ -584,7 +496,7 @@ void Texture::onSerialize(Serializer* serializer) {
     serializer->writeEnum("wrapT", "mgp::Texture::Wrap", static_cast<int>(_wrapT), REPEAT);
     serializer->writeEnum("wrapR", "mgp::Texture::Wrap", static_cast<int>(_wrapR), REPEAT);
 
-    serializer->writeEnum("format", "mgp::Texture::Format", static_cast<int>(_format), RGBA8888);
+    serializer->writeEnum("format", "mgp::Image::Format", static_cast<int>(_format), Image::RGBA8888);
     serializer->writeEnum("type", "mgp::Texture::Type", static_cast<int>(_type), TEXTURE_2D);
     serializer->writeBool("mipmap", _mipmapped, false);
 }
@@ -593,17 +505,20 @@ void Texture::onSerialize(Serializer* serializer) {
  * @see Serializable::onDeserialize
  */
 void Texture::onDeserialize(Serializer* serializer) {
-    serializer->readString("id", _id, "");
+    int imagesSize = serializer->readList("images");
+    for (int i = 0; i < imagesSize; ++i) {
+        std::string id;
+        serializer->readString(NULL, id, "");
+        UPtr<Image> image = AssetManager::getInstance()->load<Image>(id, AssetManager::rt_image);
+        this->_datas.push_back(SPtr<Image>(image.take()));
+    }
+    serializer->finishColloction();
+
     serializer->readString("path", _path, "");
     if (_path.size() > 0) {
         this->load(_path.c_str());
     }
-    else {
-        UPtr<Texture> t  = AssetManager::getInstance()->load<Texture>(_id, AssetManager::rt_textureData);
-        this->_data = t->_data;
-        this->setData(t->_data);
-        t->_data = NULL;
-    }
+
     _minFilter = static_cast<Texture::Filter>(serializer->readEnum("minFilter", "mgp::Texture::Filter", -1));
     _magFilter = static_cast<Texture::Filter>(serializer->readEnum("magFilter", "mgp::Texture::Filter", -1));
 
@@ -611,25 +526,9 @@ void Texture::onDeserialize(Serializer* serializer) {
     _wrapT = static_cast<Texture::Wrap>(serializer->readEnum("wrapT", "mgp::Texture::Wrap", REPEAT));
     _wrapR = static_cast<Texture::Wrap>(serializer->readEnum("wrapR", "mgp::Texture::Wrap", REPEAT));
 
-    _format = static_cast<Texture::Format>(serializer->readEnum("format", "mgp::Texture::Format", RGBA8888));
+    _format = static_cast<Image::Format>(serializer->readEnum("format", "mgp::Image::Format", Image::RGBA8888));
     _type = static_cast<Texture::Type>(serializer->readEnum("type", "mgp::Texture::Type", TEXTURE_2D));
     _mipmapped = serializer->readBool("mipmap", false);
-}
-
-void Texture::write(Stream* file) {
-    if (!_data) return;
-    int bpp = getFormatBPP(_format);
-    int size = bpp * _width * _height;
-    file->write((const char*)_data, size);
-}
-
-bool Texture::read(Stream* file) {
-    GP_ASSERT(_data == NULL);
-    int bpp = getFormatBPP(_format);
-    int size = bpp * _width * _height;
-    _data = (const unsigned char*)malloc(size);
-    file->read((char*)_data, size);
-    return true;
 }
 
 void Texture::copyFrom(Texture* that) {
@@ -651,7 +550,7 @@ void Texture::copyFrom(Texture* that) {
     _dataDirty = that->_dataDirty;
 
     _handle = that->_handle;
-    _data = that->_data;
+    _datas = that->_datas;
 }
 
 void Texture::setWrapMode(Wrap wrapS, Wrap wrapT, Wrap wrapR)
@@ -669,12 +568,13 @@ void Texture::setFilterMode(Filter minificationFilter, Filter magnificationFilte
 
 void Texture::bind()
 {
-    if (_dataDirty && _data) {
+    if (_dataDirty && _datas.size() > 0) {
         _dataDirty = false;
         Renderer::cur()->updateTexture(this);
         if (!_keepMemory) {
-            free((void*)_data);
-            _data = NULL;
+            for (auto& image : _datas) {
+                image->setData(NULL);
+            }
         }
     }
 
@@ -692,7 +592,7 @@ void Texture::setSize(unsigned int width, unsigned int height) {
 }
 
 void* Texture::lock() {
-    return (void*)_data;
+    return (void*)_datas.at(0)->getData();
     //TODO;
 }
 void Texture::unlock() {

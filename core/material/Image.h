@@ -2,6 +2,7 @@
 #define IMAGE_H__
 
 #include "base/Ref.h"
+#include "base/Resource.h"
 
 namespace mgp
 {
@@ -11,8 +12,9 @@ namespace mgp
  *
  * Currently only supports loading from .png image files.
  */
-class Image : public Refable
+class Image : public Resource
 {
+    friend class Texture;
 public:
 
     /**
@@ -20,10 +22,35 @@ public:
      */
     enum Format
     {
+        UNKNOWN = 0,
+        //auto size type
         RGB,
         RGBA,
-        RGBF,
-        RGBAF,
+        ALPHA,
+        RED,
+        RG,
+
+        //fix size type
+        RGB888,
+        RGB565,
+        RGBA4444,
+        RGBA5551,
+        RGBA8888,
+
+        //depth
+        DEPTH,
+        DEPTH24_STENCIL8,
+
+        //float type
+        RGB16F,
+        RGBA16F,
+        R16F,
+        R11F_G11F_B10F,
+        RGB9_E5,
+        R32F,
+        RGB32F,
+        RGBA32F,
+        RG16F,
     };
 
     /**
@@ -57,13 +84,18 @@ public:
      */
     inline unsigned char* getData() const;
     void setData(unsigned char* data);
-
+    
     /**
      * Gets the image's format.
      *
      * @return The image's format.
      */
     inline Format getFormat() const;
+
+    /**
+    * byte size per pixcel
+    */
+    static size_t getFormatBPP(Format format);
 
     /**
      * Gets the height of the image.
@@ -86,13 +118,14 @@ public:
     */
     bool save(const char* file, const char* format = "png");
 
-private:
+    void write(Stream* file) override;
+    bool read(Stream* file) override;
 
     /**
      * Constructor.
      */
     Image();
-
+private:
     /**
      * Destructor.
      */

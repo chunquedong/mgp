@@ -62,7 +62,7 @@ public:
      * @return A newly created FrameBuffer.
      * @script{create}
      */
-    static UPtr<FrameBuffer> create(const char* id, unsigned int width, unsigned int height, Texture::Format format = Texture::RGBA);
+    static UPtr<FrameBuffer> create(const char* id, unsigned int width, unsigned int height, Image::Format format = Image::RGBA);
 
     /**
      * Get the ID of this FrameBuffer.

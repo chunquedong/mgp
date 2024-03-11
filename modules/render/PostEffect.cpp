@@ -21,7 +21,7 @@ SSAO::SSAO(RenderPath* renderPath) {
     ssao->_drawType = -1;
     ssao->_inputTextureBuffers["u_texture"] = "main.1";
     ssao->_newDstBufferSize = 0.5;
-    ssao->_newDstBufferFormat = Texture::RED;
+    ssao->_newDstBufferFormat = Image::RED;
     ssao->_dstBufferName = "ssao";
     _passGroup.push_back(ssao);
 
@@ -29,7 +29,7 @@ SSAO::SSAO(RenderPath* renderPath) {
     post->_renderPath = renderPath;
     post->_inputTextureBuffers["u_texture"] = "ssao.0";
     post->_newDstBufferSize = 0.5;
-    post->_newDstBufferFormat = Texture::RED;
+    post->_newDstBufferFormat = Image::RED;
     post->_dstBufferName = "ssaoBlur";
     post->_material = Material::create("res/shaders/postEffect/fullQuad.vert", "res/shaders/postEffect/blurOne.frag");
     _passGroup.push_back(post);
@@ -82,7 +82,7 @@ SSAO::SSAO(RenderPath* renderPath) {
         ssaoNoise.push_back(noise.y);
         ssaoNoise.push_back(noise.z);
     }
-    UPtr<Texture> _noiseTexture = Texture::create(Texture::RGB16F, 4, 4, (const unsigned char*)&ssaoNoise[0]);
+    UPtr<Texture> _noiseTexture = Texture::create(Image::RGB16F, 4, 4, (const unsigned char*)&ssaoNoise[0]);
     /*GLuint noiseTexture; glGenTextures(1, &noiseTexture);
     glBindTexture(GL_TEXTURE_2D, noiseTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
@@ -108,7 +108,7 @@ Bloom::Bloom(RenderPath* renderPath) {
     bloom->_inputTextureBuffers["u_texture"] = "main.0";
     bloom->_dstBufferName = "bloom";
     bloom->_newDstBufferSize = 0.5;
-    bloom->_newDstBufferFormat = Texture::RGBA16F;
+    bloom->_newDstBufferFormat = Image::RGBA16F;
     bloom->_material->getParameter("u_brightLimit")->setFloat(1.0);
     _passGroup.push_back(bloom);
 
@@ -117,7 +117,7 @@ Bloom::Bloom(RenderPath* renderPath) {
     //blur->_inputTextureBuffers["u_texture"] = "bloom.0";
     //blur->_dstBufferName = "bloom_blur";
     //blur->_newDstBufferSize = 0.5;
-    //blur->_newDstBufferFormat = Texture::RGBA;
+    //blur->_newDstBufferFormat = Image::RGBA;
     //blur->_material = Material::create("res/shaders/postEffect/fullQuad.vert", "res/shaders/postEffect/gaussianBlur.frag");
     //blur->_material->getParameter("u_horizontal")->setValue(true);
     //_passGroup.push_back(blur);
@@ -127,7 +127,7 @@ Bloom::Bloom(RenderPath* renderPath) {
     blur2->_inputTextureBuffers["u_texture"] = "bloom.0";
     blur2->_dstBufferName = "bloom_blur2";
     blur2->_newDstBufferSize = 0.15;
-    blur2->_newDstBufferFormat = Texture::RGBA16F;
+    blur2->_newDstBufferFormat = Image::RGBA16F;
     blur2->_material = Material::create("res/shaders/postEffect/fullQuad.vert", "res/shaders/postEffect/gaussianBlur.frag");
     //blur2->_material->getParameter("u_horizontal")->setValue(false);
     _passGroup.push_back(blur2);
@@ -137,7 +137,7 @@ Bloom::Bloom(RenderPath* renderPath) {
     blur3->_inputTextureBuffers["u_texture"] = "bloom_blur2.0";
     blur3->_dstBufferName = "bloom_blur3";
     blur3->_newDstBufferSize = 0.15;
-    blur3->_newDstBufferFormat = Texture::RGBA16F;
+    blur3->_newDstBufferFormat = Image::RGBA16F;
     blur3->_material = Material::create("res/shaders/postEffect/fullQuad.vert", "res/shaders/postEffect/gaussianBlur.frag", "GAUSS_HORIZONTAL");
     //blur3->_material->getParameter("u_horizontal")->setValue(true);
     _passGroup.push_back(blur3);

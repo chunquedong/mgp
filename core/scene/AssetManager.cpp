@@ -122,10 +122,10 @@ UPtr<Resource> AssetManager::load(const std::string &name, ResType type) {
             res = mesh;
             break;
         }
-        case rt_textureData: {
-            std::string file = path + "/" + name + ".texture";
+        case rt_image: {
+            std::string file = path + "/" + name + ".image";
             UPtr<Stream> s = FileSystem::open(file.c_str());
-            Texture* m = new Texture();
+            Image* m = new Image();
             m->read(s.get());
             m->setId(name);
             res = m;
@@ -173,8 +173,8 @@ void AssetManager::save(Resource* res) {
         s->close();
         //delete s;
     }
-    else if (Texture* texture = dynamic_cast<Texture*>(res)) {
-        std::string file = path + "/" + name + ".texture";
+    else if (Image* texture = dynamic_cast<Image*>(res)) {
+        std::string file = path + "/" + name + ".image";
         UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
         texture->write(s.get());
         s->close();

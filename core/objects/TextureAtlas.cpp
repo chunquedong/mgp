@@ -13,11 +13,11 @@
 
 using namespace mgp;
 
-TextureAtlas::TextureAtlas(Texture::Format format, int w, int h) : texture(NULL), lastX(0), curY(0), maxY(0), isFull(false), data(NULL) {
+TextureAtlas::TextureAtlas(Image::Format format, int w, int h) : texture(NULL), lastX(0), curY(0), maxY(0), isFull(false), data(NULL) {
     
     texture = Texture::create(format, w, h, data).take();
 
-    int pixelSize = texture->getFormatBPP(texture->getFormat());
+    int pixelSize = Image::getFormatBPP(texture->getFormat());
     unsigned char* data = (unsigned char*)calloc(1, w * h * pixelSize);
     this->data = data;
 }
@@ -29,7 +29,7 @@ TextureAtlas::~TextureAtlas() {
 
 
 bool TextureAtlas::addImage(Image* image, Rectangle& rect) {
-    if (texture->getFormat() == Texture::RGBA) {
+    if (texture->getFormat() == Image::RGBA) {
         GP_ASSERT(image->getFormat() == Image::RGBA);
     }
     return addImageData(image->getWidth(), image->getHeight(), image->getData(), rect);
@@ -52,7 +52,7 @@ bool TextureAtlas::addImageData(int imgW, int imgH, const unsigned char* imgData
         return false;
     }
 
-    int pixelSize = texture->getFormatBPP(texture->getFormat());
+    int pixelSize = Image::getFormatBPP(texture->getFormat());
 
     //copy sub image
     int x = this->lastX + 1;

@@ -3,6 +3,7 @@
 #include "ogl.h"
 #include "DepthStencilTarget.h"
 #include "platform/Toolkit.h"
+#include "scene/Renderer.h"
 
 #define FRAMEBUFFER_ID_DEFAULT "framebuffer.default"
 
@@ -80,7 +81,7 @@ UPtr<FrameBuffer> GLFrameBuffer::create(const char* id)
     return create(id, 0, 0);
 }
 
-UPtr<FrameBuffer> GLFrameBuffer::create(const char* id, unsigned int width, unsigned int height, Texture::Format format)
+UPtr<FrameBuffer> GLFrameBuffer::create(const char* id, unsigned int width, unsigned int height, Image::Format format)
 {
     UPtr<Texture> renderTarget;
     if (width > 0 && height > 0)
@@ -105,6 +106,7 @@ UPtr<FrameBuffer> GLFrameBuffer::create(const char* id, unsigned int width, unsi
 
     if (renderTarget.get())
     {
+        Renderer::cur()->updateTexture(renderTarget.get());
         frameBuffer->setRenderTarget(renderTarget.get(), 0);
         //SAFE_RELEASE(renderTarget);
     }
@@ -181,13 +183,13 @@ void GLFrameBuffer::setRenderTarget(Texture* target, unsigned int index, GLenum 
         // Now set this target as the color attachment corresponding to index.
         GL_ASSERT( glBindFramebuffer(GL_FRAMEBUFFER, _handle) );
         GLenum attachment;
-        if (target->getFormat() == Texture::DEPTH)
+        if (target->getFormat() == Image::DEPTH)
         {
             attachment = GL_DEPTH_ATTACHMENT;
             GL_ASSERT( glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, textureTarget, _renderTargets[index]->getHandle(), mipmapLevel));
 
         }
-        else if (target->getFormat() == Texture::DEPTH24_STENCIL8) {
+        else if (target->getFormat() == Image::DEPTH24_STENCIL8) {
             attachment = GL_DEPTH_STENCIL_ATTACHMENT;
             GL_ASSERT( glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, textureTarget, _renderTargets[index]->getHandle(), mipmapLevel));
         }

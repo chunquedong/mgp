@@ -130,7 +130,7 @@ void RenderPass::onResize(int w, int h) {
         }
         else {
             //SAFE_RELEASE(_dstFrameBuffer);
-            GP_ASSERT(_newDstBufferFormat != Texture::UNKNOWN);
+            GP_ASSERT(_newDstBufferFormat != Image::UNKNOWN);
             _dstFrameBuffer = _renderPath->getRenderer()->createFrameBuffer(_dstBufferName.c_str(), 
                     w* _newDstBufferSize, h* _newDstBufferSize, _newDstBufferFormat);
             _dstFrameBuffer->check();
@@ -164,7 +164,7 @@ GBuffer::GBuffer() {
     _material = Material::create("res/shaders/deferred/gbuffer.vert", "res/shaders/deferred/gbuffer.frag");
     _drawType = Drawable::RenderLayer::Qpaque;
     this->_newDstBufferSize = 1.0;
-    this->_newDstBufferFormat = Texture::RGBA16F;
+    this->_newDstBufferFormat = Image::RGBA16F;
     this->_dstBufferName = "gbuffer";
 }
 
@@ -178,7 +178,7 @@ void GBuffer::onResize(int w, int h) {
     /*RenderTarget* normal = RenderTarget::create("normal", w, h, Texture::RGBA16F);
     _dstBuffer->setRenderTarget(normal, 1);*/
 
-    UPtr<Texture> depth = Texture::create(Texture::DEPTH24_STENCIL8, w, h, NULL);
+    UPtr<Texture> depth = Texture::create(Image::DEPTH24_STENCIL8, w, h, NULL);
     _dstFrameBuffer->setRenderTarget(depth.get(), 1);
 
     _dstFrameBuffer->check();
@@ -194,7 +194,7 @@ LightShading::LightShading()
     _drawType = -1;
     _inputTextureBuffers["u_texture"] = "gbuffer.0";
     _newDstBufferSize = 1;
-    _newDstBufferFormat = Texture::RGBA16F;
+    _newDstBufferFormat = Image::RGBA16F;
     _dstBufferName = "lbuffer";
 }
 

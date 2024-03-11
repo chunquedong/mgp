@@ -5,6 +5,7 @@
 #include "base/Stream.h"
 #include "base/Serializable.h"
 #include "base/Resource.h"
+#include "Image.h"
 
 namespace mgp
 {
@@ -12,53 +13,15 @@ namespace mgp
 /** Texture handle. */
 typedef unsigned int TextureHandle;
 
-class Image;
-
 /**
  * Defines a standard texture.
  */
-class Texture : public Resource, public Serializable
+class Texture : public Refable, public Serializable
 {
     friend class Sampler;
     friend class CompressedTexture;
     friend class GLRenderer;
 public:
-
-    /**
-     * Defines the set of supported texture formats.
-     */
-    enum Format
-    {
-        UNKNOWN = 0,
-        //auto size type
-        RGB,
-        RGBA,
-        ALPHA,
-        RED,
-        RG,
-
-        //fix size type
-        RGB888,
-        RGB565,
-        RGBA4444,
-        RGBA5551,
-        RGBA8888,
-
-        //depth
-        DEPTH,
-        DEPTH24_STENCIL8,
-
-        //float type
-        RGB16F,
-        RGBA16F,
-        R16F,
-        R11F_G11F_B10F,
-        RGB9_E5,
-        R32F,
-        RGB32F,
-        RGBA32F,
-        RG16F,
-    };
 
     /**
      * Defines the set of supported texture filters.
@@ -130,7 +93,7 @@ public:
      * @return The new texture, or NULL if the image is not of a supported texture format.
      * @script{create}
      */
-    static UPtr<Texture> create(Image* image, bool generateMipmaps = false, bool copyData = true);
+    static UPtr<Texture> create(UPtr<Image> image, bool generateMipmaps = false);
 
     /**
      * Creates a texture from the given texture data.
@@ -149,12 +112,11 @@ public:
      * @return The new texture.
      * @script{create}
      */
-    static UPtr<Texture> create(Format format, unsigned int width, unsigned int height, const unsigned char* data, 
+    static UPtr<Texture> create(Image::Format format, unsigned int width, unsigned int height, const unsigned char* data,
         bool generateMipmaps = false, Type type = TEXTURE_2D, bool copyData = true, unsigned int arrayDepth = 0);
 
     static UPtr<Texture> loadCubeMap(const char* faces[]);
 
-    static size_t getFormatBPP(Texture::Format format);
     /**
      * Creates a texture object to wrap the specified pre-created native texture handle.
      *
@@ -167,7 +129,7 @@ public:
      * @param width The width of the texture represented by 'handle'.
      * @param height The height of the texture represented by 'handle'.
      * @param format Optionally, the format of the texture represented by 'handle'.
-     *      If the format cannot be represented by any of the Texture::Format values,
+     *      If the format cannot be represented by any of the Image::Format values,
      *      use a value of UNKNOWN.
      *
      * @return The new texture.
@@ -206,7 +168,7 @@ public:
      *
      * @return The texture format.
      */
-    Format getFormat() const;
+    Image::Format getFormat() const;
 
     /**
      * Gets the texture type.
@@ -285,9 +247,6 @@ public:
      */
     void onDeserialize(Serializer* serializer) override;
 
-    void write(Stream* file) override;
-    bool read(Stream* file) override;
-
     void copyFrom(Texture* that);
 
     /**
@@ -316,7 +275,6 @@ public:
 
     void setKeepMemory(bool b);
 
-
     /**
      * Constructor.
      */
@@ -337,9 +295,10 @@ private:
      */
     Texture& operator=(const Texture&) = delete;
 
+private:
     std::string _path;
     
-    Format _format;
+    Image::Format _format;
     Type _type;
     unsigned int _width;
     unsigned int _height;
@@ -353,17 +312,13 @@ private:
 
     Filter _magFilter;
 
-    //bool _generateMipmaps;
-
-    //int _internalFormat;
-    //unsigned int _texelType;
-    //size_t _bpp;
     bool _keepMemory;
     bool _dataDirty;
-private:
+
     TextureHandle _handle;
-    const unsigned char* _data;
     Filter _minFilter;
+private:
+    std::vector<SPtr<Image> > _datas;
 };
 
 }

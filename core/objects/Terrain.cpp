@@ -837,7 +837,7 @@ void Terrain::generateNormalMap()
     //LOG(1, "\rCalculating normals... Done.\n");
 
     // Create and save an image for the normal map
-    UPtr<Texture> texture = Texture::create(Texture::Format::RGBA, _resolutionX, _resolutionY, 
+    UPtr<Texture> texture = Texture::create(Image::Format::RGBA, _resolutionX, _resolutionY, 
         (const unsigned char*)normalPixels, true);
     texture->setWrapMode(Texture::CLAMP, Texture::CLAMP);
     if (_normalMap) {

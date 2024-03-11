@@ -7,8 +7,8 @@
  * History:
  *   2012-12-23  Jed Young  Creation
  */
-#ifndef STRINGUTIL_H_
-#define STRINGUTIL_H_
+#ifndef RESOURCE_H
+#define RESOURCE_H
 
 
 #include "Ref.h"

@@ -148,9 +148,9 @@ void Shadow::update(Scene* scene, Renderer *renderer, Light* light, Camera* curC
     int height = _cascadeTextureSize;
     if (_frameBuffer == NULL) {
         //SAFE_RELEASE(cascade.frameBuffer);
-        //cascade.frameBuffer = renderer->createFrameBuffer("shadow", width, height, Texture::RGBA);
+        //cascade.frameBuffer = renderer->createFrameBuffer("shadow", width, height, Image::RGBA);
         //cascade.frameBuffer->createDepthStencilTarget();
-        _frameBuffer = renderer->createFrameBuffer("shadow", width, height * _cascadeCount, Texture::DEPTH).take();
+        _frameBuffer = renderer->createFrameBuffer("shadow", width, height * _cascadeCount, Image::DEPTH).take();
         _frameBuffer->disableDrawBuffer();
         _frameBuffer->check();
     }

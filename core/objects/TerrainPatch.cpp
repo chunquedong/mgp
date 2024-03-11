@@ -636,7 +636,7 @@ void TerrainPatch::genLayerVertex(std::vector<float>& position, int layerIndex, 
 
         auto layer =_terrain->_layers.at(layerIndex);
         Texture* blendTexture = _terrain->_samplers[layer->blendIndex];
-        int bbp = Texture::getFormatBPP(blendTexture->getFormat());
+        int bbp = Image::getFormatBPP(blendTexture->getFormat());
         unsigned char* blendData = (unsigned char*)blendTexture->lock();
         int channel = layer->blendChannel;
 

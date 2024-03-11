@@ -94,7 +94,7 @@ public:
     virtual void bindTextureSampler(Texture* texture) = 0;
 
 
-    virtual UPtr<FrameBuffer> createFrameBuffer(const char* id, unsigned int width, unsigned int height, Texture::Format format = Texture::RGBA) = 0;
+    virtual UPtr<FrameBuffer> createFrameBuffer(const char* id, unsigned int width, unsigned int height, Image::Format format = Image::RGBA) = 0;
     virtual FrameBuffer* getCurrentFrameBuffer() = 0;
 
 

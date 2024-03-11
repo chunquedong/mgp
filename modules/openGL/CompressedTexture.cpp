@@ -99,7 +99,7 @@ UPtr<Texture> CompressedTexture::createCompressedDdsKtx(const char* path) {
     void* dds_data = load_file(path, &size);
     if (!dds_data) return UPtr<Texture>(NULL);
     ddsktx_texture_info tc = { 0 };
-    GLuint tex = 0;
+    GLuint RGBtex = 0;
     if (ddsktx_parse(&tc, dds_data, size, NULL)) {
         assert(tc.depth == 1);
         assert(tc.num_layers == 1);
@@ -696,7 +696,7 @@ UPtr<Texture> CompressedTexture::createCompressedDDS(const char* path)
     bool compressed = false;
     GLsizei width = header.dwWidth;
     GLsizei height = header.dwHeight;
-    Texture::Format textureFormat = Texture::UNKNOWN;
+    Image::Format textureFormat = Texture::UNKNOWN;
 
     if (header.ddspf.dwFlags & 0x4/*DDPF_FOURCC*/)
     {
@@ -786,13 +786,13 @@ UPtr<Texture> CompressedTexture::createCompressedDDS(const char* path)
         if (header.ddspf.dwRGBBitCount == 24)
         {
             format = internalFormat = GL_RGB;
-            textureFormat = Texture::RGB;
+            textureFormat = Image::RGB;
             colorConvert = (ridx != 0) || (gidx != 1) || (bidx != 2);
         }
         else if (header.ddspf.dwRGBBitCount == 32)
         {
             format = internalFormat = GL_RGBA;
-            textureFormat = Texture::RGBA;
+            textureFormat = Image::RGBA;
             if (ridx == 0 && gidx == 1 && bidx == 2)
             {
                 aidx = 3; // XBGR or ABGR

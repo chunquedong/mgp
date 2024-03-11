@@ -13,7 +13,7 @@ class AssetManager
 {
 public:
     enum ResType {
-        rt_textureData,
+        rt_image,
         rt_materail,
         //rt_shaderProgram,
         rt_mesh,

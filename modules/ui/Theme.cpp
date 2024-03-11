@@ -73,7 +73,7 @@ Theme* Theme::getDefault()
             GP_WARN("Creating empty UI Theme.");
             __defaultTheme = new Theme();
             //unsigned int color = 0x00000000;
-            //__defaultTheme->_texture = Texture::create(Texture::RGBA, 1, 1, (unsigned char*)&color, false);
+            //__defaultTheme->_texture = Texture::create(Image::RGBA, 1, 1, (unsigned char*)&color, false);
             //__defaultTheme->_emptyImage = new ThemeImage(1.0f, 1.0f, Rectangle::empty(), Vector4::zero());
             //__defaultTheme->_spriteBatch = SpriteBatch::create(__defaultTheme->_texture);
             //__defaultTheme->_spriteBatch->getSampler()->setFilterMode(Texture::LINEAR, Texture::LINEAR);
@@ -142,7 +142,7 @@ SPtr<Theme> Theme::create(const char* url)
     // Parse the Properties object and set up the theme.
     //std::string textureFile;
     //themeProperties->getPath("texture", &textureFile);
-    theme->_texture = new TextureAtlas(Texture::RGBA, 1024, 1024);//Texture::create(textureFile.c_str(), false);
+    theme->_texture = new TextureAtlas(Image::RGBA, 1024, 1024);//Texture::create(textureFile.c_str(), false);
     GP_ASSERT(theme->_texture);
     Texture* texture = theme->_texture->getTexture();
     theme->_spriteBatch = SpriteBatch::create(texture).take();

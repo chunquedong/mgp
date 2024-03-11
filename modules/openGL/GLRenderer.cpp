@@ -326,180 +326,180 @@ void GLRenderer::updateState(StateBlock* state, int force) {
 }
 
 
-GLint getFormatInternal(Texture::Format format)
+GLint getFormatInternal(Image::Format format)
 {
     switch (format)
     {
-    case Texture::UNKNOWN:
+    case Image::UNKNOWN:
         return 0;
         //auto size type
-    case Texture::RGB:
+    case Image::RGB:
         return GL_RGB;
-    case Texture::RGBA:
+    case Image::RGBA:
         return GL_RGBA;
-    case Texture::ALPHA:
+    case Image::ALPHA:
         return GL_ALPHA;
-    case Texture::RED:
+    case Image::RED:
         return GL_R8;
-    case Texture::RG:
+    case Image::RG:
         return GL_RG;
 
         //fix size type
-    case Texture::RGB888:
+    case Image::RGB888:
         return GL_RGB8;
-    case Texture::RGB565:
+    case Image::RGB565:
         return GL_RGB565;
-    case Texture::RGBA4444:
+    case Image::RGBA4444:
         return GL_RGBA4;
-    case Texture::RGBA5551:
+    case Image::RGBA5551:
         return GL_RGB5_A1;
-    case Texture::RGBA8888:
+    case Image::RGBA8888:
         return GL_RGBA8;
 
         //depth
-    case Texture::DEPTH:
+    case Image::DEPTH:
         return GL_DEPTH_COMPONENT32F;
-    case Texture::DEPTH24_STENCIL8:
+    case Image::DEPTH24_STENCIL8:
         return GL_DEPTH24_STENCIL8;
 
         //float type
-    case Texture::RGB16F:
+    case Image::RGB16F:
         return GL_RGB16F;
-    case Texture::RGBA16F:
+    case Image::RGBA16F:
         return GL_RGBA16F;
-    case Texture::R16F:
+    case Image::R16F:
         return GL_R16F;
-    case Texture::R11F_G11F_B10F:
+    case Image::R11F_G11F_B10F:
         return GL_R11F_G11F_B10F;
-    case Texture::RGB9_E5:
+    case Image::RGB9_E5:
         return GL_RGB9_E5;
-    case Texture::R32F:
+    case Image::R32F:
         return GL_R32F;
-    case Texture::RGB32F:
+    case Image::RGB32F:
         return GL_RGB32F;
-    case Texture::RGBA32F:
+    case Image::RGBA32F:
         return GL_RGBA32F;
-    case Texture::RG16F:
+    case Image::RG16F:
         return GL_RG16F;
     default:
         return 0;
     }
 }
 
-GLenum getIOFormat(Texture::Format format)
+GLenum getIOFormat(Image::Format format)
 {
     switch (format)
     {
-    case Texture::UNKNOWN:
+    case Image::UNKNOWN:
         return 0;
         //auto size type
-    case Texture::RGB:
+    case Image::RGB:
         return GL_RGB;
-    case Texture::RGBA:
+    case Image::RGBA:
         return GL_RGBA;
-    case Texture::ALPHA:
+    case Image::ALPHA:
         return GL_ALPHA;
-    case Texture::RED:
+    case Image::RED:
         return GL_RED;
-    case Texture::RG:
+    case Image::RG:
         return GL_RG;
 
         //fix size type
-    case Texture::RGB888:
+    case Image::RGB888:
         return GL_RGB;
-    case Texture::RGB565:
+    case Image::RGB565:
         return GL_RGB;
-    case Texture::RGBA4444:
+    case Image::RGBA4444:
         return GL_RGBA;
-    case Texture::RGBA5551:
+    case Image::RGBA5551:
         return GL_RGBA;
-    case Texture::RGBA8888:
+    case Image::RGBA8888:
         return GL_RGBA;
 
         //depth
-    case Texture::DEPTH:
+    case Image::DEPTH:
         return GL_DEPTH_COMPONENT;
-    case Texture::DEPTH24_STENCIL8:
+    case Image::DEPTH24_STENCIL8:
         return GL_DEPTH_STENCIL;
 
         //float type
-    case Texture::RGB16F:
+    case Image::RGB16F:
         return GL_RGB;
-    case Texture::RGBA16F:
+    case Image::RGBA16F:
         return GL_RGBA;
-    case Texture::R16F:
+    case Image::R16F:
         return GL_RED;
-    case Texture::R11F_G11F_B10F:
+    case Image::R11F_G11F_B10F:
         return GL_RGB;
-    case Texture::RGB9_E5:
+    case Image::RGB9_E5:
         return GL_RGB;
-    case Texture::R32F:
+    case Image::R32F:
         return GL_RED;
-    case Texture::RGB32F:
+    case Image::RGB32F:
         return GL_RGB;
-    case Texture::RGBA32F:
+    case Image::RGBA32F:
         return GL_RGBA;
-    case Texture::RG16F:
+    case Image::RG16F:
         return GL_RG;
     default:
         return 0;
     }
 }
 
-GLenum getFormatDataType(Texture::Format format)
+GLenum getFormatDataType(Image::Format format)
 {
     switch (format)
     {
-    case Texture::UNKNOWN:
+    case Image::UNKNOWN:
         return 0;
         //auto size type
-    case Texture::RGB:
+    case Image::RGB:
         return GL_UNSIGNED_BYTE;
-    case Texture::RGBA:
+    case Image::RGBA:
         return GL_UNSIGNED_BYTE;
-    case Texture::ALPHA:
+    case Image::ALPHA:
         return GL_UNSIGNED_BYTE;
-    case Texture::RED:
+    case Image::RED:
         return GL_UNSIGNED_BYTE;
-    case Texture::RG:
+    case Image::RG:
         return GL_UNSIGNED_BYTE;
 
         //fix size type
-    case Texture::RGB888:
+    case Image::RGB888:
         return GL_UNSIGNED_BYTE;
-    case Texture::RGB565:
+    case Image::RGB565:
         return GL_UNSIGNED_SHORT_5_6_5;
-    case Texture::RGBA4444:
+    case Image::RGBA4444:
         return GL_UNSIGNED_SHORT_4_4_4_4;
-    case Texture::RGBA5551:
+    case Image::RGBA5551:
         return GL_UNSIGNED_SHORT_5_5_5_1;
-    case Texture::RGBA8888:
+    case Image::RGBA8888:
         return GL_UNSIGNED_BYTE;
 
         //depth
-    case Texture::DEPTH:
+    case Image::DEPTH:
         return GL_FLOAT;
-    case Texture::DEPTH24_STENCIL8:
+    case Image::DEPTH24_STENCIL8:
         return GL_UNSIGNED_INT_24_8;
 
         //float type
-    case Texture::RGB16F:
+    case Image::RGB16F:
         return GL_FLOAT;
-    case Texture::RGBA16F:
+    case Image::RGBA16F:
         return GL_FLOAT;
-    case Texture::R16F:
+    case Image::R16F:
         return GL_FLOAT;
-    case Texture::R11F_G11F_B10F:
+    case Image::R11F_G11F_B10F:
         return GL_FLOAT;
-    case Texture::RGB9_E5:
+    case Image::RGB9_E5:
         return GL_FLOAT;
-    case Texture::R32F:
+    case Image::R32F:
         return GL_FLOAT;
-    case Texture::RGB32F:
+    case Image::RGB32F:
         return GL_FLOAT;
-    case Texture::RGBA32F:
+    case Image::RGBA32F:
         return GL_FLOAT;
-    case Texture::RG16F:
+    case Image::RG16F:
         return GL_FLOAT;
     default:
         return 0;
@@ -508,7 +508,7 @@ GLenum getFormatDataType(Texture::Format format)
 
 
 void GLRenderer::updateTexture(Texture* texture) {
-    Texture::Format format = texture->getFormat();
+    Image::Format format = texture->getFormat();
     Texture::Type type = texture->getType();
     GP_ASSERT(type == Texture::TEXTURE_2D || type == Texture::TEXTURE_CUBE);
 
@@ -545,10 +545,10 @@ void GLRenderer::updateTexture(Texture* texture) {
     GL_ASSERT(glBindTexture(target, textureId));
 
     // Load the texture
-    size_t bpp = Texture::getFormatBPP(format);
+    size_t bpp = Image::getFormatBPP(format);
     if (type == Texture::TEXTURE_2D)
     {
-        GL_ASSERT(glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, ioFormat, texelType, texture->_data));
+        GL_ASSERT(glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, ioFormat, texelType, texture->_datas.at(0)->getData()));
     }
     else if (type == Texture::TEXTURE_2D_ARRAY) {
         //(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels);
@@ -567,7 +567,8 @@ void GLRenderer::updateTexture(Texture* texture) {
         // Texture Cube
         for (unsigned int i = 0; i < texture->_arrayDepth; i++)
         {
-            const unsigned char* texturePtr = (texture->_data == NULL) ? NULL : &texture->_data[i * textureSize];
+            //const unsigned char* texturePtr = (texture->_data == NULL) ? NULL : &texture->_data[i * textureSize];
+            const unsigned char* texturePtr = texture->_datas.at(i)->getData();
             //(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *pixels);
             GL_ASSERT(glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height, 1, ioFormat, texelType, texturePtr));
         }
@@ -587,7 +588,8 @@ void GLRenderer::updateTexture(Texture* texture) {
         // Texture Cube
         for (unsigned int i = 0; i < 6; i++)
         {
-            const unsigned char* texturePtr = (texture->_data == NULL) ? NULL : &texture->_data[i * textureSize];
+            //const unsigned char* texturePtr = (texture->_data == NULL) ? NULL : &texture->_data[i * textureSize];
+            const unsigned char* texturePtr = texture->_datas.at(i)->getData();
             GL_ASSERT(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, width, height, 0, ioFormat, texelType, texturePtr));
         }
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1208,7 +1210,7 @@ void GLRenderer::deleteVertexAttributeObj(VertexAttributeObject* vertextAttribut
     }
 }
 
-UPtr<FrameBuffer> GLRenderer::createFrameBuffer(const char* id, unsigned int width, unsigned int height, Texture::Format format) {
+UPtr<FrameBuffer> GLRenderer::createFrameBuffer(const char* id, unsigned int width, unsigned int height, Image::Format format) {
     return GLFrameBuffer::create(id, width, height, format);
 }
 

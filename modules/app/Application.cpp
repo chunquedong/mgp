@@ -52,7 +52,7 @@ void regiseterSerializer() {
     mgr->registerEnum("mgp::Light::Mode", Light::enumToString, Light::enumParse);
     mgr->registerEnum("mgp::Light::Shadows", Light::enumToString, Light::enumParse);
 
-    mgr->registerEnum("mgp::Texture::Format", Texture::enumToString, Texture::enumParse);
+    mgr->registerEnum("mgp::Image::Format", Texture::enumToString, Texture::enumParse);
     mgr->registerEnum("mgp::Texture::Type", Texture::enumToString, Texture::enumParse);
     mgr->registerEnum("mgp::Texture::Wrap", Texture::enumToString, Texture::enumParse);
     mgr->registerEnum("mgp::Texture::Filter", Texture::enumToString, Texture::enumParse);

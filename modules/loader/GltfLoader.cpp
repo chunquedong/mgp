@@ -165,7 +165,7 @@ private:
 		if (texture->image->uri == NULL && texture->image->buffer_view) {
 			cgltf_buffer_view* buf = texture->image->buffer_view;
 			UPtr<Image> image = Image::createFromBuf((const char*)buf->buffer->data + buf->offset, buf->size, false);
-			UPtr<Texture> t = Texture::create(image.get(), false);
+			UPtr<Texture> t = Texture::create(std::move(image), false);
 			//SAFE_RELEASE(image);
 			return t;
 		}

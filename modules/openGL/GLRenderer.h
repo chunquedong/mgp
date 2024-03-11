@@ -49,7 +49,7 @@ public:
 	void unbindVertexAttributeObj(VertexAttributeObject* vertextAttribute);
 	void deleteVertexAttributeObj(VertexAttributeObject* vertextAttribute);
 
-    UPtr<FrameBuffer> createFrameBuffer(const char* id, unsigned int width, unsigned int height, Texture::Format format = Texture::RGBA) override;
+    UPtr<FrameBuffer> createFrameBuffer(const char* id, unsigned int width, unsigned int height, Image::Format format = Image::RGBA) override;
     FrameBuffer* getCurrentFrameBuffer() override;
 
 	int drawCallCount() override;

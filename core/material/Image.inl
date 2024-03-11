@@ -9,6 +9,11 @@ inline unsigned char* Image::getData() const
 }
 
 inline void Image::setData(unsigned char* data) {
+    if (_data == data) return;
+
+    if (_data) {
+        free(_data);
+    }
     _data = data;
 }
 

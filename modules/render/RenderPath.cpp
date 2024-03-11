@@ -315,9 +315,9 @@ void RenderPath::renderDrawables(std::vector<Drawable*>& drawables, Camera* came
 }
 
 void RenderPath::createFramebuffer() {
-    _frameBuffer = _renderer->createFrameBuffer("main", _width, _height, Texture::RGBA16F).take();
+    _frameBuffer = _renderer->createFrameBuffer("main", _width, _height, Image::RGBA16F).take();
     //_frameBuffer->createDepthStencilTarget();
-    Texture* depth = Texture::create(Texture::DEPTH24_STENCIL8, _width, _height, NULL).take();
+    Texture* depth = Texture::create(Image::DEPTH24_STENCIL8, _width, _height, NULL).take();
     _frameBuffer->setRenderTarget(depth, 1);
 
     _frameBuffer->check();

@@ -32,7 +32,7 @@ class TextureAtlas : public Refable {
     unsigned char* data;
 
 public:
-    TextureAtlas(Texture::Format format, int w, int h);
+    TextureAtlas(Image::Format format, int w, int h);
     ~TextureAtlas();
 
     bool addImageData(int imgW, int imgH, const unsigned char* imgData, Rectangle& rect);

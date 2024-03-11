@@ -142,7 +142,7 @@ bool FontCache::getGlyph(FontInfo& fontInfo, wchar_t c, Glyph& glyph) {
 
         //new texture
         if (fontTexture == NULL) {
-            fontTexture = new TextureAtlas(Texture::Format::RED, textureWidth, textureHeight);
+            fontTexture = new TextureAtlas(Image::Format::RED, textureWidth, textureHeight);
             fontTexture->getTexture()->setFilterMode(Texture::LINEAR, Texture::LINEAR);
             //fontTexture->getTexture()->setFilterMode(Texture::NEAREST, Texture::NEAREST);
             textureIndex = fontTextures.size();

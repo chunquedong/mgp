@@ -126,7 +126,7 @@ void SerializerManager::registerSystemTypes()
     //this->registerEnum("mgp::Light::Mode", Light::enumToString, Light::enumParse);
     //this->registerEnum("mgp::Light::Shadows", Light::enumToString, Light::enumParse);
 
-    //this->registerEnum("mgp::Texture::Format", Texture::enumToString, Texture::enumParse);
+    //this->registerEnum("mgp::Image::Format", Texture::enumToString, Texture::enumParse);
     //this->registerEnum("mgp::Texture::Type", Texture::enumToString, Texture::enumParse);
     //this->registerEnum("mgp::Texture::Wrap", Texture::enumToString, Texture::enumParse);
     //this->registerEnum("mgp::Texture::Filter", Texture::enumToString, Texture::enumParse);
