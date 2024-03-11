@@ -106,7 +106,6 @@ UPtr<FrameBuffer> GLFrameBuffer::create(const char* id, unsigned int width, unsi
 
     if (renderTarget.get())
     {
-        Renderer::cur()->updateTexture(renderTarget.get());
         frameBuffer->setRenderTarget(renderTarget.get(), 0);
         //SAFE_RELEASE(renderTarget);
     }
@@ -175,6 +174,8 @@ void GLFrameBuffer::setRenderTarget(Texture* target, unsigned int index, GLenum 
 
     if (target)
     {
+        Renderer::cur()->updateTexture(target);
+
         ++_renderTargetCount;
 
         // This GLFrameBuffer now references the RenderTarget.
