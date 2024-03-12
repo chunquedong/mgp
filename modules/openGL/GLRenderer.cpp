@@ -589,7 +589,10 @@ void GLRenderer::updateTexture(Texture* texture) {
         for (unsigned int i = 0; i < 6; i++)
         {
             //const unsigned char* texturePtr = (texture->_data == NULL) ? NULL : &texture->_data[i * textureSize];
-            const unsigned char* texturePtr = texture->_datas.at(i)->getData();
+            const unsigned char* texturePtr = NULL;
+            if (i < texture->_datas.size()) {
+                texturePtr = texture->_datas.at(i)->getData();
+            }
             GL_ASSERT(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, width, height, 0, ioFormat, texelType, texturePtr));
         }
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

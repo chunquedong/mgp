@@ -624,7 +624,7 @@ float SerializerJson::readFloat(const char* propertyName, float defaultValue)
     jc::Value* property = node->get(propertyName);
     if (property)
     {
-        if (property->type() != jc::Type::Float)
+        if (property->type() != jc::Type::Float && property->type() != jc::Type::Integer)
             GP_ERROR("Invalid json bool for propertyName:%s", propertyName);
         return property->as_float();
     }

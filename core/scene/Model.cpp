@@ -292,46 +292,68 @@ std::string Model::getClassName() {
 
 
 void Model::onSerialize(Serializer* serializer) {
+    serializer->writeInt("renderLayer", this->getRenderLayer(), 0);
+    serializer->writeInt("lightMask", this->getLightMask(), 0);
+
+    if (_mesh.get()) {
+        AssetManager::getInstance()->save(_mesh.get());
+    }
     if (_mesh.get()) serializer->writeString("mesh", _mesh->getId().c_str(), "");
     else serializer->writeString("mesh", "", "");
         
+    if (_skin.get()) {
+        AssetManager::getInstance()->save(_skin.get());
+    }
     if (_skin.get()) serializer->writeString("skin", _skin->getId().c_str(), "");
     else serializer->writeString("skin", "", "");
 
+    if (_material.get()) {
+        AssetManager::getInstance()->save(_material.get());
+    }
     if (_material.get()) serializer->writeString("material", _material->getId().c_str(), "");
     else serializer->writeString("material", "", "");
 
     serializer->writeList("partMaterials", _partMaterials.size());
     for (int i=0; i<_partMaterials.size(); ++i) {
-        if (_partMaterials[i].get()) serializer->writeString(NULL, _partMaterials[i]->getId().c_str(), NULL);
+        if (_partMaterials[i].get()) {
+            AssetManager::getInstance()->save(_partMaterials[i].get());
+            serializer->writeString(NULL, _partMaterials[i]->getId().c_str(), NULL);
+        }
         else serializer->writeString(NULL, "", NULL);
     }
     serializer->finishColloction();
 }
 
 void Model::onDeserialize(Serializer* serializer) {
+    setRenderLayer((Drawable::RenderLayer)serializer->readInt("renderLayer", 0));
+    setLightMask(serializer->readInt("lightMask", 0));
+
     std::string mesh;
     serializer->readString("mesh", mesh, "");
-    _mesh = AssetManager::getInstance()->load<Mesh>(mesh, AssetManager::rt_mesh);
-    //if (_mesh) _mesh->addRef();
+    if (mesh.size() > 0) {
+        _mesh = AssetManager::getInstance()->load<Mesh>(mesh, AssetManager::rt_mesh);
+    }
 
     std::string skin;
     serializer->readString("skin", skin, "");
-    _skin = AssetManager::getInstance()->load<MeshSkin>(skin, AssetManager::rt_skin);
-    //if (_skin) _skin->addRef();
+    if (skin.size() > 0) {
+        _skin = AssetManager::getInstance()->load<MeshSkin>(skin, AssetManager::rt_skin);
+    }
 
     std::string material;
     serializer->readString("material", material, "");
-
-    _material = AssetManager::getInstance()->load<Material>(material, AssetManager::rt_materail);
-    //if (_material) _material->addRef();
+    if (material.size() > 0) {
+        _material = AssetManager::getInstance()->load<Material>(material, AssetManager::rt_materail);
+    }
 
     int materialsCount = serializer->readList("partMaterials");
     for (int i=0; i<materialsCount; ++i) {
         std::string material;
         serializer->readString(NULL, material, NULL);
-        UPtr<Material> m = AssetManager::getInstance()->load<Material>(material, AssetManager::rt_materail);
-        if (m.get()) this->setMaterial(std::move(m), i);
+        if (material.size() > 0) {
+            UPtr<Material> m = AssetManager::getInstance()->load<Material>(material, AssetManager::rt_materail);
+            if (m.get()) this->setMaterial(std::move(m), i);
+        }
     }
     serializer->finishColloction();
 }

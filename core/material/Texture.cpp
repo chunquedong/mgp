@@ -223,6 +223,10 @@ UPtr<Texture> Texture::loadCubeMap(const char* faces[]) {
             texture->release();
             return UPtr<Texture>(nullptr);
         }
+
+        format = image->_format;
+        width = image->_width;
+        height = image->_height;
         
         texture->_datas.push_back(SPtr<Image>(image.take()));
     }

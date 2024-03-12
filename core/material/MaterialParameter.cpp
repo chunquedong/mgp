@@ -1027,7 +1027,7 @@ void MaterialParameter::onSerialize(Serializer* serializer) {
  */
 void MaterialParameter::onDeserialize(Serializer* serializer) {
     serializer->readString("name", _name, "");
-    _type = static_cast<MaterialParameter::Type>(serializer->readEnum("minFilter", "mgp::MaterialParameter::Type", -1));
+    _type = static_cast<MaterialParameter::Type>(serializer->readEnum("type", "mgp::MaterialParameter::Type", -1));
     _count = serializer->readInt("count", 1);
 
     switch (_type) {
@@ -1054,25 +1054,25 @@ void MaterialParameter::onDeserialize(Serializer* serializer) {
     }
     case MaterialParameter::VECTOR2: {
         Vector2 v;
-        serializer->readVector("value", v);
+        v = serializer->readVector("value", v);
         setVector2(v);
         break;
     }
     case MaterialParameter::VECTOR3: {
         Vector3 v;
-        serializer->readVector("value", v);
+        v = serializer->readVector("value", v);
         setVector3(v);
         break;
     }
     case MaterialParameter::VECTOR4: {
         Vector4 v;
-        serializer->readVector("value", v);
+        v = serializer->readVector("value", v);
         setVector4(v);
         break;
     }
     case MaterialParameter::MATRIX: {
         Matrix v;
-        serializer->readMatrix("value", v);
+        v = serializer->readMatrix("value", v);
         setMatrix(v);
         break;
     }

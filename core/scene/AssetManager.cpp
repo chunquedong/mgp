@@ -179,6 +179,9 @@ void AssetManager::save(Resource* res) {
         texture->write(s.get());
         s->close();
     }
+    else {
+        GP_ERROR("ERROR: unknow resource\n");
+    }
 
     _saved[name] = 1;
 }
