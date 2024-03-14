@@ -223,7 +223,7 @@ protected:
     
     SerializerJson(Type type, Stream* stream, uint32_t versionMajor, uint32_t versionMinor, jc::JsonNode* root);
     
-    
+    jc::Value* readElement(const char* propertyName);
 private:
     
     jc::JsonNode* createNode(jc::JsonNode* parent, const char* propertyName);

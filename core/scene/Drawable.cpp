@@ -168,3 +168,22 @@ UPtr<Drawable> mgp::DrawableGroup::clone(NodeCloneContext& context) {
     return ng;
 }
 
+std::string mgp::DrawableGroup::getClassName() {
+    return "mgp::DrawableGroup";
+}
+void mgp::DrawableGroup::onSerialize(Serializer* serializer) {
+    serializer->writeList("list", _drawables.size());
+    for (UPtr<Drawable>& d : _drawables) {
+        if (Serializable* c = dynamic_cast<Serializable*>(d.get())) {
+            serializer->writeObject(NULL, c);
+        }
+    }
+    serializer->finishColloction();
+}
+void mgp::DrawableGroup::onDeserialize(Serializer* serializer) {
+    int n = serializer->readList("list");
+    for (int i = 0; i < n; ++i) {
+        auto c = serializer->readObject(NULL).dynamicCastTo<Drawable>();
+        _drawables.push_back(std::move(c));
+    }
+}

@@ -256,7 +256,9 @@ public:
     /**
      * Hidden copy constructor.
      */
-    Scene(const Scene& copy);
+    Scene(const Scene& copy) = delete;
+
+    std::vector<Animation*>& getAnimations() { return _animations; }
 public:
     /**
      * Destructor.
@@ -266,7 +268,7 @@ private:
     /**
      * Hidden copy assignment operator.
      */
-    Scene& operator=(const Scene&);
+    Scene& operator=(const Scene&) = delete;
 
     /**
      * Visits the given node and all of its children recursively.
@@ -299,6 +301,8 @@ private:
     Node* _nextItr;
     int _nextIndex;
     bool _nextReset;
+
+    std::vector<Animation*> _animations;
 };
 
 template <class T>

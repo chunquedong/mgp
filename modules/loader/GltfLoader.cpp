@@ -506,7 +506,7 @@ private:
 	}
 
 	UPtr<Model> loadPrimitiveAsMesh(cgltf_primitive* primitive) {
-		int vertexCount = 0;
+		//int vertexCount = 0;
 		std::vector<cgltf_attribute*> attrs;
 		attrs.resize(primitive->attributes_count);
 		for (int j = 0; j < primitive->attributes_count; ++j) {
@@ -523,26 +523,41 @@ private:
 	Model* loadMesh(cgltf_mesh *cmesh, Node* node) {
 
 		bool sharedVertexBuf = true;
-		std::map<std::string, cgltf_accessor*> attributeUnique;
 		std::vector<cgltf_attribute*> attrs;
-		for (int i = 0; i < cmesh->primitives_count; ++i) {
-			cgltf_primitive* primitive = cmesh->primitives + i;
-			if (primitive->targets_count > 0) {
-				sharedVertexBuf = false;
-				goto label1;
-			}
-			for (int j = 0; j < primitive->attributes_count; ++j) {
-				cgltf_attribute* attr = primitive->attributes + j;
-				cgltf_accessor* old = attributeUnique[attr->name];
-				if (!old) {
-					attributeUnique[attr->name] = attr->data;
-					attrs.push_back(attr);
-				}
-				else if (old != attr->data) {
+		if (cmesh->primitives_count > 1) {
+			std::map<std::string, cgltf_accessor*> attributeUnique;
+			for (int i = 0; i < cmesh->primitives_count; ++i) {
+				cgltf_primitive* primitive = cmesh->primitives + i;
+				if (primitive->targets_count > 0) {
 					sharedVertexBuf = false;
 					goto label1;
 				}
+				for (int j = 0; j < primitive->attributes_count; ++j) {
+					cgltf_attribute* attr = primitive->attributes + j;
+					cgltf_accessor* old = attributeUnique[attr->name];
+					if (!old) {
+						attributeUnique[attr->name] = attr->data;
+						attrs.push_back(attr);
+					}
+					else if (old != attr->data) {
+						sharedVertexBuf = false;
+						goto label1;
+					}
+				}
 			}
+		}
+		else if (cmesh->primitives_count == 1) {
+			cgltf_primitive* primitive = cmesh->primitives;
+			UPtr<Model> model = loadPrimitiveAsMesh(primitive);
+			if (lighting) {
+				model->setLightMask(1);
+			}
+			for (int i = 0; i < cmesh->weights_count; ++i) {
+				node->getWeights().push_back(cmesh->weights[i]);
+			}
+			Model* res = model.get();
+			node->addComponent(std::move(model));
+			return res;
 		}
 
 	label1:
@@ -820,7 +835,7 @@ private:
 		for (int i = 0; i < data->animations_count; ++i) {
 			cgltf_animation* ca = data->animations + i;
 			UPtr<Animation> a = loadAnimation(ca);
-			//a->release();
+			scene->getAnimations().push_back(a.get());
 		}
 
 		return scene;

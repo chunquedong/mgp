@@ -961,6 +961,12 @@ void Node::onSerialize(Serializer* serializer)
         serializer->finishColloction();
     }
 
+    serializer->writeList("weights", _weights.size());
+    for (float f : _weights) {
+        serializer->writeFloat(NULL, f, 0);
+    }
+    serializer->finishColloction();
+
     /*auto co = getCollisionObject();
     if (co) {
         serializer->writeString("collisionObject", co->getName().c_str(), "");
@@ -1007,6 +1013,12 @@ void Node::onDeserialize(Serializer* serializer)
     }
     serializer->finishColloction();
 
+    int weightCount = serializer->readList("weights");
+    for (int i = 0; i < weightCount; ++i) {
+        float f = serializer->readFloat(NULL, 0);
+        _weights.push_back(f);
+    }
+    serializer->finishColloction();
     //std::string collisionObject;
     //serializer->readString("collisionObject", collisionObject, SCENEOBJECT_NAME);
     //PhysicsCollisionObject::load(collisionObject, this);

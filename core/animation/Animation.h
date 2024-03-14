@@ -15,6 +15,7 @@ class AnimationController;
 class AnimationClip;
 class AnimationValue;
 class AnimationChannel;
+class Scene;
 
 /**
  * Defines a generic property animation.
@@ -31,7 +32,6 @@ class Animation : public Resource
     friend class AnimationClip;
     friend class AnimationTarget;
     friend class Bundle;
-
 public:
 
     /**
@@ -118,7 +118,7 @@ public:
 
 public:
 
-    
+    void bindTarget(Scene* scene);
 
     /**
      * Hidden copy constructor.
@@ -243,7 +243,6 @@ class KeyframeChannel : public AnimationChannel
     friend class AnimationClip;
     friend class Animation;
     friend class AnimationTarget;
-
 public:
     virtual void update(float percentComplete, float clipStart, float clipEnd, float loopBlendTime, float blendWeight);
 

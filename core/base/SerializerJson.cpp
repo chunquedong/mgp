@@ -184,7 +184,6 @@ void SerializerJson::writeInt(const char* propertyName, int value, int defaultVa
 
 void SerializerJson::writeFloat(const char* propertyName, float value, float defaultValue)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eWriter);
     
     if (value == defaultValue)
@@ -193,7 +192,12 @@ void SerializerJson::writeFloat(const char* propertyName, float value, float def
     jc::JsonNode* node = _nodes.top();
     jc::JsonNode* json_value = (JsonNode*)allocator.allocate(sizeof(JsonNode));
     json_value->set_float(value);
-    node->insert_pair(json_strdup(allocator, propertyName), json_value);
+    if (propertyName) {
+        node->insert_pair(json_strdup(allocator, propertyName), json_value);
+    }
+    else {
+        node->insert(json_value);
+    }
 }
 
 
@@ -593,11 +597,10 @@ int SerializerJson::readEnum(const char* propertyName, const char* enumName, int
 
 bool SerializerJson::readBool(const char* propertyName, bool defaultValue)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
     
     jc::JsonNode* node = _nodes.top();
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::Boolean)
@@ -609,11 +612,10 @@ bool SerializerJson::readBool(const char* propertyName, bool defaultValue)
 
 int SerializerJson::readInt(const char* propertyName, int defaultValue)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
 
     jc::JsonNode* node = _nodes.top();
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::Integer)
@@ -625,11 +627,11 @@ int SerializerJson::readInt(const char* propertyName, int defaultValue)
 
 float SerializerJson::readFloat(const char* propertyName, float defaultValue)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
 
     jc::JsonNode* node = _nodes.top();
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
+
     if (property)
     {
         if (property->type() != jc::Type::Float && property->type() != jc::Type::Integer)
@@ -641,11 +643,10 @@ float SerializerJson::readFloat(const char* propertyName, float defaultValue)
 
 Vector2 SerializerJson::readVector(const char* propertyName, const Vector2& defaultValue)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
     
     jc::JsonNode* node = _nodes.top();
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::Array || property->size() < 2)
@@ -664,11 +665,10 @@ Vector2 SerializerJson::readVector(const char* propertyName, const Vector2& defa
 
 Vector3 SerializerJson::readVector(const char* propertyName, const Vector3& defaultValue)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
 
     jc::JsonNode* node = _nodes.top();
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::Array || property->size() < 3)
@@ -690,11 +690,10 @@ Vector3 SerializerJson::readVector(const char* propertyName, const Vector3& defa
 
 Vector4 SerializerJson::readVector(const char* propertyName, const Vector4& defaultValue)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
 
     jc::JsonNode* node = _nodes.top();
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::Array || property->size() < 4)
@@ -719,11 +718,10 @@ Vector4 SerializerJson::readVector(const char* propertyName, const Vector4& defa
 
 Vector3 SerializerJson::readColor(const char* propertyName, const Vector3& defaultValue)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
     
     jc::JsonNode* node = _nodes.top();
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::String)
@@ -738,11 +736,10 @@ Vector3 SerializerJson::readColor(const char* propertyName, const Vector3& defau
 
 Vector4 SerializerJson::readColor(const char* propertyName, const Vector4& defaultValue)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
     
     jc::JsonNode* node = _nodes.top();
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::String)
@@ -757,11 +754,10 @@ Vector4 SerializerJson::readColor(const char* propertyName, const Vector4& defau
 
 Matrix SerializerJson::readMatrix(const char* propertyName, const Matrix& defaultValue)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
 
     jc::JsonNode* node = _nodes.top();
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::Array || property->size() < 16)
@@ -780,12 +776,9 @@ Matrix SerializerJson::readMatrix(const char* propertyName, const Matrix& defaul
     return defaultValue;
 }
 
-void SerializerJson::readString(const char* propertyName, std::string& value, const char* defaultValue)
-{
-    GP_ASSERT(_type == Type::eReader);
-
+jc::Value* SerializerJson::readElement(const char* propertyName) {
+    jc::Value* property_ = nullptr;
     jc::JsonNode* node = _nodes.top();
-    jc::Value* property = nullptr;
 
     if (node->type() == jc::Type::Array)
     {
@@ -793,7 +786,7 @@ void SerializerJson::readString(const char* propertyName, std::string& value, co
         int i = 0;
         for (auto it = node->begin(); it != node->end(); ++it) {
             if (i == (uint32_t)arraySize - (uint32_t)_nodesListCounts.top()) {
-                property = *it;
+                property_ = *it;
                 break;
             }
             ++i;
@@ -801,11 +794,20 @@ void SerializerJson::readString(const char* propertyName, std::string& value, co
         //property = json_at(node, (uint32_t)arraySize - (uint32_t)_nodesListCounts.top());
         _nodesListCounts.top() -= 1;
     }
-    else
+    else if (node->type() == jc::Type::Object)
     {
-        GP_ASSERT(propertyName);
-        property = node->get(propertyName);
+        if (!propertyName) return nullptr;
+        property_ = node->get(propertyName);
     }
+    return property_;
+}
+
+void SerializerJson::readString(const char* propertyName, std::string& value, const char* defaultValue)
+{
+    GP_ASSERT(_type == Type::eReader);
+
+    jc::JsonNode* node = _nodes.top();
+    jc::Value* property = readElement(propertyName);
    
     if (property)
     {
@@ -832,38 +834,15 @@ UPtr<Serializable> SerializerJson::readObject(const char* propertyName)
     GP_ASSERT(_type == Type::eReader);
     
     jc::JsonNode* parentNode = _nodes.top();
-    jc::Value* readNode = nullptr;
-    
-    if (parentNode->type() == jc::Type::Array)
-    {
-        size_t arraySize = parentNode->size();
-        int i = 0;
-        for (auto it = parentNode->begin(); it != parentNode->end(); ++it) {
-            if (i == (uint32_t)arraySize - (uint32_t)_nodesListCounts.top()) {
-                readNode = *it;
-                break;
-            }
-            ++i;
-        }
-        //property = json_at(node, (uint32_t)arraySize - (uint32_t)_nodesListCounts.top());
-        _nodesListCounts.top() -= 1;
-    }
-    else if (parentNode->type() == jc::Type::Object && propertyName)
-    {
-        jc::Value* propertyNode = parentNode->get(propertyName);
-        if (propertyNode == nullptr)
-            return UPtr<Serializable>();
-        if (propertyNode->type() != jc::Type::Object)
-        {
-            GP_WARN("Invalid json object for propertyName:%s", propertyName);
-            return UPtr<Serializable>();
-        }
-        readNode = propertyNode;
-    }
-    else
-    {
+    jc::Value* readNode = readElement(propertyName);
+
+    //read root
+    if (!readNode && !propertyName && parentNode->type() == jc::Type::Object) {
         readNode = parentNode;
     }
+
+    if (readNode == nullptr)
+        return UPtr<Serializable>();
     
     jc::Value* classProperty = readNode->get("class");
     const char* className = classProperty->as_str();
@@ -926,11 +905,10 @@ UPtr<Serializable> SerializerJson::readObject(const char* propertyName)
 
 void SerializerJson::readMap(const char* propertyName, std::vector<std::string> &keys)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
 
     jc::JsonNode* node = _nodes.top();
-    jc::Value* list = node->get(propertyName);
+    jc::Value* list = readElement(propertyName);
     //size_t count = list->size();
     //if (count > 0)
     //{
@@ -948,11 +926,10 @@ void SerializerJson::readMap(const char* propertyName, std::vector<std::string> 
 
 size_t SerializerJson::readList(const char* propertyName)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
     
     jc::JsonNode* node = _nodes.top();
-    jc::Value* list = node->get(propertyName);
+    jc::Value* list = readElement(propertyName);
 
     size_t count = 0;
     if (list) {
@@ -968,12 +945,11 @@ size_t SerializerJson::readList(const char* propertyName)
 
 size_t SerializerJson::readIntArray(const char* propertyName, int** data)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
     
     jc::JsonNode* node = _nodes.top();
     size_t count = 0;
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::Array )
@@ -1002,12 +978,11 @@ size_t SerializerJson::readIntArray(const char* propertyName, int** data)
 
 size_t SerializerJson::readFloatArray(const char* propertyName, float** data)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
     
     jc::JsonNode* node = _nodes.top();
     size_t count = 0;
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::Array)
@@ -1037,12 +1012,11 @@ size_t SerializerJson::readFloatArray(const char* propertyName, float** data)
 
 size_t SerializerJson::readDFloatArray(const char* propertyName, double** data)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
 
     jc::JsonNode* node = _nodes.top();
     size_t count = 0;
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::Array)
@@ -1072,12 +1046,11 @@ size_t SerializerJson::readDFloatArray(const char* propertyName, double** data)
     
 size_t SerializerJson::readByteArray(const char* propertyName, unsigned char** data)
 {
-    GP_ASSERT(propertyName);
     GP_ASSERT(_type == Type::eReader);
     
     unsigned long size = 0L;
     jc::JsonNode* node = _nodes.top();
-    jc::Value* property = node->get(propertyName);
+    jc::Value* property = readElement(propertyName);
     if (property)
     {
         if (property->type() != jc::Type::String)

@@ -176,7 +176,7 @@ protected:
     HighlightType _highlightType;
 };
 
-class DrawableGroup : public Drawable {
+class DrawableGroup : public Drawable, public Serializable {
     std::vector<UPtr<Drawable> > _drawables;
     BoundingSphere _bounds;
 public:
@@ -190,6 +190,10 @@ public:
     virtual const BoundingSphere* getBoundingSphere() override;
 
     virtual UPtr<Drawable> clone(NodeCloneContext& context);
+
+    std::string getClassName();
+    void onSerialize(Serializer* serializer);
+    void onDeserialize(Serializer* serializer);
 };
 
 class DelayUpdater {

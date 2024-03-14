@@ -7,6 +7,7 @@
 #include "scene/Transform.h"
 #include "base/Properties.h"
 #include "scene/Node.h"
+#include "scene/Scene.h"
 
 #define ANIMATION_INDEFINITE_STR "INDEFINITE"
 #define ANIMATION_DEFAULT_CLIP 0
@@ -379,9 +380,12 @@ void Animation::write(Stream* file) {
         file->writeUInt32(c->_curve->getPointCount());
         file->writeUInt8(c->_curve->_componentCount);
         for (int i = 0; i < c->_curve->getPointCount(); i++) {
-            file->writeFloat(c->_curve->_points->time);
-            file->writeFloat(*c->_curve->_points->value);
-            file->writeUInt8(c->_curve->_points->type);
+            file->writeUInt8(c->_curve->_points[i].type);
+            file->writeFloat(c->_curve->_points[i].time);
+            
+            for (int j = 0; j < c->_curve->_componentCount; ++j) {
+                file->writeFloat(c->_curve->_points[i].value[j]);
+            }
         }
     }
 }
@@ -391,26 +395,40 @@ bool Animation::read(Stream* file) {
     a->_id = id;
     a->_duration = file->readUInt64();
     int channelCount = file->readUInt16();
-    for (int i = 0; i < channelCount; ++i) {
+    for (int k = 0; k < channelCount; ++k) {
         KeyframeChannel* c = new KeyframeChannel();
         c->_targetId = file->readStr();
         c->_propertyId = file->readUInt16();
         c->_duration = file->readUInt64();
         
         int keyCount = file->readUInt32();
-        int propertyComponentCount = file->readUInt16();
-        int propertyComponentSize = file->readUInt16();
+        int propertyComponentCount = file->readUInt8();
         Curve* curve = Curve::create(keyCount, propertyComponentCount).take();
         c->_curve = curve;
+        float values[256];
         for (int i = 0; i < keyCount; i++) {
-            float time = file->readFloat();
-            float value = file->readFloat();
             int type = file->readUInt8();
-            curve->setPoint(i, time, &value, (Curve::InterpolationType)type);
+            float time_ = file->readFloat();
+            
+            for (int j = 0; j < propertyComponentCount; ++j) {
+                values[j] = file->readFloat();
+            }
+            curve->setPoint(i, time_, values, (Curve::InterpolationType)type);
         }
         a->_channels.push_back(c);
+        c->_animation = a;
+        a->addRef();
     }
     return true;
+}
+
+void Animation::bindTarget(Scene* scene) {
+    for (AnimationChannel* ac : this->_channels) {
+        if (KeyframeChannel* c = dynamic_cast<KeyframeChannel*>(ac)) {
+            c->_target = scene->findNode(c->_targetId.c_str());
+            c->_target->addChannel(c);
+        }
+    }
 }
 
 void Animation::update(float percentComplete, unsigned int clipStart, unsigned int clipEnd, unsigned int loopBlendTime, float blendWeight) {

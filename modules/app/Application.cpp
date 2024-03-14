@@ -11,6 +11,8 @@
 #include "SceneView.h"
 #include "base/ThreadPool.h"
 
+#include "scene/AssetManager.h"
+
 #ifndef __EMSCRIPTEN__
 #include "script/ScriptController.h"
 //#include "net/HttpClient.hpp"
@@ -147,6 +149,7 @@ Application::~Application()
     //    g_threadPool->stop();
     //    g_threadPool = NULL;
     //}
+
 #ifdef GP_USE_REF_TRACE
     Refable::printLeaks();
 #endif
@@ -396,8 +399,12 @@ void Application::shutdown()
 
         RenderPath::releaseStatic();
 
+
+        AssetManager::getInstance()->clear();
+
         _animationController->finalize();
         SAFE_DELETE(_animationController);
+
 
         delete g_rendererInstance;
         g_rendererInstance = NULL;

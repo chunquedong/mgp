@@ -4,6 +4,7 @@
 #include "MeshSkin.h"
 #include "objects/Terrain.h"
 #include "../base/SerializerJson.h"
+#include "AssetManager.h"
 
 #define SCENE_NAME ""
 #define SCENE_STREAMING false
@@ -356,6 +357,13 @@ void Scene::onSerialize(Serializer* serializer)
     else {
         serializer->writeString("activeCamera", "", "");
     }
+
+    serializer->writeList("animations", _animations.size());
+    for (Animation* anim : _animations) {
+        AssetManager::getInstance()->save(anim);
+        serializer->writeString(NULL, anim->getId().c_str(), "");
+    }
+    serializer->finishColloction();
 }
 
 void Scene::onDeserialize(Serializer* serializer)
@@ -373,7 +381,16 @@ void Scene::onDeserialize(Serializer* serializer)
         if (camera && camera->getCamera())
             this->setActiveCamera(camera->getCamera());
     }
-    //node->addRef();
+    
+    int animCount = serializer->readList("animations");
+    for (int i = 0; i < animCount; ++i) {
+        std::string animName;
+        serializer->readString(NULL, animName, "");
+        auto anim = AssetManager::getInstance()->load<Animation>(animName, AssetManager::rt_animation);
+        anim->bindTarget(this);
+        this->_animations.push_back(anim.get());
+    }
+    serializer->finishColloction();
 }
 
 }
