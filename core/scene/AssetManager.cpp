@@ -8,6 +8,7 @@
 #include "../animation/Animation.h"
 #include "material/Texture.h"
 #include "material/Image.h"
+#include "base/StringUtil.h"
 
 using namespace mgp;
 
@@ -28,8 +29,8 @@ void AssetManager::releaseInstance() {
   }
 }
 
-AssetManager::AssetManager(): path("res") {
-
+AssetManager::AssetManager() {
+    setPath("res/assets");
 }
 
 AssetManager::~AssetManager() {
@@ -38,10 +39,20 @@ AssetManager::~AssetManager() {
 
 void AssetManager::setPath(const std::string& path) {
    this->path = path;
+   FileSystem::mkdirs((path + "/mesh").c_str());
+   FileSystem::mkdirs((path + "/skin").c_str());
+   FileSystem::mkdirs((path + "/material").c_str());
+   FileSystem::mkdirs((path + "/anim").c_str());
+   FileSystem::mkdirs((path + "/image").c_str());
+   //FileSystem::mkdirs((path + "/texture").c_str());
+}
+
+const std::string& AssetManager::getPath() {
+    return this->path;
 }
 
 void AssetManager::clear() {
-  std::lock_guard<std::mutex> lock_guard(mutex);
+  std::lock_guard<std::recursive_mutex> lock_guard(_mutex);
   for (int i=0; i<rt_count; ++i) {
     auto &map = resourceMap[i];
     for (auto it = map.begin(); it != map.end(); ++it) {
@@ -54,11 +65,12 @@ void AssetManager::clear() {
 }
 
 void AssetManager::beginSave() {
+    std::lock_guard<std::recursive_mutex> lock_guard(_mutex);
     _saved.clear();
 }
 
 void AssetManager::remove(const std::string &name, ResType type) {
-  std::lock_guard<std::mutex> lock_guard(mutex);
+  std::lock_guard<std::recursive_mutex> lock_guard(_mutex);
 
   auto it = resourceMap[type].find(name);
   if (it != resourceMap[type].end()) {
@@ -71,7 +83,7 @@ void AssetManager::remove(const std::string &name, ResType type) {
 UPtr<Resource> AssetManager::load(const std::string &name, ResType type) {
     if (name.size() == 0) return UPtr<Resource>(NULL);
 
-    std::lock_guard<std::mutex> lock_guard(mutex);
+    std::lock_guard<std::recursive_mutex> lock_guard(_mutex);
     auto itr = this->resourceMap[type].find(name);
     if (itr != this->resourceMap[type].end()) {
         Resource* res = itr->second;
@@ -81,7 +93,7 @@ UPtr<Resource> AssetManager::load(const std::string &name, ResType type) {
     Resource* res = NULL;
     switch (type) {
         case rt_mesh: {
-            std::string file = path + "/" + name + ".mesh";
+            std::string file = path + "/mesh/" + name + ".mesh";
             UPtr<Stream> s = FileSystem::open(file.c_str());
             Mesh *mesh = Mesh::create(VertexFormat(NULL, 0)).take();
             mesh->read(s.get());
@@ -92,7 +104,7 @@ UPtr<Resource> AssetManager::load(const std::string &name, ResType type) {
             break;
         }
         case rt_skin: {
-            std::string file = path + "/" + name + ".skin";
+            std::string file = path + "/skin/" + name + ".skin";
             UPtr<Stream> s = FileSystem::open(file.c_str());
             MeshSkin* mesh = new MeshSkin();
             mesh->read(s.get());
@@ -103,16 +115,16 @@ UPtr<Resource> AssetManager::load(const std::string &name, ResType type) {
             break;
         }
         case rt_materail: {
-            std::string file = path + "/" + name + ".material";
+            std::string file = path + "/material/" + name + ".material";
             auto stream = SerializerJson::createReader(file);
-            Material *m = dynamic_cast<Material*>(stream->readObject(nullptr).take());
+            Material* m = dynamic_cast<Material*>(stream->readObject(nullptr).take());
             stream->close();
             m->setId(name);
             res = m;
             break;
         }
         case rt_animation: {
-            std::string file = path + "/" + name + ".anim";
+            std::string file = path + "/anim/" + name + ".anim";
             UPtr<Stream> s = FileSystem::open(file.c_str());
             Animation* mesh = new Animation("");
             mesh->read(s.get());
@@ -123,12 +135,20 @@ UPtr<Resource> AssetManager::load(const std::string &name, ResType type) {
             break;
         }
         case rt_image: {
-            std::string file = path + "/" + name + ".image";
-            UPtr<Stream> s = FileSystem::open(file.c_str());
-            Image* m = new Image();
-            m->read(s.get());
-            m->setId(name);
-            res = m;
+            if (StringUtil::endsWith(name, ".image")) {
+                std::string file = path + "/image/" + name;
+                UPtr<Stream> s = FileSystem::open(file.c_str());
+                Image* m = new Image();
+                m->read(s.get());
+                m->setId(name);
+                res = m;
+            }
+            else {
+                std::string file = path + "/image/" + name;
+                Image* m = Image::create(file.c_str()).take();
+                m->setId(name);
+                res = m;
+            }
             break;
         }
     }
@@ -144,40 +164,54 @@ void AssetManager::save(Resource* res) {
     std::string name = res->getId();
     if (name.size() == 0) return;
 
+    std::lock_guard<std::recursive_mutex> lock_guard(_mutex);
+
     if (_saved[name]) return;
 
-    if (Mesh *mesh = dynamic_cast<Mesh*>(res)) {
-        std::string file = path + "/" + name + ".mesh";
+    if (Mesh* mesh = dynamic_cast<Mesh*>(res)) {
+        std::string file = path + "/mesh/" + name + ".mesh";
         UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
         mesh->write(s.get());
         s->close();
         //delete s;
     }
-    else if (MeshSkin *mesh = dynamic_cast<MeshSkin*>(res)) {
-        std::string file = path + "/" + name + ".skin";
+    else if (MeshSkin* mesh = dynamic_cast<MeshSkin*>(res)) {
+        std::string file = path + "/skin/" + name + ".skin";
         UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
         mesh->write(s.get());
         s->close();
         //delete s;
     }
-    else if (Material *m = dynamic_cast<Material*>(res)) {
-        std::string file = path + "/" + name + ".material";
+    else if (Material* m = dynamic_cast<Material*>(res)) {
+        std::string file = path + "/material/" + name + ".material";
         auto stream = SerializerJson::createWriter(file);
         stream->writeObject(nullptr, m);
         stream->close();
     }
-    else if (Animation *mesh = dynamic_cast<Animation*>(res)) {
-        std::string file = path + "/" + name + ".anim";
+    else if (Animation* mesh = dynamic_cast<Animation*>(res)) {
+        std::string file = path + "/anim/" + name + ".anim";
         UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
         mesh->write(s.get());
         s->close();
         //delete s;
     }
     else if (Image* texture = dynamic_cast<Image*>(res)) {
-        std::string file = path + "/" + name + ".image";
-        UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
-        texture->write(s.get());
-        s->close();
+        if (StringUtil::endsWith(name, ".image")) {
+            std::string file = path + "/image/" + name;
+            UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
+            texture->write(s.get());
+            s->close();
+        }
+        else {
+            std::string file = path + "/image/" + name;
+            if (!FileSystem::fileExists(file.c_str())) {
+                std::string originName = FileSystem::getBaseName(name.c_str()) + FileSystem::getExtension(name.c_str(), false);
+                std::string dst = path + "/image/" + originName;
+                FileSystem::copyFile(name.c_str(), dst.c_str());
+                _saved[originName] = 1;
+                res->setId(originName);
+            }
+        }
     }
     else {
         GP_ERROR("ERROR: unknow resource\n");

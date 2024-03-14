@@ -383,7 +383,12 @@ void SerializerJson::writeString(const char* propertyName, const char* value, co
 
     jc::JsonNode* node = _nodes.top();
     auto str = json_new_a(allocator, value);
-    node->insert_pair(json_strdup(allocator, propertyName), str);
+    if (node->type() == jc::Type::Object) {
+        node->insert_pair(json_strdup(allocator, propertyName), str);
+    }
+    else if (node->type() == jc::Type::Array) {
+        node->insert(str);
+    }
 }
 
 void SerializerJson::writeMap(const char* propertyName, std::vector<std::string> &keys)
@@ -579,6 +584,9 @@ int SerializerJson::readEnum(const char* propertyName, const char* enumName, int
     
     std::string str;
     readString(propertyName, str, "");
+    if (str.size() == 0) {
+        return defaultValue;
+    }
     
     return SerializerManager::getActivator()->enumParse(enumName, str.c_str());
 }

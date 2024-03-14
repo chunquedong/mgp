@@ -68,7 +68,7 @@ public:
      * 
      * @return The pointer to the matrix palette.
      */
-    Vector4* getMatrixPalette(const Matrix* viewMatrix) const;
+    Vector4* getMatrixPalette(const Matrix* viewMatrix, Node* node);
 
     /**
      * Returns the number of elements in the matrix palette array.
@@ -79,7 +79,6 @@ public:
      */
     unsigned int getMatrixPaletteSize() const;
 
-    void rebindJoins();
 
     void write(Stream* file);
     bool read(Stream* file);
@@ -124,14 +123,18 @@ public:
      */
     void setJointCount(unsigned int jointCount);
 
+    void resetBind();
 private:
+    void bindNode(Node* node);
+
+    void rebindJoins();
+private:
+    std::string _rootJointName;
 
     std::vector<BoneJoint> _joints;
 
     //for calculate node boundBox
     SPtr<Node> _rootJoint;
-
-    //std::string name;
 
     // Pointer to the array of palette matrices.
     // This array is passed to the vertex shader as a uniform.

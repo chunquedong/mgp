@@ -253,6 +253,8 @@ public:
     static std::string getParentPath(const char* path);
 
     static bool remove(const char* path);
+
+    static bool copyFile(const char* src, const char* dst);
 private:
 
     /**

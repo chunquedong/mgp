@@ -141,6 +141,14 @@ UPtr<Image> Image::createFromBuf(const char* file_data, size_t file_size, bool f
         image->_format = Image::RGB;
         break;
 
+    case 1:
+        image->_format = Image::RED;
+        break;
+
+    case 2:
+        image->_format = Image::RG;
+        break;
+
     default:
         GP_ERROR("Unsupported PNG color type (%d) for image buffer.", (int)n);
         stbi_image_free(data);
@@ -227,6 +235,7 @@ UPtr<Image> Image::create(const char* path, bool flipY)
         return UPtr<Image>(NULL);
     }
     image->_data = data;
+    image->_id = path;
     //stbi_image_free(data);
     return UPtr<Image>(image);
 }
@@ -287,7 +296,7 @@ UPtr<Image> Image::create(unsigned int width, unsigned int height, Image::Format
     return UPtr<Image>(image);
 }
 
-Image::Image() : _data(NULL), _format(RGB), _width(0), _height(0)
+Image::Image() : _data(NULL), _format(RGB), _width(0), _height(0), Resource(genId()+".image")
 {
 }
 

@@ -23,7 +23,7 @@ public:
       };
 private:
     std::map<std::string, Resource*> resourceMap[rt_count];
-    std::mutex mutex;
+    std::recursive_mutex _mutex;
     std::string path;
     std::map<std::string, int> _saved;
 public:
@@ -35,6 +35,7 @@ private:
 
 public:
     void setPath(const std::string& path);
+    const std::string& getPath();
     void clear();
     void beginSave();
 

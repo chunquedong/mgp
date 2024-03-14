@@ -338,6 +338,7 @@ void Model::onDeserialize(Serializer* serializer) {
     serializer->readString("skin", skin, "");
     if (skin.size() > 0) {
         _skin = AssetManager::getInstance()->load<MeshSkin>(skin, AssetManager::rt_skin);
+        _skin->resetBind();
     }
 
     std::string material;

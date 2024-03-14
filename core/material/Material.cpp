@@ -379,7 +379,7 @@ void Material::bindNode(Camera* camera, Node *node, Drawable* drawable) {
             MeshSkin* skin = model->getSkin();
             if (skin) {
                 MaterialParameter* param = getParameter("u_matrixPalette");
-                param->setVector4Array(skin->getMatrixPalette(&camera->getViewMatrix()), skin->getMatrixPaletteSize());
+                param->setVector4Array(skin->getMatrixPalette(&camera->getViewMatrix(), node), skin->getMatrixPaletteSize());
                 param->_temporary = true;
             }
         }

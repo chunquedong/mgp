@@ -296,23 +296,34 @@ Node* Node::findNode(const char* id, bool recursive, bool exactMatch) const
 
 Node* Node::findNode(const char* id, bool recursive, bool exactMatch, bool skipSkin) const
 {
-    GP_ASSERT(id);
-    // Search immediate children first.
-    for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
-        // Does this child's ID match?
-        if ((exactMatch && child->_name == id) || (!exactMatch && child->_name.find(id) == 0))
-        {
-            return child;
-        }
+    if ((exactMatch && this->_name == id) || (!exactMatch && this->_name.find(id) == 0))
+    {
+        return (Node*)this;
     }
+
+    GP_ASSERT(id);
+
     // Recurse.
     if (recursive)
     {
         for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
+            if (skipSkin && child->isBoneJoint()) {
+                continue;
+            }
             Node* match = child->findNode(id, true, exactMatch, skipSkin);
             if (match)
             {
                 return match;
+            }
+        }
+    }
+    else {
+        // Search immediate children first.
+        for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
+            // Does this child's ID match?
+            if ((exactMatch && child->_name == id) || (!exactMatch && child->_name.find(id) == 0))
+            {
+                return child;
             }
         }
     }
@@ -967,9 +978,7 @@ void Node::onDeserialize(Serializer* serializer)
     Vector3 position = serializer->readVector("position", SCENEOBJECT_POSITION);
     this->setTranslation(position);
     Vector3 _eulerAngles = serializer->readVector("eulerAngles", SCENEOBJECT_EULER_ANGLES);
-    Quaternion rotation;
-    Quaternion::createFromEuler(_eulerAngles.x, _eulerAngles.y, _eulerAngles.z, &rotation);
-    this->setRotation(rotation);
+    this->setEulerAngles(_eulerAngles);
     Vector3 scale = serializer->readVector("scale", SCENEOBJECT_SCALE);
     this->setScale(scale);
 

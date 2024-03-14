@@ -612,4 +612,21 @@ bool FileSystem::remove(const char* path) {
     return false;
 }
 
+bool FileSystem::copyFile(const char* src, const char* dst) {
+    UPtr<Stream> stream = FileSystem::open(src, FileSystem::READ);
+    if (stream.isNull()) return false;
+    UPtr<Stream> out = FileSystem::open(dst, FileSystem::WRITE);
+    
+    int size = stream->length();
+    char buffer[1024];
+    while (size > 0) {
+        int n = stream->read(buffer, 1024);
+        out->write(buffer, n);
+        size -= n;
+    }
+    stream->close();
+    out->close();
+    return true;
+}
+
 }

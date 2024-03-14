@@ -79,8 +79,13 @@ void MeshSkin::setJointCount(unsigned int jointCount)
     }
 }
 
-Vector4* MeshSkin::getMatrixPalette(const Matrix* viewMatrix) const
+Vector4* MeshSkin::getMatrixPalette(const Matrix* viewMatrix, Node* node)
 {
+    if (node) {
+        if (_rootJoint.get() == NULL && _rootJointName.size() > 0) {
+            bindNode(node);
+        }
+    }
     GP_ASSERT(_matrixPalette);
 
     for (size_t i = 0, count = _joints.size(); i < count; i++)
@@ -128,7 +133,32 @@ void MeshSkin::rebindJoins() {
     }
 }
 
+void MeshSkin::bindNode(Node* node) {
+    Node* parent = node;
+    while (parent->getParent()) {
+        parent = parent->getParent();
+    }
+    Node* root = parent->findNode(_rootJointName.c_str());
+    if (root) {
+        setRootJoint(root);
+        rebindJoins();
+    }
+}
+
+void MeshSkin::resetBind() {
+    _rootJoint.clear();
+    for (int i = 0; i < _joints.size(); ++i) {
+        _joints[i]._node.clear();
+    }
+}
+
 void MeshSkin::write(Stream* file) {
+    if (_rootJoint.get()) {
+        file->writeStr(_rootJoint->getName());
+    }
+    else {
+        file->writeStr("");
+    }
     //file->write((char*)&_bindShape.m, sizeof(_bindShape.m));
     file->writeUInt16(_joints.size());
     for (BoneJoint& join : _joints) {
@@ -137,13 +167,15 @@ void MeshSkin::write(Stream* file) {
 }
 bool MeshSkin::read(Stream* file) {
     MeshSkin* skin = this;
+    _rootJointName = file->readStr();
+
     //file->read((char*)&skin->_bindShape.m, sizeof(skin->_bindShape.m));
     int size = file->readUInt16();
     skin->setJointCount(size);
     for (int i = 0; i < size; ++i) {
         _joints[i].read(file);
     }
-    rebindJoins();
+    //rebindJoins();
     return true;
 }
 

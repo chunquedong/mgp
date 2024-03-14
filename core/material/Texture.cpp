@@ -31,8 +31,9 @@ Texture::Texture() : _handle(0), _format(Image::UNKNOWN), _type((Texture::Type)0
 Texture::~Texture()
 {
     _datas.clear();
-    Renderer::cur()->deleteTexture(this);
-
+    if (_handle) {
+        Renderer::cur()->deleteTexture(this);
+    }
     // Remove ourself from the texture cache.
     if (_cached)
     {
@@ -340,14 +341,14 @@ std::string Texture::enumToString(const std::string& enumName, int value)
         {
             case static_cast<int>(Image::UNKNOWN) :
                 return "UNKNOWN";
-            //case static_cast<int>(Format::RGB) :
-            //    return "RGB";
+            case static_cast<int>(Image::RGB) :
+                return "RGB";
             case static_cast<int>(Image::RGB888) :
                 return "RGB888";
             case static_cast<int>(Image::RGB565) :
                 return "RGB565";
-            //case static_cast<int>(Format::RGBA) :
-            //    return "RGBA";
+            case static_cast<int>(Image::RGBA) :
+                return "RGBA";
             case static_cast<int>(Image::RGBA8888) :
                 return "RGBA8888";
             case static_cast<int>(Image::RGBA4444) :
@@ -359,7 +360,7 @@ std::string Texture::enumToString(const std::string& enumName, int value)
             case static_cast<int>(Image::DEPTH) :
                 return "DEPTH";
             default:
-                return "RGBA";
+                return "UNKNOWN";
         }
     }
     else if (enumName.compare("mgp::Texture::Filter") == 0)
@@ -480,19 +481,14 @@ std::string Texture::getClassName() {
  */
 void Texture::onSerialize(Serializer* serializer) {
 
-    if (_path.size() == 0) {
-        serializer->writeList("images", _datas.size());
-        for (auto& image : _datas) {
-            serializer->writeString(NULL, image->getId().c_str(), "");
-        }
-        serializer->finishColloction();
+    serializer->writeList("images", _datas.size());
+    for (auto& image : _datas) {
+        AssetManager::getInstance()->save(image.get());
+        serializer->writeString(NULL, image->getId().c_str(), "");
     }
-    else {
-        serializer->writeList("images", 0);
-        serializer->finishColloction();
-    }
+    serializer->finishColloction();
 
-    serializer->writeString("path", _path.c_str(), "");
+    //serializer->writeString("path", _path.c_str(), "");
     serializer->writeEnum("minFilter", "mgp::Texture::Filter", static_cast<int>(_minFilter), -1);
     serializer->writeEnum("magFilter", "mgp::Texture::Filter", static_cast<int>(_magFilter), -1);
 
@@ -500,9 +496,10 @@ void Texture::onSerialize(Serializer* serializer) {
     serializer->writeEnum("wrapT", "mgp::Texture::Wrap", static_cast<int>(_wrapT), REPEAT);
     serializer->writeEnum("wrapR", "mgp::Texture::Wrap", static_cast<int>(_wrapR), REPEAT);
 
-    serializer->writeEnum("format", "mgp::Image::Format", static_cast<int>(_format), Image::RGBA8888);
+    serializer->writeEnum("format", "mgp::Image::Format", static_cast<int>(_format), Image::RGBA);
     serializer->writeEnum("type", "mgp::Texture::Type", static_cast<int>(_type), TEXTURE_2D);
     serializer->writeBool("mipmap", _mipmapped, false);
+    serializer->writeInt("arrayDepth", _arrayDepth, 0);
 }
 
 /**
@@ -518,11 +515,6 @@ void Texture::onDeserialize(Serializer* serializer) {
     }
     serializer->finishColloction();
 
-    serializer->readString("path", _path, "");
-    if (_path.size() > 0) {
-        this->load(_path.c_str());
-    }
-
     _minFilter = static_cast<Texture::Filter>(serializer->readEnum("minFilter", "mgp::Texture::Filter", -1));
     _magFilter = static_cast<Texture::Filter>(serializer->readEnum("magFilter", "mgp::Texture::Filter", -1));
 
@@ -530,9 +522,19 @@ void Texture::onDeserialize(Serializer* serializer) {
     _wrapT = static_cast<Texture::Wrap>(serializer->readEnum("wrapT", "mgp::Texture::Wrap", REPEAT));
     _wrapR = static_cast<Texture::Wrap>(serializer->readEnum("wrapR", "mgp::Texture::Wrap", REPEAT));
 
-    _format = static_cast<Image::Format>(serializer->readEnum("format", "mgp::Image::Format", Image::RGBA8888));
+    _format = static_cast<Image::Format>(serializer->readEnum("format", "mgp::Image::Format", Image::RGBA));
     _type = static_cast<Texture::Type>(serializer->readEnum("type", "mgp::Texture::Type", TEXTURE_2D));
     _mipmapped = serializer->readBool("mipmap", false);
+    _arrayDepth = serializer->readInt("arrayDepth", 0);
+
+    //overwrite format
+    if (_datas.size() > 0) {
+        if (_format != _datas[0]->_format) {
+            _format = _datas[0]->_format;
+        }
+        _width = _datas[0]->_width;
+        _height = _datas[0]->_height;
+    }
 }
 
 void Texture::copyFrom(Texture* that) {
