@@ -87,9 +87,20 @@ UPtr<Resource> AssetManager::load(const std::string &name, ResType type) {
     auto itr = this->resourceMap[type].find(name);
     if (itr != this->resourceMap[type].end()) {
         Resource* res = itr->second;
-        res->addRef();
-        return UPtr<Resource>(res);
+        bool ok = true;
+        if (Image* texture = dynamic_cast<Image*>(res)) {
+            if (!texture->getData()) {
+                res->release();
+                this->resourceMap->erase(itr);
+                ok = false;
+            }
+        }
+        if (ok) {
+            res->addRef();
+            return UPtr<Resource>(res);
+        }
     }
+
     Resource* res = NULL;
     switch (type) {
         case rt_mesh: {
