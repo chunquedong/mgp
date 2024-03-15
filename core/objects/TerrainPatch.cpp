@@ -377,13 +377,13 @@ void TerrainPatch::initLOD(int dlevel)
     _levels[dlevel] = level;
 }
 
-std::string TerrainPatch::passCallback(Material *pass, void* cookie)
-{
-    TerrainPatch* patch = reinterpret_cast<TerrainPatch*>(cookie);
-    GP_ASSERT(patch);
-
-    return patch->passCreated(pass);
-}
+//std::string TerrainPatch::passCallback(Material *pass, void* cookie)
+//{
+//    TerrainPatch* patch = reinterpret_cast<TerrainPatch*>(cookie);
+//    GP_ASSERT(patch);
+//
+//    return patch->passCreated(pass);
+//}
 
 std::string TerrainPatch::passCreated(Material* pass)
 {
@@ -435,14 +435,10 @@ bool TerrainPatch::updateLevelMaterial(int level) {
 
     if (!_levels[level].model) return false;
 
-    UPtr<Material> material = Material::create(_terrain->_materialPath.c_str(), &passCallback, this);
+    UPtr<Material> material = Material::create("res/shaders/terrain.vert", "res/shaders/terrain.frag");
     GP_ASSERT(material.get());
-    if (!material.get())
-    {
-        GP_WARN("Failed to load material for terrain patch: %s", _terrain->_materialPath.c_str());
-        //__currentPatchIndex = -1;
-        return false;
-    }
+    std::string defines = passCreated(material.get());
+    material->setShaderDefines(defines);
 
     //material->setNodeBinding(_terrain->_node);
 

@@ -2,7 +2,6 @@
 #define MATERIAL_H_
 
 #include "../scene/Drawable.h"
-#include "base/Properties.h"
 #include "base/Serializable.h"
 #include "StateBlock.h"
 #include "base/Resource.h"
@@ -33,52 +32,7 @@ class Material : public Resource, public Serializable
 
 public:
 
-    /**
-     * Pass creation callback function definition.
-     */
-    typedef std::string(*PassCallback)(Material*, void*);
-
-    /**
-     * Creates a material using the data from the Properties object defined at the specified URL, 
-     * where the URL is of the format "<file-path>.<extension>#<namespace-id>/<namespace-id>/.../<namespace-id>"
-     * (and "#<namespace-id>/<namespace-id>/.../<namespace-id>" is optional). 
-     * 
-     * @param url The URL pointing to the Properties object defining the material.
-     * 
-     * @return A new Material or NULL if there was an error.
-     * @script{create}
-     */
-    static UPtr<Material> create(const char* url);
-    static std::vector<Material*> createAll(const char* url);
-
-    /**
-     * Creates a material from a Properties file.
-     *
-     * This overloaded method allows you to pass a function pointer to be called back for each
-     * pass that is loaded for the material. The passed in callback receives a pointer to each
-     * Pass being created and returns a string of optional defines to append to the shaders
-     * being compiled for each Pass. The function is called during Pass creation, prior to
-     * compiling the shaders for that Pass. MaterialParameters can be safely modified in this
-     * callback even though the shader is not yet compiled.
-     *
-     * @param url The URL pointing to the Properties object defining the material.
-     * @param callback Function pointer to be called during Pass creation.
-     * @param cookie Optional custom parameter to be passed to the callback function.
-     *
-     * @return A new Material or NULL if there was an error.
-     * @script{ignore}
-     */
-    static UPtr<Material> create(const char* url, PassCallback callback, void* cookie = NULL);
-
-    /**
-     * Creates a material from the specified properties object.
-     * 
-     * @param materialProperties The properties object defining the 
-     *      material (must have namespace equal to 'material').
-     * @return A new Material.
-     * @script{create}
-     */
-    static UPtr<Material> create(Properties* materialProperties);
+    static UPtr<Material> create(const std::string& name, const char* defines = NULL);
 
     /**
      * Creates a material from the specified effect.
@@ -291,11 +245,6 @@ public:
     UPtr<Material> clone() const;
     void copyFrom(const Material* m);
 
-    /**
-     * Creates a new material with optional pass callback function.
-     */
-    static UPtr<Material> create(Properties* materialProperties, PassCallback callback, void* cookie);
-
 
     const std::string& getShaderDefines();
     void setShaderDefines(const std::string &defiens);
@@ -311,7 +260,7 @@ private:
     /**
      * Constructor.
      */
-    //Material(const Material& m);
+    Material(const Material& m) = delete;
     
     /**
      * Destructor.

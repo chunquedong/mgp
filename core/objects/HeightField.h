@@ -73,6 +73,8 @@ namespace mgp
          */
         static UPtr<HeightField> createFromRAW(const char* path, unsigned int width, unsigned int height, float heightMin = 0, float heightMax = 1);
 
+        void save(const char* path);
+
         /**
          * Returns a pointer to the underlying height array.
          *
@@ -121,6 +123,9 @@ namespace mgp
         float getHeightMax() const {
             return _heightMax;
         }
+        std::string& getPath() {
+            return _path;
+        }
     private:
 
         /**
@@ -143,6 +148,7 @@ namespace mgp
         unsigned int _rows;
         float _heightMin;
         float _heightMax;
+        std::string _path;
     };
 
 }

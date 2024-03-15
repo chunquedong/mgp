@@ -21,7 +21,7 @@ class Resource : public Refable {
 protected:
 	std::string _id;
 public:
-	std::string genId();
+	static std::string genId();
 
 	Resource();
 	Resource(const std::string& id);

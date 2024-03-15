@@ -3,12 +3,11 @@
 #include "TerrainPatch.h"
 #include "scene/Node.h"
 #include "base/FileSystem.h"
+#include "base/Resource.h"
+#include "scene/AssetManager.h"
 
 namespace mgp
 {
-
-// Default terrain material path
-#define TERRAIN_MATERIAL "res/materials/terrain.material"
 
 // The default square size of terrain patches for a terrain that
 // does not have an explicitly specified patch size.
@@ -56,221 +55,59 @@ Terrain::~Terrain()
     _samplers.clear();
 }
 
-UPtr<Terrain> Terrain::create(const char* path)
-{
-    return create(path, NULL);
-}
+void Terrain::initPatchs() {
+    Terrain* terrain = this;
+    // Store reference to bounding box (it is calculated and updated from TerrainPatch)
+    BoundingBox& bounds = terrain->_boundingBox;
 
-UPtr<Terrain> Terrain::create(Properties* properties)
-{
-    return create(properties->getNamespace(), properties);
-}
+    unsigned int width = _heightfield->getColumnCount();
+    unsigned int height = _heightfield->getRowCount();
 
-UPtr<Terrain> Terrain::create(const char* path, Properties* properties)
-{
-    // Terrain properties
-    Properties* p = properties;
-    Properties* pTerrain = NULL;
-    bool externalProperties = (p != NULL);
-    UPtr<HeightField> heightfield;
-    Vector3 terrainSize;
-    int patchSize = 0;
-    int detailLevels = 1;
-    float skirtScale = 0;
-    const char* normalMap = NULL;
-    std::string materialPath;
+    float halfWidth = (width - 1) * 0.5f;
+    float halfHeight = (height - 1) * 0.5f;
+    float verticalSkirtSize = _skirtScale * (terrain->_heightfield->getHeightMax() - terrain->_heightfield->getHeightMin());
 
-    if (!p && path)
+    // Create terrain patches
+    unsigned int x1, x2, z1, z2;
+    unsigned int row = 0, column = 0;
+    for (unsigned int z = 0; z < height - 1; z = z2, ++row)
     {
-        p = Properties::create(path).take();
-    }
+        z1 = z;
+        z2 = std::min(z1 + _patchSize, height - 1);
 
-    if (!p)
-    {
-        GP_WARN("Failed to properties for terrain: %s", path ? path : "");
-        return UPtr<Terrain>(NULL);
-    }
-
-    pTerrain = strlen(p->getNamespace()) > 0 ? p : p->getNextNamespace();
-    if (pTerrain == NULL)
-    {
-        GP_WARN("Invalid terrain definition.");
-        if (!externalProperties)
-            SAFE_DELETE(p);
-        return UPtr<Terrain>(NULL);
-    }
-
-    // Read heightmap info
-    Properties* pHeightmap = pTerrain->getNamespace("heightmap", true);
-    if (pHeightmap)
-    {
-        // Read heightmap path
-        std::string heightmap;
-        if (!pHeightmap->getPath("path", &heightmap))
+        column = 0;
+        for (unsigned int x = 0; x < width - 1; x = x2, ++column)
         {
-            GP_WARN("No 'path' property supplied in heightmap section of terrain definition: %s", path);
-            if (!externalProperties)
-                SAFE_DELETE(p);
-            return UPtr<Terrain>(NULL);
-        }
+            x1 = x;
+            x2 = std::min(x1 + _patchSize, width - 1);
 
-        std::string ext = FileSystem::getExtension(heightmap.c_str());
-        if (ext == ".PNG")
-        {
-            // Read normalized height values from heightmap image
-            heightfield = HeightField::createFromImage(heightmap.c_str(), 0, 1);
-        }
-        else if (ext == ".RAW" || ext == ".R16")
-        {
-            // Require additional properties to be specified for RAW files
-            Vector2 imageSize;
-            if (!pHeightmap->getVector2("size", &imageSize))
-            {
-                GP_WARN("Invalid or missing 'size' attribute in heightmap defintion of terrain definition: %s", path);
-                if (!externalProperties)
-                    SAFE_DELETE(p);
-                return UPtr<Terrain>(NULL);
-            }
+            // Create this patch
+            TerrainPatch* patch = TerrainPatch::create(terrain, terrain->_patches.size(), row, column,
+                x1, z1, x2, z2, -halfWidth, -halfHeight, _detailLevels, verticalSkirtSize);
+            terrain->_patches.push_back(patch);
 
-            // Read normalized height values from RAW file
-            heightfield = HeightField::createFromRAW(heightmap.c_str(), (unsigned int)imageSize.x, (unsigned int)imageSize.y, 0, 1);
-        }
-        else
-        {
-            // Unsupported heightmap format
-            GP_WARN("Unsupported heightmap format ('%s') in terrain definition: %s", heightmap.c_str(), path);
-            if (!externalProperties)
-                SAFE_DELETE(p);
-            return UPtr<Terrain>(NULL);
+            // Append the new patch's local bounds to the terrain local bounds
+            bounds.merge(patch->getBoundingBox(false));
         }
     }
-    else
-    {
-        // Try to read 'heightmap' as a simple string property
-        std::string heightmap;
-        if (!pTerrain->getPath("heightmap", &heightmap))
-        {
-            GP_WARN("No 'heightmap' property supplied in terrain definition: %s", path);
-            if (!externalProperties)
-                SAFE_DELETE(p);
-            return UPtr<Terrain>(NULL);
-        }
-
-        std::string ext = FileSystem::getExtension(heightmap.c_str());
-        if (ext == ".PNG")
-        {
-            // Read normalized height values from heightmap image
-            heightfield = HeightField::createFromImage(heightmap.c_str(), 0, 1);
-        }
-        else if (ext == ".RAW" || ext == ".R16")
-        {
-            GP_WARN("RAW heightmaps must be specified inside a heightmap block with width and height properties.");
-            if (!externalProperties)
-                SAFE_DELETE(p);
-            return UPtr<Terrain>(NULL);
-        }
-        else
-        {
-            GP_WARN("Unsupported 'heightmap' format ('%s') in terrain definition: %s.", heightmap.c_str(), path);
-            if (!externalProperties)
-                SAFE_DELETE(p);
-            return UPtr<Terrain>(NULL);
-        }
-    }
-
-    // Read terrain 'size'
-    if (pTerrain->exists("size"))
-    {
-        if (!pTerrain->getVector3("size", &terrainSize))
-        {
-            GP_WARN("Invalid 'size' value ('%s') in terrain definition: %s", pTerrain->getString("size"), path);
-        }
-    }
-
-    // Read terrain 'patch size'
-    if (pTerrain->exists("patchSize"))
-    {
-        patchSize = pTerrain->getInt("patchSize");
-    }
-
-    // Read terrain 'detailLevels'
-    if (pTerrain->exists("detailLevels"))
-    {
-        detailLevels = pTerrain->getInt("detailLevels");
-    }
-
-    // Read 'skirtScale'
-    if (pTerrain->exists("skirtScale"))
-    {
-        skirtScale = pTerrain->getFloat("skirtScale");
-    }
-
-    // Read 'normalMap'
-    normalMap = pTerrain->getString("normalMap");
-
-    // Read 'material'
-    materialPath = pTerrain->getString("material", "");
-
-    if (heightfield.isNull())
-    {
-        GP_WARN("Failed to read heightfield heights for terrain definition: %s", path);
-        if (!externalProperties)
-            SAFE_DELETE(p);
-        return UPtr<Terrain>(NULL);
-    }
-
-    if (terrainSize.isZero())
-    {
-        terrainSize.set(heightfield->getColumnCount(), getDefaultHeight(heightfield->getColumnCount(), heightfield->getRowCount()), heightfield->getRowCount());
-    }
-
-    if (patchSize <= 0 || patchSize > (int)heightfield->getColumnCount() || patchSize > (int)heightfield->getRowCount())
-    {
-        patchSize = std::min(heightfield->getRowCount(), std::min(heightfield->getColumnCount(), DEFAULT_TERRAIN_PATCH_SIZE));
-    }
-
-    if (detailLevels <= 0)
-        detailLevels = 1;
-
-    if (skirtScale < 0)
-        skirtScale = 0;
-
-    // Compute terrain scale
-    Vector3 scale(terrainSize.x / (heightfield->getColumnCount()-1), terrainSize.y, terrainSize.z / (heightfield->getRowCount()-1));
-
-    // Create terrain
-    UPtr<Terrain> terrain = create(std::move(heightfield), scale, (unsigned int)patchSize, (unsigned int)detailLevels, skirtScale, normalMap, materialPath.c_str(), pTerrain);
-
-    if (!externalProperties)
-        SAFE_DELETE(p);
-
-    return terrain;
-}
-
-UPtr<Terrain> Terrain::create(UPtr<HeightField> heightfield, const Vector3& scale, unsigned int patchSize, unsigned int detailLevels, float skirtScale, const char* normalMapPath, const char* materialPath)
-{
-    return create(std::move(heightfield), scale, patchSize, detailLevels, skirtScale, normalMapPath, materialPath, NULL);
 }
 
 UPtr<Terrain> Terrain::create(UPtr<HeightField> heightfield, const Vector3& scale,
     unsigned int patchSize, unsigned int detailLevels, float skirtScale,
-    const char* normalMapPath, const char* materialPath, Properties* properties)
+    const char* normalMapPath)
 {
     GP_ASSERT(heightfield.get());
-
-    unsigned int width = heightfield->getColumnCount();
-    unsigned int height = heightfield->getRowCount();
 
     // Create the terrain object
     Terrain* terrain = new Terrain();
     terrain->_heightfield = std::move(heightfield);
-    terrain->_materialPath = (materialPath == NULL || strlen(materialPath) == 0) ? TERRAIN_MATERIAL : materialPath;
+    //terrain->_materialPath = (materialPath == NULL || strlen(materialPath) == 0) ? TERRAIN_MATERIAL : materialPath;
 
     // Store terrain local scaling so it can be applied to the heightfield
     terrain->_localScale.set(scale);
-
-    // Store reference to bounding box (it is calculated and updated from TerrainPatch)
-    BoundingBox& bounds = terrain->_boundingBox;
+    terrain->_patchSize = patchSize;
+    terrain->_detailLevels = detailLevels;
+    terrain->_skirtScale = skirtScale;
 
     if (normalMapPath)
     {
@@ -279,116 +116,7 @@ UPtr<Terrain> Terrain::create(UPtr<HeightField> heightfield, const Vector3& scal
         GP_ASSERT( terrain->_normalMap->getType() == Texture::TEXTURE_2D );
     }
 
-    float halfWidth = (width - 1) * 0.5f;
-    float halfHeight = (height - 1) * 0.5f;
-
-    // Compute the maximum step size, which is a function of our lowest level of detail.
-    // This determines how many vertices will be skipped per triange/quad on the lowest
-    // level detail terrain patch.
-    //unsigned int maxStep = (unsigned int)std::pow(2.0, (double)(detailLevels-1));
-
-    float verticalSkirtSize = skirtScale * (terrain->_heightfield->getHeightMax() - terrain->_heightfield->getHeightMin());
-
-    // Create terrain patches
-    unsigned int x1, x2, z1, z2;
-    unsigned int row = 0, column = 0;
-    for (unsigned int z = 0; z < height-1; z = z2, ++row)
-    {
-        z1 = z;
-        z2 = std::min(z1 + patchSize, height-1);
-
-        column = 0;
-        for (unsigned int x = 0; x < width-1; x = x2, ++column)
-        {
-            x1 = x;
-            x2 = std::min(x1 + patchSize, width-1);
-
-            // Create this patch
-            TerrainPatch* patch = TerrainPatch::create(terrain, terrain->_patches.size(), row, column, 
-                x1, z1, x2, z2, -halfWidth, -halfHeight, detailLevels, verticalSkirtSize);
-            terrain->_patches.push_back(patch);
-
-            // Append the new patch's local bounds to the terrain local bounds
-            bounds.merge(patch->getBoundingBox(false));
-        }
-    }
-
-    // Read additional layer information from properties (if specified)
-    /*if (properties)
-    {
-        // Parse terrain layers
-        Properties* lp;
-        int index = -1;
-        while ((lp = properties->getNextNamespace()) != NULL)
-        {
-            if (strcmp(lp->getNamespace(), "layer") == 0)
-            {
-                // If there is no explicitly specified index for this layer, assume it's the 'next' layer
-                if (lp->exists("index"))
-                    index = lp->getInt("index");
-                else
-                    ++index;
-
-                std::string textureMap;
-                const char* textureMapPtr = NULL;
-                std::string blendMap;
-                const char* blendMapPtr = NULL;
-                Vector2 textureRepeat;
-                int blendChannel = 0;
-                int row = -1, column = -1;
-                Vector4 temp;
-
-                // Read layer textures
-                Properties* t = lp->getNamespace("texture", true);
-                if (t)
-                {
-                    if (t->getPath("path", &textureMap))
-                    {
-                        textureMapPtr = textureMap.c_str();
-                    }
-                    if (!t->getVector2("repeat", &textureRepeat))
-                        textureRepeat.set(1,1);
-                }
-
-                Properties* b = lp->getNamespace("blend", true);
-                if (b)
-                {
-                    if (b->getPath("path", &blendMap))
-                    {
-                        blendMapPtr = blendMap.c_str();
-                    }
-                    const char* channel = b->getString("channel");
-                    if (channel && strlen(channel) > 0)
-                    {
-                        char c = std::toupper(channel[0]);
-                        if (c == 'R' || c == '0')
-                            blendChannel = 0;
-                        else if (c == 'G' || c == '1')
-                            blendChannel = 1;
-                        else if (c == 'B' || c == '2')
-                            blendChannel = 2;
-                        else if (c == 'A' || c == '3')
-                            blendChannel = 3;
-                    }
-                }
-
-                // Get patch row/columns that this layer applies to.
-                if (lp->exists("row"))
-                    row = lp->getInt("row");
-                if (lp->exists("column"))
-                    column = lp->getInt("column");
-
-                if (!terrain->setLayer(index, textureMapPtr, textureRepeat, blendMapPtr, blendChannel, row, column))
-                {
-                    GP_WARN("Failed to load terrain layer: %s", textureMap.c_str());
-                }
-            }
-        }
-    }
-    */
-    // Load materials for all patches
-    //for (size_t i = 0, count = terrain->_patches.size(); i < count; ++i)
-    //    terrain->_patches[i]->updateMaterial();
+    terrain->initPatchs();
 
     return UPtr<Terrain>(terrain);
 }
@@ -462,7 +190,7 @@ bool Terrain::addLayer(const char* texturePath, const Vector2& textureRepeat, Te
 
     // Create the layer
     Layer* layer = new Layer();
-    layer->index = _layers.size();
+    //layer->index = _layers.size();
     layer->textureIndex = textureIndex;
     layer->textureRepeat = textureRepeat;
     layer->blendIndex = blendIndex;
@@ -672,7 +400,7 @@ int Terrain::addSampler(Texture* texture)
 }
 
 Terrain::Layer::Layer() :
-    index(0), row(-1), column(-1), textureIndex(-1), blendIndex(-1)
+    textureIndex(-1), blendIndex(-1)
 {
 }
 
@@ -850,6 +578,111 @@ void Terrain::generateNormalMap()
     normalPixels = NULL;
 
     this->resetMesh();
+}
+
+Serializable* Terrain::createLayerObject() {
+    return new Terrain::Layer();
+}
+
+std::string Terrain::Layer::getClassName() {
+    return "mgp::Terrain::Layer";
+}
+
+void Terrain::Layer::onSerialize(Serializer* serializer) {
+    serializer->writeInt("textureIndex", textureIndex, -1);
+    serializer->writeInt("blendIndex", blendIndex, -1);
+    serializer->writeInt("blendChannel", blendChannel, -1);
+    serializer->writeVector("textureRepeat", textureRepeat, Vector2::one());
+}
+
+void Terrain::Layer::onDeserialize(Serializer* serializer) {
+    textureIndex = serializer->readInt("textureIndex", -1);
+    blendIndex = serializer->readInt("blendIndex", -1);
+    blendChannel = serializer->readInt("blendChannel", -1);
+    textureRepeat = serializer->readVector("textureRepeat", Vector2::one());
+}
+
+Serializable* Terrain::createObject() {
+    return new Terrain();
+}
+
+std::string Terrain::getClassName() {
+    return "mgp::Terrain";
+}
+
+void Terrain::onSerialize(Serializer* serializer) {
+    serializer->writeInt("renderLayer", this->getRenderLayer(), 0);
+    serializer->writeInt("lightMask", this->getLightMask(), 0);
+
+    serializer->writeInt("patchSize", _patchSize, -1);
+    serializer->writeInt("detailLevels", _detailLevels, -1);
+    serializer->writeFloat("skirtScale", _skirtScale, 0);
+    serializer->writeVector("localScale", _localScale, Vector3::one());
+
+    serializer->writeInt("heightfield_row", _heightfield->getRowCount(), 0);
+    serializer->writeInt("heightfield_column", _heightfield->getColumnCount(), 0);
+    serializer->writeFloat("heightfield_min", _heightfield->getHeightMin(), 0);
+    serializer->writeFloat("heightfield_max", _heightfield->getHeightMax(), 0);
+    
+    if (_heightfield->getPath().size() == 0) {
+        _heightfield->getPath() = AssetManager::getInstance()->getPath() + "/image/" + Resource::genId() + ".raw";
+        _heightfield->save(_heightfield->getPath().c_str());
+    }
+    serializer->writeString("heightfield_path", _heightfield->getPath().c_str(), "");
+
+    serializer->writeObject("normalMap", _normalMap);
+
+    serializer->writeList("samplers", _samplers.size());
+    for (Texture* t : _samplers) {
+        serializer->writeObject(NULL, t);
+    }
+    serializer->finishColloction();
+
+    serializer->writeList("layers", _layers.size());
+    for (Layer* t : _layers) {
+        serializer->writeObject(NULL, t);
+    }
+    serializer->finishColloction();
+}
+
+void Terrain::onDeserialize(Serializer* serializer) {
+    setRenderLayer((Drawable::RenderLayer)serializer->readInt("renderLayer", 0));
+    setLightMask(serializer->readInt("lightMask", 0));
+
+    _patchSize = serializer->readInt("patchSize", -1);
+    _detailLevels = serializer->readInt("detailLevels", -1);
+    _skirtScale = serializer->readFloat("skirtScale", 0);
+    _localScale = serializer->readVector("localScale", Vector3::one());
+
+    int heightfield_row = serializer->readInt("heightfield_row", 0);
+    int heightfield_column = serializer->readInt("heightfield_column", 0);
+    float heightfield_min = serializer->readFloat("heightfield_min", 0);
+    float heightfield_max = serializer->readFloat("heightfield_max", 0);
+    std::string heightfield_path;
+    serializer->readString("heightfield_path", heightfield_path, "");
+
+    _heightfield = HeightField::createFromRAW(heightfield_path.c_str(), heightfield_row, heightfield_column, heightfield_min, heightfield_max);
+
+    auto normalMap = serializer->readObject("normalMap");
+    if (normalMap.get()) {
+        _normalMap = normalMap.dynamicCastTo<Texture>().take();
+    }
+
+    int n = serializer->readList("samplers");
+    for (int i = 0; i < n; ++i) {
+        Texture * t = serializer->readObject(NULL).dynamicCastTo<Texture>().take();
+        _samplers.push_back(t);
+    }
+    serializer->finishColloction();
+
+    n = serializer->readList("layers");
+    for (int i = 0; i < n; ++i) {
+        Layer* t = serializer->readObject(NULL).dynamicCastTo<Layer>().take();
+        _layers.push_back(t);
+    }
+    serializer->finishColloction();
+
+    this->initPatchs();
 }
 
 }

@@ -2,7 +2,6 @@
 #include "Material.h"
 #include "base/FileSystem.h"
 #include "ShaderProgram.h"
-#include "base/Properties.h"
 #include "scene/Node.h"
 #include "MaterialParameter.h"
 #include "platform/Toolkit.h"
@@ -30,49 +29,11 @@ Material::~Material()
     //SAFE_RELEASE(_vertexAttributeBinding);
 }
 
-UPtr<Material> Material::create(const char* url)
+UPtr<Material> Material::create(const std::string& name, const char* defines)
 {
-    return create(url, (PassCallback)NULL, NULL);
-}
-
-std::vector<Material*> Material::createAll(const char* url)
-{
-    std::vector<Material*> res;
-
-    UPtr<Properties> properties = Properties::create(url);
-    if (properties.get() == NULL)
-    {
-        GP_WARN("Failed to create material from file: %s", url);
-        return res;
-    }
-
-    for (Properties *p = properties->getNextNamespace(); p != NULL; p = properties->getNextNamespace()) {
-        Material* material = create(p, NULL, NULL).take();
-        res.push_back(material);
-    }
-    //SAFE_DELETE(properties);
-    return res;
-}
-
-UPtr<Material> Material::create(const char* url, PassCallback callback, void* cookie)
-{
-    // Load the material properties from file.
-    UPtr<Properties> properties = Properties::create(url);
-    if (properties.get() == NULL)
-    {
-        GP_WARN("Failed to create material from file: %s", url);
-        return UPtr<Material>(NULL);
-    }
-
-    UPtr<Material> material = create((strlen(properties->getNamespace()) > 0) ? properties.get() : properties->getNextNamespace(), callback, cookie);
-    //SAFE_DELETE(properties);
-
-    return material;
-}
-
-UPtr<Material> Material::create(Properties* materialProperties)
-{
-    return create(materialProperties, (PassCallback)NULL, NULL);
+    std::string v = "res/shaders/" + name + ".vert";
+    std::string f = "res/shaders/" + name + ".frag";
+    return create(v.c_str(), f.c_str(), defines);
 }
 
 bool Material::initialize(Drawable* drawable, std::vector<Light*>* lights, int lightMask, int instanced)
@@ -408,50 +369,6 @@ void Material::bindNode(Camera* camera, Node *node, Drawable* drawable) {
         param->_temporary = true;
     }
 
-}
-
-UPtr<Material> Material::create(Properties* materialProperties, PassCallback callback, void* cookie)
-{
-    // Check if the Properties is valid and has a valid namespace.
-    if (!materialProperties || !(strcmp(materialProperties->getNamespace(), "material") == 0))
-    {
-        GP_ERROR("Properties object must be non-null and have namespace equal to 'material'.");
-        return UPtr<Material>(NULL);
-    }
-
-    // Create new material from the file passed in.
-    Material* material = new Material();
-
-    material->setId(materialProperties->getId());
-
-    // Load uniform value parameters for this material.
-    loadRenderState(material, materialProperties);
-
-    // Fetch shader info required to create the effect of this technique.
-    const char* vertexShaderPath = materialProperties->getString("vertexShader");
-    GP_ASSERT(vertexShaderPath);
-    const char* fragmentShaderPath = materialProperties->getString("fragmentShader");
-    GP_ASSERT(fragmentShaderPath);
-    const char* passDefines = materialProperties->getString("defines");
-
-    // If a pass callback was specified, call it and add the result to our list of defines
-    std::string allDefines = passDefines ? passDefines : "";
-    if (callback)
-    {
-        std::string customDefines = callback(material, cookie);
-        if (customDefines.length() > 0)
-        {
-            if (allDefines.length() > 0)
-                allDefines += ';';
-            allDefines += customDefines;
-        }
-    }
-
-    material->vertexShaderPath = vertexShaderPath;
-    material->fragmentShaderPath = fragmentShaderPath;
-    material->shaderDefines = allDefines;
-
-    return UPtr<Material>(material);
 }
 
 UPtr<Material> Material::create(ShaderProgram* effect)

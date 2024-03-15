@@ -51,7 +51,7 @@ public:
      *
      * @script{ignore}
      */
-    static std::string passCallback(Material* pass, void* cookie);
+    //static std::string passCallback(Material* pass, void* cookie);
 
     void genLayerVertex(std::vector<float>& position, int layer, int random, float randomRange);
 private:

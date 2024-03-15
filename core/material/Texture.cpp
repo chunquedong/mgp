@@ -500,6 +500,7 @@ void Texture::onSerialize(Serializer* serializer) {
     serializer->writeEnum("type", "mgp::Texture::Type", static_cast<int>(_type), TEXTURE_2D);
     serializer->writeBool("mipmap", _mipmapped, false);
     serializer->writeInt("arrayDepth", _arrayDepth, 0);
+    serializer->writeBool("keepMemory", _keepMemory, false);
 }
 
 /**
@@ -526,6 +527,7 @@ void Texture::onDeserialize(Serializer* serializer) {
     _type = static_cast<Texture::Type>(serializer->readEnum("type", "mgp::Texture::Type", TEXTURE_2D));
     _mipmapped = serializer->readBool("mipmap", false);
     _arrayDepth = serializer->readInt("arrayDepth", 0);
+    _keepMemory = serializer->readBool("keepMemory", false);
 
     //overwrite format
     if (_datas.size() > 0) {

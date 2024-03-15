@@ -4,7 +4,6 @@
 #include "base/Ref.h"
 #include "scene/Drawable.h"
 #include "scene/Transform.h"
-#include "base/Properties.h"
 #include "HeightField.h"
 #include "material/Texture.h"
 #include "math/BoundingBox.h"
@@ -81,14 +80,9 @@ class TerrainAutoBindingResolver;
  *
  * @see http://gameplay3d.github.io/GamePlay/docs/file-formats.html#wiki-Terrain
  */
-class Terrain : public Drawable, public Transform::Listener
+class Terrain : public Drawable, public Transform::Listener, public Serializable
 {
-    //friend class Node;
-    //friend class PhysicsController;
-    //friend class PhysicsRigidBody;
     friend class TerrainPatch;
-    //friend class TerrainAutoBindingResolver;
-
 public:
 
     /**
@@ -120,33 +114,6 @@ public:
     };
 
     /**
-     * Loads a Terrain from the given properties file.
-     *
-     * The specified properties file can contain a full terrain definition, including a
-     * heightmap (PNG, RAW8, RAW16), level of detail information, patch size, layer texture
-     * details and vertical skirt size. A custom terrain material file can also be specified,
-     * otherwise the terrain will look for a material file at res/materials/terrain.material.
-     *
-     * @param path Path to a properties file describing the terrain.
-     *
-     * @return A new Terrain.
-     * @script{create}
-     */
-    static UPtr<Terrain> create(const char* path);
-
-    /**
-     * Creates a new terrain definition from the configuration in the specified Properties object.
-     *
-     * @param properties Properties object containing the terrain definition.
-     *
-     * @return A new Terrain.
-     *
-     * @see create(const char*)
-     * @script{create}
-     */
-    static UPtr<Terrain> create(Properties* properties);
-
-    /**
      * Creates a terrain from the given heightfield.
      *
      * Terrain geometry is loaded from the given height array, using the specified parameters for
@@ -173,8 +140,7 @@ public:
      * @script{create}
      */
     static UPtr<Terrain> create(UPtr<HeightField> heightfield, const Vector3& scale = Vector3::one(), unsigned int patchSize = 32,
-        unsigned int detailLevels = 3, float skirtScale = 0.01f, const char* normalMapPath = NULL,
-        const char* materialPath = NULL);
+        unsigned int detailLevels = 3, float skirtScale = 0.01f, const char* normalMapPath = NULL);
 
     /**
      * Determines if the specified terrain flag is currently set.
@@ -303,6 +269,26 @@ public:
     const Matrix& getInverseWorldMatrix() const;
 
     void generateNormalMap();
+
+
+    static Serializable* createObject();
+    static Serializable* createLayerObject();
+
+    /**
+     * @see Serializable::getClassName
+     */
+    std::string getClassName() override;
+
+    /**
+     * @see Serializable::onSerialize
+     */
+    void onSerialize(Serializer* serializer) override;
+
+    /**
+     * @see Serializable::onDeserialize
+     */
+    void onDeserialize(Serializer* serializer) override;
+
 private:
 
     /**
@@ -325,17 +311,7 @@ private:
      */
     ~Terrain();
 
-    /**
-     * Internal method for creating terrain.
-     */
-    static UPtr<Terrain> create(UPtr<HeightField> heightfield, const Vector3& scale,
-        unsigned int patchSize, unsigned int detailLevels, float skirtScale, 
-        const char* normalMapPath, const char* materialPath, Properties* properties);
-
-    /**
-     * Internal method for creating terrain.
-     */
-    static UPtr<Terrain> create(const char* path, Properties* properties);
+    void initPatchs();
 
     /**
      * @see Transform::Listener::transformChanged.
@@ -348,7 +324,7 @@ private:
     //BoundingBox getBoundingBox(bool worldSpace) const;
     int addSampler(Texture* texture);
 
-    struct Layer
+    struct Layer : public Serializable
     {
         Layer();
 
@@ -358,16 +334,24 @@ private:
 
         Layer& operator=(const Layer&) = delete;
 
-        int index;
-        int row;
-        int column;
+        //int index;
+        //int row;
+        //int column;
         int textureIndex;
         Vector2 textureRepeat;
         int blendIndex;
         int blendChannel;
+
+        std::string getClassName() override;
+        void onSerialize(Serializer* serializer) override;
+        void onDeserialize(Serializer* serializer) override;
     };
 
-    std::string _materialPath;
+    int _patchSize = 32;
+    int _detailLevels = 3;
+    float _skirtScale = 0.01f;
+
+    //std::string _materialPath;
     UPtr<HeightField> _heightfield;
     Vector3 _localScale;
     std::vector<TerrainPatch*> _patches;

@@ -159,7 +159,21 @@ UPtr<HeightField> HeightField::create(const char* path, unsigned int width, unsi
         GP_WARN("Unsupported heightfield image format: %s.", path);
     }
 
+    heightfield->_path = path;
     return heightfield;
+}
+
+void HeightField::save(const char* path) {
+    UPtr<Stream> stream = FileSystem::open(path, FileSystem::WRITE);
+    float* end = _array + (_rows * _cols);
+    float* it = _array;
+    float d = (1.0/(_heightMax - _heightMin)) * 65535.0;
+    for (; it != end; ++it) {
+        float value = *it;
+        uint16_t ivalue = (value - _heightMin) * d;
+        stream->writeUInt16(ivalue);
+    }
+    stream->close();
 }
 
 float* HeightField::getArray() const

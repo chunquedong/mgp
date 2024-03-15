@@ -121,6 +121,8 @@ public:
     void write(Stream* file) override;
     bool read(Stream* file) override;
 
+    std::string& getFilePath() { return _filePath; }
+
     /**
      * Constructor.
      */
@@ -140,6 +142,7 @@ private:
     Format _format;
     unsigned int _width;
     unsigned int _height;
+    std::string _filePath;
 };
 
 }

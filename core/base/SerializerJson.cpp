@@ -420,7 +420,8 @@ void SerializerJson::writeObject(const char* propertyName, Serializable *value)
     jc::JsonNode* parentNode = _nodes.top();
     jc::JsonNode* writeNode = nullptr;
     jc::JsonNode* xrefNode = nullptr;
-    if (value && dynamic_cast<Refable*>(value)->getRefCount() > 1)
+    Refable* refable = dynamic_cast<Refable*>(value);
+    if (refable && refable->getRefCount() > 1)
     {
         unsigned long xrefAddress = (unsigned long)value;
         std::map<unsigned long, jc::JsonNode*>::const_iterator itr = _xrefsWrite.find(xrefAddress);

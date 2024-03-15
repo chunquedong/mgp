@@ -235,7 +235,10 @@ UPtr<Image> Image::create(const char* path, bool flipY)
         return UPtr<Image>(NULL);
     }
     image->_data = data;
-    image->_id = path;
+
+    std::string name = FileSystem::getBaseName(path)+ FileSystem::getExtension(path, false);
+    image->_id = name;
+    image->_filePath = path;
     //stbi_image_free(data);
     return UPtr<Image>(image);
 }

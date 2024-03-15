@@ -10,6 +10,7 @@
 #include "openGL/GLRenderer.h"
 #include "SceneView.h"
 #include "base/ThreadPool.h"
+#include "objects/Terrain.h"
 
 #include "scene/AssetManager.h"
 
@@ -47,6 +48,8 @@ void regiseterSerializer() {
     mgr->registerType("mgp::Material", Material::createObject);
     mgr->registerType("mgp::Texture", Texture::createObject);
     mgr->registerType("mgp::MaterialParameter", MaterialParameter::createObject);
+    mgr->registerType("mgp::Terrain", Terrain::createObject);
+    mgr->registerType("mgp::Terrain::Layer", Terrain::createLayerObject);
 
     // Register engine enums
     mgr->registerEnum("mgp::Camera::Mode", Camera::enumToString, Camera::enumParse);

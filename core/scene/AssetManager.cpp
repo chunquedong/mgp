@@ -196,21 +196,29 @@ void AssetManager::save(Resource* res) {
         //delete s;
     }
     else if (Image* texture = dynamic_cast<Image*>(res)) {
-        if (StringUtil::endsWith(name, ".image")) {
+        if (texture->getFilePath().size() > 0) {
+            std::string dst = path + "/image/" + name;
+            if (!FileSystem::fileExists(dst.c_str())) {
+                std::string src = texture->getFilePath();
+                FileSystem::copyFile(src.c_str(), dst.c_str());
+            }
+        }
+        else if (StringUtil::endsWith(name, ".png")) {
+            std::string file = path + "/image/" + name;
+            texture->save(file.c_str(), "png");
+        }
+        else if (StringUtil::endsWith(name, ".jpg")) {
+            std::string file = path + "/image/" + name;
+            texture->save(file.c_str(), "jgp");
+        }
+        else if (StringUtil::endsWith(name, ".image")) {
             std::string file = path + "/image/" + name;
             UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
             texture->write(s.get());
             s->close();
         }
         else {
-            std::string file = path + "/image/" + name;
-            if (!FileSystem::fileExists(file.c_str())) {
-                std::string originName = FileSystem::getBaseName(name.c_str()) + FileSystem::getExtension(name.c_str(), false);
-                std::string dst = path + "/image/" + originName;
-                FileSystem::copyFile(name.c_str(), dst.c_str());
-                _saved[originName] = 1;
-                res->setId(originName);
-            }
+            GP_ASSERT("Unknow image type:%s", name.c_str());
         }
     }
     else {
