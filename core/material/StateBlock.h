@@ -3,6 +3,7 @@
 
 #include "base/Base.h"
 #include "base/Ref.h"
+#include "base/Serializable.h"
 
 namespace mgp
 {
@@ -78,25 +79,6 @@ namespace mgp
         };
 
         /**
-         * Defines the supported stencil compare functions.
-         *
-         * Stencil compare functions determine if a new pixel will be drawn.
-         *
-         * The initial stencil compare function is STENCIL_ALWAYS.
-         */
-        enum StencilFunction
-        {
-            STENCIL_NEVER = 0x0200,
-            STENCIL_ALWAYS = 0x0207,
-            STENCIL_LESS = 0x0201,
-            STENCIL_LEQUAL = 0x0203,
-            STENCIL_EQUAL = 0x0202,
-            STENCIL_GREATER = 0x0204,
-            STENCIL_GEQUAL = 0x0206,
-            STENCIL_NOTEQUAL = 0x0205
-        };
-
-        /**
          * Defines the supported stencil operations to perform.
          *
          * Stencil operations determine what should happen to the pixel if the
@@ -125,7 +107,7 @@ namespace mgp
          * This method handles both setting and restoring of render states to ensure that
          * only the state explicitly defined by this StateBlock is applied to the renderer.
          */
-        void bind(int force = 1);
+        void bind(int force = 0);
 
         /**
          * Toggles blending.
@@ -232,7 +214,7 @@ namespace mgp
          * @param ref The stencil reference value.
          * @param mask The stencil mask.
          */
-        void setStencilFunction(StencilFunction func, int ref, unsigned int mask);
+        void setStencilFunction(DepthFunction func, int ref, unsigned int mask);
 
         /**
          * Sets the stencil operation.
@@ -259,6 +241,15 @@ namespace mgp
          */
         void setState(const char* name, const char* value);
 
+
+public:
+        static std::string enumToString(const std::string& enumName, int value);
+
+        static int enumParse(const std::string& enumName, const std::string& str);
+
+        void onSerialize(Serializer* serializer);
+
+        void onDeserialize(Serializer* serializer);
     //private:
 
         /**
@@ -293,7 +284,7 @@ namespace mgp
         FrontFace _frontFace;
         bool _stencilTestEnabled;
         unsigned int _stencilWrite;
-        StencilFunction _stencilFunction;
+        DepthFunction _stencilFunction;
         int _stencilFunctionRef;
         unsigned int _stencilFunctionMask;
         StencilOperation _stencilOpSfail;
@@ -304,23 +295,6 @@ namespace mgp
         float _offsetFactor;
         float _offsetUnits;
 
-// Render state override bits
-#define RS_BLEND 1
-#define RS_BLEND_FUNC 2
-#define RS_CULL_FACE 4
-#define RS_DEPTH_TEST 8
-#define RS_DEPTH_WRITE 16
-#define RS_DEPTH_FUNC 32
-#define RS_CULL_FACE_SIDE 64
-#define RS_STENCIL_TEST 128
-#define RS_STENCIL_WRITE 256
-#define RS_STENCIL_FUNC 512
-#define RS_STENCIL_OP 1024
-#define RS_FRONT_FACE 2048
-#define RS_POLYGON_OFFSET 4096
-
-#define RS_ALL_ONES 0xFFFFFFFF
-        long _bits;
     };
 }
 

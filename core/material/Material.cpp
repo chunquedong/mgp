@@ -598,13 +598,7 @@ void Material::onSerialize(Serializer* serializer) {
     serializer->writeString("fragmentShaderPath", fragmentShaderPath.c_str(), "");
     serializer->writeString("shaderDefines", shaderDefines.c_str(), "");
 
-    /*
-    std::vector<std::string> params;
-    for (int i=0; i<getParameterCount(); ++i) {
-        MaterialParameter *p = getParameterByIndex(i);
-        params.push_back(p->getName());
-    }
-    */
+    _state.onSerialize(serializer);
 
     int count = 0;
     for (int i = 0; i < getParameterCount(); ++i) {
@@ -630,6 +624,7 @@ void Material::onDeserialize(Serializer* serializer) {
     serializer->readString("fragmentShaderPath", fragmentShaderPath, "");
     serializer->readString("shaderDefines", shaderDefines, "");
 
+    _state.onDeserialize(serializer);
 
     int size = serializer->readList("parameters");
     for (int i = 0; i < size; ++i) {

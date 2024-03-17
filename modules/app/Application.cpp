@@ -63,6 +63,11 @@ void regiseterSerializer() {
     mgr->registerEnum("mgp::Texture::Filter", Texture::enumToString, Texture::enumParse);
 
     mgr->registerEnum("mgp::MaterialParameter::Type", MaterialParameter::enumToString, MaterialParameter::enumParse);
+    mgr->registerEnum("mgp::StateBlock::DepthFunction", StateBlock::enumToString, StateBlock::enumParse);
+    mgr->registerEnum("mgp::StateBlock::Blend", StateBlock::enumToString, StateBlock::enumParse);
+    mgr->registerEnum("mgp::StateBlock::CullFaceSide", StateBlock::enumToString, StateBlock::enumParse);
+    mgr->registerEnum("mgp::StateBlock::FrontFace", StateBlock::enumToString, StateBlock::enumParse);
+    mgr->registerEnum("mgp::StateBlock::StencilOperation", StateBlock::enumToString, StateBlock::enumParse);
 }
 #if GP_SCRIPT_ENABLE
 /**

@@ -643,6 +643,8 @@ void TerrainPatch::genLayerVertex(std::vector<float>& position, int layerIndex, 
         const float* buffer = (float*)mesh->getVertexBuffer()->_data;
         int n = mesh->getVertexCount();
         int vertexSize = format.getVertexSize();
+
+        int limit = 128;
         for (int i = 0; i < n; ++i) {
             int p2 = i * uvAttr.stride + uvAttr.offset;
             p2 /= 4;
@@ -654,7 +656,7 @@ void TerrainPatch::genLayerVertex(std::vector<float>& position, int layerIndex, 
             int tx = u * (blendTexture->getWidth()-1);
             int ty = v * (blendTexture->getHeight()-1);
             unsigned char value = blendData[(tx + ty * blendTexture->getWidth()) * bbp + channel];
-            if (value > 128) {
+            if (value > limit) {
                 int p1 = i * posAttr.stride + posAttr.offset;
                 p1 /= 4;
                 float x = buffer[p1];
@@ -662,12 +664,13 @@ void TerrainPatch::genLayerVertex(std::vector<float>& position, int layerIndex, 
                 float z = buffer[p1 + 2];
 
                 if (random) {
-                    int randomCount = (value / 255.0) * random;
-                    for (int k = 0; k < random; ++k) {
+                    int randomCount = ((value- limit) / (255.0- limit)) * random;
+                    for (int k = 0; k < randomCount; ++k) {
                         float r = ((rand() / (float)RAND_MAX) - 0.5) * randomRange;
                         float r2 = ((rand() / (float)RAND_MAX) - 0.5) * randomRange;
+                        float h = _terrain->getHeight(x + r, z + r2);
                         _positionCache.push_back(x+r);
-                        _positionCache.push_back(y);
+                        _positionCache.push_back(h);
                         _positionCache.push_back(z+r2);
                     }
                 }

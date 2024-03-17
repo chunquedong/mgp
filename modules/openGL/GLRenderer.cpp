@@ -226,7 +226,7 @@ void GLRenderer::updateState(StateBlock* state, int force) {
     StateBlock* _defaultState = &stateBlock;
 
     // Update any state that differs from _defaultState and flip _defaultState bits
-    if (force == 2 || ((force || (state->_bits & RS_BLEND)) && (state->_blendEnabled != _defaultState->_blendEnabled)))
+    if (force || (state->_blendEnabled != _defaultState->_blendEnabled))
     {
         if (state->_blendEnabled)
             GL_ASSERT(glEnable(GL_BLEND));
@@ -234,9 +234,9 @@ void GLRenderer::updateState(StateBlock* state, int force) {
             GL_ASSERT(glDisable(GL_BLEND));
         _defaultState->_blendEnabled = state->_blendEnabled;
     }
-    if (force == 2 || ((force || (state->_bits & RS_BLEND_FUNC)) && 
+    if (force ||
         (state->_blendSrc != _defaultState->_blendSrc || state->_blendDst != _defaultState->_blendDst ||
-        state->_blendSrcAlpha != _defaultState->_blendSrcAlpha || state->_blendDstAlpha != _defaultState->_blendDstAlpha)))
+        state->_blendSrcAlpha != _defaultState->_blendSrcAlpha || state->_blendDstAlpha != _defaultState->_blendDstAlpha))
     {
         GL_ASSERT(glBlendFuncSeparate((GLenum)state->_blendSrc, (GLenum)state->_blendDst, (GLenum)state->_blendSrcAlpha, (GLenum)state->_blendDstAlpha));
         //GL_ASSERT(glBlendFunc((GLenum)state->_blendSrc, (GLenum)state->_blendDst));
@@ -245,7 +245,7 @@ void GLRenderer::updateState(StateBlock* state, int force) {
         _defaultState->_blendSrcAlpha = state->_blendSrcAlpha;
         _defaultState->_blendDstAlpha = state->_blendDstAlpha;
     }
-    if (force == 2 || ((force || (state->_bits & RS_CULL_FACE)) && (state->_cullFaceEnabled != _defaultState->_cullFaceEnabled)))
+    if (force || (state->_cullFaceEnabled != _defaultState->_cullFaceEnabled))
     {
         if (state->_cullFaceEnabled)
             GL_ASSERT(glEnable(GL_CULL_FACE));
@@ -253,17 +253,17 @@ void GLRenderer::updateState(StateBlock* state, int force) {
             GL_ASSERT(glDisable(GL_CULL_FACE));
         _defaultState->_cullFaceEnabled = state->_cullFaceEnabled;
     }
-    if (force == 2 || ((force || (state->_bits & RS_CULL_FACE_SIDE)) && (state->_cullFaceSide != _defaultState->_cullFaceSide)))
+    if (force || (state->_cullFaceSide != _defaultState->_cullFaceSide))
     {
         GL_ASSERT(glCullFace((GLenum)state->_cullFaceSide));
         _defaultState->_cullFaceSide = state->_cullFaceSide;
     }
-    if (force == 2 || ((force || (state->_bits & RS_FRONT_FACE)) && (state->_frontFace != _defaultState->_frontFace)))
+    if (force || (state->_frontFace != _defaultState->_frontFace))
     {
         GL_ASSERT(glFrontFace((GLenum)state->_frontFace));
         _defaultState->_frontFace = state->_frontFace;
     }
-    if (force == 2 || ((force || (state->_bits & RS_DEPTH_TEST)) && (state->_depthTestEnabled != _defaultState->_depthTestEnabled)))
+    if (force || (state->_depthTestEnabled != _defaultState->_depthTestEnabled))
     {
         if (state->_depthTestEnabled)
             GL_ASSERT(glEnable(GL_DEPTH_TEST));
@@ -271,17 +271,17 @@ void GLRenderer::updateState(StateBlock* state, int force) {
             GL_ASSERT(glDisable(GL_DEPTH_TEST));
         _defaultState->_depthTestEnabled = state->_depthTestEnabled;
     }
-    if (force == 2 || ((force || (state->_bits & RS_DEPTH_WRITE)) && (state->_depthWriteEnabled != _defaultState->_depthWriteEnabled)))
+    if (force || (state->_depthWriteEnabled != _defaultState->_depthWriteEnabled))
     {
         GL_ASSERT(glDepthMask(state->_depthWriteEnabled ? GL_TRUE : GL_FALSE));
         _defaultState->_depthWriteEnabled = state->_depthWriteEnabled;
     }
-    if (force == 2 || ((force || (state->_bits & RS_DEPTH_FUNC)) && (state->_depthFunction != _defaultState->_depthFunction)))
+    if (force || (state->_depthFunction != _defaultState->_depthFunction))
     {
         GL_ASSERT(glDepthFunc((GLenum)state->_depthFunction));
         _defaultState->_depthFunction = state->_depthFunction;
     }
-    if (force == 2 || ((force || (state->_bits & RS_STENCIL_TEST)) && (state->_stencilTestEnabled != _defaultState->_stencilTestEnabled)))
+    if (force || (state->_stencilTestEnabled != _defaultState->_stencilTestEnabled))
     {
         if (state->_stencilTestEnabled)
             GL_ASSERT(glEnable(GL_STENCIL_TEST));
@@ -289,32 +289,32 @@ void GLRenderer::updateState(StateBlock* state, int force) {
             GL_ASSERT(glDisable(GL_STENCIL_TEST));
         _defaultState->_stencilTestEnabled = state->_stencilTestEnabled;
     }
-    if (force == 2 || ((force || (state->_bits & RS_STENCIL_WRITE)) && (state->_stencilWrite != _defaultState->_stencilWrite)))
+    if (force || (state->_stencilWrite != _defaultState->_stencilWrite))
     {
         GL_ASSERT(glStencilMask(state->_stencilWrite));
         _defaultState->_stencilWrite = state->_stencilWrite;
     }
-    if (force == 2 || ((force || (state->_bits & RS_STENCIL_FUNC)) && (state->_stencilFunction != _defaultState->_stencilFunction ||
+    if (force || (state->_stencilFunction != _defaultState->_stencilFunction ||
         state->_stencilFunctionRef != _defaultState->_stencilFunctionRef ||
-        state->_stencilFunctionMask != _defaultState->_stencilFunctionMask)))
+        state->_stencilFunctionMask != _defaultState->_stencilFunctionMask))
     {
         GL_ASSERT(glStencilFunc((GLenum)state->_stencilFunction, state->_stencilFunctionRef, state->_stencilFunctionMask));
         _defaultState->_stencilFunction = state->_stencilFunction;
         _defaultState->_stencilFunctionRef = state->_stencilFunctionRef;
         _defaultState->_stencilFunctionMask = state->_stencilFunctionMask;
     }
-    if (force == 2 || ((force || (state->_bits & RS_STENCIL_OP)) && (state->_stencilOpSfail != _defaultState->_stencilOpSfail ||
+    if (force || (state->_stencilOpSfail != _defaultState->_stencilOpSfail ||
         state->_stencilOpDpfail != _defaultState->_stencilOpDpfail ||
-        state->_stencilOpDppass != _defaultState->_stencilOpDppass)))
+        state->_stencilOpDppass != _defaultState->_stencilOpDppass))
     {
         GL_ASSERT(glStencilOp((GLenum)state->_stencilOpSfail, (GLenum)state->_stencilOpDpfail, (GLenum)state->_stencilOpDppass));
         _defaultState->_stencilOpSfail = state->_stencilOpSfail;
         _defaultState->_stencilOpDpfail = state->_stencilOpDpfail;
         _defaultState->_stencilOpDppass = state->_stencilOpDppass;
     }
-    if (force == 2 || ((force || (state->_bits & RS_POLYGON_OFFSET)) && (state->_polygonOffset != _defaultState->_polygonOffset ||
+    if (force || (state->_polygonOffset != _defaultState->_polygonOffset ||
         state->_offsetFactor != _defaultState->_offsetFactor ||
-        state->_offsetUnits != _defaultState->_offsetUnits)))
+        state->_offsetUnits != _defaultState->_offsetUnits))
     {
         if (state->_polygonOffset) GL_ASSERT(glEnable(GL_POLYGON_OFFSET_FILL));
         else GL_ASSERT(glDisable(GL_POLYGON_OFFSET_FILL));
