@@ -40,11 +40,11 @@ public:
     void beginSave();
 
     template<typename T>
-    UPtr<T> load(const std::string &name, ResType type) {
-        return load(name, type).dynamicCastTo<T>();
+    UPtr<T> load(const std::string &name, ResType type, bool cache = true) {
+        return load(name, type, cache).dynamicCastTo<T>();
     }
 
-    UPtr<Resource> load(const std::string &name, ResType type);
+    UPtr<Resource> load(const std::string &name, ResType type, bool cache = true);
 
     void remove(const std::string &name, ResType type);
 

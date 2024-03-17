@@ -107,7 +107,11 @@ void RenderDataManager::filterInstanced() {
         const InstanceKey& key = *it;
         std::vector<DrawCall*>& list = _groupByInstance[key];
         if (list.size() > 1) {
-            if (_useInstanced) {
+            bool hasSkin = false;
+            if (Model* model = dynamic_cast<Model*>(list[0]->_drawable)) {
+                hasSkin = model->getSkin() != NULL;
+            }
+            if (_useInstanced && !hasSkin) {
                 auto found = _instanceds.find(key);
                 Instanced* instance_;
                 if (found == _instanceds.end()) {

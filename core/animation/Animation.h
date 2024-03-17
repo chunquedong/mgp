@@ -15,7 +15,7 @@ class AnimationController;
 class AnimationClip;
 class AnimationValue;
 class AnimationChannel;
-class Scene;
+class Node;
 
 /**
  * Defines a generic property animation.
@@ -118,7 +118,7 @@ public:
 
 public:
 
-    void bindTarget(Scene* scene);
+    void bindTarget(Node* root);
 
     /**
      * Hidden copy constructor.

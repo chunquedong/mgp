@@ -123,11 +123,18 @@ public:
      */
     void setJointCount(unsigned int jointCount);
 
-    void resetBind();
-private:
+    void clearBind();
+
+    /**
+    * bind node by _rootJoint
+    */
+    void bindByRootJoint();
+
+    /**
+    * bind node by name
+    */
     void bindNode(Node* node);
 
-    void rebindJoins();
 private:
     std::string _rootJointName;
 

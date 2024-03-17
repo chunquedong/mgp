@@ -80,24 +80,27 @@ void AssetManager::remove(const std::string &name, ResType type) {
   }
 }
 
-UPtr<Resource> AssetManager::load(const std::string &name, ResType type) {
+UPtr<Resource> AssetManager::load(const std::string &name, ResType type, bool cache) {
     if (name.size() == 0) return UPtr<Resource>(NULL);
 
     std::lock_guard<std::recursive_mutex> lock_guard(_mutex);
-    auto itr = this->resourceMap[type].find(name);
-    if (itr != this->resourceMap[type].end()) {
-        Resource* res = itr->second;
-        bool ok = true;
-        if (Image* texture = dynamic_cast<Image*>(res)) {
-            if (!texture->getData()) {
-                res->release();
-                this->resourceMap->erase(itr);
-                ok = false;
+
+    if (cache) {
+        auto itr = this->resourceMap[type].find(name);
+        if (itr != this->resourceMap[type].end()) {
+            Resource* res = itr->second;
+            bool ok = true;
+            if (Image* texture = dynamic_cast<Image*>(res)) {
+                if (!texture->getData()) {
+                    res->release();
+                    this->resourceMap->erase(itr);
+                    ok = false;
+                }
             }
-        }
-        if (ok) {
-            res->addRef();
-            return UPtr<Resource>(res);
+            if (ok) {
+                res->addRef();
+                return UPtr<Resource>(res);
+            }
         }
     }
 
@@ -163,7 +166,7 @@ UPtr<Resource> AssetManager::load(const std::string &name, ResType type) {
             break;
         }
     }
-    if (res) {
+    if (cache && res) {
         res->addRef();
         this->resourceMap[type][name] = res;
     }
@@ -174,6 +177,11 @@ void AssetManager::save(Resource* res) {
     if (res == NULL) return;
     std::string name = res->getId();
     if (name.size() == 0) return;
+
+    if (StringUtil::contains(name, "|")) {
+        StringUtil::replace(name, "|", "_");
+        res->setId(name);
+    }
 
     std::lock_guard<std::recursive_mutex> lock_guard(_mutex);
 

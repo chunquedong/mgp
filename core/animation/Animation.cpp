@@ -422,10 +422,10 @@ bool Animation::read(Stream* file) {
     return true;
 }
 
-void Animation::bindTarget(Scene* scene) {
+void Animation::bindTarget(Node* root) {
     for (AnimationChannel* ac : this->_channels) {
         if (KeyframeChannel* c = dynamic_cast<KeyframeChannel*>(ac)) {
-            c->_target = scene->findNode(c->_targetId.c_str());
+            c->_target = root->findNode(c->_targetId.c_str());
             c->_target->addChannel(c);
         }
     }

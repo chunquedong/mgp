@@ -387,7 +387,7 @@ void Scene::onDeserialize(Serializer* serializer)
         std::string animName;
         serializer->readString(NULL, animName, "");
         auto anim = AssetManager::getInstance()->load<Animation>(animName, AssetManager::rt_animation);
-        anim->bindTarget(this);
+        anim->bindTarget(this->getRootNode());
         this->_animations.push_back(anim.get());
     }
     serializer->finishColloction();

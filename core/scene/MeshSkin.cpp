@@ -83,7 +83,11 @@ Vector4* MeshSkin::getMatrixPalette(const Matrix* viewMatrix, Node* node)
 {
     if (node) {
         if (_rootJoint.get() == NULL && _rootJointName.size() > 0) {
-            bindNode(node);
+            Node* parent = node;
+            while (parent->getParent()) {
+                parent = parent->getParent();
+            }
+            bindNode(parent);
         }
     }
     GP_ASSERT(_matrixPalette);
@@ -122,7 +126,7 @@ void MeshSkin::setRootJoint(Node* joint)
     _rootJoint = joint;
 }
 
-void MeshSkin::rebindJoins() {
+void MeshSkin::bindByRootJoint() {
     Node* rootNode = _rootJoint.get();
     GP_ASSERT(rootNode);
 
@@ -133,19 +137,15 @@ void MeshSkin::rebindJoins() {
     }
 }
 
-void MeshSkin::bindNode(Node* node) {
-    Node* parent = node;
-    while (parent->getParent()) {
-        parent = parent->getParent();
-    }
+void MeshSkin::bindNode(Node* parent) {
     Node* root = parent->findNode(_rootJointName.c_str());
     if (root) {
         setRootJoint(root);
-        rebindJoins();
+        bindByRootJoint();
     }
 }
 
-void MeshSkin::resetBind() {
+void MeshSkin::clearBind() {
     _rootJoint.clear();
     for (int i = 0; i < _joints.size(); ++i) {
         _joints[i]._node.clear();
