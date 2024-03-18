@@ -365,18 +365,11 @@ void Animation::write(Stream* file) {
     for (AnimationChannel* ac : _channels) {
         KeyframeChannel* c = dynamic_cast<KeyframeChannel*>(ac);
         if (!c) continue;
-        Node* node = dynamic_cast<Node*>(c->_target);
-        if (node != NULL) {
-            file->writeStr(node->getName());
-        }
-        else {
-            file->writeStr("");
-        }
 
+        file->writeStr(c->_targetId);
         file->writeUInt16(c->_propertyId);
         file->writeUInt64(c->_duration);
 
-        
         file->writeUInt32(c->_curve->getPointCount());
         file->writeUInt8(c->_curve->_componentCount);
         for (int i = 0; i < c->_curve->getPointCount(); i++) {
@@ -397,6 +390,7 @@ bool Animation::read(Stream* file) {
     int channelCount = file->readUInt16();
     for (int k = 0; k < channelCount; ++k) {
         KeyframeChannel* c = new KeyframeChannel();
+        
         c->_targetId = file->readStr();
         c->_propertyId = file->readUInt16();
         c->_duration = file->readUInt64();
@@ -427,6 +421,8 @@ void Animation::bindTarget(Node* root) {
         if (KeyframeChannel* c = dynamic_cast<KeyframeChannel*>(ac)) {
             c->_target = root->findNode(c->_targetId.c_str());
             c->_target->addChannel(c);
+            if (c->_target->_targetType == AnimationTarget::TRANSFORM)
+                setTransformRotationOffset(c->_curve, c->_propertyId);
         }
     }
 }
@@ -549,6 +545,10 @@ KeyframeChannel::KeyframeChannel(Animation* animation, AnimationTarget* target, 
     _curve->addRef();
     _target->addChannel(this);
     _animation->addRef();
+
+    if (Node* node = dynamic_cast<Node*>(target)) {
+        _targetId = node->getName();
+    }
 }
 
 KeyframeChannel::KeyframeChannel(const KeyframeChannel& copy, Animation* animation, AnimationTarget* target)
@@ -561,6 +561,8 @@ KeyframeChannel::KeyframeChannel(const KeyframeChannel& copy, Animation* animati
     _curve->addRef();
     _target->addChannel(this);
     _animation->addRef();
+
+    _targetId = copy._targetId;
 }
 
 KeyframeChannel::~KeyframeChannel()
