@@ -217,7 +217,7 @@ private:
     UPtr<Mesh> _mesh;
     UPtr<Material> _material;
     std::vector<UPtr<Material> > _partMaterials;
-    UPtr<MeshSkin> _skin;
+    UniquePtr<MeshSkin, true> _skin;
     float _lodLimit;
 };
 

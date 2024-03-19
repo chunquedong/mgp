@@ -12,7 +12,7 @@ namespace mgp
  *
  * Currently only supports loading from .png image files.
  */
-class Image : public Resource
+class Image : public Refable
 {
     friend class Texture;
 public:
@@ -116,10 +116,8 @@ public:
     * write image to file
     * @format image format png jpg
     */
-    bool save(const char* file, const char* format = "png");
+    bool save(const char* file, const char* format = NULL);
 
-    void write(Stream* file) override;
-    bool read(Stream* file) override;
 
     std::string& getFilePath() { return _filePath; }
 
@@ -127,6 +125,11 @@ public:
      * Constructor.
      */
     Image();
+
+    /**
+    * set default formt to save
+    */
+    void setDefaultFileFormat(const char* format);
 private:
     /**
      * Destructor.
@@ -136,13 +139,17 @@ private:
     /**
      * Hidden copy assignment operator.
      */
-    Image& operator=(const Image&);
+    Image& operator=(const Image&) = delete;
+
+    void write(Stream* file);
+    bool read(Stream* file);
 
     unsigned char* _data;
     Format _format;
     unsigned int _width;
     unsigned int _height;
     std::string _filePath;
+    std::string _defaultFileFormat;
 };
 
 }

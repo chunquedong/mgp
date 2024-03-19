@@ -5,6 +5,7 @@
 #include "base/FileSystem.h"
 #include "base/Resource.h"
 #include "scene/AssetManager.h"
+#include "base/StringUtil.h"
 
 namespace mgp
 {
@@ -625,8 +626,9 @@ void Terrain::onSerialize(Serializer* serializer) {
     serializer->writeFloat("heightfield_max", _heightfield->getHeightMax(), 0);
     
     if (_heightfield->getPath().size() == 0) {
-        _heightfield->getPath() = AssetManager::getInstance()->getPath() + "/image/" + Resource::genId() + ".raw";
-        _heightfield->save(_heightfield->getPath().c_str());
+        _heightfield->getPath() = "image/" + Resource::genId() + ".raw";
+        std::string file = AssetManager::getInstance()->getPath() + "/" + _heightfield->getPath();
+        _heightfield->save(file.c_str());
     }
     serializer->writeString("heightfield_path", _heightfield->getPath().c_str(), "");
 
@@ -660,7 +662,9 @@ void Terrain::onDeserialize(Serializer* serializer) {
     float heightfield_max = serializer->readFloat("heightfield_max", 0);
     std::string heightfield_path;
     serializer->readString("heightfield_path", heightfield_path, "");
-
+    if (StringUtil::startsWith(heightfield_path, "image/")) {
+        heightfield_path = AssetManager::getInstance()->getPath() + "/" + heightfield_path;
+    }
     _heightfield = HeightField::createFromRAW(heightfield_path.c_str(), heightfield_row, heightfield_column, heightfield_min, heightfield_max);
 
     auto normalMap = serializer->readObject("normalMap");

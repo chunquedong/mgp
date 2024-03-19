@@ -193,6 +193,7 @@ UPtr<Image> Image::createHDR(const char* path, bool flipY) {
         return UPtr<Image>(NULL);
     }
     image->_data = (unsigned char*)data;
+    image->_filePath = path;
     //stbi_image_free(data);
     return UPtr<Image>(image);
 }
@@ -203,6 +204,13 @@ UPtr<Image> Image::create(const char* path, bool flipY)
 
     if (StringUtil::endsWith(path, ".hdr")) {
         return createHDR(path, flipY);
+    }
+    if (StringUtil::endsWith(path, ".image")) {
+        UPtr<Stream> s = FileSystem::open(path);
+        Image* m = new Image();
+        m->read(s.get());
+        m->_filePath = path;
+        return UPtr<Image>(m);
     }
 
     std::string fullPath;
@@ -236,8 +244,8 @@ UPtr<Image> Image::create(const char* path, bool flipY)
     }
     image->_data = data;
 
-    std::string name = FileSystem::getBaseName(path)+ FileSystem::getExtension(path, false);
-    image->_id = name;
+    //std::string name = FileSystem::getBaseName(path)+ FileSystem::getExtension(path, false);
+    //image->_id = name;
     image->_filePath = path;
     //stbi_image_free(data);
     return UPtr<Image>(image);
@@ -246,6 +254,18 @@ UPtr<Image> Image::create(const char* path, bool flipY)
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "3rd/stb_image_write.h"
 bool Image::save(const char* file, const char* format) {
+
+    if (format == NULL) {
+        format = _defaultFileFormat.c_str();
+    }
+
+    if (strcmp(format, "image") == 0) {
+        UPtr<Stream> s = FileSystem::open(file, FileSystem::WRITE);
+        this->write(s.get());
+        s->close();
+        return true;
+    }
+
     unsigned int pixelSize = 0;
     switch (_format)
     {
@@ -299,7 +319,7 @@ UPtr<Image> Image::create(unsigned int width, unsigned int height, Image::Format
     return UPtr<Image>(image);
 }
 
-Image::Image() : _data(NULL), _format(RGB), _width(0), _height(0), Resource(genId()+".image")
+Image::Image() : _data(NULL), _format(RGB), _width(0), _height(0), _defaultFileFormat("png")
 {
 }
 
@@ -364,6 +384,10 @@ size_t Image::getFormatBPP(Format format)
     default:
         return 0;
     }
+}
+
+void Image::setDefaultFileFormat(const char* format) {
+    _defaultFileFormat = format;
 }
 
 void Image::write(Stream* file) {

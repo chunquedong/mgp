@@ -3,6 +3,7 @@
 #include "scene/Node.h"
 #include "scene/Renderer.h"
 #include "Texture.h"
+#include "scene/AssetManager.h"
 
 namespace mgp
 {
@@ -1008,12 +1009,16 @@ void MaterialParameter::onSerialize(Serializer* serializer) {
         break;
     case MaterialParameter::SAMPLER:
         if (!_isArray) {
-            serializer->writeObject("value", (Texture*)_value.samplerValue);
+            Texture* texture = (Texture*)_value.samplerValue;
+            AssetManager::getInstance()->save(texture);
+            serializer->writeString("value", texture->getId().c_str(), "");
         }
         else {
             serializer->writeList("value", _count);
             for (int i = 0; i < _count; ++i) {
-                serializer->writeObject(NULL, (Texture*)_value.samplerArrayValue[i]);
+                Texture* texture = (Texture*)_value.samplerArrayValue[i];
+                AssetManager::getInstance()->save(texture);
+                serializer->writeString("value", texture->getId().c_str(), "");
             }
             serializer->finishColloction();
         }
@@ -1078,14 +1083,18 @@ void MaterialParameter::onDeserialize(Serializer* serializer) {
     }
     case MaterialParameter::SAMPLER: {
         if (!_isArray) {
-            Texture* tex = dynamic_cast<Texture*>(serializer->readObject("value").take());
+            std::string id;
+            serializer->readString("value", id, "");
+            Texture* tex = AssetManager::getInstance()->load<Texture>(id, AssetManager::rt_texture).take();
             _value.samplerValue = tex;
         }
         else {
             int size = serializer->readList("value");
             std::vector<Texture*> samplaers;
             for (int i = 0; i < size; ++i) {
-                Texture* tex = dynamic_cast<Texture*>(serializer->readObject("value").take());
+                std::string id;
+                serializer->readString("value", id, "");
+                Texture* tex = AssetManager::getInstance()->load<Texture>(id, AssetManager::rt_texture).take();
                 samplaers.push_back(tex);
             }
             serializer->finishColloction();

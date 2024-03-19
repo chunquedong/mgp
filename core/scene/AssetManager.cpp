@@ -44,7 +44,7 @@ void AssetManager::setPath(const std::string& path) {
    FileSystem::mkdirs((path + "/material").c_str());
    FileSystem::mkdirs((path + "/anim").c_str());
    FileSystem::mkdirs((path + "/image").c_str());
-   //FileSystem::mkdirs((path + "/texture").c_str());
+   FileSystem::mkdirs((path + "/texture").c_str());
 }
 
 const std::string& AssetManager::getPath() {
@@ -148,21 +148,13 @@ UPtr<Resource> AssetManager::load(const std::string &name, ResType type, bool ca
             res = mesh;
             break;
         }
-        case rt_image: {
-            if (StringUtil::endsWith(name, ".image")) {
-                std::string file = path + "/image/" + name;
-                UPtr<Stream> s = FileSystem::open(file.c_str());
-                Image* m = new Image();
-                m->read(s.get());
-                m->setId(name);
-                res = m;
-            }
-            else {
-                std::string file = path + "/image/" + name;
-                Image* m = Image::create(file.c_str()).take();
-                m->setId(name);
-                res = m;
-            }
+        case rt_texture: {
+            std::string file = path + "/texture/" + name + ".texture";
+            auto stream = SerializerJson::createReader(file);
+            Texture* m = dynamic_cast<Texture*>(stream->readObject(nullptr).take());
+            stream->close();
+            m->setId(name);
+            res = m;
             break;
         }
     }
@@ -214,31 +206,11 @@ void AssetManager::save(Resource* res) {
         s->close();
         //delete s;
     }
-    else if (Image* texture = dynamic_cast<Image*>(res)) {
-        if (texture->getFilePath().size() > 0) {
-            std::string dst = path + "/image/" + name;
-            if (!FileSystem::fileExists(dst.c_str())) {
-                std::string src = texture->getFilePath();
-                FileSystem::copyFile(src.c_str(), dst.c_str());
-            }
-        }
-        else if (StringUtil::endsWith(name, ".png")) {
-            std::string file = path + "/image/" + name;
-            texture->save(file.c_str(), "png");
-        }
-        else if (StringUtil::endsWith(name, ".jpg")) {
-            std::string file = path + "/image/" + name;
-            texture->save(file.c_str(), "jgp");
-        }
-        else if (StringUtil::endsWith(name, ".image")) {
-            std::string file = path + "/image/" + name;
-            UPtr<Stream> s = FileSystem::open(file.c_str(), FileSystem::WRITE);
-            texture->write(s.get());
-            s->close();
-        }
-        else {
-            GP_ASSERT("Unknow image type:%s", name.c_str());
-        }
+    else if (Texture* texture = dynamic_cast<Texture*>(res)) {
+        std::string file = path + "/texture/" + name + ".texture";
+        auto stream = SerializerJson::createWriter(file);
+        stream->writeObject(nullptr, texture);
+        stream->close();
     }
     else {
         GP_ERROR("ERROR: unknow resource\n");

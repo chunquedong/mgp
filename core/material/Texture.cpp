@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "base/SerializerJson.h"
 #include "scene/AssetManager.h"
+#include "base/StringUtil.h"
 
 namespace mgp
 {
@@ -160,8 +161,9 @@ UPtr<Texture> Texture::create(UPtr<Image> image, bool generateMipmaps)
     texture->_height = image->getHeight();
     texture->_minFilter = minFilter;
     texture->_mipmapped = generateMipmaps;
-    
+    texture->_path = image->getFilePath().c_str();
     texture->_datas.push_back(SPtr<Image>(image.take()));
+
     return UPtr<Texture>(texture);
 }
 
@@ -483,8 +485,21 @@ void Texture::onSerialize(Serializer* serializer) {
 
     serializer->writeList("images", _datas.size());
     for (auto& image : _datas) {
-        AssetManager::getInstance()->save(image.get());
-        serializer->writeString(NULL, image->getId().c_str(), "");
+        std::string imageFile = image->getFilePath();
+        if (imageFile.size() > 0) {
+            std::string name = FileSystem::getBaseName(imageFile.c_str())+FileSystem::getExtension(imageFile.c_str());
+            std::string dst = AssetManager::getInstance()->getPath() + "/image/" + name;
+            if (!FileSystem::fileExists(dst.c_str())) {
+                FileSystem::copyFile(imageFile.c_str(), dst.c_str());
+            }
+            imageFile = "image/" + name;
+        }
+        else {
+            imageFile = "image/" + Resource::genId()+"."+image->_defaultFileFormat;
+            std::string fullName = AssetManager::getInstance()->getPath() + "/" + imageFile;
+            image->save(fullName.c_str(), image->_defaultFileFormat.c_str());
+        }
+        serializer->writeString(NULL, imageFile.c_str(), "");
     }
     serializer->finishColloction();
 
@@ -509,9 +524,12 @@ void Texture::onSerialize(Serializer* serializer) {
 void Texture::onDeserialize(Serializer* serializer) {
     int imagesSize = serializer->readList("images");
     for (int i = 0; i < imagesSize; ++i) {
-        std::string id;
-        serializer->readString(NULL, id, "");
-        UPtr<Image> image = AssetManager::getInstance()->load<Image>(id, AssetManager::rt_image);
+        std::string imageFile;
+        serializer->readString(NULL, imageFile, "");
+        if (StringUtil::startsWith(imageFile, "image/")) {
+            imageFile = AssetManager::getInstance()->getPath() + "/" + imageFile;
+        }
+        UPtr<Image> image = Image::create(imageFile.c_str());
         this->_datas.push_back(SPtr<Image>(image.take()));
     }
     serializer->finishColloction();
@@ -537,6 +555,19 @@ void Texture::onDeserialize(Serializer* serializer) {
         _width = _datas[0]->_width;
         _height = _datas[0]->_height;
     }
+}
+
+void Texture::write(Stream* file) {
+    auto stream = SerializerJson::create(file);
+    stream->writeObject(nullptr, this);
+    stream->flush();
+}
+
+bool Texture::read(Stream* file) {
+    auto stream = SerializerJson::create(file);
+    UPtr<Texture> m = stream->readObject(nullptr).dynamicCastTo<Texture>();
+    this->copyFrom(m.get());
+    return true;
 }
 
 void Texture::copyFrom(Texture* that) {

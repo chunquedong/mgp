@@ -16,7 +16,7 @@ typedef unsigned int TextureHandle;
 /**
  * Defines a standard texture.
  */
-class Texture : public Refable, public Serializable
+class Texture : public Resource, public Serializable
 {
     friend class Sampler;
     friend class CompressedTexture;
@@ -246,6 +246,9 @@ public:
      * @see Serializable::onDeserialize
      */
     void onDeserialize(Serializer* serializer) override;
+
+    void write(Stream* file);
+    bool read(Stream* file);
 
     void copyFrom(Texture* that);
 
