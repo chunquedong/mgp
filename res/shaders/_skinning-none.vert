@@ -31,25 +31,33 @@ vec4 getPosition()
         in vec3 a_tangent;
         //in vec3 a_binormal;
     #endif
+
+
+    vec3 getViewSpaceVector(vec3 normal) {
+        // Transform the normal, tangent and binormals to view space.
+        mat3 inverseTransposeWorldViewMatrix = mat3(u_inverseTransposeWorldViewMatrix[0].xyz, u_inverseTransposeWorldViewMatrix[1].xyz, u_inverseTransposeWorldViewMatrix[2].xyz);
+        vec3 normalVector = normalize(inverseTransposeWorldViewMatrix * normal);
+        return normalVector;
+    }
     
     vec3 getNormal()
     {
         #if defined(NORMAL_MAP)
             return vec3(0.0, 0.0, 0.0);
         #else
-            return a_normal;
+            return getViewSpaceVector(a_normal);
         #endif
     }
 
     #if defined(BUMPED)
         vec3 getTangent()
         {
-            return a_tangent;
+            return getViewSpaceVector(a_tangent);
         }
 
         vec3 getBinormal()
         {
-            return cross(a_tangent, a_normal);
+            return getViewSpaceVector(cross(a_tangent, a_normal));
         }
     #endif
 

@@ -70,7 +70,7 @@ vec4 getPosition()
         _skinnedNormal += blendWeight * tmp;
     }
 
-    vec3 getTangentSpaceVector(vec3 vector)
+    vec3 getViewSpaceVector(vec3 vector)
     {
         _skinnedNormal = vec3(0.0);
         // Transform normal to view space using matrix palette with four matrices used to transform a vertex.
@@ -91,20 +91,20 @@ vec4 getPosition()
 
     vec3 getNormal()
     {
-        return getTangentSpaceVector(a_normal);
+        return getViewSpaceVector(a_normal);
     }
 
     #if defined(BUMPED)
 
         vec3 getTangent()
         {
-            return getTangentSpaceVector(a_tangent);
+            return getViewSpaceVector(a_tangent);
         }
 
         vec3 getBinormal()
         {
             vec3 binormal = cross(a_tangent, a_normal);
-            return getTangentSpaceVector(binormal);
+            return getViewSpaceVector(binormal);
         }
 
     #endif

@@ -86,16 +86,11 @@ void initLightDirection(vec4 positionWorldViewSpace)
 #endif
 
 void applyLight(vec4 positionViewSpace) {
-    vec3 normal = getNormal();
-    // Transform the normal, tangent and binormals to view space.
-    mat3 inverseTransposeWorldViewMatrix = mat3(u_inverseTransposeWorldViewMatrix[0].xyz, u_inverseTransposeWorldViewMatrix[1].xyz, u_inverseTransposeWorldViewMatrix[2].xyz);
-    vec3 normalVector = normalize(inverseTransposeWorldViewMatrix * normal);
+    vec3 normalVector = getNormal();
     
     #if defined(BUMPED)
-        vec3 tangent = getTangent();
-        vec3 binormal = getBinormal();
-        vec3 tangentVector  = normalize(inverseTransposeWorldViewMatrix * tangent);
-        vec3 binormalVector = normalize(inverseTransposeWorldViewMatrix * binormal);
+        vec3 tangentVector = getTangent();
+        vec3 binormalVector = getBinormal();
         mat3 tangentSpaceTransformMatrix = mat3(tangentVector.x, binormalVector.x, normalVector.x, tangentVector.y, binormalVector.y, normalVector.y, tangentVector.z, binormalVector.z, normalVector.z);
         initLightDirection(positionViewSpace, tangentSpaceTransformMatrix);
     #elif defined(NORMAL_MAP)
