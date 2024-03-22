@@ -640,25 +640,24 @@ bool PlatformGlfw::hasMouse()
 
 void PlatformGlfw::setMouseCaptured(bool captured)
 {
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }
 
 bool PlatformGlfw::isMouseCaptured()
 {
     //return __mouseCaptured;
-    return false;
+    return glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
 }
 
 void PlatformGlfw::setCursorVisible(bool visible)
 {
-    if (visible)
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    glfwSetInputMode(window, GLFW_CURSOR, visible ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_HIDDEN);
 }
 
 bool PlatformGlfw::isCursorVisible()
 {
     //return __cursorVisible;
-    return true;
+    return glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL;
 }
 
 void PlatformGlfw::displayKeyboard(bool display)
