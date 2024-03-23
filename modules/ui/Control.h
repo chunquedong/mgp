@@ -12,6 +12,7 @@
     #include "script/ScriptTarget.h"
 #endif
 #include "base/Serializable.h"
+#include <functional>
 
 namespace mgp
 {
@@ -754,6 +755,7 @@ public:
      * @param eventFlags The events to listen for.
      */
     virtual void addListener(Control::Listener* listener, int eventFlags);
+    void setListener(std::function<void(Control* control, Control::Listener::EventType evt)> listener);
 
     /**
      * Removes a listener from this control.
@@ -1262,6 +1264,8 @@ protected:
 
     std::string _styleName;
     std::string _className;
+
+    std::function<void(Control* control, Control::Listener::EventType evt)> _eventListener;
 public:
     uint64_t _userData = 0;
 private:

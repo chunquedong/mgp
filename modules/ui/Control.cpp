@@ -644,6 +644,10 @@ void Control::addListener(Control::Listener* listener, int eventFlags)
     }
 }
 
+void Control::setListener(std::function<void(Control* control, Control::Listener::EventType evt)> listener) {
+    _eventListener = listener;
+}
+
 void Control::removeListener(Control::Listener* listener)
 {
     if (_listeners == NULL || listener == NULL)
@@ -726,6 +730,11 @@ void Control::notifyListeners(Control::Listener::EventType eventType)
             }
         }
     }
+
+    if (_eventListener) {
+        _eventListener(this, eventType);
+    }
+
 #if GP_SCRIPT_ENABLE
     fireScriptEvent<void>(GP_GET_SCRIPT_EVENT(Control, controlEvent), dynamic_cast<void*>(this), eventType);
 #endif

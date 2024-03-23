@@ -22,6 +22,14 @@ void EventTimer::schedule(int64_t timeOffset, TimeListener* timeListener, void* 
     _scheduleLock.unlock();
 }
 
+void EventTimer::setTimeout(int64_t timeMillis, std::function<void()> callback) {
+    uint64_t time = System::millisTicks() + timeMillis;
+    TimeEvent timeEvent(time, callback);
+    _scheduleLock.lock();
+    _timeEvents->push(timeEvent);
+    _scheduleLock.unlock();
+}
+
 void EventTimer::schedule(int64_t timeOffset, const char* function)
 {
 #if undeclared
@@ -62,12 +70,19 @@ void EventTimer::fireTimeEvents()
         if (!listener.isNull()) {
             listener->timeEvent(frameTime - timeEvent.time, timeEvent.cookie);
         }
+        if (timeEvent.callback) {
+            timeEvent.callback();
+        }
     }
 }
 
 EventTimer::TimeEvent::TimeEvent(int64_t time, SPtr<TimeListener> timeListener, void* cookie)
     : time(time), listener(timeListener), cookie(cookie)
 {
+}
+
+EventTimer::TimeEvent::TimeEvent(int64_t time, std::function<void()> callback)
+    : time(time), callback(callback) {
 }
 
 bool EventTimer::TimeEvent::operator<(const TimeEvent& v) const

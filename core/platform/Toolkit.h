@@ -10,6 +10,7 @@
 
 #include "math/Rectangle.h"
 #include "base/System.h"
+#include <functional>
 
 namespace mgp
 {
@@ -82,7 +83,7 @@ public:
      * @script{ignore}
      */
     virtual void schedule(int64_t timeOffset, TimeListener* timeListener, void* cookie = 0) = 0;
-
+    virtual void setTimeout(int64_t timeMillis, std::function<void()> callback) = 0;
 
     /**
      * Clears all scheduled time events.

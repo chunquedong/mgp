@@ -19,9 +19,11 @@ class EventTimer {
     public:
 
         TimeEvent(int64_t time, SPtr<TimeListener> timeListener, void* cookie);
+        TimeEvent(int64_t time, std::function<void()> callback);
         bool operator<(const TimeEvent& v) const;
         uint64_t time;
         SPtr<TimeListener> listener;
+        std::function<void()> callback;
         void* cookie;
     };
 
@@ -41,6 +43,7 @@ public:
      * @script{ignore}
      */
     void schedule(int64_t timeOffset, TimeListener* timeListener, void* cookie = 0);
+    void setTimeout(int64_t timeMillis, std::function<void()> callback);
 
     /**
      * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.

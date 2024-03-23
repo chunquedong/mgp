@@ -34,3 +34,4 @@ test.scene
 res/assets/
 test2.scene
 *.scene
+*.log

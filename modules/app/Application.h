@@ -176,6 +176,9 @@ public:
     virtual void schedule(int64_t timeOffset, TimeListener* timeListener, void* cookie = 0) {
         _eventTimer->schedule(timeOffset, timeListener, cookie);
     }
+    virtual void setTimeout(int64_t timeMillis, std::function<void()> callback) {
+        _eventTimer->setTimeout(timeMillis, callback);
+    }
 
 
     /**
