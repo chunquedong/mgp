@@ -191,7 +191,7 @@ public:
     Float intersectsQuery(const Ray& ray) const;
 
 
-    bool intersectsLineSegment(const Vector3& p1, const Vector3& p2, Vector3* point, double* t = NULL);
+    bool intersectsLineSegment(const Vector3& p1, const Vector3& p2, Vector3* point, double* t = 0);
 
     /**
      * Determines whether the given plane is parallel to this plane.

@@ -933,7 +933,7 @@ void Node::onSerialize(Serializer* serializer)
     serializer->writeVector("eulerAngles", getEulerAngles(), SCENEOBJECT_EULER_ANGLES);
     serializer->writeVector("scale", getScale(), SCENEOBJECT_SCALE);
 
-    bool serializableCount = 0;
+    int serializableCount = 0;
     for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
         if (child->isSerializable()) {
             serializableCount++;
