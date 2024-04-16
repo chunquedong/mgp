@@ -57,6 +57,7 @@
 #include "ui/MenuList.h"
 #include "ui/FormManager.h"
 #include "ui/Icon.h"
+#include "ui/ProgressBar.h"
 
 // Render
 #include "loader/GltfLoader.h"

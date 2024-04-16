@@ -195,20 +195,24 @@ bool SpriteBatch::isStarted() const
     return _batch->isStarted();
 }
 
-void SpriteBatch::drawImageRotated(const Vector3& dst, const Rectangle& src, const Vector2& scale, const Vector4& color,
+void SpriteBatch::drawImageRotated(const Vector3& dst, const Rectangle& src, const Vector2& size, const Vector4& color,
           const Vector2& rotationPoint, float rotationAngle, bool positionIsCenter)
 {
     float x = dst.x;
     float y = dst.y;
     float z = dst.z;
-    float width = scale.x;
-    float height = scale.y;
+    float width = size.x;
+    float height = size.y;
 
     // Calculate uvs.
+    // float u1 = _textureWidthRatio * src.x;
+    // float v1 = 1.0f - _textureHeightRatio * src.y;
+    // float u2 = u1 + _textureWidthRatio * src.width;
+    // float v2 = v1 - _textureHeightRatio * src.height;
     float u1 = _textureWidthRatio * src.x;
-    float v1 = 1.0f - _textureHeightRatio * src.y;
-    float u2 = u1 + _textureWidthRatio * src.width;
-    float v2 = v1 - _textureHeightRatio * src.height;
+    float v1 = _textureHeightRatio * src.y;
+    float u2 = _textureWidthRatio *  (src.x+ src.width);
+    float v2 = _textureHeightRatio * (src.y+ src.height);
 
     // Treat the given position as the center if the user specified it as such.
     if (positionIsCenter)

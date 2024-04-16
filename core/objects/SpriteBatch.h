@@ -132,7 +132,7 @@ public:
      * @param rotationAngle The rotation angle in radians.
      * @param positionIsCenter Specified whether the given destination is to be the center of the sprite or not (if not, it is treated as the bottom-left).
      */
-    void drawImageRotated(const Vector3& dst, const Rectangle& src, const Vector2& scale, const Vector4& color,
+    void drawImageRotated(const Vector3& dst, const Rectangle& src, const Vector2& size, const Vector4& color,
               const Vector2& rotationPoint, float rotationAngle, bool positionIsCenter = false);
 
     /**
@@ -141,7 +141,7 @@ public:
      * @param position The destination position.
      * @param right The right vector of the sprite quad (should be normalized).
      * @param forward The forward vector of the sprite quad (should be normalized).
-     * @param scale The X and Y scale.
+     * @param size The X and Y scale.
      * @param src The source rectangle.
      * @param color The color to tint the sprite. Use white for no tint.
      * @param rotationPoint The point to rotate around, relative to dst's x and y values.
@@ -149,7 +149,7 @@ public:
      * @param rotationAngle The rotation angle in radians.
      * @param positionIsCenter Specified whether the given destination is to be the center of the sprite or not (if not, it is treated as the bottom-left).
      */
-    void drawImageUpVector(const Vector3& aposition, const Vector3& right, const Vector3& forward, const Vector2& scale,
+    void drawImageUpVector(const Vector3& aposition, const Vector3& right, const Vector3& forward, const Vector2& size,
         float u1, float v1, float u2, float v2, const Vector4& color, const Vector2& rotationPoint, float rotationAngle, bool positionIsCenter = false);
 
     /**

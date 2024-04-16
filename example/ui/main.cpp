@@ -91,6 +91,16 @@ class MainApp : public Application, Control::Listener {
         form->getContent()->addControl(std::move(slider));
         //SAFE_RELEASE(slider);
 
+        UPtr<ProgressBar> progressBar = Control::create<ProgressBar>("ProgressBar");
+        progressBar->setWidth(1.0, Control::AUTO_PERCENT_PARENT);
+        progressBar->setValue(0.3);
+        form->getContent()->addControl(std::move(progressBar));
+
+        UPtr<LoadingView> loading = Control::create<LoadingView>("LoadingView");
+        loading->setWidth(1.0, Control::AUTO_PERCENT_PARENT);
+        form->getContent()->addControl(std::move(loading));
+
+
         UPtr<TextBox> text = Control::create<TextBox>("text");
         text->setText("input");
         text->setWidth(300);

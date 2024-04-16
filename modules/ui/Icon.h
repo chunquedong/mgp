@@ -42,12 +42,20 @@ protected:
 
     virtual void onDeserialize(Serializer* serializer);
 
-    unsigned int drawImages(Form* form, const Rectangle& clip, RenderInfo* view);
+    virtual unsigned int drawImages(Form* form, const Rectangle& clip, RenderInfo* view);
 
     void measureSize();
-private:
+protected:
     std::string _imagePath;
     ThemeImage* _image = NULL;
+};
+
+class LoadingView : public Icon {
+    friend class Control;
+    float _progress = 0;
+protected:
+    void updateState(State state);
+    unsigned int drawImages(Form* form, const Rectangle& clip, RenderInfo* view) override;
 };
 
 }
