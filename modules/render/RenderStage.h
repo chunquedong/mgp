@@ -54,6 +54,7 @@ struct RenderPass : public RenderStage {
     * clear buffer before render
     */
     int _clearBuffer = Renderer::CLEAR_COLOR_DEPTH_STENCIL;
+    Vector4 _clearColor;
 
     /**
     * RenderLayer type. -1 is draw full screen quad.

@@ -47,6 +47,8 @@ namespace mgp {
 
 		std::map<std::string, FrameBuffer*> _frameBufferPool;
 		std::map<std::string, Texture*> _texturePool;
+
+		Vector4 _clearColor;
 	public:
 		bool _use_ssao;
 		bool _use_bloom;
@@ -64,6 +66,7 @@ namespace mgp {
 		static Model* fullscreenQuadModel();
 		static void releaseStatic();
 
+		void setClearColor(const Vector4& color);
 		std::vector<RenderStage*>& getRenderStages() { return _renderStages; }
 		FrameBuffer* getFrameBuffer() { return _frameBuffer; }
 		RenderDataManager* getRenderDataManager() { return &_renderDataManager; }

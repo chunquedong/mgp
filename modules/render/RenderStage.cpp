@@ -99,7 +99,7 @@ void RenderPass::render() {
         }
     }
     if (_clearBuffer) {
-        _renderPath->getRenderer()->clear((Renderer::ClearFlags)_clearBuffer);
+        _renderPath->getRenderer()->clear((Renderer::ClearFlags)_clearBuffer, _clearColor);
     }
 
     beforeRender(view);

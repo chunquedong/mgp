@@ -1,6 +1,7 @@
 #include "base/Base.h"
 #include "Sprite.h"
 #include "scene/Scene.h"
+#include "platform/Toolkit.h"
 
 namespace mgp
 {
@@ -23,12 +24,12 @@ Sprite& Sprite::operator=(const Sprite& sprite)
     return *this;
 }
     
-Sprite* Sprite::create(const char* imagePath, float width, float height, ShaderProgram* effect)
+UPtr<Sprite> Sprite::create(const char* imagePath, float width, float height, ShaderProgram* effect)
 {
     return Sprite::create(imagePath, width, height, Rectangle(0, 0, -1, -1), 1, effect);
 }
     
-Sprite* Sprite::create(const char* imagePath, float width, float height,
+UPtr<Sprite> Sprite::create(const char* imagePath, float width, float height,
                        const Rectangle& source, unsigned int frameCount, ShaderProgram* effect)
 {
     GP_ASSERT(imagePath != NULL);
@@ -60,7 +61,7 @@ Sprite* Sprite::create(const char* imagePath, float width, float height,
         sprite->_frames[0].width = imageWidth;
     if (sprite->_frames[0].height == -1.0f)
         sprite->_frames[0].height = imageHeight;
-    return sprite;
+    return UPtr<Sprite>(sprite);
 }
 
 static bool parseBlendMode(const char* str, Sprite::BlendMode* blend)
@@ -219,13 +220,13 @@ static bool parseOffset(const char* str, Sprite::Offset* offset)
     return true;
 }
 
-Sprite* Sprite::create(Properties* properties)
+UPtr<Sprite> Sprite::create(Properties* properties)
 {
     // Check if the Properties is valid and has a valid namespace.
     if (!properties || strcmp(properties->getNamespace(), "sprite") != 0)
     {
         GP_ERROR("Properties object must be non-null and have namespace equal to 'sprite'.");
-        return NULL;
+        return UPtr<Sprite>();
     }
 
     // Get image path.
@@ -233,7 +234,7 @@ Sprite* Sprite::create(Properties* properties)
     if (imagePath == NULL || strlen(imagePath) == 0)
     {
         GP_ERROR("Sprite is missing required image file path.");
-        return NULL;
+        return UPtr<Sprite>();
     }
 
     // Don't support loading custom effects
@@ -269,7 +270,7 @@ Sprite* Sprite::create(Properties* properties)
         }
     }
 
-    Sprite* sprite;
+    UPtr<Sprite> sprite;
     if (properties->exists("source"))
     {
         // Get source frame
@@ -563,6 +564,12 @@ Material* Sprite::getMaterial() const
 
 unsigned int Sprite::draw(RenderInfo* view)
 {
+    int w = view->viewport.width / Toolkit::cur()->getScreenScale();
+    int h = view->viewport.height / Toolkit::cur()->getScreenScale();
+    Matrix projectionMatrix;
+    Matrix::createOrthographicOffCenter(0, w, h, 0, 0, 1, &projectionMatrix);
+    _batch->setProjectionMatrix(projectionMatrix);
+
     // Apply scene camera projection and translation offsets
     Vector3 position = Vector3::zero();
     if (_node && _node->getScene())
@@ -570,27 +577,32 @@ unsigned int Sprite::draw(RenderInfo* view)
         Camera* activeCamera = _node->getScene()->getActiveCamera();
         if (activeCamera)
         {
-            Node* cameraNode = _node->getScene()->getActiveCamera()->getNode();
-            if (cameraNode)
-            {
-                // Scene projection
-                Matrix projectionMatrix;
-                projectionMatrix = activeCamera->getProjectionMatrix();
-                _batch->setProjectionMatrix(projectionMatrix);
-                
-                // Camera translation offsets
-                position.x -= cameraNode->getTranslationWorld().x;
-                position.y -= cameraNode->getTranslationWorld().y;
-                
-            }
+            //Node* cameraNode = _node->getScene()->getActiveCamera()->getNode();
+            //if (cameraNode)
+            //{
+            //    // Camera translation offsets
+            //    position.x -= cameraNode->getTranslationWorld().x;
+            //    position.y += cameraNode->getTranslationWorld().y - getHeight();
+            //}
+            Vector3 pos = this->getNode()->getTranslationWorld();
+            Vector3 screen;
+            /*Rectangle localViewport;
+            localViewport.width = viewport.width;
+            localViewport.height = viewport.height;*/
+            Rectangle viewport = view->viewport;
+            activeCamera->project(viewport, pos, &screen);
+
+            position.x = screen.x;
+            position.y = screen.y;
         }
-        
-        // Apply node translation offsets
-        Vector3 translation = _node->getTranslationWorld();
-        position.x += translation.x;
-        position.y += translation.y;
-        position.z += translation.z;
+        else {
+            // Apply node translation offsets
+            Vector3 translation = _node->getTranslationWorld();
+            position.x += translation.x;
+            position.y -= translation.y;
+        }
     }
+    position *= 1.0 / Toolkit::cur()->getScreenScale();
     
     // Apply local offset translation offsets
     if ((_offset & OFFSET_HCENTER) == OFFSET_HCENTER)

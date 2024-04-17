@@ -100,7 +100,7 @@ public:
      * @param effect The custom effect to render with.
      * @return The new sprite.
      */
-    static Sprite* create(const char* imagePath, float width = -1, float height = -1,
+    static UPtr<Sprite> create(const char* imagePath, float width = -1, float height = -1,
         ShaderProgram* effect = NULL);
     
     /**
@@ -117,7 +117,7 @@ public:
      * @param effect The custom effect to render with.
      * @return The new sprite.
      */
-    static Sprite* create(const char* imagePath, float width, float height,
+    static UPtr<Sprite> create(const char* imagePath, float width, float height,
                           const Rectangle& source, unsigned int frameCount = 1,
         ShaderProgram* effect = NULL);
     
@@ -127,7 +127,7 @@ public:
      * @param properties The properties object to create from.
      * @return The new Sprite.
      */
-    static Sprite* create(Properties* properties);
+    static UPtr<Sprite> create(Properties* properties);
     
     /**
      * Gets the width of the sprite.

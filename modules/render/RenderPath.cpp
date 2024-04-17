@@ -147,6 +147,11 @@ void RenderPath::addPostProcess() {
     }
 }
 
+void RenderPath::setClearColor(const Vector4& color) {
+    _clearColor = color;
+    GP_ASSERT(_renderStages.size() == 0);
+}
+
 void RenderPath::initForward() {
     clearStages();
 
@@ -166,6 +171,7 @@ void RenderPath::initForward() {
     p1->_renderPath = this;
     p1->_drawType = (int)Drawable::RenderLayer::Qpaque;
     p1->_clearBuffer = _use_prez ? 0 : Renderer::CLEAR_COLOR_DEPTH_STENCIL;
+    p1->_clearColor = _clearColor;
     p1->_depthState = _use_prez ? 1 : 0;
     _renderStages.push_back(p1);
 
@@ -258,8 +264,10 @@ void RenderPath::render(Scene* scene, Camera* camera, Rectangle* viewport) {
     _renderData.lights = &_renderDataManager._lights;
     //_renderData._renderer = _renderer;
     //_renderData._renderPath = this;
-
-    //_renderer->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0);
+    
+    if (!_blend) {
+        _renderer->clear(Renderer::CLEAR_DEPTH_STENCIL);
+    }
     _previousFrameBuffer = _frameBuffer->bind();
 
     for (int i = 0; i < _renderStages.size(); ++i) {
