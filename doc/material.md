@@ -24,3 +24,11 @@ material->getParameter("u_roughness")->setFloat(roughness);
 material->getParameter("u_ao")->setFloat(1.0);
 material->getParameter("u_emissive")->setVector3(Vector3(0.0, 0.0, 0.0));
 ```
+
+
+### 纹理
+
+```
+Texture* sampler = material->getParameter("u_diffuseTexture")->setValue("res/image/crate.png", true);
+sampler->setFilterMode(Texture::LINEAR_MIPMAP_LINEAR, Texture::LINEAR);
+```

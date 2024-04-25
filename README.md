@@ -22,9 +22,11 @@ MGP is a lightweight 3D game engine.
 
 
 ## Screenshot
-
+### Editor
 ![image](screenshot/editor.png)
 
+### 3D Geospatial Visualizing
 ![image](screenshot/mgpEarth.png)
 
+### Finite Element Simulation
 ![image](screenshot/feaView.png)

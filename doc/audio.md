@@ -2,6 +2,8 @@
 
 ## 声音
 
+目前只支持WAV和OGG两种格式
+
 ```
 class MainApp : public Application {
     UPtr<AudioSource> _audioEngine;
