@@ -68,21 +68,20 @@ bool JoystickControl::isRadiusPercentage() const
 
 void JoystickControl::onSerialize(Serializer* serializer) {
     Control::onSerialize(serializer);
+
+    serializer->writeFloat("radius", _radiusCoord, 0.5f);
+    serializer->writeBool("isRadiusPercentage", _isRadiusPercentage, true);
+    serializer->writeBool("relative", _relative, true);
+    serializer->writeInt("index", _index, 0);
 }
 
 void JoystickControl::onDeserialize(Serializer* serializer) {
     Control::onDeserialize(serializer);
-    std::string radiusStr;
-    serializer->readString("radius", radiusStr, "");
-    if (radiusStr.size() > 0)
-    {
-        bool isPercentage = false;
-        _radiusCoord = parseCoord(radiusStr.c_str(), &isPercentage);
-        //setBoundsBit(isPercentage, _boundsBits, BOUNDS_RADIUS_PERCENTAGE_BIT);
-        _isRadiusPercentage = isPercentage;
-    }
 
-    bool r = serializer->readBool("relative", false);
+    _radiusCoord = serializer->readFloat("radius", 0.5f);
+    _isRadiusPercentage = serializer->readBool("isRadiusPercentage", true);
+
+    bool r = serializer->readBool("relative", true);
     setRelative(r);
 
     _index = serializer->readInt("index", 0);

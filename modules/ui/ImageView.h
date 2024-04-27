@@ -107,6 +107,8 @@ private:
 
     ImageView(const ImageView& copy);
 
+    std::string _imagePath;
+
     // Source region.
     Rectangle _srcRegion;
     // Destination region.

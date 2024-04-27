@@ -35,7 +35,7 @@ Style::Style(const Style& copy) : _background(NULL), _font(NULL), _theme(NULL)
 {
     if (copy._background)
     {
-        _background = new BorderImage(*copy._background);
+        _background = copy._background->clone();
     }
 
     _theme = copy._theme;
@@ -54,9 +54,6 @@ Style::Style(const Style& copy) : _background(NULL), _font(NULL), _theme(NULL)
     if (_font)
     {
         _font->addRef();
-    }
-    if (_background) {
-        _background->addRef();
     }
 }
 

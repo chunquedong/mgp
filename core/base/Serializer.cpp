@@ -22,7 +22,7 @@ Serializer::~Serializer()
     SAFE_DELETE(_stream);
 }
 
-UPtr<Serializer> Serializer::createReader(const std::string& path)
+UPtr<Serializer> Serializer::createReader(const std::string& path, bool isHiml)
 {
     Stream* stream = FileSystem::open(path.c_str()).take();
     if (!stream)
@@ -32,17 +32,17 @@ UPtr<Serializer> Serializer::createReader(const std::string& path)
     if (!serializer.get())
     {
         stream->rewind();
-        serializer = SerializerJson::create(stream);
+        serializer = SerializerJson::create(stream, isHiml);
     }
     return serializer;
 }
 
-UPtr<Serializer> Serializer::createReader(Stream* stream) {
+UPtr<Serializer> Serializer::createReader(Stream* stream, bool isHiml) {
     UPtr<Serializer> serializer = SerializerBinary::create(stream);
     if (!serializer.get())
     {
         stream->rewind();
-        serializer = SerializerJson::create(stream);
+        serializer = SerializerJson::create(stream, isHiml);
     }
     return serializer;
 }

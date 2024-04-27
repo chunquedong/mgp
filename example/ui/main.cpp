@@ -9,14 +9,14 @@ class MainApp : public Application, Control::Listener {
     //Button* button;
 
     void initialize() {
-        auto theme = Theme::create("res/ui/default.theme");
-        Theme::setDefault(theme.get());
+        /*auto theme = Theme::create("res/ui/default.theme");
+        Theme::setDefault(theme.get());*/
 
         UPtr<Form> form = Form::create();
         form->getContent()->setSize(600, 700);
         form->getContent()->setPadding(20, 20, 20, 20);
         form->getContent()->setLayout(Layout::LAYOUT_FLOW);
-#if 1
+#if 0
         UPtr<TreeView> tree = Control::create<TreeView>("treeview");
         //tree->setCheckbox(false);
         tree->setWidth(120);
@@ -107,20 +107,21 @@ class MainApp : public Application, Control::Listener {
         form->getContent()->addControl(std::move(text));
         //SAFE_RELEASE(text);
 
-
+#endif
+#if 1
         //test scroll
         UPtr<ScrollContainer> container = Control::create<ScrollContainer>("container");
         container->setSize(200, 100);
-        container->setScroll(ScrollContainer::SCROLL_BOTH);
-        UPtr<Button> button2 = Control::create<Button>("testButton2");
-        button2->setText("test\nButton");
-        button2->setSize(200, 100);
-        container->addControl(std::move(button2));
+        container->setScroll(ScrollContainer::SCROLL_BOTH); {
+            UPtr<Button> button2 = Control::create<Button>("testButton2");
+            button2->setText("test\nButton");
+            button2->setSize(200, 100);
+            container->addControl(std::move(button2));
+        }
         form->getContent()->addControl(std::move(container));
-        //SAFE_RELEASE(button2);
-        //SAFE_RELEASE(container);
 
-
+#endif
+#if 1
         UPtr<ImageView> image = Control::create<ImageView>("image");
         image->setImage("res/image/logo.png");
         image->setSize(50, 50);
@@ -140,12 +141,12 @@ class MainApp : public Application, Control::Listener {
             combobox2->getItems().push_back("Item:"+std::to_string(i));
         }
         form->getContent()->addControl(std::move(combobox2));
-#endif
+
         UPtr<Icon> icon = Control::create<Icon>("Icon");
         icon->setImagePath("res/image/point.png");
         icon->setToolTip("Hello World");
         form->getContent()->addControl(std::move(icon));
-
+#endif
 #if 0
         //test scroll
         UPtr<ScrollContainer> containerS = Control::create<ScrollContainer>("container2");
@@ -168,20 +169,32 @@ class MainApp : public Application, Control::Listener {
         form->getContent()->addControl(std::move(containerS3));
 #endif
 #if 0
-        UPtr<Font> font = Font::create("res/ui/sans.ttf");
-        set button style
-        button->overrideStyle();
-        button->getStyle()->setFont(font);
+        UPtr<Button> button = Control::create<Button>("testButton");
+        //button->setPosition(45, 100);
+        //button->setSize(200, 100);
+        button->setText("Button");
+        button->addListener(this, Control::Listener::CLICK);
         
-        ThemeImage* image = theme->getImage("button");
-        BorderImage* border = new BorderImage(image->getRegion(), Border(20,20,20,20));
-        button->getStyle()->setBgImage(border);
-        border->release();
-        button->getStyle()->setBgColor(Vector4(1.0, 0, 0, 1.0), Style::OVERLAY_HOVER);
+        UPtr<Font> font = Font::create("res/ui/sans.ttf");
+        //set button style
+        button->overrideStyle();
+        button->getStyle()->setFont(font.get());
+        
+        ThemeImage* image = Theme::getDefault()->getImage("button");
+        UPtr<BorderImage> border(new BorderImage(image->getRegion(), Border(20,20,20,20)));
+        button->getStyle()->setBgImage(border.get());
+        form->getContent()->addControl(std::move(button));
 
-        font->release();
 #endif
 
+        auto sceneWriter = mgp::SerializerJson::createWriter("ui.hml", true);
+        sceneWriter->writeObject(nullptr, form->getContent());
+        sceneWriter->close();
+
+        auto reader = mgp::Serializer::createReader("ui.hml", true);
+        auto content = reader->readObject(nullptr).dynamicCastTo<mgp::Container>();
+
+        form->setContent(std::move(content));
         getFormManager()->add(std::move(form));
         //SAFE_RELEASE(theme);
     }

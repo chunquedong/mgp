@@ -124,6 +124,7 @@ public:
 
     Container* getRoot();
     Container* getContent();
+    void setContent(UPtr<Container> c);
     ModalLayer* getOverlay();
 
     bool screenToForm(int* x, int* y);

@@ -16,6 +16,8 @@ RadioButton::~RadioButton()
 
 void RadioButton::onSerialize(Serializer* serializer) {
     Button::onSerialize(serializer);
+    serializer->writeBool("selected", _selected, false);
+    serializer->writeString("group", _groupId.c_str(), "");
 }
 
 void RadioButton::onDeserialize(Serializer* serializer) {

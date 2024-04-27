@@ -175,7 +175,8 @@ public:
     
     bool canReceiveFocus() const override;
 
-
+    static std::string enumToString(const std::string& enumName, int value);
+    static int enumParse(const std::string& enumName, const std::string& str);
 protected:
     /**
      * Sets the specified dirty bits for all children within this container.

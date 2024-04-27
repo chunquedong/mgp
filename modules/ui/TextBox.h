@@ -94,6 +94,8 @@ public:
      */
     void setText(char const *text, bool fireEvent = true) override;
 
+    static std::string enumToString(const std::string& enumName, int value);
+    static int enumParse(const std::string& enumName, const std::string& str);
 protected:
 
     /**

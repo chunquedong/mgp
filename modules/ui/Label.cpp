@@ -15,6 +15,7 @@ Label::~Label()
 
 void Label::onSerialize(Serializer* serializer) {
     Control::onSerialize(serializer);
+    serializer->writeString("text", _text.c_str(), "");
 }
 
 void Label::onDeserialize(Serializer* serializer) {

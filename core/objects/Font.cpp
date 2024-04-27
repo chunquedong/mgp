@@ -13,6 +13,7 @@
 #include "material/Material.h"
 #include "material/MaterialParameter.h"
 #include <algorithm>
+#include "base/StringUtil.h"
 
 extern "C" {
 #include "3rd/utf8.h"
@@ -560,6 +561,70 @@ int Font::indexAtCoord(const wchar_t* utext, unsigned int fontSize, bool clipToF
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 
+std::string FontLayout::enumToString(const std::string& enumName, int value)
+{
+    if (enumName.compare("mgp::FontLayout::Justify") == 0)
+    {
+        std::string h;
+        switch (value & 0x0F)
+        {
+        case static_cast<int>(ALIGN_LEFT):
+            h = "Left";
+        case static_cast<int>(ALIGN_HCENTER):
+            h = "HCenter";
+        case static_cast<int>(ALIGN_RIGHT):
+            h = "Right";
+        default:
+            h = "Left";
+        }
+
+        std::string v;
+        switch (value & 0xF0)
+        {
+        case static_cast<int>(ALIGN_TOP):
+            h = "Top";
+        case static_cast<int>(ALIGN_VCENTER):
+            h = "VCenter";
+        case static_cast<int>(ALIGN_BOTTOM):
+            h = "Bottom";
+        default:
+            h = "Left";
+        }
+
+        return v + "_" + h;
+    }
+    return "";
+}
+
+int FontLayout::enumParse(const std::string& enumName, const std::string& str)
+{
+    if (enumName.compare("mgp::FontLayout::Justify") == 0)
+    {
+        std::vector<std::string> fs = StringUtil::split(str, "_");
+        if (fs.size() == 2) {
+            std::string& v = fs[0];
+            std::string& h = fs[1];
+            int iv = 0;
+            int ih = 0;
+            if (v.compare("Left") == 0)
+                iv = static_cast<int>(ALIGN_LEFT);
+            else if (v.compare("HCenter") == 0)
+                iv = static_cast<int>(ALIGN_HCENTER);
+            else if (v.compare("Right") == 0)
+                iv = static_cast<int>(ALIGN_RIGHT);
+
+            if (h.compare("Top") == 0)
+                ih = static_cast<int>(ALIGN_TOP);
+            else if (v.compare("VCenter") == 0)
+                ih = static_cast<int>(ALIGN_VCENTER);
+            else if (v.compare("Bottom") == 0)
+                ih = static_cast<int>(ALIGN_BOTTOM);
+
+            return iv << 8 | ih;
+        }
+    }
+    return 0;
+}
 
 FontLayout::Justify FontLayout::getJustify(const char* justify)
 {

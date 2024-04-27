@@ -18,6 +18,11 @@ ImageView::~ImageView()
 
 void ImageView::onSerialize(Serializer* serializer) {
     Control::onSerialize(serializer);
+
+    serializer->writeString("path", _imagePath.c_str(), "");
+
+    serializer->writeVector("srcRegion", Vector4(_srcRegion.x, _srcRegion.y, _srcRegion.width, _srcRegion.height), Vector4::zero());
+    serializer->writeVector("dstRegion", Vector4(_dstRegion.x, _dstRegion.y, _dstRegion.width, _dstRegion.height), Vector4::zero());
 }
 
 void ImageView::onDeserialize(Serializer* serializer) {
@@ -29,15 +34,19 @@ void ImageView::onDeserialize(Serializer* serializer) {
         setImage(path.c_str());
     }
 
-    Vector4 region = serializer->readVector("srcRegion", region);
-    setRegionSrc(region.x, region.y, region.z, region.w);
-
-    Vector4 regionDst = serializer->readVector("dstRegion", region);
-    setRegionDst(regionDst.x, regionDst.y, regionDst.z, regionDst.w);
+    Vector4 region = serializer->readVector("srcRegion", Vector4::zero());
+    if (!region.isZero()) {
+        setRegionSrc(region.x, region.y, region.z, region.w);
+    }
+    Vector4 regionDst = serializer->readVector("dstRegion", Vector4::zero());
+    if (!regionDst.isZero()) {
+        setRegionDst(regionDst.x, regionDst.y, regionDst.z, regionDst.w);
+    }
 }
 
 void ImageView::setImage(const char* path)
 {
+    _imagePath = path;
     SAFE_DELETE(_batch);
     UPtr<Texture> texture = Texture::create(path, false);
     _batch = SpriteBatch::create(texture.get()).take();

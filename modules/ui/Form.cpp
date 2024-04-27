@@ -168,6 +168,12 @@ Container* Form::getRoot() {
 Container* Form::getContent() {
     return _content;
 }
+
+void Form::setContent(UPtr<Container> c) {
+    _root->removeControl(_content);
+    this->_content = c.get();
+    _root->insertControl(std::move(c), 0);
+}
 ModalLayer* Form::getOverlay() {
     return _overlay;
 }

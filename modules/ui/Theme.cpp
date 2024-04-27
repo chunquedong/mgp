@@ -391,6 +391,11 @@ BorderImage::BorderImage(const Rectangle& region, const Border& border) :
     setRegion(region);
 }
 
+BorderImage* BorderImage::clone() {
+    BorderImage* img = new BorderImage(_region, _border);
+    return img;
+}
+
 const Vector4 BorderImage::getUVs(SkinArea area, float tw, float th) const
 {
     const Vector4& r = _uvs[area];

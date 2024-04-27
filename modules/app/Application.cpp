@@ -14,6 +14,7 @@
 
 #include "scene/AssetManager.h"
 
+
 #ifndef __EMSCRIPTEN__
 #include "script/ScriptController.h"
 //#include "net/HttpClient.hpp"
@@ -50,6 +51,9 @@ void regiseterSerializer() {
     mgr->registerType("mgp::MaterialParameter", MaterialParameter::createObject);
     mgr->registerType("mgp::Terrain", Terrain::createObject);
     mgr->registerType("mgp::Terrain::Layer", Terrain::createLayerObject);
+
+
+    FormManager::regiseterSerializer(mgr);
 
     // Register engine enums
     mgr->registerEnum("mgp::Camera::Mode", Camera::enumToString, Camera::enumParse);

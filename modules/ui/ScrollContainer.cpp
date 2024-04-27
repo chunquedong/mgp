@@ -58,14 +58,20 @@ ScrollContainer::~ScrollContainer()
 
 void ScrollContainer::onSerialize(Serializer* serializer) {
     Container::onSerialize(serializer);
+
+    serializer->writeEnum("scroll", "mgp::ScrollContainer::Scroll", _scroll, Scroll::SCROLL_NONE);
+
+    serializer->writeBool("scrollBarsAutoHide", _scrollBarsAutoHide, false);
+    serializer->writeBool("scrollWheelRequiresFocus", _scrollWheelRequiresFocus, false);
+    serializer->writeFloat("scrollingFriction", _scrollingFriction, 1.0f);
+    serializer->writeFloat("scrollWheelSpeed", _scrollWheelSpeed, 400.0f);
 }
 
 void ScrollContainer::onDeserialize(Serializer* serializer) {
     Container::onDeserialize(serializer);
     
-    std::string scroll;
-    serializer->readString("scroll", scroll, "");
-    setScroll(getScroll(scroll.c_str()));
+    Scroll scroll = (Scroll)serializer->readEnum("scroll", "mgp::ScrollContainer::Scroll", Scroll::SCROLL_NONE);
+    setScroll(scroll);
 
     _scrollBarsAutoHide = serializer->readBool("scrollBarsAutoHide", false);
     if (_scrollBarsAutoHide)
@@ -74,8 +80,8 @@ void ScrollContainer::onDeserialize(Serializer* serializer) {
     }
     _scrollWheelRequiresFocus = serializer->readBool("scrollWheelRequiresFocus", false);
 
-    _scrollingFriction = serializer->readFloat("scrollWheelRequiresFocus", _scrollingFriction);
-    _scrollWheelSpeed = serializer->readFloat("scrollWheelRequiresFocus", _scrollWheelSpeed);
+    _scrollingFriction = serializer->readFloat("scrollingFriction", 1.0f);
+    _scrollWheelSpeed = serializer->readFloat("scrollWheelSpeed", 400.0f);
 }
 
 void ScrollContainer::setScroll(Scroll scroll)
@@ -762,33 +768,70 @@ bool ScrollContainer::mouseEventScroll(MotionEvent::MotionType evt, int x, int y
 }
 
 
-ScrollContainer::Scroll ScrollContainer::getScroll(const char* scroll)
+//ScrollContainer::Scroll ScrollContainer::getScroll(const char* scroll)
+//{
+//    if (!scroll)
+//        return ScrollContainer::SCROLL_NONE;
+//
+//    if (strcmp(scroll, "SCROLL_NONE") == 0)
+//    {
+//        return ScrollContainer::SCROLL_NONE;
+//    }
+//    else if (strcmp(scroll, "SCROLL_HORIZONTAL") == 0)
+//    {
+//        return ScrollContainer::SCROLL_HORIZONTAL;
+//    }
+//    else if (strcmp(scroll, "SCROLL_VERTICAL") == 0)
+//    {
+//        return ScrollContainer::SCROLL_VERTICAL;
+//    }
+//    else if (strcmp(scroll, "SCROLL_BOTH") == 0)
+//    {
+//        return ScrollContainer::SCROLL_BOTH;
+//    }
+//    else
+//    {
+//        GP_ERROR("Failed to get corresponding scroll state for unsupported value '%s'.", scroll);
+//    }
+//
+//    return ScrollContainer::SCROLL_NONE;
+//}
+
+std::string ScrollContainer::enumToString(const std::string& enumName, int value)
 {
-    if (!scroll)
-        return ScrollContainer::SCROLL_NONE;
+    if (enumName.compare("mgp::ScrollContainer::Scroll") == 0)
+    {
+        switch (value)
+        {
+        case static_cast<int>(SCROLL_NONE):
+            return "None";
+        case static_cast<int>(SCROLL_HORIZONTAL):
+            return "Horizontal";
+        case static_cast<int>(SCROLL_VERTICAL):
+            return "Vertical";
+        case static_cast<int>(SCROLL_BOTH):
+            return "Both";
+        default:
+            return "None";
+        }
+    }
+    return "";
+}
 
-    if (strcmp(scroll, "SCROLL_NONE") == 0)
+int ScrollContainer::enumParse(const std::string& enumName, const std::string& str)
+{
+    if (enumName.compare("mgp::ScrollContainer::Scroll") == 0)
     {
-        return ScrollContainer::SCROLL_NONE;
+        if (str.compare("None") == 0)
+            return static_cast<int>(SCROLL_NONE);
+        else if (str.compare("Horizontal") == 0)
+            return static_cast<int>(SCROLL_HORIZONTAL);
+        else if (str.compare("Vertical") == 0)
+            return static_cast<int>(SCROLL_VERTICAL);
+        else if (str.compare("Both") == 0)
+            return static_cast<int>(SCROLL_BOTH);
     }
-    else if (strcmp(scroll, "SCROLL_HORIZONTAL") == 0)
-    {
-        return ScrollContainer::SCROLL_HORIZONTAL;
-    }
-    else if (strcmp(scroll, "SCROLL_VERTICAL") == 0)
-    {
-        return ScrollContainer::SCROLL_VERTICAL;
-    }
-    else if (strcmp(scroll, "SCROLL_BOTH") == 0)
-    {
-        return ScrollContainer::SCROLL_BOTH;
-    }
-    else
-    {
-        GP_ERROR("Failed to get corresponding scroll state for unsupported value '%s'.", scroll);
-    }
-
-    return ScrollContainer::SCROLL_NONE;
+    return 0;
 }
 
 float ScrollContainer::getScrollingFriction() const

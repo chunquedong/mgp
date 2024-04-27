@@ -17,6 +17,8 @@ ProgressBar::~ProgressBar()
 
 void ProgressBar::onSerialize(Serializer* serializer) {
     Control::onSerialize(serializer);
+
+    serializer->writeFloat("value", _value, 0.0f);
 }
 
 void ProgressBar::onDeserialize(Serializer* serializer) {

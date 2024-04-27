@@ -143,6 +143,9 @@ public:
      */
     virtual void setAnimationPropertyValue(int propertyId, AnimationValue* value, float blendWeight = 1.0f);
 
+    static std::string enumToString(const std::string& enumName, int value);
+    static int enumParse(const std::string& enumName, const std::string& str);
+
 protected:
     void getBarPadding(int* vertical, int* horizontal);
 
@@ -217,7 +220,7 @@ protected:
      *
      * @return The Scroll enum value that matches the given string.
      */
-    static Scroll getScroll(const char* scroll);
+    //static Scroll getScroll(const char* scroll);
 
     /**
      * Scrollbar top cap image.

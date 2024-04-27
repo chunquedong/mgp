@@ -54,6 +54,7 @@ class LoadingView : public Icon {
     friend class Control;
     float _progress = 0;
 protected:
+    LoadingView();
     void updateState(State state);
     unsigned int drawImages(Form* form, const Rectangle& clip, RenderInfo* view) override;
 };

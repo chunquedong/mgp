@@ -251,7 +251,8 @@ private:
     unsigned int lineHeight = 0;
 
 public:
-
+    static std::string enumToString(const std::string& enumName, int value);
+    static int enumParse(const std::string& enumName, const std::string& str);
     static Justify getJustify(const char* justify);
 
     void update(Font* font, unsigned int fontSize, const char* text, int textLen = -1, int wrapWidth = -1);

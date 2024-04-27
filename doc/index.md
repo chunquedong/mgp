@@ -20,3 +20,5 @@ MGP is a lightweight 3D game engine.
 [声音](audio.md)
 
 [物理引擎](physics.md)
+
+[序列化](serializer.md)

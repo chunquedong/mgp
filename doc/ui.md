@@ -68,3 +68,48 @@ mgp自带UI库，支持常用的控件。
     auto theme = Theme::create(...);
     Theme::setDefault(theme.get());
 ```
+
+## 界面描述语言
+UI使用HiML格式配置。详见[jsonc](https://github.com/chunquedong/jsonc) readme文件。
+
+```
+mgp::ScrollContainer {
+  version = 4.0
+  style = Form
+  id = _form_content
+  width = 600
+  height = 700
+  padding = {
+    20,
+    20,
+    20,
+    20
+  }
+  scrollBarsAutoHide = true
+  mgp::Label {
+    id = testLabel
+    autoSizeW = WrapContent
+    autoSizeH = WrapContent
+    text = Label
+  }
+  mgp::Button {
+    id = testButton
+    autoSizeW = WrapContent
+    autoSizeH = WrapContent
+    padding = {
+      4,
+      12,
+      4,
+      12
+    }
+    x = 100
+    y = 100
+    text = Button
+  }
+}
+```
+加载UI文件
+```
+auto reader = mgp::Serializer::createReader("ui.hml", true);
+auto content = reader->readObject(nullptr).dynamicCastTo<mgp::Container>();
+```

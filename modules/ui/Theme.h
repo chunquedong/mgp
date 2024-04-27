@@ -142,7 +142,10 @@ public:
     /**
     * Hidden copy assignment operator.
     */
-    BorderImage& operator=(const BorderImage&);
+    BorderImage& operator=(const BorderImage&) = delete;
+    BorderImage(const BorderImage&) = delete;
+
+    BorderImage* clone();
 
     //static BorderImage* create(const char* id, const Rectangle& region, const Border& border, const Vector4& color);
 

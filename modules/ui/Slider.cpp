@@ -25,6 +25,15 @@ Slider::~Slider()
 
 void Slider::onSerialize(Serializer* serializer) {
     Label::onSerialize(serializer);
+    serializer->writeFloat("min", _min, 0);
+    serializer->writeFloat("max", _max, 1);
+    serializer->writeFloat("value", _value, 0);
+    serializer->writeFloat("step", _step, 0);
+
+    serializer->writeBool("valueTextVisible", _valueTextVisible, false);
+    serializer->writeInt("valueTextPrecision", _valueTextPrecision, 0);
+
+    serializer->writeEnum("valueTextAlignment", "mgp::FontLayout::Justify", _valueTextAlignment, FontLayout::ALIGN_BOTTOM_HCENTER);
 }
 
 void Slider::onDeserialize(Serializer* serializer) {
@@ -33,16 +42,12 @@ void Slider::onDeserialize(Serializer* serializer) {
     _min = serializer->readFloat("min", 0);
     _max = serializer->readFloat("max", 1);
     _value = serializer->readFloat("value", 0);
-    _step = serializer->readFloat("step", 1);
+    _step = serializer->readFloat("step", 0);
 
     _valueTextVisible = serializer->readBool("valueTextVisible", false);
     _valueTextPrecision = serializer->readInt("valueTextPrecision", 0);
 
-    std::string valueTextAlignment;
-    serializer->readString("valueTextAlignment", valueTextAlignment, "");
-    if (valueTextAlignment.size() > 0) {
-        _valueTextAlignment = FontLayout::getJustify(valueTextAlignment.c_str());
-    }
+    _valueTextAlignment = (FontLayout::Justify)serializer->readEnum("valueTextAlignment", "mgp::FontLayout::Justify", FontLayout::ALIGN_BOTTOM_HCENTER);
 
     // Force value text to be updated
     setValue(_value);

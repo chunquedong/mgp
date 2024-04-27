@@ -19,11 +19,25 @@ ComboBox::~ComboBox()
 
 void ComboBox::onSerialize(Serializer* serializer) {
     Button::onSerialize(serializer);
+    serializer->writeList("items", _items.size());
+    for (std::string& it : _items) {
+        serializer->writeString(NULL, it.c_str(), "");
+    }
+    serializer->finishColloction();
+    serializer->writeInt("selectIndex", _selectIndex, -1);
 }
 
 void ComboBox::onDeserialize(Serializer* serializer) {
     Button::onDeserialize(serializer);
-    _selectIndex = serializer->readBool("selIndex", -1);
+    int size = serializer->readList("items");
+    for (int i = 0; i < size; ++i) {
+        std::string value;
+        serializer->readString(NULL, value, "");
+        _items.push_back(value);
+    }
+    serializer->finishColloction();
+    int selectIndex = serializer->readInt("selectIndex", -1);
+    setSelectIndex(selectIndex, false);
 }
 
 void ComboBox::setSelectIndex(int v, bool fireEvent) {

@@ -16,15 +16,43 @@ TextBox::~TextBox()
 {
 }
 
+std::string TextBox::enumToString(const std::string& enumName, int value)
+{
+    if (enumName.compare("mgp::TextBox::InputMode") == 0)
+    {
+        switch (value)
+        {
+        case static_cast<int>(TEXT):
+            return "Text";
+        case static_cast<int>(PASSWORD):
+            return "PassWord";
+        default:
+            return "Text";
+        }
+    }
+    return "";
+}
+
+int TextBox::enumParse(const std::string& enumName, const std::string& str)
+{
+    if (enumName.compare("mgp::TextBox::InputMode") == 0)
+    {
+        if (str.compare("Text") == 0)
+            return static_cast<int>(TEXT);
+        else if (str.compare("PassWord") == 0)
+            return static_cast<int>(PASSWORD);
+    }
+    return 0;
+}
+
 void TextBox::onSerialize(Serializer* serializer) {
     Label::onSerialize(serializer);
+    serializer->writeEnum("inputMode", "mgp::TextBox::InputMode", _inputMode, TEXT);
 }
 
 void TextBox::onDeserialize(Serializer* serializer) {
     Label::onDeserialize(serializer);
-    std::string inputMode;
-    serializer->readString("inputMode", inputMode, "");
-    _inputMode = getInputMode(inputMode.c_str());
+    _inputMode = (InputMode)serializer->readEnum("inputMode", "mgp::TextBox::InputMode", TEXT);
 }
 
 void TextBox::addListener(Control::Listener* listener, int eventFlags)
@@ -442,29 +470,29 @@ TextBox::InputMode TextBox::getInputMode() const
     return _inputMode;
 }
 
-TextBox::InputMode TextBox::getInputMode(const char* inputMode)
-{
-    if (!inputMode)
-    {
-        return TextBox::TEXT;
-    }
-
-    if (strcmp(inputMode, "TEXT") == 0)
-    {
-        return TextBox::TEXT;
-    }
-    else if (strcmp(inputMode, "PASSWORD") == 0)
-    {
-        return TextBox::PASSWORD;
-    }
-    else
-    {
-        GP_ERROR("Failed to get corresponding textbox inputmode for unsupported value '%s'.", inputMode);
-    }
-
-    // Default.
-    return TextBox::TEXT;
-}
+//TextBox::InputMode TextBox::getInputMode(const char* inputMode)
+//{
+//    if (!inputMode)
+//    {
+//        return TextBox::TEXT;
+//    }
+//
+//    if (strcmp(inputMode, "TEXT") == 0)
+//    {
+//        return TextBox::TEXT;
+//    }
+//    else if (strcmp(inputMode, "PASSWORD") == 0)
+//    {
+//        return TextBox::PASSWORD;
+//    }
+//    else
+//    {
+//        GP_ERROR("Failed to get corresponding textbox inputmode for unsupported value '%s'.", inputMode);
+//    }
+//
+//    // Default.
+//    return TextBox::TEXT;
+//}
 
 std::string& TextBox::getDisplayedText()
 {

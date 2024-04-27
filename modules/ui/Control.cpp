@@ -7,6 +7,7 @@
 #include "ScrollContainer.h"
 #include "Label.h"
 #include "ModalLayer.h"
+#include "base/StringUtil.h"
 
 namespace mgp
 {
@@ -39,95 +40,263 @@ Control::~Control()
     }
 }
 
-Control::AutoSize Control::parseAutoSize(const char* str)
+//Control::AutoSize Control::parseAutoSize(const char* str)
+//{
+//    if (str == NULL)
+//        return AUTO_SIZE_NONE;
+//    if (strcmpnocase(str, "AUTO_WRAP_CONTENT") == 0 )
+//        return AUTO_WRAP_CONTENT;
+//    if (strcmpnocase(str, "AUTO_PERCENT_LEFT") == 0)
+//        return AUTO_PERCENT_LEFT;
+//    if (strcmpnocase(str, "AUTO_PERCENT_PARENT") == 0)
+//        return AUTO_PERCENT_PARENT;
+//    return AUTO_SIZE_NONE;
+//}
+//
+//
+//Control::Alignment Control::getAlignment(const char* alignment)
+//{
+//    if (!alignment)
+//    {
+//        return Control::ALIGN_TOP_LEFT;
+//    }
+//
+//    if (strcmp(alignment, "ALIGN_LEFT") == 0)
+//    {
+//        return Control::ALIGN_LEFT;
+//    }
+//    else if (strcmp(alignment, "ALIGN_HCENTER") == 0)
+//    {
+//        return Control::ALIGN_HCENTER;
+//    }
+//    else if (strcmp(alignment, "ALIGN_RIGHT") == 0)
+//    {
+//        return Control::ALIGN_RIGHT;
+//    }
+//    else if (strcmp(alignment, "ALIGN_TOP") == 0)
+//    {
+//        return Control::ALIGN_TOP;
+//    }
+//    else if (strcmp(alignment, "ALIGN_VCENTER") == 0)
+//    {
+//        return Control::ALIGN_VCENTER;
+//    }
+//    else if (strcmp(alignment, "ALIGN_BOTTOM") == 0)
+//    {
+//        return Control::ALIGN_BOTTOM;
+//    }
+//    else if (strcmp(alignment, "ALIGN_TOP_LEFT") == 0)
+//    {
+//        return Control::ALIGN_TOP_LEFT;
+//    }
+//    else if (strcmp(alignment, "ALIGN_VCENTER_LEFT") == 0)
+//    {
+//        return Control::ALIGN_VCENTER_LEFT;
+//    }
+//    else if (strcmp(alignment, "ALIGN_BOTTOM_LEFT") == 0)
+//    {
+//        return Control::ALIGN_BOTTOM_LEFT;
+//    }
+//    else if (strcmp(alignment, "ALIGN_TOP_HCENTER") == 0)
+//    {
+//        return Control::ALIGN_TOP_HCENTER;
+//    }
+//    else if (strcmp(alignment, "ALIGN_VCENTER_HCENTER") == 0)
+//    {
+//        return Control::ALIGN_VCENTER_HCENTER;
+//    }
+//    else if (strcmp(alignment, "ALIGN_BOTTOM_HCENTER") == 0)
+//    {
+//        return Control::ALIGN_BOTTOM_HCENTER;
+//    }
+//    else if (strcmp(alignment, "ALIGN_TOP_RIGHT") == 0)
+//    {
+//        return Control::ALIGN_TOP_RIGHT;
+//    }
+//    else if (strcmp(alignment, "ALIGN_VCENTER_RIGHT") == 0)
+//    {
+//        return Control::ALIGN_VCENTER_RIGHT;
+//    }
+//    else if (strcmp(alignment, "ALIGN_BOTTOM_RIGHT") == 0)
+//    {
+//        return Control::ALIGN_BOTTOM_RIGHT;
+//    }
+//    else
+//    {
+//        GP_ERROR("Failed to get corresponding control alignment for unsupported value '%s'.", alignment);
+//    }
+//    return Control::ALIGN_TOP_LEFT;
+//}
+
+std::string Control::enumToString(const std::string& enumName, int value)
 {
-    if (str == NULL)
-        return AUTO_SIZE_NONE;
-    if (strcmpnocase(str, "AUTO_WRAP_CONTENT") == 0 )
-        return AUTO_WRAP_CONTENT;
-    if (strcmpnocase(str, "AUTO_PERCENT_LEFT") == 0)
-        return AUTO_PERCENT_LEFT;
-    if (strcmpnocase(str, "AUTO_PERCENT_PARENT") == 0)
-        return AUTO_PERCENT_PARENT;
-    return AUTO_SIZE_NONE;
+    if (enumName.compare("mgp::Control::AutoSize") == 0)
+    {
+        switch (value)
+        {
+        case static_cast<int>(AUTO_SIZE_NONE):
+            return "None";
+        case static_cast<int>(AUTO_WRAP_CONTENT):
+            return "WrapContent";
+        case static_cast<int>(AUTO_PERCENT_LEFT):
+            return "PercentLeft";
+        case static_cast<int>(AUTO_PERCENT_PARENT):
+            return "ParcentParent";
+        default:
+            return "None";
+        }
+    }
+    else if (enumName.compare("mgp::Control::Alignment") == 0)
+    {
+        std::string h;
+        switch (value & 0x0F)
+        {
+        case static_cast<int>(ALIGN_LEFT):
+            h = "Left";
+        case static_cast<int>(ALIGN_HCENTER):
+            h = "HCenter";
+        case static_cast<int>(ALIGN_RIGHT):
+            h = "Right";
+        default:
+            h = "Left";
+        }
+
+        std::string v;
+        switch (value & 0xF0)
+        {
+        case static_cast<int>(ALIGN_TOP):
+            h = "Top";
+        case static_cast<int>(ALIGN_VCENTER):
+            h = "VCenter";
+        case static_cast<int>(ALIGN_BOTTOM):
+            h = "Bottom";
+        default:
+            h = "Left";
+        }
+
+        return v + "_" + h;
+    }
+    return "";
+}
+
+int Control::enumParse(const std::string& enumName, const std::string& str)
+{
+    if (enumName.compare("mgp::Control::AutoSize") == 0)
+    {
+        if (str.compare("None") == 0)
+            return static_cast<int>(AutoSize::AUTO_SIZE_NONE);
+        else if (str.compare("WrapContent") == 0)
+            return static_cast<int>(AutoSize::AUTO_WRAP_CONTENT);
+        else if (str.compare("PercentLeft") == 0)
+            return static_cast<int>(AutoSize::AUTO_PERCENT_LEFT);
+        else if (str.compare("ParcentParent") == 0)
+            return static_cast<int>(AutoSize::AUTO_PERCENT_PARENT);
+    }
+    else if (enumName.compare("mgp::Control::Alignment") == 0)
+    {
+        std::vector<std::string> fs = StringUtil::split(str, "_");
+        if (fs.size() == 2) {
+            std::string& v = fs[0];
+            std::string& h = fs[1];
+            int iv = 0;
+            int ih = 0;
+            if (v.compare("Left") == 0)
+                iv = static_cast<int>(ALIGN_LEFT);
+            else if (v.compare("HCenter") == 0)
+                iv = static_cast<int>(ALIGN_HCENTER);
+            else if (v.compare("Right") == 0)
+                iv = static_cast<int>(ALIGN_RIGHT);
+
+            if (h.compare("Top") == 0)
+                ih = static_cast<int>(ALIGN_TOP);
+            else if (v.compare("VCenter") == 0)
+                ih = static_cast<int>(ALIGN_VCENTER);
+            else if (v.compare("Bottom") == 0)
+                ih = static_cast<int>(ALIGN_BOTTOM);
+
+            return iv << 8 | ih;
+        }
+    }
+    return 0;
 }
 
 std::string Control::getClassName() {
-    return _className;
+    return "mgp::"+_className;
 }
 
 void Control::onSerialize(Serializer* serializer) {
+    serializer->writeString("style", _styleName.c_str(), _className.c_str());
+    serializer->writeString("id", _id.c_str(), "");
+    serializer->writeEnum("alignment", "mgp::Control::Alignment", _alignment, Alignment::ALIGN_TOP_LEFT);
+    serializer->writeBool("consumeInputEvents", _consumeInputEvents, true);
+    serializer->writeInt("zIndex", _zIndex, -1);
+    //serializer->writeBool("canFocus", _canFocus, false);
+    //serializer->writeInt("focusIndex", _focusIndex, -1);
+    serializer->writeFloat("opacity", _opacity, 0);
+
+    serializer->writeFloat("x", _desiredBounds.x, 0);
+    serializer->writeFloat("y", _desiredBounds.y, 0);
+    serializer->writeFloat("width", _desiredBounds.width, 0);
+    serializer->writeFloat("height", _desiredBounds.height, 0);
+
+    serializer->writeEnum("autoSizeX", "mgp::Control::AutoSize", _autoSizeX, AutoSize::AUTO_SIZE_NONE);
+    serializer->writeEnum("autoSizeY", "mgp::Control::AutoSize", _autoSizeY, AutoSize::AUTO_SIZE_NONE);
+    serializer->writeEnum("autoSizeW", "mgp::Control::AutoSize", _autoSizeW, AutoSize::AUTO_SIZE_NONE);
+    serializer->writeEnum("autoSizeH", "mgp::Control::AutoSize", _autoSizeH, AutoSize::AUTO_SIZE_NONE);
+
+    serializer->writeVector("padding", Vector4(_padding.top, _padding.right, _padding.bottom, _padding.left), Vector4::zero());
+    serializer->writeVector("margin", Vector4(_margin.top, _margin.right, _margin.bottom, _margin.left), Vector4::zero());
+
+    serializer->writeBool("enabled", _state != DISABLED, true);
+    serializer->writeString("toolTip", _toolTip.c_str(), "");
 }
 
 void Control::onDeserialize(Serializer* serializer) {
-    serializer->readString("style", _styleName, _className.c_str());
+    std::string style;
+    serializer->readString("style", style, _className.c_str());
     serializer->readString("id", _id, "");
 
-    std::string alignmentString;
-    serializer->readString("alignment", alignmentString, "");
-    _alignment = getAlignment(alignmentString.c_str());
+    if (style.size() == 0) {
+        setStyleName(_className.c_str());
+    }
+    else {
+        setStyleName(style.c_str());
+    }
+
+    _alignment = (Alignment)serializer->readEnum("alignment", "mgp::Control::Alignment", Alignment::ALIGN_TOP_LEFT);
 
     _consumeInputEvents = serializer->readBool("consumeInputEvents", true);
     _visible = serializer->readBool("visible", true);
 
     _zIndex = serializer->readInt("zIndex", -1);
 
-    _canFocus = serializer->readBool("canFocus", false);
-    _focusIndex = serializer->readInt("focusIndex", -1);
+    //_canFocus = serializer->readBool("canFocus", false);
+    //_focusIndex = serializer->readInt("focusIndex", -1);
+    _opacity = serializer->readInt("opacity", 0);
 
+    float x = serializer->readFloat("x", 0);
+    float y = serializer->readFloat("y", 0);
+    float w = serializer->readFloat("width", 0);
+    float h = serializer->readFloat("height", 0);
 
-    float bounds[2];
-    bool boundsBits[2];
-    std::string position;
-    serializer->readString("position", position, "");
-    if (position.size() > 0 && parseCoordPair(position.c_str(), &bounds[0], &bounds[1], &boundsBits[0], &boundsBits[1]))
-    {
-        setX(bounds[0], boundsBits[0] ? AUTO_PERCENT_PARENT : AUTO_SIZE_NONE);
-        setY(bounds[1], boundsBits[1] ? AUTO_PERCENT_PARENT : AUTO_SIZE_NONE);
-    }
+    AutoSize autoSizeX = (AutoSize)serializer->readEnum("autoSizeX", "mgp::Control::AutoSize", AutoSize::AUTO_SIZE_NONE);
+    AutoSize autoSizeY = (AutoSize)serializer->readEnum("autoSizeY", "mgp::Control::AutoSize", AutoSize::AUTO_SIZE_NONE);
+    AutoSize autoSizeW = (AutoSize)serializer->readEnum("autoSizeW", "mgp::Control::AutoSize", AutoSize::AUTO_SIZE_NONE);
+    AutoSize autoSizeH = (AutoSize)serializer->readEnum("autoSizeH", "mgp::Control::AutoSize", AutoSize::AUTO_SIZE_NONE);
 
-    // If there is an explicitly specified size, width or height, unset the corresponding autoSize bit
-    std::string size;
-    serializer->readString("size", size, "");
-    if (size.size() > 0 && parseCoordPair(size.c_str(), &bounds[0], &bounds[1], &boundsBits[0], &boundsBits[1]))
-    {
-        setWidth(bounds[0], boundsBits[0] ? AUTO_PERCENT_PARENT : AUTO_SIZE_NONE);
-        setHeight(bounds[1], boundsBits[1] ? AUTO_PERCENT_PARENT : AUTO_SIZE_NONE);
-    }
+    setX(x, autoSizeX);
+    setY(y, autoSizeY);
+    setWidth(w, autoSizeW);
+    setHeight(h, autoSizeH);
 
-    std::string autoSizeStr;
-    serializer->readString("autoSizeX", autoSizeStr, "");
-    _autoSizeX = parseAutoSize(autoSizeStr.c_str());
+    auto padding = serializer->readVector("padding", Vector4::zero());
+    setPadding(padding.x, padding.y, padding.z, padding.w);
 
-    autoSizeStr.clear();
-    serializer->readString("autoSizeY", autoSizeStr, "");
-    _autoSizeY = parseAutoSize(autoSizeStr.c_str());
-
-    autoSizeStr.clear();
-    serializer->readString("autoSizeW", autoSizeStr, "");
-    _autoSizeW = parseAutoSize(autoSizeStr.c_str());
-
-    autoSizeStr.clear();
-    serializer->readString("autoSizeH", autoSizeStr, "");
-    _autoSizeH = parseAutoSize(autoSizeStr.c_str());
-
-    std::string paddingStr;
-    serializer->readString("padding", paddingStr, "");
-    if (paddingStr.size() > 0)
-    {
-        float pad = atof(paddingStr.c_str());
-        setPadding(pad, pad, pad, pad);
-    }
-
-    std::string marginStr;
-    serializer->readString("margin", paddingStr, "");
-    if (marginStr.size() > 0)
-    {
-        float pad = atof(marginStr.c_str());
-        setMargin(pad, pad, pad, pad);
-    }
+    auto margin = serializer->readVector("margin", Vector4::zero());
+    setMargin(margin.x, margin.y, margin.z, margin.w);
 
     setEnabled(serializer->readBool("enabled", true));
+    serializer->readString("toolTip", _toolTip, "");
 
 #if GP_SCRIPT_ENABLE
     // Register script listeners for control events
@@ -1213,80 +1382,6 @@ Style* Control::overrideStyle()
     _style = SPtr<Style>(new Style(*_style));
     _styleOverridden = true;
     return getStyle();
-}
-
-Control::Alignment Control::getAlignment(const char* alignment)
-{
-    if (!alignment)
-    {
-        return Control::ALIGN_TOP_LEFT;
-    }
-
-    if (strcmp(alignment, "ALIGN_LEFT") == 0)
-    {
-        return Control::ALIGN_LEFT;
-    }
-    else if (strcmp(alignment, "ALIGN_HCENTER") == 0)
-    {
-        return Control::ALIGN_HCENTER;
-    }
-    else if (strcmp(alignment, "ALIGN_RIGHT") == 0)
-    {
-        return Control::ALIGN_RIGHT;
-    }
-    else if (strcmp(alignment, "ALIGN_TOP") == 0)
-    {
-        return Control::ALIGN_TOP;
-    }
-    else if (strcmp(alignment, "ALIGN_VCENTER") == 0)
-    {
-        return Control::ALIGN_VCENTER;
-    }
-    else if (strcmp(alignment, "ALIGN_BOTTOM") == 0)
-    {
-        return Control::ALIGN_BOTTOM;
-    }
-    else if (strcmp(alignment, "ALIGN_TOP_LEFT") == 0)
-    {
-        return Control::ALIGN_TOP_LEFT;
-    }
-    else if (strcmp(alignment, "ALIGN_VCENTER_LEFT") == 0)
-    {
-        return Control::ALIGN_VCENTER_LEFT;
-    }
-    else if (strcmp(alignment, "ALIGN_BOTTOM_LEFT") == 0)
-    {
-        return Control::ALIGN_BOTTOM_LEFT;
-    }
-    else if (strcmp(alignment, "ALIGN_TOP_HCENTER") == 0)
-    {
-        return Control::ALIGN_TOP_HCENTER;
-    }
-    else if (strcmp(alignment, "ALIGN_VCENTER_HCENTER") == 0)
-    {
-        return Control::ALIGN_VCENTER_HCENTER;
-    }
-    else if (strcmp(alignment, "ALIGN_BOTTOM_HCENTER") == 0)
-    {
-        return Control::ALIGN_BOTTOM_HCENTER;
-    }
-    else if (strcmp(alignment, "ALIGN_TOP_RIGHT") == 0)
-    {
-        return Control::ALIGN_TOP_RIGHT;
-    }
-    else if (strcmp(alignment, "ALIGN_VCENTER_RIGHT") == 0)
-    {
-        return Control::ALIGN_VCENTER_RIGHT;
-    }
-    else if (strcmp(alignment, "ALIGN_BOTTOM_RIGHT") == 0)
-    {
-        return Control::ALIGN_BOTTOM_RIGHT;
-    }
-    else
-    {
-        GP_ERROR("Failed to get corresponding control alignment for unsupported value '%s'.", alignment);
-    }
-    return Control::ALIGN_TOP_LEFT;
 }
 
 float Control::parseCoord(const char* s, bool* isPercentage)

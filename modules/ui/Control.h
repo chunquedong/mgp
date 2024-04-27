@@ -27,7 +27,7 @@ class Form;
  */
 class Control : public Refable, public AnimationTarget, public Serializable
 #if GP_SCRIPT_ENABLE
-, public ScriptTarget
+    , public ScriptTarget
 #endif
 {
     friend class Form;
@@ -48,12 +48,18 @@ public:
             cb->_style = style;
         }
         if (!typeName) {
-            cb->setStyleName(cb->getClassName().c_str());
+            cb->setStyleName(cb->_className.c_str());
         }
         else {
             cb->setStyleName(typeName);
         }
         return UPtr<T>(cb);
+    }
+
+    template<typename T>
+    static Serializable* _create() {
+        T* cb = new T();
+        return cb;
     }
 
     /**
@@ -1046,27 +1052,39 @@ protected:
      */
     virtual unsigned int drawText(Form* form, const Rectangle& clip, RenderInfo* view);
 
+public:
+
+    /**
+        * @see Activator::enumToString
+        */
+    static std::string enumToString(const std::string& enumName, int value);
+
+    /**
+        * @see Activator::enumParse
+        */
+    static int enumParse(const std::string& enumName, const std::string& str);
+
     /**
      * Gets the class name string for the object.
      *
      * This is used by the Serializer when reading/writing objects.
      * The class name should be namespaced. Ex: mgp::SceneObject
      */
-    virtual std::string getClassName();
+    virtual std::string getClassName() override;
 
     /**
      * Event handled when an object is asked to serialize itself.
      * 
      * @param serializer The serializer to write properties to.
      */
-    virtual void onSerialize(Serializer* serializer);
+    virtual void onSerialize(Serializer* serializer) override;
 
     /**
      * Event handled when an object properties are being deserialized.
      *
      * @param serializer The serializer to read properties from.
      */
-    virtual void onDeserialize(Serializer* serializer);
+    virtual void onDeserialize(Serializer* serializer) override;
 
     /**
      * Get a Control::State enum from a matching string.
@@ -1114,7 +1132,7 @@ protected:
      * @param alignment The string representation of the Alignment type.
      * @return The Alignment enum value corresponding to the given string.
      */
-    static Alignment getAlignment(const char* alignment);
+    //static Alignment getAlignment(const char* alignment);
 
     /**
      * Converts a string in the format of either 'N' or 'N%' (where N is a number)
@@ -1275,7 +1293,7 @@ private:
      */    
     Control(const Control& copy);
 
-    AutoSize parseAutoSize(const char* str);
+    //AutoSize parseAutoSize(const char* str);
 
     void addSpecificListener(Control::Listener* listener, Control::Listener::EventType eventType);
     void showToolTip();

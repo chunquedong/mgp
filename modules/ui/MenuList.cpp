@@ -22,10 +22,22 @@ MenuList::~MenuList()
 
 void MenuList::onSerialize(Serializer* serializer) {
     ScrollContainer::onSerialize(serializer);
+    serializer->writeList("items", _items.size());
+    for (std::string& it : _items) {
+        serializer->writeString(NULL, it.c_str(), "");
+    }
+    serializer->finishColloction();
 }
 
 void MenuList::onDeserialize(Serializer* serializer) {
     ScrollContainer::onDeserialize(serializer);
+    int size = serializer->readList("items");
+    for (int i = 0; i < size; ++i) {
+        std::string value;
+        serializer->readString(NULL, value, "");
+        _items.push_back(value);
+    }
+    serializer->finishColloction();
 }
 
 void MenuList::controlEvent(Control* control, EventType evt) {
@@ -49,6 +61,7 @@ void MenuList::controlEvent(Control* control, EventType evt) {
 }
 
 void MenuList::initItems(std::vector<std::string>& items) {
+    _items = items;
     for (std::string& name : items) {
         UPtr<Button> label = Control::create<Button>((this->_id + "_items").c_str());
         label->setPadding(4);

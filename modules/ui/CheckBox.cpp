@@ -18,6 +18,7 @@ CheckBox::~CheckBox()
 
 void CheckBox::onSerialize(Serializer* serializer) {
     Button::onSerialize(serializer);
+    serializer->writeBool("checked", _checked, false);
 }
 
 void CheckBox::onDeserialize(Serializer* serializer) {

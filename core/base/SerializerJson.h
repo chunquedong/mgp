@@ -25,8 +25,8 @@ public:
      * @param path The path to open create and open the serializer from.
      * @return The new json serializer.
      */
-    static UPtr<Serializer> createWriter(const std::string& path);
-    static UPtr<Serializer> create(Stream* stream);
+    static UPtr<Serializer> createWriter(const std::string& path, bool isHiml = false);
+    static UPtr<Serializer> create(Stream* stream, bool isHiml = false);
 
     /**
      * @see Serializer::close
@@ -233,6 +233,7 @@ private:
     std::stack<size_t> _nodesListCounts;
     std::map<unsigned long, jc::JsonNode*> _xrefsWrite;
     std::map<unsigned long, Serializable*> _xrefsRead;
+    bool _isHiml;
 public:
     jc::JsonAllocator allocator;
 };

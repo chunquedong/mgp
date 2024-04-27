@@ -77,26 +77,23 @@ Container::~Container()
 
 void Container::onSerialize(Serializer* serializer) {
     Control::onSerialize(serializer);
+
+    serializer->writeEnum("layout", "mgp::Container::Layout", getLayout()->getType(), Layout::LAYOUT_ABSOLUTE);
+
+    serializer->writeList("_children", _controls.size());
+    std::vector<Control*>::iterator it;
+    for (it = _controls.begin(); it < _controls.end(); it++)
+    {
+        serializer->writeObject(NULL, *it);
+    }
+    serializer->finishColloction();
 }
 
 void Container::onDeserialize(Serializer* serializer) {
     Control::onDeserialize(serializer);
-    std::string layoutStr;
-    serializer->readString("layout", layoutStr, "");
-    if (layoutStr.size() > 0)
-    {
-        _layout = createLayout(getLayoutType(layoutStr.c_str()));
-        switch (_layout->getType())
-        {
-        case Layout::LAYOUT_FLOW:
-            static_cast<FlowLayout*>(_layout.get())->setSpacing(serializer->readInt("horizontalSpacing", 0), 
-                serializer->readInt("verticalSpacing", 0));
-            break;
-        case Layout::LAYOUT_VERTICAL:
-            static_cast<VerticalLayout*>(_layout.get())->setSpacing(serializer->readInt("spacing", 0));
-            break;
-        }
-    }
+
+    Layout::Type type = (Layout::Type)serializer->readEnum("layout", "mgp::Container::Layout", Layout::LAYOUT_ABSOLUTE);
+    setLayout(type);
 
     int size = serializer->readList("_children");
     for (int i = 0; i < size; ++i) {
@@ -109,11 +106,12 @@ void Container::onDeserialize(Serializer* serializer) {
             //control->release();
         }
     }
+    serializer->finishColloction();
 
     // Sort controls by Z-Order.
     sortControls();
 
-    std::string activeControl;
+    /*std::string activeControl;
     serializer->readString("activeControl", activeControl, "");
     if (activeControl.size() > 0)
     {
@@ -125,7 +123,7 @@ void Container::onDeserialize(Serializer* serializer) {
                 break;
             }
         }
-    }
+    }*/
 }
 
 Layout* Container::getLayout()
@@ -163,9 +161,9 @@ unsigned int Container::addControl(UPtr<Control> control)
 		return 0;
 	}
 
-	if( control->getZIndex() == -1 ) {
-		control->setZIndex( _zIndexDefault++ );
-	}
+	// if( control->getZIndex() == -1 ) {
+	// 	control->setZIndex( _zIndexDefault++ );
+	// }
 
 	if( control->getFocusIndex() == -1 ) {
 		// Find the current largest focus index
@@ -813,32 +811,69 @@ bool Container::inContact()
     return false;
 }
 
-Layout::Type Container::getLayoutType(const char* layoutString)
-{
-    if (!layoutString)
-    {
-        return Layout::LAYOUT_ABSOLUTE;
-    }
+//Layout::Type Container::getLayoutType(const char* layoutString)
+//{
+//    if (!layoutString)
+//    {
+//        return Layout::LAYOUT_ABSOLUTE;
+//    }
+//
+//    std::string layoutName(layoutString);
+//    std::transform(layoutName.begin(), layoutName.end(), layoutName.begin(), (int(*)(int))toupper);
+//    if (layoutName == "LAYOUT_ABSOLUTE")
+//    {
+//        return Layout::LAYOUT_ABSOLUTE;
+//    }
+//    else if (layoutName == "LAYOUT_VERTICAL")
+//    {
+//        return Layout::LAYOUT_VERTICAL;
+//    }
+//    else if (layoutName == "LAYOUT_FLOW")
+//    {
+//        return Layout::LAYOUT_FLOW;
+//    }
+//    else
+//    {
+//        // Default.
+//        return Layout::LAYOUT_ABSOLUTE;
+//    }
+//}
 
-    std::string layoutName(layoutString);
-    std::transform(layoutName.begin(), layoutName.end(), layoutName.begin(), (int(*)(int))toupper);
-    if (layoutName == "LAYOUT_ABSOLUTE")
+std::string Container::enumToString(const std::string& enumName, int value)
+{
+    if (enumName.compare("mgp::Container::Layout") == 0)
     {
-        return Layout::LAYOUT_ABSOLUTE;
+        switch (value)
+        {
+        case static_cast<int>(Layout::LAYOUT_ABSOLUTE):
+            return "Absolute";
+        case static_cast<int>(Layout::LAYOUT_VERTICAL):
+            return "Vertical";
+        case static_cast<int>(Layout::LAYOUT_HORIZONTAL):
+            return "Horizontal";
+        case static_cast<int>(Layout::LAYOUT_FLOW):
+            return "Flow";
+        default:
+            return "Absolute";
+        }
     }
-    else if (layoutName == "LAYOUT_VERTICAL")
+    return "";
+}
+
+int Container::enumParse(const std::string& enumName, const std::string& str)
+{
+    if (enumName.compare("mgp::Container::Layout") == 0)
     {
-        return Layout::LAYOUT_VERTICAL;
+        if (str.compare("Absolute") == 0)
+            return static_cast<int>(Layout::LAYOUT_ABSOLUTE);
+        else if (str.compare("Vertical") == 0)
+            return static_cast<int>(Layout::LAYOUT_VERTICAL);
+        else if (str.compare("Horizontal") == 0)
+            return static_cast<int>(Layout::LAYOUT_HORIZONTAL);
+        else if (str.compare("Flow") == 0)
+            return static_cast<int>(Layout::LAYOUT_FLOW);
     }
-    else if (layoutName == "LAYOUT_FLOW")
-    {
-        return Layout::LAYOUT_FLOW;
-    }
-    else
-    {
-        // Default.
-        return Layout::LAYOUT_ABSOLUTE;
-    }
+    return 0;
 }
 
 UPtr<Layout> Container::createLayout(Layout::Type type)

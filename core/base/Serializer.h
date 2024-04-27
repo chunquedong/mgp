@@ -64,8 +64,8 @@ public:
      *
      * @param path The path to load a serialized object from.
      */
-    static UPtr<Serializer> createReader(const std::string& path);
-    static UPtr<Serializer> createReader(Stream* stream);
+    static UPtr<Serializer> createReader(const std::string& path, bool isHiml = false);
+    static UPtr<Serializer> createReader(Stream* stream, bool isHiml = false);
 
     /**
      * Gets the file path for the reader/writer.

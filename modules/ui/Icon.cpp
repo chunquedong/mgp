@@ -16,6 +16,7 @@ Icon::~Icon()
 
 void Icon::onSerialize(Serializer* serializer) {
     Control::onSerialize(serializer);
+    serializer->writeString("path", _imagePath.c_str(), "");
 }
 
 void Icon::onDeserialize(Serializer* serializer) {
@@ -71,6 +72,11 @@ unsigned int Icon::drawImages(Form* form, const Rectangle& clip, RenderInfo* vie
         region, color, &_viewportClipBounds);
     finishBatch(form, batch, view);
     return 1;
+}
+
+LoadingView::LoadingView() {
+    _canFocus = false;
+    _className = "LoadingView";
 }
 
 void LoadingView::updateState(State state)

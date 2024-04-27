@@ -5,6 +5,7 @@
 
 namespace mgp
 {
+class SerializerManager;
 
 class FormManager {
     std::vector<Form*> __forms;
@@ -70,6 +71,8 @@ public:
 
 
     void verifyRemovedControlState(Control* control);
+
+    static void regiseterSerializer(SerializerManager *mgr);
 };
 
 }

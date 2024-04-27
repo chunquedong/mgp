@@ -9,6 +9,7 @@
 #include "math/Matrix.h"
 
 #include "jparser.hpp"
+#include "HimlParser.hpp"
 
 extern "C" {
 #include "3rd/base64.h"
@@ -23,9 +24,7 @@ namespace mgp
 {
 
 static JsonNode* json_new_f(jc::JsonAllocator& allocator, float f) {
-    jc::JsonNode* value = allocator.allocNode(jc::Type::Float);
-    value->set_float(f);
-    return value;
+    return allocator.alloc_float(f);
 }
 
 static char* json_strdup(jc::JsonAllocator& allocator, const char* s) {
@@ -33,9 +32,7 @@ static char* json_strdup(jc::JsonAllocator& allocator, const char* s) {
 }
 
 static JsonNode* json_new_a(jc::JsonAllocator& allocator, const char* s) {
-    jc::JsonNode* value = allocator.allocNode(jc::Type::String);
-    value->set_str(allocator.strdup(s));
-    return value;
+    return allocator.alloc_str(s);
 }
 
 SerializerJson::SerializerJson(Type type,
@@ -44,7 +41,7 @@ SerializerJson::SerializerJson(Type type,
                                uint32_t versionMinor,
                                jc::JsonNode* root) :
     Serializer(type, stream, versionMajor, versionMinor), 
-    _root(root)
+    _root(root), _isHiml(false)
 {
     _nodes.push(root);
 }
@@ -52,8 +49,8 @@ SerializerJson::SerializerJson(Type type,
 SerializerJson::~SerializerJson()
 {
 }
-        
-UPtr<Serializer> SerializerJson::create(Stream* stream)
+
+UPtr<Serializer> SerializerJson::create(Stream* stream, bool isHiml)
 {
     jc::JsonAllocator allocator;
 
@@ -62,12 +59,23 @@ UPtr<Serializer> SerializerJson::create(Stream* stream)
     stream->read(buffer, sizeof(char), length);
     buffer[length] = '\0';
 
-    JsonParser parser(&allocator);
-    JsonNode* root = (JsonNode*)parser.parse(buffer);
+    JsonNode* root = nullptr;
+    if (isHiml) {
+        HimlParser parser(&allocator);
+        root = (JsonNode*)parser.parse(buffer);
+        if (root->children() && root->get("version") == NULL && root->children()->begin() != root->children()->end()) {
+            root = (JsonNode*)*root->children()->begin();
+        }
+    }
+    else {
+        JsonParser parser(&allocator);
+        root = (JsonNode*)parser.parse(buffer);
+    }
+
     if (root == nullptr)
         return UPtr<Serializer>();
 
-    Serializer* serializer = nullptr;
+    SerializerJson* serializer = nullptr;
 
     auto versionNode = root->get("version");
     int versionMajor = GP_ENGINE_VERSION_MAJOR;
@@ -88,16 +96,15 @@ UPtr<Serializer> SerializerJson::create(Stream* stream)
             versionMinor = std::stoi(minor);
         }
         serializer = new SerializerJson(Type::eReader, stream, versionMajor, versionMinor, root);
-        ((SerializerJson*)serializer)->allocator.swap(allocator);
+        serializer->_isHiml = isHiml;
+        serializer->allocator.swap(allocator);
     }
     //SAFE_DELETE_ARRAY(buffer);
     return UPtr<Serializer>(serializer);
 }
 
 
-
-
-UPtr<Serializer> SerializerJson::createWriter(const std::string& path)
+UPtr<Serializer> SerializerJson::createWriter(const std::string& path, bool isHiml)
 {
     Stream* stream = FileSystem::open(path.c_str(), FileSystem::WRITE).take();
     if (stream == nullptr)
@@ -112,8 +119,9 @@ UPtr<Serializer> SerializerJson::createWriter(const std::string& path)
     root->insert_pair("version", json_new_a(allocator, version.c_str()));
     //json_push_back(root, json_new_a("version", version.c_str()));
 
-    Serializer* serializer = new SerializerJson(Type::eWriter, stream, GP_ENGINE_VERSION_MAJOR, GP_ENGINE_VERSION_MINOR, root);
-    ((SerializerJson*)serializer)->allocator.swap(allocator);
+    SerializerJson* serializer = new SerializerJson(Type::eWriter, stream, GP_ENGINE_VERSION_MAJOR, GP_ENGINE_VERSION_MINOR, root);
+    serializer->allocator.swap(allocator);
+    serializer->_isHiml = isHiml;
     return UPtr<Serializer>(serializer);
 }
 
@@ -130,7 +138,7 @@ void SerializerJson::flush() {
     if (_type == Type::eWriter && _root)
     {
         std::string str;
-        _root->to_json(str);
+        _root->to_json(str, _isHiml);
         _stream->write(str.c_str(), sizeof(char), str.length());
         //json_free(buffer);
         _root = NULL;
@@ -420,6 +428,11 @@ void SerializerJson::writeObject(const char* propertyName, Serializable *value)
     jc::JsonNode* parentNode = _nodes.top();
     jc::JsonNode* writeNode = nullptr;
     jc::JsonNode* xrefNode = nullptr;
+
+    const char* classField = "class";
+    if (_isHiml) {
+        classField = "_type";
+    }
     Refable* refable = dynamic_cast<Refable*>(value);
     if (refable && refable->getRefCount() > 1)
     {
@@ -429,15 +442,14 @@ void SerializerJson::writeObject(const char* propertyName, Serializable *value)
         if (itr == _xrefsWrite.end())
         {
             writeNode = createNode(parentNode, propertyName);
-            writeNode->insert_pair("class", json_new_a(allocator, value->getClassName().c_str()));
+            writeNode->insert_pair(classField, json_new_a(allocator, value->getClassName().c_str()));
             url = std::to_string(xrefAddress);
             _xrefsWrite[xrefAddress] = writeNode;
         }
         else
         {
             writeNode = createNode(parentNode, propertyName);
-            //json_push_back(writeNode, json_new_a("class", value->getClassName().c_str()));
-            writeNode->insert_pair("class", json_new_a(allocator, value->getClassName().c_str()));
+            writeNode->insert_pair(classField, json_new_a(allocator, value->getClassName().c_str()));
             std::ostringstream o;
             o << "@" << std::to_string(xrefAddress);
             url = o.str();
@@ -449,8 +461,7 @@ void SerializerJson::writeObject(const char* propertyName, Serializable *value)
     else
     {
         writeNode = createNode(parentNode, propertyName);
-        //json_push_back(writeNode, json_new_a("class", value->getClassName().c_str()));
-        writeNode->insert_pair("class", json_new_a(allocator, value->getClassName().c_str()));
+        writeNode->insert_pair(classField, json_new_a(allocator, value->getClassName().c_str()));
     }
     
     if (xrefNode == nullptr) {
@@ -604,7 +615,7 @@ bool SerializerJson::readBool(const char* propertyName, bool defaultValue)
     jc::Value* property = readElement(propertyName);
     if (property)
     {
-        if (property->type() != jc::Type::Boolean)
+        if (!_isHiml && property->type() != jc::Type::Boolean)
             GP_ERROR("Invalid json bool for propertyName:%s", propertyName);
         return property->as_bool();
     }
@@ -619,8 +630,8 @@ int SerializerJson::readInt(const char* propertyName, int defaultValue)
     jc::Value* property = readElement(propertyName);
     if (property)
     {
-        if (property->type() != jc::Type::Integer)
-            GP_ERROR("Invalid json bool for propertyName:%s", propertyName);
+        if (!_isHiml && property->type() != jc::Type::Integer)
+            GP_ERROR("Invalid json int for propertyName:%s", propertyName);
         return property->as_int();
     }
     return defaultValue;
@@ -635,8 +646,8 @@ float SerializerJson::readFloat(const char* propertyName, float defaultValue)
 
     if (property)
     {
-        if (property->type() != jc::Type::Float && property->type() != jc::Type::Integer)
-            GP_ERROR("Invalid json bool for propertyName:%s", propertyName);
+        if (!_isHiml && property->type() != jc::Type::Float && property->type() != jc::Type::Integer)
+            GP_ERROR("Invalid json float for propertyName:%s", propertyName);
         return property->as_float();
     }
     return defaultValue;
@@ -648,6 +659,9 @@ Vector2 SerializerJson::readVector(const char* propertyName, const Vector2& defa
     
     jc::JsonNode* node = _nodes.top();
     jc::Value* property = readElement(propertyName);
+    if (_isHiml && property) {
+        property = property->children();
+    }
     if (property)
     {
         if (property->type() != jc::Type::Array || property->size() < 2)
@@ -670,6 +684,9 @@ Vector3 SerializerJson::readVector(const char* propertyName, const Vector3& defa
 
     jc::JsonNode* node = _nodes.top();
     jc::Value* property = readElement(propertyName);
+    if (_isHiml && property) {
+        property = property->children();
+    }
     if (property)
     {
         if (property->type() != jc::Type::Array || property->size() < 3)
@@ -695,6 +712,9 @@ Vector4 SerializerJson::readVector(const char* propertyName, const Vector4& defa
 
     jc::JsonNode* node = _nodes.top();
     jc::Value* property = readElement(propertyName);
+    if (_isHiml && property) {
+        property = property->children();
+    }
     if (property)
     {
         if (property->type() != jc::Type::Array || property->size() < 4)
@@ -723,6 +743,9 @@ Vector3 SerializerJson::readColor(const char* propertyName, const Vector3& defau
     
     jc::JsonNode* node = _nodes.top();
     jc::Value* property = readElement(propertyName);
+    if (_isHiml && property) {
+        property = property->children();
+    }
     if (property)
     {
         if (property->type() != jc::Type::String)
@@ -741,6 +764,9 @@ Vector4 SerializerJson::readColor(const char* propertyName, const Vector4& defau
     
     jc::JsonNode* node = _nodes.top();
     jc::Value* property = readElement(propertyName);
+    if (_isHiml && property) {
+        property = property->children();
+    }
     if (property)
     {
         if (property->type() != jc::Type::String)
@@ -759,6 +785,9 @@ Matrix SerializerJson::readMatrix(const char* propertyName, const Matrix& defaul
 
     jc::JsonNode* node = _nodes.top();
     jc::Value* property = readElement(propertyName);
+    if (_isHiml && property) {
+        property = property->children();
+    }
     if (property)
     {
         if (property->type() != jc::Type::Array || property->size() < 16)
@@ -812,7 +841,7 @@ void SerializerJson::readString(const char* propertyName, std::string& value, co
    
     if (property)
     {
-        if (property->type() != jc::Type::String)
+        if (!_isHiml && property->type() != jc::Type::String)
             GP_ERROR("Invalid json string for propertyName:%s", propertyName);
 
         /*json_char* str = json_as_string(property);
@@ -845,7 +874,11 @@ UPtr<Serializable> SerializerJson::readObject(const char* propertyName)
     if (readNode == nullptr)
         return UPtr<Serializable>();
     
-    jc::Value* classProperty = readNode->get("class");
+    const char* classField = "class";
+    if (_isHiml) {
+        classField = "_type";
+    }
+    jc::Value* classProperty = readNode->get(classField);
     const char* className = classProperty->as_str();
     
     // Look for xref's

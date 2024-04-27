@@ -12,7 +12,7 @@ namespace mgp
 
 class MenuList : public ScrollContainer, public Control::Listener {
     friend class Control;
-
+    std::vector<std::string> _items;
     int _selectIndex = -1;
 public:
 
