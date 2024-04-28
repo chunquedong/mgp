@@ -42,11 +42,11 @@ Form::~Form()
     //SAFE_RELEASE(_root);
 
     // Remove this Form from the global list.
-    std::vector<Form*>::iterator it = std::find(FormManager::cur()->__forms.begin(), FormManager::cur()->__forms.end(), this);
+    /*std::vector<Form*>::iterator it = std::find(FormManager::cur()->__forms.begin(), FormManager::cur()->__forms.end(), this);
     if (it != FormManager::cur()->__forms.end())
     {
         FormManager::cur()->__forms.erase(it);
-    }
+    }*/
 }
 
 UPtr<Form> Form::create(const char* url)

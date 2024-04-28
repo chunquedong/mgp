@@ -965,6 +965,10 @@ size_t SerializerJson::readList(const char* propertyName)
     jc::JsonNode* node = _nodes.top();
     jc::Value* list = readElement(propertyName);
 
+    if (_isHiml && list && strcmp(propertyName, "_children") != 0) {
+        list = list->children();
+    }
+
     size_t count = 0;
     if (list) {
         count = list->size();

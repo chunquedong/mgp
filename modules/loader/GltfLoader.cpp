@@ -17,7 +17,7 @@
 #include "material/MaterialParameter.h"
 #include "base/FileSystem.h"
 #include "material/Image.h"
-
+#include "base/StringUtil.h"
 
 
 using namespace mgp;
@@ -170,6 +170,7 @@ private:
 			return t;
 		}
 		std::string uri = baseDir + texture->image->uri;
+		StringUtil::replace(uri, "%20", " ");
 		UPtr<Texture> t = Texture::create(uri.c_str(), true);
 		return t;
 	}

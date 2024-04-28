@@ -214,7 +214,7 @@ int Control::enumParse(const std::string& enumName, const std::string& str)
             else if (v.compare("Bottom") == 0)
                 ih = static_cast<int>(ALIGN_BOTTOM);
 
-            return iv << 8 | ih;
+            return iv | ih;
         }
     }
     return 0;

@@ -32,12 +32,12 @@ void FormManager::add(UPtr<Form> f) {
 }
 
 unsigned int FormManager::draw(RenderInfo* view) {
-    int i = 0;
+    int n = 0;
     for (int i = 0; i < __forms.size(); ++i) {
         Form* form = __forms[i];
-        i += form->draw(view);
+        n += form->draw(view);
     }
-    return i;
+    return n;
 }
 
 void FormManager::updateInternal(float elapsedTime)
