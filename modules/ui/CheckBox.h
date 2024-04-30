@@ -45,7 +45,7 @@ public:
      * @param listener The listener to add.
      * @param eventFlags The events to listen for.
      */
-    virtual void addListener(Control::Listener* listener, int eventFlags);
+    virtual void addListener(Control::Listener* listener, Listener::EventType eventFlags);
 
 protected:
 

@@ -14,9 +14,43 @@ Icon::~Icon()
 {
 }
 
+bool Icon::isChecked() {
+    return _checked;
+}
+
+void Icon::setChecked(bool checked) {
+    if (_checked != checked)
+    {
+        _checked = checked;
+        setDirty(DIRTY_STATE);
+        notifyListeners(Control::Listener::VALUE_CHANGED);
+    }
+}
+
+void Icon::controlEvent(Control::Listener::EventType evt)
+{
+    Control::controlEvent(evt);
+    if (_checkable) {
+        switch (evt)
+        {
+        case Control::Listener::CLICK:
+
+            setChecked(!_checked);
+            break;
+        }
+    }
+}
+
+unsigned int Icon::drawBorder(Form* form, const Rectangle& clip, RenderInfo* view) {
+    if (!_checked) return 0;
+    return Control::drawBorder(form, clip, view);
+}
+
 void Icon::onSerialize(Serializer* serializer) {
     Control::onSerialize(serializer);
     serializer->writeString("path", _imagePath.c_str(), "");
+    serializer->writeBool("checkable", _checkable, false);
+    serializer->writeBool("checked", _checked, false);
 }
 
 void Icon::onDeserialize(Serializer* serializer) {
@@ -27,6 +61,8 @@ void Icon::onDeserialize(Serializer* serializer) {
     {
         setImagePath(path.c_str());
     }
+    _checkable = serializer->readBool("checkable", false);
+    _checked = serializer->readBool("checked", false);
 }
 
 void Icon::setImagePath(const char* path)

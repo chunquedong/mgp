@@ -169,64 +169,66 @@ public:
             /**
              * Mouse-down or touch-press event.
              */
-            PRESS           = 0x01,
+            PRESS,
 
             /**
              * Mouse-up or touch-release event.
              */
-            RELEASE         = 0x02,
+            RELEASE,
 
             /**
              * Event triggered after consecutive PRESS and RELEASE events take place
              * within the bounds of a control.
              */
-            CLICK           = 0x04,
+            CLICK,
 
             /**
              * Event triggered when the value of a slider, check box, or radio button
              * changes.
              */
-            VALUE_CHANGED   = 0x08,
+            VALUE_CHANGED,
 
             /**
              * Event triggered when the contents of a text box are modified.
              */
-            TEXT_CHANGED    = 0x10,
+            TEXT_CHANGED,
 
             /**
              * Event triggered when a control is clicked with the middle mouse button.
              */
-            MIDDLE_CLICK    = 0x20,
+            MIDDLE_CLICK,
 
             /**
              * Event triggered when a control is clicked with the right mouse button.
              */
-            RIGHT_CLICK     = 0x40,
+            RIGHT_CLICK,
 
             /**
              * Event triggered when a control is activated in another manner (such as pressing enter in text control)
              */
-            ACTIVATED       = 0x80,
+            ACTIVATED,
 
             /**
              * Event triggered when a control gains focus.
              */
-            FOCUS_GAINED    = 0x200,
+            FOCUS_GAINED,
 
             /**
              * Event triggered when a control loses focus.
              */
-            FOCUS_LOST      = 0x400,
+            FOCUS_LOST,
 
             /**
              * Event triggered when a control select index change
              */
-            SELECT_CHANGE  = 0x800,
+            SELECT_CHANGE,
 
             /**
              * Tree Expanded
              */
-            EXPANDED       = 0x100,
+            EXPANDED,
+
+            DRAG,
         };
 
         /*
@@ -443,6 +445,8 @@ public:
      * @return The bounds of this control.
      */
     const Rectangle& getBounds() const;
+
+    const Rectangle& getDesiredBounds() const;
 
     /**
      * Set the bounds of this control, relative to its parent container and including its
@@ -760,7 +764,7 @@ public:
      * @param listener The listener to add.
      * @param eventFlags The events to listen for.
      */
-    virtual void addListener(Control::Listener* listener, int eventFlags);
+    virtual void addListener(Control::Listener* listener, Listener::EventType eventFlags);
     void setListener(std::function<void(Control* control, Control::Listener::EventType evt)> listener);
 
     /**
@@ -1093,7 +1097,7 @@ public:
      *
      * @return The Control::State enum that matches the given string.
      */
-    static State getState(const char* state);
+    //static State getState(const char* state);
 
     /**
      * Notify this control's listeners of a specific event.

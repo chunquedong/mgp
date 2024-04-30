@@ -108,7 +108,7 @@ class MainApp : public Application, Control::Listener {
         //SAFE_RELEASE(text);
 
 #endif
-#if 1
+#if 0
         //test scroll
         UPtr<ScrollContainer> container = Control::create<ScrollContainer>("container");
         container->setSize(200, 100);
@@ -121,7 +121,7 @@ class MainApp : public Application, Control::Listener {
         form->getContent()->addControl(std::move(container));
 
 #endif
-#if 1
+#if 0
         UPtr<ImageView> image = Control::create<ImageView>("image");
         image->setImage("res/image/logo.png");
         image->setSize(50, 50);
@@ -141,10 +141,17 @@ class MainApp : public Application, Control::Listener {
             combobox2->getItems().push_back("Item:"+std::to_string(i));
         }
         form->getContent()->addControl(std::move(combobox2));
+#endif
+#if 0
+        UPtr<Button> button = Control::create<Button>("testButton");
+        button->setText("Button");
+        button->addListener(this, Control::Listener::CLICK);
+        form->getContent()->addControl(std::move(button));
 
         UPtr<Icon> icon = Control::create<Icon>("Icon");
         icon->setImagePath("res/image/point.png");
         icon->setToolTip("Hello World");
+        icon->setPadding(4);
         form->getContent()->addControl(std::move(icon));
 #endif
 #if 0
@@ -187,14 +194,14 @@ class MainApp : public Application, Control::Listener {
 
 #endif
 
-        auto sceneWriter = mgp::SerializerJson::createWriter("ui.hml", true);
+        /*auto sceneWriter = mgp::SerializerJson::createWriter("ui.hml", true);
         sceneWriter->writeObject(nullptr, form->getContent());
         sceneWriter->close();
 
         auto reader = mgp::Serializer::createReader("ui.hml", true);
         auto content = reader->readObject(nullptr).dynamicCastTo<mgp::Container>();
+        form->setContent(std::move(content));*/
 
-        form->setContent(std::move(content));
         getFormManager()->add(std::move(form));
         //SAFE_RELEASE(theme);
     }

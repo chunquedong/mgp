@@ -132,7 +132,7 @@ public:
      * @param listener The listener to add.
      * @param eventFlags The events to listen for.
      */
-    void addListener(Control::Listener* listener, int eventFlags);
+    void addListener(Control::Listener* listener, Listener::EventType eventFlags);
 
 protected:
 

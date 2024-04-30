@@ -142,7 +142,7 @@ unsigned int Slider::getValueTextPrecision() const
     return _valueTextPrecision;
 }
 
-void Slider::addListener(Control::Listener* listener, int eventFlags)
+void Slider::addListener(Control::Listener* listener, Listener::EventType eventFlags)
 {
     if ((eventFlags & Control::Listener::TEXT_CHANGED) == Control::Listener::TEXT_CHANGED)
     {

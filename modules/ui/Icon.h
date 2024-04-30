@@ -21,6 +21,8 @@ class Icon : public Control
 {
     friend class Control;
 
+    bool _checked = false;
+    bool _checkable = false;
 public:
 
     /**
@@ -31,6 +33,23 @@ public:
     void setImagePath(const char* path);
 
     const char* getImagePath();
+
+    bool isCheckable() { return _checkable; }
+    void setCheckable(bool c) { _checkable = c; }
+
+    /**
+     * Gets whether this checkbox is checked.
+     *
+     * @return Whether this checkbox is checked.
+     */
+    bool isChecked();
+
+    /**
+     * Sets whether the checkbox is checked.
+     *
+     * @param checked TRUE if the checkbox is checked; FALSE if the checkbox is not checked.
+     */
+    void setChecked(bool checked);
 
 protected:
 
@@ -45,6 +64,10 @@ protected:
     virtual unsigned int drawImages(Form* form, const Rectangle& clip, RenderInfo* view);
 
     void measureSize();
+
+    void controlEvent(Control::Listener::EventType evt);
+
+    virtual unsigned int drawBorder(Form* form, const Rectangle& clip, RenderInfo* view);
 protected:
     std::string _imagePath;
     ThemeImage* _image = NULL;

@@ -48,7 +48,7 @@ void RadioButton::setSelected(bool selected)
     }
 }
 
-void RadioButton::addListener(Control::Listener* listener, int eventFlags)
+void RadioButton::addListener(Control::Listener* listener, Listener::EventType eventFlags)
 {
     if ((eventFlags & Control::Listener::TEXT_CHANGED) == Control::Listener::TEXT_CHANGED)
     {

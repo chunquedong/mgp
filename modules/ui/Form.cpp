@@ -418,7 +418,6 @@ SPtr<Control> Form::handlePointerRelease(int* x, int* y, bool pressed, unsigned 
                 active->notifyListeners(Control::Listener::CLICK);
             }
         }
-
         //active->release();
     }
     else

@@ -55,7 +55,7 @@ void TextBox::onDeserialize(Serializer* serializer) {
     _inputMode = (InputMode)serializer->readEnum("inputMode", "mgp::TextBox::InputMode", TEXT);
 }
 
-void TextBox::addListener(Control::Listener* listener, int eventFlags)
+void TextBox::addListener(Control::Listener* listener, Listener::EventType eventFlags)
 {
     if ((eventFlags & Control::Listener::VALUE_CHANGED) == Control::Listener::VALUE_CHANGED)
     {

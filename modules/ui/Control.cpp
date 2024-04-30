@@ -23,6 +23,8 @@ Control::Control()
     GP_REGISTER_SCRIPT_EVENTS();
 #endif
     _className = "Control";
+    _desiredBounds.width = 1;
+    _desiredBounds.height = 1;
 }
 
 Control::~Control()
@@ -236,8 +238,8 @@ void Control::onSerialize(Serializer* serializer) {
 
     serializer->writeFloat("x", _desiredBounds.x, 0);
     serializer->writeFloat("y", _desiredBounds.y, 0);
-    serializer->writeFloat("width", _desiredBounds.width, 0);
-    serializer->writeFloat("height", _desiredBounds.height, 0);
+    serializer->writeFloat("width", _desiredBounds.width, 1);
+    serializer->writeFloat("height", _desiredBounds.height, 1);
 
     serializer->writeEnum("autoSizeX", "mgp::Control::AutoSize", _autoSizeX, AutoSize::AUTO_SIZE_NONE);
     serializer->writeEnum("autoSizeY", "mgp::Control::AutoSize", _autoSizeY, AutoSize::AUTO_SIZE_NONE);
@@ -276,8 +278,8 @@ void Control::onDeserialize(Serializer* serializer) {
 
     float x = serializer->readFloat("x", 0);
     float y = serializer->readFloat("y", 0);
-    float w = serializer->readFloat("width", 0);
-    float h = serializer->readFloat("height", 0);
+    float w = serializer->readFloat("width", 1);
+    float h = serializer->readFloat("height", 1);
 
     AutoSize autoSizeX = (AutoSize)serializer->readEnum("autoSizeX", "mgp::Control::AutoSize", AutoSize::AUTO_SIZE_NONE);
     AutoSize autoSizeY = (AutoSize)serializer->readEnum("autoSizeY", "mgp::Control::AutoSize", AutoSize::AUTO_SIZE_NONE);
@@ -458,6 +460,10 @@ void Control::setSize(float width, float height)
 const Rectangle& Control::getBounds() const
 {
     return _localBounds;
+}
+
+const Rectangle& Control::getDesiredBounds() const {
+    return _desiredBounds;
 }
 
 void Control::setBounds(const Rectangle& bounds)
@@ -801,16 +807,11 @@ void Control::setFocusIndex(int focusIndex)
     _focusIndex = focusIndex;
 }
 
-void Control::addListener(Control::Listener* listener, int eventFlags)
+void Control::addListener(Control::Listener* listener, Listener::EventType eventFlags)
 {
     GP_ASSERT(listener);
 
-    for (int i = 0; i < 32; ++i) {
-        uint32_t flag = 1U << i;
-        if (eventFlags & flag) {
-            addSpecificListener(listener, (Listener::EventType)flag);
-        }
-    }
+    addSpecificListener(listener, eventFlags);
 }
 
 void Control::setListener(std::function<void(Control* control, Control::Listener::EventType evt)> listener) {
@@ -1220,36 +1221,36 @@ unsigned int Control::drawText(Form* form, const Rectangle& position, RenderInfo
     return 0;
 }
 
-Control::State Control::getState(const char* state)
-{
-    if (!state)
-    {
-        return NORMAL;
-    }
-
-    if (strcmp(state, "NORMAL") == 0)
-    {
-        return NORMAL;
-    }
-    else if (strcmp(state, "ACTIVE") == 0)
-    {
-        return ACTIVE;
-    }
-    else if (strcmp(state, "FOCUS") == 0)
-    {
-        return FOCUS;
-    }
-    else if (strcmp(state, "DISABLED") == 0)
-    {
-        return DISABLED;
-    }
-    else if (strcmp(state, "HOVER") == 0)
-    {
-        return HOVER;
-    }
-
-    return NORMAL;
-}
+//Control::State Control::getState(const char* state)
+//{
+//    if (!state)
+//    {
+//        return NORMAL;
+//    }
+//
+//    if (strcmp(state, "NORMAL") == 0)
+//    {
+//        return NORMAL;
+//    }
+//    else if (strcmp(state, "ACTIVE") == 0)
+//    {
+//        return ACTIVE;
+//    }
+//    else if (strcmp(state, "FOCUS") == 0)
+//    {
+//        return FOCUS;
+//    }
+//    else if (strcmp(state, "DISABLED") == 0)
+//    {
+//        return DISABLED;
+//    }
+//    else if (strcmp(state, "HOVER") == 0)
+//    {
+//        return HOVER;
+//    }
+//
+//    return NORMAL;
+//}
 
 Container* Control::getParent() const
 {

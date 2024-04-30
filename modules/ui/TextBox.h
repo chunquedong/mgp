@@ -87,7 +87,7 @@ public:
      */
     InputMode getInputMode() const;
 
-    virtual void addListener(Control::Listener* listener, int eventFlags);
+    virtual void addListener(Control::Listener* listener, Listener::EventType eventFlags);
 
     /**
      * Update the text being edited.

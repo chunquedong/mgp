@@ -115,7 +115,7 @@ void JoystickControl::updateAbsoluteSizes()
                 std::min(_viewportClipBounds.width, _viewportClipBounds.height) * _radiusCoord : _radiusCoord);
 }
 
-void JoystickControl::addListener(Control::Listener* listener, int eventFlags)
+void JoystickControl::addListener(Control::Listener* listener, Listener::EventType eventFlags)
 {
     if ((eventFlags & Control::Listener::TEXT_CHANGED) == Control::Listener::TEXT_CHANGED)
     {

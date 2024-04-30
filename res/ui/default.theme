@@ -4,7 +4,7 @@ theme mainMenu
         color = #ffffffff
         textColor = #ffffffff
         font = sans.ttf
-        fontSize = 16
+        fontSize = 15
         opacity = 1.0
         textAlignment = ALIGN_VCENTER_LEFT
         disabledColor = #aaaaaaff
@@ -67,6 +67,28 @@ theme mainMenu
         focusColor = #88b5e5ff
         disabledColor = #ccccccff
         textAlignment = ALIGN_VCENTER_HCENTER
+    }
+
+    style Outline : Default
+    {
+        background
+        {
+            border
+            {
+                left = 18
+                right = 18
+                top = 0
+                bottom = 0
+            }
+            image = circle_outline.png
+        }
+        normalColor = #33b5e5ff
+        hoverColor = #66b5e5ff
+        activeColor = #88b5e5ff
+        focusColor = #88b5e5ff
+        disabledColor = #ccccccff
+        textAlignment = ALIGN_VCENTER_HCENTER
+        fontSize = 14
     }
 
     style TextBoxNormal : Default
@@ -148,6 +170,38 @@ theme mainMenu
 
     style Icon: Default
     {
+        background
+        {
+            border
+            {
+                left = 15
+                right = 15
+                top = 15
+                bottom = 15
+            }
+            image=outline.png
+        }
+        normalColor = #f9f9f9ff
+        hoverColor = #aaaaaaff
+        activeColor = #eeeeeeff
+        focusColor = #55eeeeff
+        disabledColor = #ccccccff
+        textColor = #000000ff
+    }
+
+    style Rect : Default
+    {
+        background
+        {
+            border
+            {
+                left = 1
+                right = 1
+                top = 1
+                bottom = 1
+            }
+            image = empty.png
+        }
         normalColor = #f9f9f9ff
         hoverColor = #aaaaaaff
         activeColor = #eeeeeeff

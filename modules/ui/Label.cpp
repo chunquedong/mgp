@@ -24,7 +24,7 @@ void Label::onDeserialize(Serializer* serializer) {
 }
 
 
-void Label::addListener(Control::Listener* listener, int eventFlags)
+void Label::addListener(Control::Listener* listener, Listener::EventType eventFlags)
 {
     if ((eventFlags & Control::Listener::TEXT_CHANGED) == Control::Listener::TEXT_CHANGED)
     {

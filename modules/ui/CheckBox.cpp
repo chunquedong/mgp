@@ -41,12 +41,12 @@ void CheckBox::setChecked(bool checked)
     }
 }
 
-void CheckBox::addListener(Control::Listener* listener, int eventFlags)
+void CheckBox::addListener(Control::Listener* listener, Listener::EventType eventFlags)
 {
     if ((eventFlags & Control::Listener::TEXT_CHANGED) == Control::Listener::TEXT_CHANGED)
     {
         GP_ERROR("TEXT_CHANGED event is not applicable to CheckBox.");
-        eventFlags &= ~Control::Listener::TEXT_CHANGED;
+        return;
     }
 
     Control::addListener(listener, eventFlags);
