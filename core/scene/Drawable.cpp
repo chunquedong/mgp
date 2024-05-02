@@ -10,7 +10,7 @@ void RenderInfo::draw(DrawCall* drawCall) {
 }
 
 Drawable::Drawable()
-    : _renderLayer(RenderLayer::Qpaque), _lightMask(0), _visiable(true), _pickMask(1), _highlightType(HighlightType::SharedColor)
+    : _renderLayer(RenderLayer::Qpaque), _lightMask(0), _visiable(true), _pickMask(1), _highlightType(HighlightType::Silhouette)
 {
 }
 
@@ -124,12 +124,42 @@ void mgp::DrawableGroup::update(float elapsedTime)
         d->update(elapsedTime);
     }
 }
+bool DrawableGroup::raycast(RayQuery& query) {
+    if (!isVisiable()) return Ray::INTERSECTS_NONE;
+    if ((_pickMask & query.pickMask) == 0) {
+        return Ray::INTERSECTS_NONE;
+    }
 
-bool mgp::DrawableGroup::doRaycast(RayQuery& query)
-{
+    if (_node) {
+        auto sphere = _node->getBoundingSphere();
+        if (sphere.intersectsQuery(query.ray) == Ray::INTERSECTS_NONE) {
+            return false;
+        }
+    }
+    Matrix matrix;
+    if (_node) {
+        matrix = _node->getWorldMatrix();
+        matrix.invert();
+    }
+
+    RayQuery localQuery = query;
+    localQuery.ray.transform(matrix);
+
     bool res = false;
     for (UPtr<Drawable>& d : _drawables) {
-        if (d->raycast(query)) res = true;
+        if (d->doRaycast(localQuery)) {
+            if (_node) {
+                _node->getWorldMatrix().transformPoint(&localQuery.target);
+            }
+            double distance = localQuery.target.distance(query.ray.getOrigin());
+            if (query.minDistance == Ray::INTERSECTS_NONE || distance < query.minDistance) {
+                query.minDistance = distance;
+                query.target = localQuery.target;
+                query.path.swap(localQuery.path);
+                query.drawable = this;
+            }
+            res = true;
+        }
     }
     return res;
 }

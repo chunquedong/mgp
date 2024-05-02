@@ -19,6 +19,8 @@ MeshBatch::MeshBatch(const VertexFormat& vertexFormat, Mesh::PrimitiveType primi
     }
     _mesh._indexBuffer._growSize = growSize * _mesh.getIndexSize();
     setCapacity(initialCapacity);
+
+    _highlightType = Drawable::SharedColor;
 }
 
 MeshBatch::~MeshBatch()

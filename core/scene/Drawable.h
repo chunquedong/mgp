@@ -136,7 +136,7 @@ public:
     HighlightType getHighlightType() { return _highlightType; }
     void setHighlightType(HighlightType v) { _highlightType = v; }
 
-    bool raycast(RayQuery& query);
+    virtual bool raycast(RayQuery& query);
     virtual bool doRaycast(RayQuery& query);
 
     virtual const BoundingSphere* getBoundingSphere() { return NULL; }
@@ -186,7 +186,8 @@ public:
 
     unsigned int draw(RenderInfo* view) override;
     virtual void update(float elapsedTime) override;
-    virtual bool doRaycast(RayQuery& query) override;
+    virtual bool raycast(RayQuery& query) override;
+    //virtual bool doRaycast(RayQuery& query) override;
     virtual const BoundingSphere* getBoundingSphere() override;
 
     virtual UPtr<Drawable> clone(NodeCloneContext& context);
