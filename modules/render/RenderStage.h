@@ -53,7 +53,7 @@ struct RenderPass : public RenderStage {
     /**
     * clear buffer before render
     */
-    int _clearBuffer = Renderer::CLEAR_COLOR_DEPTH_STENCIL;
+    int _clearBuffer = 0;// Renderer::CLEAR_COLOR_DEPTH_STENCIL;
     Vector4 _clearColor;
 
     /**

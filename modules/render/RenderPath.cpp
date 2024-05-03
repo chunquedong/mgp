@@ -86,6 +86,8 @@ void RenderPath::updateShadowMap(Scene* scene, Camera* camera) {
     _shadowMapCache.clear();
 
     _shadowMapCache.swap(curLights);
+
+    _renderer->setViewport(0, 0, _frameBuffer->getWidth(), _frameBuffer->getHeight());
 }
 
 void RenderPath::clearStages()
@@ -160,6 +162,7 @@ void RenderPath::initForward() {
     if (_use_prez) {
         RenderPass* p0 = new RenderPass();
         p0->_renderPath = this;
+        p0->_clearBuffer = 0;
         p0->_drawType = (int)Drawable::RenderLayer::Qpaque;
         p0->_material = Material::create("res/shaders/depth.vert", "res/shaders/null.frag");
         _renderStages.push_back(p0);
@@ -170,7 +173,7 @@ void RenderPath::initForward() {
     RenderPass* p1 = new RenderPass();
     p1->_renderPath = this;
     p1->_drawType = (int)Drawable::RenderLayer::Qpaque;
-    p1->_clearBuffer = _use_prez ? 0 : Renderer::CLEAR_COLOR_DEPTH_STENCIL;
+    p1->_clearBuffer = 0;
     p1->_clearColor = _clearColor;
     p1->_depthState = _use_prez ? 1 : 0;
     _renderStages.push_back(p1);
@@ -245,10 +248,17 @@ void RenderPath::render(Scene* scene, Camera* camera, Rectangle* viewport) {
     GP_ASSERT(viewport);
     GP_ASSERT(_frameBuffer);
 
-    _renderDataManager.fill(scene, camera, viewport);
-    if (_use_shadow) updateShadowMap(scene, camera);
+    if (!_blend) {
+        _renderer->clear(Renderer::CLEAR_DEPTH_STENCIL);
+    }
+    _previousFrameBuffer = _frameBuffer->bind();
+    _renderer->setViewport(0, 0, _frameBuffer->getWidth(), _frameBuffer->getHeight());
+    _renderer->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL);
 
-    resetViewport(viewport);
+    _renderDataManager.fill(scene, camera, viewport);
+    if (_use_shadow) {
+        updateShadowMap(scene, camera);
+    }
     _renderDataManager.sort();
 
 #if 0
@@ -264,11 +274,6 @@ void RenderPath::render(Scene* scene, Camera* camera, Rectangle* viewport) {
     _renderData.lights = &_renderDataManager._lights;
     //_renderData._renderer = _renderer;
     //_renderData._renderPath = this;
-    
-    if (!_blend) {
-        _renderer->clear(Renderer::CLEAR_DEPTH_STENCIL);
-    }
-    _previousFrameBuffer = _frameBuffer->bind();
 
     for (int i = 0; i < _renderStages.size(); ++i) {
         RenderStage* p = _renderStages[i];

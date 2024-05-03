@@ -466,7 +466,7 @@ void Material::copyFrom(const Material* src) {
     }
 
     // Clone our state block
-    material->_state.cloneInto(src->getStateBlock());
+    src->getStateBlock()->cloneInto(&material->_state);
 
     //_paramBinding.cloneInto(&material->_paramBinding, context);
 

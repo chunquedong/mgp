@@ -258,8 +258,9 @@ void Font::finish(RenderInfo* view)
         }
 
         // Finish any font batches that have been started
-        if (_batch->isStarted())
-            _batch->finish(view);
+        if (_batch->isStarted()) {
+            _batch->finish(_immediatelyDraw ? NULL : view);
+        }
     }
     _isStarted = false;
 }

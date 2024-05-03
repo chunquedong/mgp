@@ -170,8 +170,10 @@ public:
 
     int indexAtCoord(const wchar_t *text, unsigned int fontSize, bool clipToFloor, int textLen, int x);
 
+    bool isImmediatelyDraw() { return _immediatelyDraw; }
+    void setImmediatelyDraw(bool g) { _immediatelyDraw = g; }
 private:
-
+    bool _immediatelyDraw = false;
 
     /**
      * Constructor.

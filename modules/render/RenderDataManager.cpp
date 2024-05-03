@@ -153,7 +153,8 @@ void RenderDataManager::addInstanced(DrawCall* drawCall) {
 void RenderDataManager::fillDrawables(std::vector<Drawable*>& drawables, Camera *camera, Rectangle *viewport, bool viewFrustumCulling) {
     _camera = camera;
     _viewFrustumCulling = viewFrustumCulling;
-
+    _renderInfo.camera = camera;
+    _renderInfo.viewport = *viewport;
     clear();
     
     // Visit all the nodes in the scene for drawing
