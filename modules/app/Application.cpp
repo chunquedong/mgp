@@ -136,7 +136,6 @@ Application::Application()
     Toolkit::g_instance = this;
 
     regiseterSerializer();
-    setInputListener(this);
 
     _timeStart = System::millisTicks();
 
@@ -609,19 +608,18 @@ void Application::frame()
     }
 }
 
-void Application::keyEvent(Keyboard evt) {
+bool Application::keyEvent(Keyboard evt) {
     auto cameraCtrl = getView()->getCameraCtrl();
     if (cameraCtrl) {
-        cameraCtrl->keyEvent(evt);
+        return cameraCtrl->keyEvent(evt);
     }
+    return false;
 }
 
 bool Application::mouseEvent(Mouse evt) {
     auto cameraCtrl = getView()->getCameraCtrl();
     if (cameraCtrl) {
-        if (cameraCtrl->mouseEvent(evt)) return true;
-        cameraCtrl->touchEvent(evt);
-        return true;
+        return cameraCtrl->mouseEvent(evt);
     }
     return false;
 }
@@ -636,7 +634,11 @@ void Application::notifyKeyEvent(Keyboard evt)
     if (_forms->keyEventInternal(evt.evt, evt.key)) {
         return;
     }
-    if (_inputListener) _inputListener->keyEvent(evt);
+    if (_inputListener && _inputListener->keyEvent(evt))
+        return;
+
+    if (keyEvent(evt))
+        return;
 
     #if GP_SCRIPT_ENABLE
     if (_scriptTarget)
@@ -650,6 +652,9 @@ bool Application::notifyMouseEvent(Mouse evt)
         return true;
 
     if (_inputListener && _inputListener->mouseEvent(evt))
+        return true;
+
+    if (mouseEvent(evt))
         return true;
 
     #if GP_SCRIPT_ENABLE
@@ -669,7 +674,7 @@ void Application::notifyResizeEvent(unsigned int width, unsigned int height)
     }
 
     if (_initialized) {
-        if (_inputListener) _inputListener->resizeEvent(width, height);
+        this->resizeEvent(width, height);
 
 #if GP_SCRIPT_ENABLE
         if (_scriptTarget)

@@ -17,7 +17,7 @@ public:
      * @see Keyboard::KeyEvent
      * @see Keyboard::Key
      */
-    virtual void keyEvent(Keyboard key) {}
+    virtual bool keyEvent(Keyboard key) { return false; }
 
     /**
      * Mouse callback on mouse events. If the game does not consume the mouse move event or left mouse click event
@@ -34,26 +34,7 @@ public:
      */
     virtual bool mouseEvent(Mouse evt) { return false; }
     
-    /**
-     * Called when the game window has been resized.
-     *
-     * This method is called once the game window is created with its initial size
-     * and then again any time the game window changes size.
-     *
-     * @param width The new game window width.
-     * @param height The new game window height.
-     */
-    virtual void resizeEvent(unsigned int width, unsigned int height) {}
 
-
-    /**
-     * Gamepad callback on gamepad events.  Override to receive Gamepad::CONNECTED_EVENT 
-     * and Gamepad::DISCONNECTED_EVENT, and store the Gamepad* in order to poll it from update().
-     *
-     * @param evt The gamepad event that occurred.
-     * @param gamepad The gamepad that generated the event.
-     */
-    //virtual void gamepadEvent(Gamepad::GamepadEvent evt, Gamepad* gamepad);
 };
 }
 

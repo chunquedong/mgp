@@ -136,8 +136,9 @@ void EditorCameraCtrl::touchEvent(MotionEvent& evt)
     };
 }
 
-void EditorCameraCtrl::keyEvent(Keyboard evt)
+bool EditorCameraCtrl::keyEvent(Keyboard evt)
 {
+    return false;
 }
 
 bool EditorCameraCtrl::mouseEvent(Mouse evt)
@@ -160,5 +161,7 @@ bool EditorCameraCtrl::mouseEvent(Mouse evt)
         _camera->getNode()->translate(v);
         return true;
     }
-    return false;
+
+    touchEvent(evt);
+    return true;
 }

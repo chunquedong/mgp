@@ -169,7 +169,7 @@ void FPCameraCtrl::touchEvent(MotionEvent& evt)
     };
 }
 
-void FPCameraCtrl::keyEvent(Keyboard evt)
+bool FPCameraCtrl::keyEvent(Keyboard evt)
 {
     if (evt.evt == Keyboard::KEY_PRESS)
     {
@@ -204,7 +204,10 @@ void FPCameraCtrl::keyEvent(Keyboard evt)
         case Keyboard::KEY_ONE:
         case Keyboard::KEY_SPACE:
             break;
+        default:
+            return false;
         }
+        return true;
     }
     else if (evt.evt == Keyboard::KEY_RELEASE)
     {
@@ -228,8 +231,12 @@ void FPCameraCtrl::keyEvent(Keyboard evt)
         case Keyboard::KEY_E:
             _moveFlags &= ~MOVE_UP;
             break;
+        default:
+            return false;
         }
+        return true;
     }
+    return false;
 }
 
 bool FPCameraCtrl::mouseEvent(Mouse evt)
@@ -240,5 +247,6 @@ bool FPCameraCtrl::mouseEvent(Mouse evt)
         this->moveForward(evt.wheelDelta * MOVE_SPEED / 4.0f);
         return true;
     }
-    return false;
+    touchEvent(evt);
+    return true;
 }

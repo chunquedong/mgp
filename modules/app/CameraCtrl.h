@@ -19,11 +19,11 @@ public:
     
     virtual void update(float elapsedTime) {}
 
-    virtual void touchEvent(MotionEvent& evt) {}
+    //virtual void touchEvent(MotionEvent& evt) {}
 
-    virtual void keyEvent(Keyboard evt) {}
+    virtual bool keyEvent(Keyboard evt) override { return false; }
 
-    virtual bool mouseEvent(Mouse evt) { return false; }
+    virtual bool mouseEvent(Mouse evt) override { return false; }
 };
 
 class SceneView;
@@ -54,7 +54,7 @@ public:
 
     void touchEvent(MotionEvent& evt);
 
-    void keyEvent(Keyboard evt);
+    bool keyEvent(Keyboard evt);
 
     bool mouseEvent(Mouse evt);
 

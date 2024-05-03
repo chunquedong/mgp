@@ -174,7 +174,7 @@ void RenderPath::initForward() {
     p1->_renderPath = this;
     p1->_drawType = (int)Drawable::RenderLayer::Qpaque;
     p1->_clearBuffer = 0;
-    p1->_clearColor = _clearColor;
+    //p1->_clearColor = _clearColor;
     p1->_depthState = _use_prez ? 1 : 0;
     _renderStages.push_back(p1);
 
@@ -253,7 +253,7 @@ void RenderPath::render(Scene* scene, Camera* camera, Rectangle* viewport) {
     }
     _previousFrameBuffer = _frameBuffer->bind();
     _renderer->setViewport(0, 0, _frameBuffer->getWidth(), _frameBuffer->getHeight());
-    _renderer->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL);
+    _renderer->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL, _clearColor);
 
     _renderDataManager.fill(scene, camera, viewport);
     if (_use_shadow) {
@@ -301,7 +301,7 @@ void RenderPath::renderDrawables(std::vector<Drawable*>& drawables, Camera* came
 
     _previousFrameBuffer = _frameBuffer->bind();
     _renderer->setViewport(0, 0, _frameBuffer->getWidth(), _frameBuffer->getHeight());
-    _renderer->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL);
+    _renderer->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL, _clearColor);
 
     _renderDataManager.fillDrawables(drawables, camera, viewport);
     //if (_use_shadow) updateShadowMap(scene, camera);

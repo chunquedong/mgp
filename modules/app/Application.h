@@ -43,7 +43,7 @@ class Font;
  *
  * @see http://gameplay3d.github.io/GamePlay/docs/file-formats.html#wiki-Game_Config
  */
-class Application : public Toolkit, public InputListener
+class Application : public Toolkit
 {
     friend class Platform;
     //friend class Gamepad;
@@ -201,7 +201,7 @@ protected:
      * @see Keyboard::KeyEvent
      * @see Keyboard::Key
      */
-    virtual void keyEvent(Keyboard evt);
+    virtual bool keyEvent(Keyboard evt);
 
     /**
      * Mouse callback on mouse events. If the game does not consume the mouse move event or left mouse click event

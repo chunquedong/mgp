@@ -93,7 +93,7 @@ public:
 
     void touchEvent(MotionEvent& evt);
 
-    void keyEvent(Keyboard evt);
+    bool keyEvent(Keyboard evt);
 
     bool mouseEvent(Mouse evt);
 private:
