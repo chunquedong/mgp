@@ -299,10 +299,12 @@ void RenderPath::renderDrawables(std::vector<Drawable*>& drawables, Camera* came
     GP_ASSERT(viewport);
     GP_ASSERT(_frameBuffer);
 
+    _previousFrameBuffer = _frameBuffer->bind();
+    _renderer->setViewport(0, 0, _frameBuffer->getWidth(), _frameBuffer->getHeight());
+    _renderer->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL);
+
     _renderDataManager.fillDrawables(drawables, camera, viewport);
     //if (_use_shadow) updateShadowMap(scene, camera);
-
-    resetViewport(viewport);
     _renderDataManager.sort();
 
     _renderData.camera = camera;
@@ -313,7 +315,7 @@ void RenderPath::renderDrawables(std::vector<Drawable*>& drawables, Camera* came
     //_renderData._renderPath = this;
 
     //_renderer->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0);
-    _previousFrameBuffer = _frameBuffer->bind();
+    //_previousFrameBuffer = _frameBuffer->bind();
 
     for (int i = 0; i < _renderStages.size(); ++i) {
         RenderStage* p = _renderStages[i];
