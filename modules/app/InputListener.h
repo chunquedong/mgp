@@ -34,7 +34,8 @@ public:
      */
     virtual bool mouseEvent(Mouse evt) { return false; }
     
-
+    virtual void onSetup() {}
+    virtual void onTeardown() {}
 };
 }
 

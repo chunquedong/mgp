@@ -40,30 +40,14 @@ Node::Node(const char* id)
 
 Node::~Node()
 {
-    if (getDrawable())
-        getDrawable()->setNode(NULL);
-    //if (getAudioSource())
-    //    getAudioSource()->setNode(NULL);
-
-    //SAFE_RELEASE(_userObject);
     SAFE_DELETE(_tags);
     //setAgent(NULL);
 
-    /*for (Component *com : _components) {
+    for (auto& com : _components) {
         com->setNode(NULL);
-        Refable*ref = dynamic_cast<Refable*>(com);
-        if (ref) {
-            SAFE_RELEASE(ref);
-        } else {
-            SAFE_DELETE(com);
-        }
-    }*/
+    }
     _components.clear();
 
-    /*for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
-        child->_parent = NULL;
-        child->remove();
-    }*/
     while (_firstChild.get())
     {
         removeChild(_firstChild.get());

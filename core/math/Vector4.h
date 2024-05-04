@@ -83,6 +83,11 @@ public:
      * @return A vector corresponding to the interpreted RGBA color.
      */
     static Vector4 fromColor(uint32_t color);
+    static Vector4 fromRgba(Float r, Float g, Float b, Float a = 1.0) { return Vector4(r, g, b, a); }
+    Float r() { return x; }
+    Float g() { return y; }
+    Float b() { return z; }
+    Float a() { return w; }
 
     /**
      * Creates a new vector from a hex formatted string interpreted as an RGBA value.

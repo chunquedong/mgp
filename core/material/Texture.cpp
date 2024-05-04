@@ -22,6 +22,7 @@ public:
 };
 
 static std::vector<Texture*> __textureCache;
+static std::mutex __textureCacheMutex;
 
 Texture::Texture() : _handle(0), _format(Image::UNKNOWN), _type((Texture::Type)0), _width(0), _height(0), _arrayDepth(0), _mipmapped(false), _cached(false), _compressed(false),
     _wrapS(Texture::REPEAT), _wrapT(Texture::REPEAT), _wrapR(Texture::REPEAT), _minFilter(Texture::NEAREST), _magFilter(Texture::LINEAR),
@@ -38,6 +39,8 @@ Texture::~Texture()
     // Remove ourself from the texture cache.
     if (_cached)
     {
+        std::lock_guard<std::mutex> guard(__textureCacheMutex);
+
         std::vector<Texture*>::iterator itr = std::find(__textureCache.begin(), __textureCache.end(), this);
         if (itr != __textureCache.end())
         {
@@ -66,24 +69,27 @@ UPtr<Texture> Texture::create(const char* path, bool generateMipmaps)
 {
     GP_ASSERT( path );
 
-    // Search texture cache first.
-    for (size_t i = 0, count = __textureCache.size(); i < count; ++i)
-    {
-        Texture* t = __textureCache[i];
-        GP_ASSERT( t );
-        if (t->_path == path)
+    if (true) {
+        std::lock_guard<std::mutex> guard(__textureCacheMutex);
+        // Search texture cache first.
+        for (size_t i = 0, count = __textureCache.size(); i < count; ++i)
         {
-            // If 'generateMipmaps' is true, call Texture::generateMipamps() to force the
-            // texture to generate its mipmap chain if it hasn't already done so.
-            if (generateMipmaps)
+            Texture* t = __textureCache[i];
+            GP_ASSERT(t);
+            if (t->_path == path)
             {
-                t->_mipmapped = true;
+                // If 'generateMipmaps' is true, call Texture::generateMipamps() to force the
+                // texture to generate its mipmap chain if it hasn't already done so.
+                if (generateMipmaps)
+                {
+                    t->_mipmapped = true;
+                }
+
+                // Found a match.
+                t->addRef();
+
+                return UPtr<Texture>(t);
             }
-
-            // Found a match.
-            t->addRef();
-
-            return UPtr<Texture>(t);
         }
     }
 
@@ -131,6 +137,7 @@ UPtr<Texture> Texture::create(const char* path, bool generateMipmaps)
         texture->_path = path;
         texture->_cached = true;
 
+        std::lock_guard<std::mutex> guard(__textureCacheMutex);
         // Add to texture cache.
         __textureCache.push_back(texture.get());
 

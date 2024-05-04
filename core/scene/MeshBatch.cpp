@@ -131,10 +131,15 @@ void MeshBatch::finish()
 
 void MeshBatch::draw(RenderInfo* view, Drawable *drawable)
 {
+    if (_batchIndex.size() == 0)
+        return;
     _mesh.draw(view, drawable, _material.get(), NULL, 0);
 }
 
 unsigned int MeshBatch::draw(RenderInfo* view) {
+    if (_batchIndex.size() == 0)
+        return 0;
+
     if (_highlightMaterial.get() && _mesh.getPartCount() > 1) {
         std::vector<Material*> partMaterials(_mesh.getPartCount());
         partMaterials[0] = _material.get();

@@ -375,6 +375,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
     mgp::MotionEvent evt;
     evt.type = mgp::MotionEvent::wheel;
+    evt.button = mgp::MotionEvent::Button::middle;
     evt.x = x;
     evt.y = y;
 

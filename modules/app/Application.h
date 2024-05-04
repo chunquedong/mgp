@@ -266,9 +266,9 @@ protected:
 public:
     std::vector<SceneView*> &getSceneViews() { return _sceneViews; }
 
-    void setInputListener(InputListener *t) {
-        _inputListener = t;
-    }
+    void setInputListener(InputListener* t);
+
+    InputListener* getInputListener() { return _inputListener; }
 
     SceneView* getView(int i = 0) { return _sceneViews[i]; }
 
@@ -344,6 +344,7 @@ protected:
 
 private:
     EventTimer* _eventTimer;
+protected:
     InputListener* _inputListener;
 protected:
     FormManager* _forms;

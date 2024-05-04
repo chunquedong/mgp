@@ -690,6 +690,19 @@ void Application::ShutdownListener::timeEvent(int64_t timeDiff, void* cookie)
 	Application::getInstance()->shutdown();
 }
 
+void Application::setInputListener(InputListener* t) {
+    if (_inputListener != t) {
+        if (_inputListener) {
+            _inputListener->onTeardown();
+        }
+
+        _inputListener = t;
+
+        if (_inputListener) {
+            _inputListener->onSetup();
+        }
+    }
+}
 
 }
 
