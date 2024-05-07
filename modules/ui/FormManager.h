@@ -31,6 +31,8 @@ public:
 
     void add(UPtr<Form> f);
 
+    void remove(Form* form);
+
     void finalize();
 
     /**

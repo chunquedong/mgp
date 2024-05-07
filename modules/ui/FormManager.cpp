@@ -31,10 +31,22 @@ void FormManager::add(UPtr<Form> f) {
     __forms.push_back(f.take());
 }
 
+void FormManager::remove(Form* form_) {
+    for (int i = 0; i < __forms.size(); ++i) {
+        Form* form = __forms[i];
+        if (form == form_) {
+            __forms.erase(__forms.begin() + i);
+            break;
+        }
+    }
+    form_->release();
+}
+
 unsigned int FormManager::draw(RenderInfo* view) {
     int n = 0;
     for (int i = 0; i < __forms.size(); ++i) {
         Form* form = __forms[i];
+        if (!form->isVisiable()) continue;
         n += form->draw(view);
     }
     return n;
@@ -49,6 +61,7 @@ void FormManager::updateInternal(float elapsedTime)
         Form* form = __forms[i];
         if (form)
         {
+            if (!form->isVisiable()) continue;
             form->update(elapsedTime);
         }
     }
@@ -88,6 +101,7 @@ bool FormManager::mouseEventInternal(MotionEvent& evt)
         Form* form = __forms[i];
         if (form)
         {
+            if (!form->isVisiable()) continue;
             if (form->pointerEventInternal(true, evt.type, x, y, evt.wheelDelta, evt.contactIndex, evt.button)) {
                 return true;
             }
