@@ -42,7 +42,7 @@ GLFrameBuffer::~GLFrameBuffer()
         GL_ASSERT( glDeleteFramebuffers(1, &_handle) );
 
     if (this == _currentFrameBuffer) {
-        if (_defaultFrameBuffer) {
+        if (_defaultFrameBuffer && glIsFramebuffer(_defaultFrameBuffer->_handle)) {
             GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, _defaultFrameBuffer->_handle));
         }
         _currentFrameBuffer = _defaultFrameBuffer;
