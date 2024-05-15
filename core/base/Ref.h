@@ -88,7 +88,7 @@ protected:
      * 
      * @param copy The Refable object to copy.
      */
-    Refable(const Refable& copy);
+    //Refable(const Refable& copy);
 
     /**
      * Destructor.
@@ -101,6 +101,7 @@ private:
 #else
     std::atomic<unsigned int> _refCount;
 #endif
+    bool _isUnique;
     WeakRefBlock* _weakRefBlock;
 
     // Memory leak diagnostic data (only included when GP_USE_MEM_LEAK_DETECTION is defined)

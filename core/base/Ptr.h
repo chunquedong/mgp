@@ -42,6 +42,9 @@ typename std::enable_if<!std::is_base_of<Refable, U>::value, void>::type doFree(
     delete p;
 }
 
+template<typename T>
+class SharedPtr;
+
 template<typename T, bool nullable = false>
 class UniquePtr {
     T* pointer;
@@ -152,6 +155,12 @@ public:
     {
         UniquePtr<U> copy(dynamic_cast<U*>(take()));
         return copy;
+    }
+
+    SharedPtr<T> share() {
+        SharedPtr<T> sptr;
+        sptr = get();
+        return sptr;
     }
 };
 

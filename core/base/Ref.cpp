@@ -12,24 +12,27 @@ void untrackRef(Refable* ref);
 #endif
 
 Refable::Refable() :
-    _refCount(1), _weakRefBlock(NULL)
+    _refCount(1), _isUnique(true), _weakRefBlock(NULL)
 {
 #ifdef GP_USE_REF_TRACE
     trackRef(this);
 #endif
 }
 
-Refable::Refable(const Refable& copy) :
-    _refCount(1)
-{
-#ifdef GP_USE_REF_TRACE
-    trackRef(this);
-#endif
-}
+//Refable::Refable(const Refable& copy) :
+//    _refCount(1)
+//{
+//#ifdef GP_USE_REF_TRACE
+//    trackRef(this);
+//#endif
+//}
 
 Refable::~Refable()
 {
-    GP_ASSERT(_refCount == 0);
+    if (!_isUnique) {
+        GP_ASSERT(_refCount == 0);
+    }
+
     _refCount = 1000000;
 #ifdef GP_USE_REF_TRACE
     untrackRef(this);
@@ -38,12 +41,18 @@ Refable::~Refable()
 
 void Refable::addRef()
 {
+    _isUnique = false;
     GP_ASSERT(_refCount > 0 && _refCount < 1000000);
     ++_refCount;
 }
 
 void Refable::release()
 {
+    if (_isUnique) {
+        delete this;
+        return;
+    }
+
     GP_ASSERT(_refCount > 0 && _refCount < 1000000);
     if ((--_refCount) <= 0)
     {
