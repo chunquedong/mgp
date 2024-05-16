@@ -176,6 +176,7 @@ public:
     const BoundingSphere* getBoundingSphere() override;
 
     void addMesh(UPtr<Mesh> mesh);
+    void clearMesh() { _meshParts.clear(); };
 public:
     /**
      * Constructor.
@@ -216,7 +217,7 @@ public:
     //void setMaterialNodeBinding(Material *m);
 private:
     void validatePartCount();
-private:
+protected:
     std::vector<UPtr<Mesh> > _meshParts;
     UPtr<Material> _material;
     std::vector<UPtr<Material> > _partMaterials;

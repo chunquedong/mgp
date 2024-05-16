@@ -191,11 +191,16 @@ public:
      * @param primitiveType The type of primitive data to connect the indices as.
      * @param indexFormat The format of the indices. SHORT or INT.
      * @param indexCount The number of indices to be contained in the part.
-     * @param dynamic true if the index data is dynamic; false otherwise.
-     * 
-     * @return The newly created/added mesh part.
      */
     void setIndex(PrimitiveType primitiveType, unsigned int indexCount, unsigned int bufferOffset = 0);
+
+    /**
+    * Creates a mesh that shared buffer with this mesh
+    * 
+    * @param primitiveType The type of primitive data to connect the indices as.
+    * @param indexFormat The format of the indices. SHORT or INT.
+    * @param indexCount The number of indices to be contained in the part.
+    */
     UPtr<Mesh> createMeshPart(PrimitiveType primitiveType, unsigned int indexCount, unsigned int bufferOffset = 0);
 
     /**
@@ -303,15 +308,17 @@ public:
 
     bool isVisiable() { return _visiable; }
     void setVisiable(bool b) { _visiable = b; }
+
+    void setVertexBuffer(SPtr<RenderBuffer> b) { _vertexBuffer = b; }
+    void setIndexBuffer(SPtr<RenderBuffer> b) { _indexBuffer = b; }
 public:
     template<typename T> bool raycastPart(RayQuery& query, int _bufferOffset, int _indexCount, int partIndex, PrimitiveType _primitiveType);
-
 
     /**
      * Constructor.
      */
     Mesh();
-private:
+protected:
     /**
      * Constructor.
      */

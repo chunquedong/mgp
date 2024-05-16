@@ -77,6 +77,8 @@ int RenderBuffer::addData(char* data, int size) {
     return offset;
 }
 
+
+
 Mesh::Mesh() :
     _vertexBuffer(new RenderBuffer()), _indexBuffer(new RenderBuffer())
 {
