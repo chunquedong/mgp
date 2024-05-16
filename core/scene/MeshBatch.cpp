@@ -6,18 +6,19 @@ namespace mgp
 {
 
 MeshBatch::MeshBatch(const VertexFormat& vertexFormat, Mesh::PrimitiveType primitiveType, UPtr<Material> material, Mesh::IndexFormat indexFormat, unsigned int initialCapacity, unsigned int growSize)
-    : _material(std::move(material)), _mesh(vertexFormat), _started(false)
+    : _material(std::move(material)), _started(false)
 {
+    _mesh._vertexFormat = vertexFormat;
     _mesh._indexFormat = indexFormat;
     _mesh._dynamic = true;
     _mesh.setPrimitiveType(primitiveType);
     if (vertexFormat.getVertexSize()) {
-        _mesh._vertexBuffer._growSize = growSize * vertexFormat.getVertexSize();
+        _mesh._vertexBuffer->_growSize = growSize * vertexFormat.getVertexSize();
     }
     else {
-        _mesh._vertexBuffer._growSize = growSize;
+        _mesh._vertexBuffer->_growSize = growSize;
     }
-    _mesh._indexBuffer._growSize = growSize * _mesh.getIndexSize();
+    _mesh._indexBuffer->_growSize = growSize * _mesh.getIndexSize();
     setCapacity(initialCapacity);
 
     _highlightType = Drawable::SharedColor;
@@ -116,6 +117,7 @@ void MeshBatch::start()
     _mesh.clearData();
     _started = true;
     _batchIndex.clear();
+    _highlightMesh.clear();
 }
 
 bool MeshBatch::isStarted() const
@@ -133,24 +135,21 @@ void MeshBatch::draw(RenderInfo* view, Drawable *drawable)
 {
     if (_batchIndex.size() == 0)
         return;
-    _mesh.draw(view, drawable, _material.get(), NULL, 0);
+    _mesh.draw(view, drawable, _material.get());
+
+    if (_highlightMesh.get())
+        _highlightMesh->draw(view, drawable, _highlightMaterial.get());
 }
 
 unsigned int MeshBatch::draw(RenderInfo* view) {
     if (_batchIndex.size() == 0)
         return 0;
+    int rc = _mesh.draw(view, this, _material.get());
 
-    if (_highlightMaterial.get() && _mesh.getPartCount() > 1) {
-        std::vector<Material*> partMaterials(_mesh.getPartCount());
-        partMaterials[0] = _material.get();
-        for (int i = 1; i < _mesh.getPartCount(); ++i) {
-            partMaterials[i] = _highlightMaterial.get();
-        }
-        return _mesh.draw(view, this, _material.get(), partMaterials.data(), _mesh.getPartCount());
-    }
-    else {
-        return _mesh.draw(view, this, _material.get(), NULL, 0);
-    }
+    if (_highlightMesh.get())
+        _highlightMesh->draw(view, this, _highlightMaterial.get());
+
+    return rc;
 }
 
 bool MeshBatch::doRaycast(RayQuery& query) {

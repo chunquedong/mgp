@@ -10,19 +10,20 @@
 #include "math/BoundingSphere.h"
 #include "Drawable.h"
 #include "base/Resource.h"
+#include "material/VertexAttributeBinding.h"
 
 namespace mgp
 {
 
 class Material;
 class Model;
-class VertexAttributeBinding;
+//class VertexAttributeBinding;
 class RenderInfo;
 class Drawable;
 
 typedef uint64_t BufferHandle;
 
-struct RenderBuffer {
+struct RenderBuffer : public Refable {
     BufferHandle _bufferHandle = 0;
     char* _data = NULL;
     int _dataSize = 0;
@@ -45,8 +46,7 @@ struct RenderBuffer {
 };
 
 /**
- * Defines a mesh supporting various vertex formats and 1 or more
- * MeshPart(s) to define how the vertices are connected.
+ * Defines a mesh supporting various vertex formats and define how the vertices are connected.
  */
 class Mesh : public Resource
 {
@@ -79,13 +79,6 @@ public:
         POINTS = 0x0000,
         TRIANGLE_FAN = 0x0006,
         LINE_LOOP = 0x0007,
-    };
-
-    struct MeshPart {
-        Mesh::PrimitiveType _primitiveType;
-        int _indexCount = 0;
-        int _bufferOffset = 0;
-        bool _visiable = true;
     };
 
     /**
@@ -202,23 +195,8 @@ public:
      * 
      * @return The newly created/added mesh part.
      */
-    MeshPart* addPart(PrimitiveType primitiveType, unsigned int indexCount, unsigned int bufferOffset = 0);
-
-    /**
-     * Gets the number of mesh parts contained within the mesh.
-     *
-     * @return The number of mesh parts contained within the mesh.
-     */
-    unsigned int getPartCount();
-
-    /**
-     * Gets a MeshPart by index.
-     * 
-     * @param index The index of the MeshPart to get.
-     * 
-     * @return The MeshPart at the specified index.
-     */
-    MeshPart* getPart(unsigned int index);
+    void setIndex(PrimitiveType primitiveType, unsigned int indexCount, unsigned int bufferOffset = 0);
+    UPtr<Mesh> createMeshPart(PrimitiveType primitiveType, unsigned int indexCount, unsigned int bufferOffset = 0);
 
     /**
      * Returns the bounding box for the points in this mesh.
@@ -286,7 +264,7 @@ public:
     void write(Stream* file);
     bool read(Stream* file);
 
-    unsigned int draw(RenderInfo* view, Drawable* drawable, Material* _material, Material** _partMaterials, int partMaterialCount);
+    unsigned int draw(RenderInfo* view, Drawable* drawable, Material* _material);
 
     /**
     * Return the intersection point distance to ray origin.
@@ -319,35 +297,34 @@ public:
 
     void clearData();
 
-
-    std::vector<MeshPart>& getParts() { return _parts; }
-
     void setVertexFormatDirty();
 
+    int getPartIndex() { return _partIndex; }
+
+    bool isVisiable() { return _visiable; }
+    void setVisiable(bool b) { _visiable = b; }
 public:
     template<typename T> bool raycastPart(RayQuery& query, int _bufferOffset, int _indexCount, int partIndex, PrimitiveType _primitiveType);
 
+
+    /**
+     * Constructor.
+     */
+    Mesh();
 private:
     /**
      * Constructor.
      */
-    Mesh(const VertexFormat& vertexFormat);
-
-    /**
-     * Constructor.
-     */
-    //Mesh(const Mesh& copy);
+    Mesh(const Mesh& copy) = delete;
 
     /**
      * Hidden copy assignment operator.
      */
-    Mesh& operator=(const Mesh&);
+    Mesh& operator=(const Mesh&) = delete;
 
     void computeBounds();
 
     std::string _url;
-
-    std::vector<MeshPart> _parts;
     
     BoundingBox _boundingBox;
     BoundingSphere _boundingSphere;
@@ -357,14 +334,21 @@ private:
     bool _dynamic = false;
 
     //vertices
-    RenderBuffer _vertexBuffer;
+    SPtr<RenderBuffer> _vertexBuffer;
     unsigned int _vertexCount = 0;
 
     //indices
-    RenderBuffer _indexBuffer;
+    SPtr<RenderBuffer> _indexBuffer;
     Mesh::IndexFormat _indexFormat = INDEX16;
+    int _indexCount = 0;
+    int _bufferOffset = 0;
+    bool _isIndexed = false;
 
-    VertexAttributeBinding *_vertexAttributeArray = NULL;
+    //index in parent
+    int _partIndex = 0;
+    bool _visiable = true;
+
+    SPtr<VertexAttributeBinding> _vertexAttributeArray;
     bool _dirtyVertexFormat = false;
 };
 
@@ -376,8 +360,8 @@ template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset, 
     int minTriangle = -1;
     Vector3 curTarget;
 
-    T* indices = (T*)((char*)this->_indexBuffer._data + _bufferOffset);
-    char* verteix = (char*)_vertexBuffer._data;
+    T* indices = (T*)((char*)this->_indexBuffer->_data + _bufferOffset);
+    char* verteix = (char*)_vertexBuffer->_data;
     const VertexFormat::Element* positionElement = _vertexFormat.getPositionElement();
     if (!positionElement || positionElement->size != 3) return false;
     int count = _indexCount;

@@ -208,7 +208,7 @@ UPtr<Mesh> MeshFactory::createCube(float size)
     }
     mesh->setId("Cube");
     mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
-    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->setIndex(Mesh::TRIANGLES, indexCount);
     mesh->getIndexBuffer()->setData((char*)indices, sizeof(indices));
     return mesh;
 }
@@ -261,7 +261,7 @@ UPtr<Mesh> MeshFactory::createCube2(float size)
     }
     mesh->setId("Cube2");
     mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
-    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->setIndex(Mesh::TRIANGLES, indexCount);
     mesh->getIndexBuffer()->setData((char*)indices, sizeof(indices));
     return mesh;
 }
@@ -319,7 +319,7 @@ UPtr<Mesh> MeshFactory::createTorus(int radial_resolution, int tubular_resolutio
         return UPtr<Mesh>(NULL);
     }
     mesh->getVertexBuffer()->setData((char*)vertices.data(), vertexCount * 3 * sizeof(float));
-    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->setIndex(Mesh::TRIANGLES, indexCount);
     mesh->getIndexBuffer()->setData((char*)indices.data(), indices.size() * sizeof(uint16_t));
 
     return mesh;
@@ -452,7 +452,7 @@ UPtr<Mesh> MeshFactory::createSpherical(int subdivision) {
         return UPtr<Mesh>(NULL);
     }
     mesh->getVertexBuffer()->setData((char*)_vertices, vertexCount*6*sizeof(float));
-    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->setIndex(Mesh::TRIANGLES, indexCount);
     mesh->getIndexBuffer()->setData((char*)indices.data(), indices.size()*sizeof(uint16_t));
 
     SAFE_DELETE_ARRAY(_vertices);
@@ -525,7 +525,7 @@ UPtr<Mesh> MeshFactory::createCone(float radius, float height) {
         return UPtr<Mesh>(NULL);
     }
     mesh->getVertexBuffer()->setData((char*)vertices.data(), vertexCount * 3 * sizeof(float));
-    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->setIndex(Mesh::TRIANGLES, indexCount);
     mesh->getIndexBuffer()->setData((char*)indices.data(), indices.size() * sizeof(uint16_t));
 
     return mesh;
@@ -605,7 +605,7 @@ UPtr<Mesh> MeshFactory::createCylinder(float radius, float height) {
         return UPtr<Mesh>(NULL);
     }
     mesh->getVertexBuffer()->setData((char*)vertices.data(), vertexCount * 3 * sizeof(float));
-    Mesh::MeshPart* meshPart = mesh->addPart(Mesh::TRIANGLES, indexCount);
+    mesh->setIndex(Mesh::TRIANGLES, indexCount);
     mesh->getIndexBuffer()->setData((char*)indices.data(), indices.size() * sizeof(uint16_t));
 
     return mesh;

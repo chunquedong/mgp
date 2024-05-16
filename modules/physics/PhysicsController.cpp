@@ -1093,22 +1093,7 @@ PhysicsCollisionShape* PhysicsController::createMesh(Mesh* mesh, const Vector3& 
         // Static meshes use btBvhTriangleMeshShape and therefore only support triangle mesh shapes.
         // Dynamic meshes are approximated with a btConvexHullShape (convex wrapper on cloud of vertices)
         // and therefore can support any primitive type.
-        bool triMesh = true;
-        if (mesh->getPartCount() > 0)
-        {
-            for (unsigned int i = 0; i < mesh->getPartCount(); ++i)
-            {
-                if (mesh->getPart(i)->_primitiveType != Mesh::TRIANGLES)
-                {
-                    triMesh = false;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            triMesh = mesh->getPrimitiveType() == Mesh::TRIANGLES;
-        }
+        bool triMesh = mesh->getPrimitiveType() == Mesh::TRIANGLES;
 
         if (!triMesh)
         {
@@ -1218,29 +1203,21 @@ PhysicsCollisionShape* PhysicsController::createMesh(Mesh* mesh, const Vector3& 
             shapeMeshData->indexData = (unsigned char*)indexData;
         }
 
-        size_t partCount = mesh->getPartCount();
-        if (partCount > 0)
+        if (mesh->isIndexed())
         {
-            Mesh::MeshPart* meshPart = NULL;
-            for (size_t i = 0; i < partCount; i++)
-            {
-                meshPart = mesh->getPart(i);
-                GP_ASSERT(meshPart);
+            // Create a btIndexedMesh object for the current mesh part.
+            btIndexedMesh indexedMesh;
+            indexedMesh.m_indexType = indexType;
+            indexedMesh.m_numTriangles = mesh->getIndexCount() / 3; // assume TRIANGLES primitive type
+            indexedMesh.m_numVertices = mesh->getIndexCount();
+            indexedMesh.m_triangleIndexBase = (const unsigned char*)shapeMeshData->indexData + mesh->_bufferOffset;
+            indexedMesh.m_triangleIndexStride = indexStride*3;
+            indexedMesh.m_vertexBase = (const unsigned char*)shapeMeshData->vertexData;
+            indexedMesh.m_vertexStride = sizeof(float)*3;
+            indexedMesh.m_vertexType = PHY_FLOAT;
 
-                // Create a btIndexedMesh object for the current mesh part.
-                btIndexedMesh indexedMesh;
-                indexedMesh.m_indexType = indexType;
-                indexedMesh.m_numTriangles = meshPart->_indexCount / 3; // assume TRIANGLES primitive type
-                indexedMesh.m_numVertices = meshPart->_indexCount;
-                indexedMesh.m_triangleIndexBase = (const unsigned char*)shapeMeshData->indexData + meshPart->_bufferOffset;
-                indexedMesh.m_triangleIndexStride = indexStride*3;
-                indexedMesh.m_vertexBase = (const unsigned char*)shapeMeshData->vertexData;
-                indexedMesh.m_vertexStride = sizeof(float)*3;
-                indexedMesh.m_vertexType = PHY_FLOAT;
-
-                // Add the indexed mesh data to the mesh interface.
-                meshInterface->addIndexedMesh(indexedMesh, indexType);
-            }
+            // Add the indexed mesh data to the mesh interface.
+            meshInterface->addIndexedMesh(indexedMesh, indexType);
         }
         else
         {

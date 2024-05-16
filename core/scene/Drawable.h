@@ -176,27 +176,6 @@ protected:
     HighlightType _highlightType;
 };
 
-class DrawableGroup : public Drawable, public Serializable {
-    std::vector<UPtr<Drawable> > _drawables;
-    BoundingSphere _bounds;
-public:
-    DrawableGroup();
-    ~DrawableGroup();
-    std::vector<UPtr<Drawable> >& getDrawables() { return _drawables; }
-
-    unsigned int draw(RenderInfo* view) override;
-    virtual void update(float elapsedTime) override;
-    virtual bool raycast(RayQuery& query) override;
-    //virtual bool doRaycast(RayQuery& query) override;
-    virtual const BoundingSphere* getBoundingSphere() override;
-
-    virtual UPtr<Drawable> clone(NodeCloneContext& context);
-
-    std::string getClassName();
-    void onSerialize(Serializer* serializer);
-    void onDeserialize(Serializer* serializer);
-};
-
 class DelayUpdater {
     uint64_t maxUpdateDelay;
     uint64_t viewDirtyTime;

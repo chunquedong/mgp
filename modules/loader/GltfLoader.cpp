@@ -327,9 +327,8 @@ private:
 		return mat;
 	}
 
-	void loadPrimitive(cgltf_primitive* primitive, Model* model) {
-		Mesh* mesh = model->getMesh();
-		int partIndex = -1;
+	void loadPrimitiveIndex(cgltf_primitive* primitive, Mesh* mesh) {
+		
 		if (primitive->indices) {
 			Mesh::PrimitiveType type;
 			switch (primitive->type)
@@ -359,8 +358,8 @@ private:
 				type = Mesh::PrimitiveType::LINES;
 			}
 			int indexCount = primitive->indices->count;
-			partIndex = mesh->getPartCount();
-			Mesh::MeshPart* part = mesh->addPart(type, indexCount);
+			//partIndex = mesh->getPartCount();
+			//mesh->setIndex(type, indexCount);
 
 			int32_t* data = (int32_t*)malloc(indexCount * 4);
 			for (int j = 0; j < indexCount; ++j) {
@@ -368,9 +367,16 @@ private:
 				data[j] = v;
 			}
 			int bufferOffset = mesh->getIndexBuffer()->addData((char*)data, indexCount * 4);
-			part->_bufferOffset = bufferOffset;
+			//part->_bufferOffset = bufferOffset;
+
+			mesh->setIndex(type, indexCount, bufferOffset);
+
 			free(data);
 		}
+	}
+
+	void setMeshMaterial(cgltf_primitive* primitive, Model* model, Mesh* mesh) {
+		int partIndex = mesh->getPartIndex();
 
 		bool hasMaterial = false;
 		if (primitive->material) {
@@ -381,7 +387,7 @@ private:
 			}
 			//SAFE_RELEASE(m);
 		}
-		
+
 		if (!hasMaterial) {
 			Material* mat = model->setMaterial("res/shaders/colored.vert", "res/shaders/colored.frag");
 			mat->getParameter("u_diffuseColor")->setVector4(Vector4(1.0, 0.0, 0.0, 1.0));
@@ -506,7 +512,7 @@ private:
 		return mesh;
 	}
 
-	UPtr<Model> loadPrimitiveAsMesh(cgltf_primitive* primitive) {
+	void loadPrimitiveToModel(cgltf_primitive* primitive, Model* model) {
 		//int vertexCount = 0;
 		std::vector<cgltf_attribute*> attrs;
 		attrs.resize(primitive->attributes_count);
@@ -516,9 +522,10 @@ private:
 		}
 
 		UPtr<Mesh> mesh = loadMeshVertices(attrs, primitive);
-		UPtr<Model> model = Model::create(std::move(mesh));
-		loadPrimitive(primitive, model.get());
-		return model;
+		Mesh* mesh_ = mesh.get();
+		loadPrimitiveIndex(primitive, mesh.get());
+		model->addMesh(std::move(mesh));
+		setMeshMaterial(primitive, model, mesh_);
 	}
 
 	Model* loadMesh(cgltf_mesh *cmesh, Node* node) {
@@ -548,8 +555,17 @@ private:
 			}
 		}
 		else if (cmesh->primitives_count == 1) {
-			cgltf_primitive* primitive = cmesh->primitives;
-			UPtr<Model> model = loadPrimitiveAsMesh(primitive);
+			sharedVertexBuf = false;
+		}
+
+	label1:
+
+		if (!sharedVertexBuf) {
+			UPtr<Model> model(new Model());
+			for (int i = 0; i < cmesh->primitives_count; ++i) {
+				cgltf_primitive* primitive = cmesh->primitives + i;
+				loadPrimitiveToModel(primitive, model.get());
+			}
 			if (lighting) {
 				model->setLightMask(1);
 			}
@@ -560,27 +576,6 @@ private:
 			node->addComponent(std::move(model));
 			return res;
 		}
-
-	label1:
-
-		if (!sharedVertexBuf) {
-			Model* res = NULL;
-			UPtr<DrawableGroup> group(new DrawableGroup());
-			for (int i = 0; i < cmesh->primitives_count; ++i) {
-				cgltf_primitive* primitive = cmesh->primitives + i;
-				UPtr<Model> model = loadPrimitiveAsMesh(primitive);
-				if (!res) res = model.get();
-				if (lighting) {
-					model->setLightMask(1);
-				}
-				group->getDrawables().push_back(std::move(model));
-			}
-			for (int i = 0; i < cmesh->weights_count; ++i) {
-				node->getWeights().push_back(cmesh->weights[i]);
-			}
-			node->addComponent(std::move(group));
-			return res;
-		}
 		else {
 			UPtr<Mesh> mesh = loadMeshVertices(attrs, NULL);
 			UPtr<Model> model = Model::create(std::move(mesh));
@@ -589,7 +584,7 @@ private:
 			}
 			for (int i = 0; i < cmesh->primitives_count; ++i) {
 				cgltf_primitive* primitive = cmesh->primitives + i;
-				loadPrimitive(primitive, model.get());
+				loadPrimitiveIndex(primitive, mesh.get());
 			}
 			Model* res = model.get();
 			node->addComponent(std::move(model));

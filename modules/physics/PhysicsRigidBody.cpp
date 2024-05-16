@@ -65,7 +65,7 @@ PhysicsRigidBody::~PhysicsRigidBody()
 {
     GP_ASSERT(PhysicsController::cur());
     GP_ASSERT(_collisionShape);
-    GP_ASSERT(_node);
+    //GP_ASSERT(_node);
 
     // Clean up all constraints linked to this rigid body.
     _inDestructor = true;
@@ -87,7 +87,8 @@ PhysicsRigidBody::~PhysicsRigidBody()
     // Unregister node listener (only registered for heihgtfield collision shape types).
     if (_collisionShape->getType() == PhysicsCollisionShape::SHAPE_HEIGHTFIELD)
     {
-        _node->removeListener(this);
+        if (_node)
+            _node->removeListener(this);
     }
 }
 

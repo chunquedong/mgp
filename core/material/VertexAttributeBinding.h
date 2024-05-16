@@ -11,6 +11,8 @@ class Mesh;
 class ShaderProgram;
 class VertexAttributeObject;
 
+typedef uint64_t BufferHandle;
+
 /**
  * Defines a binding between the vertex layout of a Mesh and the vertex
  * input attributes of a vertex shader (Effect).

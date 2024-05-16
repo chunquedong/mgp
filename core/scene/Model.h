@@ -33,13 +33,14 @@ public:
      * @script{create}
      */
     static UPtr<Model> create(UPtr<Mesh> mesh);
+    static UPtr<Model> create();
 
     /**
      * Returns the Mesh for this Model.
      *
      * @return The Mesh for this Model.
      */
-    Mesh* getMesh() const;
+    Mesh* getMesh(int part = 0) const;
 
     /**
      * Returns the number of parts in the Mesh for this Model.
@@ -173,6 +174,8 @@ public:
 
     bool doRaycast(RayQuery& query) override;
     const BoundingSphere* getBoundingSphere() override;
+
+    void addMesh(UPtr<Mesh> mesh);
 public:
     /**
      * Constructor.
@@ -214,11 +217,12 @@ public:
 private:
     void validatePartCount();
 private:
-    UPtr<Mesh> _mesh;
+    std::vector<UPtr<Mesh> > _meshParts;
     UPtr<Material> _material;
     std::vector<UPtr<Material> > _partMaterials;
     UniquePtr<MeshSkin, true> _skin;
     float _lodLimit;
+    BoundingSphere _bounds;
 };
 
 class LodModel : public Drawable {

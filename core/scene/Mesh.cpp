@@ -77,22 +77,20 @@ int RenderBuffer::addData(char* data, int size) {
     return offset;
 }
 
-Mesh::Mesh(const VertexFormat& vertexFormat) : _vertexFormat(vertexFormat)
+Mesh::Mesh() :
+    _vertexBuffer(new RenderBuffer()), _indexBuffer(new RenderBuffer())
 {
 }
 
 Mesh::~Mesh()
 {
     _vertexCount = 0;
-    if (_vertexAttributeArray) {
-        SAFE_RELEASE(_vertexAttributeArray);
-        _vertexAttributeArray = NULL;
-    }
-    _parts.clear();
+    _indexCount = 0;
 }
 
 UPtr<Mesh> Mesh::create(const VertexFormat& vertexFormat, IndexFormat indexFormat, bool dynamic) {
-    Mesh* mesh = new Mesh(vertexFormat);
+    Mesh* mesh = new Mesh();
+    mesh->_vertexFormat = vertexFormat;
     mesh->_dynamic = dynamic;
     mesh->_indexFormat = indexFormat;
     return UPtr<Mesh>(mesh);
@@ -100,7 +98,8 @@ UPtr<Mesh> Mesh::create(const VertexFormat& vertexFormat, IndexFormat indexForma
 
 UPtr<Mesh> Mesh::createMesh(const VertexFormat& vertexFormat, unsigned int vertexCount, IndexFormat indexFormat, bool dynamic)
 {
-    Mesh* mesh = new Mesh(vertexFormat);
+    Mesh* mesh = new Mesh();
+    mesh->_vertexFormat = vertexFormat;
     mesh->_vertexCount = vertexCount;
     mesh->_dynamic = dynamic;
     mesh->_indexFormat = indexFormat;
@@ -132,7 +131,7 @@ void Mesh::setVertexCount(unsigned int c) {
 
 RenderBuffer* Mesh::getVertexBuffer()
 {
-    return &_vertexBuffer;
+    return _vertexBuffer.get();
 }
 
 bool Mesh::isDynamic() const
@@ -165,14 +164,11 @@ bool Mesh::unmapVertexBuffer()
 
 unsigned int Mesh::getIndexCount() const
 {
-    if (_parts.size() > 0) {
-        return _parts[0]._indexCount;
-    }
-    return 0;
+    return _indexCount;
 }
 
 bool Mesh::isIndexed() const {
-    return _parts.size() > 0;
+    return _isIndexed;
 }
 
 //
@@ -187,28 +183,33 @@ Mesh::IndexFormat Mesh::getIndexFormat() const
 
 RenderBuffer* Mesh::getIndexBuffer()
 {
-    return &_indexBuffer;
+    return _indexBuffer.get();
 }
 
-Mesh::MeshPart* Mesh::addPart(PrimitiveType primitiveType, unsigned int indexCount, unsigned int bufferOffset)
+void Mesh::setIndex(PrimitiveType primitiveType, unsigned int indexCount, unsigned int bufferOffset)
 {
-    MeshPart part;
-    part._primitiveType = primitiveType;
-    part._indexCount = indexCount;
-    part._bufferOffset = bufferOffset;
-    _parts.emplace_back(part);
-    return &_parts[_parts.size()-1];
+    _primitiveType = primitiveType;
+    _indexCount = indexCount;
+    _bufferOffset = bufferOffset;
+    _isIndexed = true;
 }
 
-unsigned int Mesh::getPartCount()
+UPtr<Mesh> Mesh::createMeshPart(PrimitiveType primitiveType, unsigned int indexCount, unsigned int bufferOffset)
 {
-    return _parts.size();
-}
+    UPtr<Mesh> mesh(new Mesh());
+    mesh->_vertexFormat = this->_vertexFormat;
+    mesh->_indexFormat = this->_indexFormat;
+    mesh->_vertexBuffer = this->_vertexBuffer;
+    mesh->_indexBuffer = this->_indexBuffer;
+    mesh->_vertexCount = this->_vertexCount;
+    mesh->_boundingBox = this->_boundingBox;
+    mesh->_boundingSphere = this->_boundingSphere;
+    mesh->_url = this->_url;
+    mesh->_dynamic = this->_dynamic;
+    mesh->_vertexAttributeArray = this->_vertexAttributeArray;
 
-Mesh::MeshPart* Mesh::getPart(unsigned int index)
-{
-    GP_ASSERT(index < _parts.size());
-    return &_parts[index];
+    mesh->setIndex(primitiveType, indexCount, bufferOffset);
+    return mesh;
 }
 
 const BoundingBox& Mesh::getBoundingBox()
@@ -248,27 +249,23 @@ void Mesh::write(Stream* file) {
     }
 
     //file->writeStr(_url);
-    file->writeUInt8(_primitiveType);
+    file->writeUInt8(0);
     file->writeUInt8(_dynamic);
 
     // vertices
     file->writeUInt32(_vertexCount);
-    file->writeUInt32(_vertexBuffer._dataSize);
-    file->write((const char*)_vertexBuffer._data, _vertexBuffer._dataSize);
+    file->writeUInt32(_vertexBuffer->_dataSize);
+    file->write((const char*)_vertexBuffer->_data, _vertexBuffer->_dataSize);
 
     // write indices buffer
     file->writeUInt16(_indexFormat);
-    file->writeUInt32(_indexBuffer._dataSize);
-    file->write(_indexBuffer._data, _indexBuffer._dataSize);
+    file->writeUInt32(_indexBuffer->_dataSize);
+    file->write(_indexBuffer->_data, _indexBuffer->_dataSize);
 
     // parts
-    file->writeInt16(_parts.size());
-    for (int i = 0; i < _parts.size(); ++i) {
-        MeshPart* p = &_parts[i];
-        file->writeUInt8(p->_primitiveType);
-        file->writeUInt32(p->_bufferOffset);
-        file->writeUInt32(p->_indexCount);
-    }
+    file->writeUInt8(_primitiveType);
+    file->writeUInt32(_bufferOffset);
+    file->writeUInt32(_indexCount);
 
     getBoundingSphere();
 
@@ -301,14 +298,14 @@ bool Mesh::read(Stream* file) {
     Mesh* mesh = this;
     mesh->_vertexFormat = format;
     //mesh->_url = file->readStr();
-    mesh->_primitiveType = (Mesh::PrimitiveType)file->readUInt8();
+    file->readUInt8();
     mesh->_dynamic = file->readUInt8();
 
     mesh->_vertexCount = file->readUInt32();
     int bufSize = file->readUInt32();
     void *vertexData = malloc(bufSize);
     file->read((char*)vertexData, bufSize);
-    mesh->_vertexBuffer.setData((char*)vertexData, bufSize, false);
+    mesh->_vertexBuffer->setData((char*)vertexData, bufSize, false);
 
     //mesh->_vertexDataDirty = true;
 
@@ -316,17 +313,11 @@ bool Mesh::read(Stream* file) {
     int ibufsize = file->readUInt32();
     void* indexData = malloc(ibufsize);
     file->read((char*)indexData, ibufsize);
-    mesh->_indexBuffer.setData((char*)indexData, ibufsize, false);
+    mesh->_indexBuffer->setData((char*)indexData, ibufsize, false);
 
-    int _partCount = file->readInt16();
-    mesh->_parts.reserve(_partCount);
-    for (int i = 0; i < _partCount; ++i) {
-        MeshPart p;
-        p._primitiveType = (Mesh::PrimitiveType)file->readUInt8();
-        p._bufferOffset = file->readUInt32();
-        p._indexCount = file->readUInt32();
-        mesh->_parts.emplace_back(p);
-    }
+    _primitiveType = (Mesh::PrimitiveType)file->readUInt8();
+    _bufferOffset = file->readUInt32();
+    _indexCount = file->readUInt32();
 
     mesh->_boundingBox.min.x = file->readFloat();
     mesh->_boundingBox.min.y = file->readFloat();
@@ -367,7 +358,7 @@ void Mesh::computeBounds()
 
     for (int i = 0; i < _vertexCount; ++i)
     {
-        float *p = (float*)((char*)_vertexBuffer._data + (i * positionElement->stride) + positionElement->offset);
+        float *p = (float*)((char*)_vertexBuffer->_data + (i * positionElement->stride) + positionElement->offset);
         float x = p[0];
         float y = p[1];
         float z = p[2];
@@ -394,7 +385,7 @@ void Mesh::computeBounds()
     // distance between the center point and each vertex position
     for (int i = 0; i < _vertexCount; ++i)
     {
-        float* p = (float*)((char*)_vertexBuffer._data + (i * positionElement->stride) + positionElement->offset);
+        float* p = (float*)((char*)_vertexBuffer->_data + (i * positionElement->stride) + positionElement->offset);
         float x = p[0];
         float y = p[1];
         float z = p[2];
@@ -410,43 +401,47 @@ void Mesh::computeBounds()
     _boundingSphere.radius = sqrt(_boundingSphere.radius);
 }
 
-unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _material, Material** _partMaterials, int partMaterialCount)
+unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _material)
 {
     Mesh* _mesh = this;
     GP_ASSERT(_mesh);
 
-    if (_vertexBuffer._bufferHandle == 0) {
-        _vertexBuffer._bufferHandle = Renderer::cur()->createBuffer(0);
-    }
-    if (_vertexBuffer._contentDirty) {
-        GP_ASSERT(_vertexBuffer._dataSize >= _vertexCount * _vertexFormat.getVertexSize());
-        Renderer::cur()->setBufferData(_vertexBuffer._bufferHandle, 0, 0, (const char*)_vertexBuffer._data, _vertexBuffer._dataSize, _dynamic);
-        _vertexBuffer._contentDirty = false;
+    if (!_visiable) {
+        return 0;
     }
 
-    if (_mesh->_parts.size() > 0) {
-        if (_indexBuffer._bufferHandle == 0) {
-            _indexBuffer._bufferHandle = Renderer::cur()->createBuffer(1);
+    if (_vertexBuffer->_bufferHandle == 0) {
+        _vertexBuffer->_bufferHandle = Renderer::cur()->createBuffer(0);
+    }
+    if (_vertexBuffer->_contentDirty) {
+        GP_ASSERT(_vertexBuffer->_dataSize >= _vertexCount * _vertexFormat.getVertexSize());
+        Renderer::cur()->setBufferData(_vertexBuffer->_bufferHandle, 0, 0, (const char*)_vertexBuffer->_data, _vertexBuffer->_dataSize, _dynamic);
+        _vertexBuffer->_contentDirty = false;
+    }
+
+    if (_isIndexed) {
+        if (_indexBuffer->_bufferHandle == 0) {
+            _indexBuffer->_bufferHandle = Renderer::cur()->createBuffer(1);
         }
-        if (_indexBuffer._contentDirty) {
-            GP_ASSERT(_indexBuffer._dataSize >= _mesh->_parts[0]._indexCount * getIndexSize());
-            Renderer::cur()->setBufferData(_indexBuffer._bufferHandle, 1, 0, (const char*)_indexBuffer._data, _indexBuffer._dataSize, _dynamic);
-            _indexBuffer._contentDirty = false;
+        if (_indexBuffer->_contentDirty) {
+            GP_ASSERT(_indexBuffer->_dataSize >= _mesh->_indexCount * getIndexSize());
+            Renderer::cur()->setBufferData(_indexBuffer->_bufferHandle, 1, 0, (const char*)_indexBuffer->_data, _indexBuffer->_dataSize, _dynamic);
+            _indexBuffer->_contentDirty = false;
         }
     }
 
     Mesh* mesh = _mesh;
-    if (!mesh->_vertexAttributeArray) {
+    if (!mesh->_vertexAttributeArray.get()) {
         BufferHandle indexBufferObject = 0;
-        if (mesh->_parts.size() > 0) indexBufferObject = _indexBuffer._bufferHandle;
-        mesh->_vertexAttributeArray = VertexAttributeBinding::create(mesh->_vertexBuffer._bufferHandle, mesh->getVertexFormat(), NULL, indexBufferObject).take();
-        _vertexBuffer._pointerDirty = false;
-        _indexBuffer._pointerDirty = false;
+        if (_isIndexed) indexBufferObject = _indexBuffer->_bufferHandle;
+        mesh->_vertexAttributeArray = VertexAttributeBinding::create(mesh->_vertexBuffer->_bufferHandle, mesh->getVertexFormat(), NULL, indexBufferObject).get();
+        _vertexBuffer->_pointerDirty = false;
+        _indexBuffer->_pointerDirty = false;
     }
-    else if (_dirtyVertexFormat || _vertexBuffer._pointerDirty || _indexBuffer._pointerDirty) {
+    else if (_dirtyVertexFormat || _vertexBuffer->_pointerDirty || _indexBuffer->_pointerDirty) {
 
-        if (mesh->_vertexAttributeArray->_indexBufferObject != _indexBuffer._bufferHandle) {
-            mesh->_vertexAttributeArray->_indexBufferObject = _indexBuffer._bufferHandle;
+        if (mesh->_vertexAttributeArray->_indexBufferObject != _indexBuffer->_bufferHandle) {
+            mesh->_vertexAttributeArray->_indexBufferObject = _indexBuffer->_bufferHandle;
         }
 
         if (_dirtyVertexFormat) {
@@ -454,20 +449,18 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
         }
 
         mesh->_vertexAttributeArray->update();
-        _vertexBuffer._pointerDirty = false;
-        _indexBuffer._pointerDirty = false;
+        _vertexBuffer->_pointerDirty = false;
+        _indexBuffer->_pointerDirty = false;
         _dirtyVertexFormat = false;
     }
 
-
-    unsigned int partCount = mesh->getPartCount();
-    if (partCount == 0)
+    if (!_isIndexed)
     {
         DrawCall drawCall;
         drawCall._drawable = drawable;
         for (Material* material = _material; material != NULL; material = material->getNextPass())
         {
-            drawCall._vertexAttributeArray = mesh->_vertexAttributeArray;
+            drawCall._vertexAttributeArray = mesh->_vertexAttributeArray.get();
             drawCall._material = material;
             drawCall._primitiveType = mesh->getPrimitiveType();
             drawCall._vertexCount = mesh->getVertexCount();
@@ -492,40 +485,24 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
         }
         return 1;
     }
-
-    for (unsigned int i = 0; i < partCount; ++i)
-    {
-        MeshPart* part = mesh->getPart(i);
-        GP_ASSERT(part);
-
-        if (!part->_visiable) {
-            continue;
-        }
-
-        // Get the material for this mesh part.
-        Material* material = NULL;
-        if (i < partMaterialCount) material = _partMaterials[i];
-        else if (_material) material = _material;
-
-        if (!material) continue;
-
+    else {
         DrawCall drawCall;
         drawCall._drawable = drawable;
-        for (; material != NULL; material = material->getNextPass())
+        for (Material* material = _material; material != NULL; material = material->getNextPass())
         {
-            drawCall._vertexAttributeArray = mesh->_vertexAttributeArray;
+            drawCall._vertexAttributeArray = mesh->_vertexAttributeArray.get();
             drawCall._material = material;
             drawCall._indexFormat = getIndexFormat();
-            drawCall._indexBuffer = _indexBuffer._bufferHandle;
-            drawCall._primitiveType = part->_primitiveType;
+            drawCall._indexBuffer = _indexBuffer->_bufferHandle;
+            drawCall._primitiveType = this->_primitiveType;
             drawCall._vertexCount = mesh->getVertexCount();
-            drawCall._indexCount = part->_indexCount;
-            drawCall._indexBufferOffset = part->_bufferOffset;
+            drawCall._indexCount = this->_indexCount;
+            drawCall._indexBufferOffset = this->_bufferOffset;
             if (drawable) drawCall._renderLayer = drawable->getRenderLayer();
             else drawCall._renderLayer = Drawable::Overlay;
             //drawCall._instanceVbo = view->_instanceVbo;
             //drawCall._instanceCount = view->_instanceCount;
-            drawCall._mesh = part;
+            drawCall._mesh = mesh;
 
             if (view) {
                 view->draw(&drawCall);
@@ -538,17 +515,16 @@ unsigned int Mesh::draw(RenderInfo* view, Drawable* drawable, Material* _materia
         }
     }
 
-    return partCount;
+    return 1;
 }
 
 bool Mesh::doRaycast(RayQuery& query) {
     bool res = false;
 
-    unsigned int partCount = getPartCount();
-    if (partCount == 0) {
+    if (!_isIndexed) {
         int minTriangle = -1;
         Vector3 curTarget;
-        char* verteix = (char*)_vertexBuffer._data;
+        char* verteix = (char*)_vertexBuffer->_data;
         const VertexFormat::Element* positionElement = _vertexFormat.getPositionElement();
         if (!positionElement || positionElement->size != 3) return false;
         int count = getVertexCount();
@@ -582,15 +558,13 @@ bool Mesh::doRaycast(RayQuery& query) {
         }
         return res;
     }
-    for (unsigned int i = 0; i < partCount; ++i)
+    else
     {
-        MeshPart* part = getPart(i);
-        GP_ASSERT(part);
         if (getIndexFormat() == Mesh::INDEX16) {
-            if (raycastPart<uint16_t>(query, part->_bufferOffset, part->_indexCount, i, part->_primitiveType)) res = true;
+            if (raycastPart<uint16_t>(query, this->_bufferOffset, this->_indexCount, _partIndex, this->_primitiveType)) res = true;
         }
         else if (getIndexFormat() == Mesh::INDEX32) {
-            if (raycastPart<uint32_t>(query, part->_bufferOffset, part->_indexCount, i, part->_primitiveType)) res = true;
+            if (raycastPart<uint32_t>(query, this->_bufferOffset, this->_indexCount, _partIndex, this->_primitiveType)) res = true;
         }
     }
 
@@ -624,36 +598,32 @@ void Mesh::merge(const void* vertices, unsigned int vertexCount, const void* ind
     unsigned int newVertexCount = _vertexCount + vertexCount;
     unsigned int vertexSize = _vertexFormat.getVertexSize();
     unsigned int vBytes = vertexCount * vertexSize;
-    _vertexBuffer.addData((char*)vertices, vBytes);
+    _vertexBuffer->addData((char*)vertices, vBytes);
 
     // Copy index data.
     if (indices)
     {
-        MeshPart* part;
-        if (_parts.size() == 0) {
-            part = addPart(this->_primitiveType, 0);
-        }
-        else {
-            part = &_parts[0];
+        if (!_isIndexed) {
+            setIndex(this->_primitiveType, 0);
         }
 
-        unsigned int newIndexCount = part->_indexCount + indexCount;
+        unsigned int newIndexCount = this->_indexCount + indexCount;
         unsigned int indexSize = getIndexSize();
         
         if (_vertexCount == 0)
         {
             // Simply copy values directly into the start of the index array.
-            _indexBuffer.addData((char*)indices, indexCount * indexSize);
+            _indexBuffer->addData((char*)indices, indexCount * indexSize);
         }
         else
         {
             if (_primitiveType == Mesh::TRIANGLE_STRIP && _vertexCount > 0) {
                 newIndexCount += 2; // need an extra 2 indices for connecting strips with degenerate triangles
             }
-            _indexBuffer.resize(newIndexCount * indexSize);
+            _indexBuffer->resize(newIndexCount * indexSize);
 
             if (_indexFormat == INDEX16) {
-                uint16_t* _indicesPtr = (uint16_t*)(_indexBuffer._data + (part->_indexCount * indexSize));
+                uint16_t* _indicesPtr = (uint16_t*)(_indexBuffer->_data + (this->_indexCount * indexSize));
                 if (_primitiveType == Mesh::TRIANGLE_STRIP)
                 {
                     // Create a degenerate triangle to connect separate triangle strips
@@ -671,7 +641,7 @@ void Mesh::merge(const void* vertices, unsigned int vertexCount, const void* ind
                 }
             }
             else if (_indexFormat == INDEX32) {
-                uint32_t* _indicesPtr = (uint32_t*)(_indexBuffer._data + (part->_indexCount * indexSize));
+                uint32_t* _indicesPtr = (uint32_t*)(_indexBuffer->_data + (this->_indexCount * indexSize));
                 if (_primitiveType == Mesh::TRIANGLE_STRIP)
                 {
                     // Create a degenerate triangle to connect separate triangle strips
@@ -689,21 +659,19 @@ void Mesh::merge(const void* vertices, unsigned int vertexCount, const void* ind
                 }
             }
         }
-        part->_indexCount = newIndexCount;
+        this->_indexCount = newIndexCount;
     }
     else {
-        GP_ASSERT(_parts.size() == 0);
+        GP_ASSERT(!_isIndexed);
     }
     _vertexCount = newVertexCount;
 }
 
 void Mesh::clearData() {
-    _vertexBuffer._dataSize = 0;
-    _indexBuffer._dataSize = 0;
+    _vertexBuffer->_dataSize = 0;
+    _indexBuffer->_dataSize = 0;
     _vertexCount = 0;
-    for (MeshPart& part : _parts) {
-        part._indexCount = 0;
-    }
+    this->_indexCount = 0;
     _boundingSphere = BoundingSphere::empty();
     _boundingBox = BoundingBox::empty();
 }

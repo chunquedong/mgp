@@ -312,7 +312,7 @@ void TerrainPatch::initLOD(int dlevel)
         GP_ASSERT(indexCount <= USHRT_MAX);
     }
 
-    auto part = mesh->addPart(Mesh::TRIANGLE_STRIP, indexCount);
+    mesh->setIndex(Mesh::TRIANGLE_STRIP, indexCount);
     unsigned short* indices = new unsigned short[indexCount];
     index = 0;
     for (unsigned int z = 0; z < patchHeight-1; ++z)

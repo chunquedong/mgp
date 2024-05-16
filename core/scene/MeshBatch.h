@@ -162,6 +162,7 @@ protected:
     Mesh _mesh;
     std::vector<uint32_t> _batchIndex;
 public:
+    UPtr<Mesh> _highlightMesh;
     UPtr<Material> _highlightMaterial;
 };
 

@@ -10,28 +10,21 @@ namespace mgp
 {
 
 Model::Model() : Drawable(),
-    _mesh(NULL), _material(NULL), _skin(NULL), _lodLimit(1000)
+    _material(NULL), _skin(NULL), _lodLimit(1000)
 {
 }
 
 Model::Model(UPtr<Mesh> mesh) : Drawable(),
-    _mesh(std::move(mesh)), _material(NULL), _skin(NULL), _lodLimit(1000)
+    _material(NULL), _skin(NULL), _lodLimit(1000)
 {
-    GP_ASSERT(_mesh.get());
+    GP_ASSERT(mesh.get());
+    _meshParts.push_back(std::move(mesh));
 }
 
 Model::~Model()
 {
-    /*SAFE_RELEASE(_material);
-
-    for (unsigned int i = 0; i < _partMaterials.size(); ++i)
-    {
-        SAFE_RELEASE(_partMaterials[i]);
-    }*/
     _partMaterials.clear();
-
-    /*SAFE_RELEASE(_mesh);
-    SAFE_RELEASE(_skin);*/
+    _meshParts.clear();
 }
 
 UPtr<Model> Model::create(UPtr<Mesh> mesh)
@@ -41,15 +34,19 @@ UPtr<Model> Model::create(UPtr<Mesh> mesh)
     return UPtr<Model>(new Model(std::move(mesh)));
 }
 
-Mesh* Model::getMesh() const
+UPtr<Model> Model::create()
 {
-    return _mesh.get();
+    return UPtr<Model>();
+}
+
+Mesh* Model::getMesh(int part) const
+{
+    return _meshParts[part].get();
 }
 
 unsigned int Model::getMeshPartCount() const
 {
-    GP_ASSERT(_mesh.get());
-    return _mesh->getPartCount();
+    return _meshParts.size();
 }
 
 Material* Model::getMaterial(int partIndex)
@@ -192,22 +189,20 @@ void Model::setNode(Node* node)
 
 unsigned int Model::draw(RenderInfo* view)
 {
-    GP_ASSERT(_mesh.get());
-    int pmsize = _partMaterials.size();
-    if (pmsize < 128) {
-        Material* partMaterials[128] = { 0 };
-        for (int i = 0; i < pmsize; ++i) {
-            partMaterials[i] = _partMaterials[i].get();
+    for (int i = 0; i < _meshParts.size(); ++i) {
+        Material* partMaterial = NULL;
+        if (i < _partMaterials.size()) {
+            partMaterial = _partMaterials[i].get();
         }
-        return _mesh->draw(view, this, _material.get(), partMaterials, _partMaterials.size());
-    }
-    else {
-        std::vector<Material*> partMaterials(pmsize);
-        for (int i = 0; i < pmsize; ++i) {
-            partMaterials[i] = _partMaterials[i].get();
+        else {
+            partMaterial = _material.get();
         }
-        return _mesh->draw(view, this, _material.get(), partMaterials.data(), _partMaterials.size());
+
+        if (partMaterial) {
+            _meshParts[i]->draw(view, this, partMaterial);
+        }
     }
+    return _meshParts.size();
 }
 
 //void Model::setMaterialNodeBinding(Material *material)
@@ -222,11 +217,9 @@ unsigned int Model::draw(RenderInfo* view)
 
 UPtr<Drawable> Model::clone(NodeCloneContext& context)
 {
-    UPtr<Model> model = Model::create(uniqueFromInstant(getMesh()));
-    if (!model.get())
-    {
-        GP_ERROR("Failed to clone model.");
-        return UPtr<Drawable>(NULL);
+    UPtr<Model> model(new Model());
+    for (int i = 0; i < _meshParts.size(); ++i) {
+        model->addMesh(uniqueFromInstant(getMesh(i)));
     }
 
     if (getSkin())
@@ -261,8 +254,7 @@ UPtr<Drawable> Model::clone(NodeCloneContext& context)
 
 void Model::validatePartCount()
 {
-    GP_ASSERT(_mesh.get());
-    unsigned int partCount = _mesh->getPartCount();
+    unsigned int partCount = _meshParts.size();
 
     if (_partMaterials.size() != partCount)
     {
@@ -271,14 +263,35 @@ void Model::validatePartCount()
 }
 
 bool Model::doRaycast(RayQuery& query) {
-    GP_ASSERT(_mesh.get());
-    return _mesh->doRaycast(query);
+    bool rc = false;
+    for (int i = 0; i < _meshParts.size(); ++i) {
+        rc |= _meshParts[i]->doRaycast(query);
+    }
+    return rc;
 }
 
 const BoundingSphere* Model::getBoundingSphere()
 {
-    GP_ASSERT(_mesh.get());
-    return &_mesh->getBoundingSphere();
+    bool empty = true;
+    for (int i = 0; i < _meshParts.size(); ++i) {
+        auto sphere = _meshParts[i]->getBoundingSphere();
+        if (empty)
+        {
+            _bounds.set(sphere);
+            empty = false;
+        }
+        else
+        {
+            _bounds.merge(sphere);
+        }
+    }
+    return &_bounds;
+}
+
+void Model::addMesh(UPtr<Mesh> mesh)
+{
+    mesh->_partIndex = _meshParts.size();
+    this->_meshParts.push_back(std::move(mesh));
 }
 
 Serializable* Model::createObject() {
@@ -295,12 +308,13 @@ void Model::onSerialize(Serializer* serializer) {
     serializer->writeInt("renderLayer", this->getRenderLayer(), 0);
     serializer->writeInt("lightMask", this->getLightMask(), 0);
 
-    if (_mesh.get()) {
-        AssetManager::getInstance()->save(_mesh.get());
+    serializer->writeList("meshParts", _meshParts.size());
+    for (int i = 0; i < _meshParts.size(); ++i) {
+        AssetManager::getInstance()->save(_meshParts[i].get());
+        serializer->writeString(NULL, _meshParts[i]->getId().c_str(), "");
     }
-    if (_mesh.get()) serializer->writeString("mesh", _mesh->getId().c_str(), "");
-    else serializer->writeString("mesh", "", "");
-        
+    serializer->finishColloction();
+
     if (_skin.get()) {
         AssetManager::getInstance()->save(_skin.get());
     }
@@ -328,11 +342,16 @@ void Model::onDeserialize(Serializer* serializer) {
     setRenderLayer((Drawable::RenderLayer)serializer->readInt("renderLayer", 0));
     setLightMask(serializer->readInt("lightMask", 0));
 
-    std::string mesh;
-    serializer->readString("mesh", mesh, "");
-    if (mesh.size() > 0) {
-        _mesh = AssetManager::getInstance()->load<Mesh>(mesh, AssetManager::rt_mesh);
+    int meshSize = serializer->readList("meshParts");
+    for (int i = 0; i < meshSize; ++i) {
+        std::string mesh;
+        serializer->readString(NULL, mesh, "");
+        if (mesh.size() > 0) {
+            auto meshObj = AssetManager::getInstance()->load<Mesh>(mesh, AssetManager::rt_mesh);
+            _meshParts.push_back(std::move(meshObj));
+        }
     }
+    serializer->finishColloction();
 
     std::string skin;
     serializer->readString("skin", skin, "");
