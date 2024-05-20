@@ -1,212 +1,245 @@
-theme mainMenu
-{
-    style Default {
-        color = #ffffffff
-        textColor = #ffffffff
-        font = sans.ttf
-        fontSize = 15
-        opacity = 1.0
-        textAlignment = ALIGN_VCENTER_LEFT
-        disabledColor = #aaaaaaff
+Style {
+    id = Default
+    color = #ffffffff
+    bgColor = #ffffffff
+    textColor = #ffffffff
+    font = res/ui/sans.ttf
+    fontSize = 15
+    opacity = 1.0
+    textAlignment = ALIGN_VCENTER_LEFT
+}
+
+Style {
+    id = Panel
+    color = #ffffffff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/panel.png
+        left = 15
+        right = 15
+        top = 15
+        bottom = 15
+    }
+}
+
+Style {
+    id = Button
+    color = #33b5e5ff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/button.png
+        left = 15
+        right = 15
+        top = 15
+        bottom = 15
+    }
+    disabled = Style {
+        color = #aaaaaaff
+    }
+    hover = Style {
+        color = #66b5e5ff
+    }
+    active = Style {
+        color = #88b5e5ff
+    }
+    focus = Style {
+        color = #88b5e5ff
+    }
+}
+
+Style {
+    id = RoundButton
+    color = #33b5e5ff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle37.png
+        left = 18
+        right = 18
+        top = 0
+        bottom = 0
+    }
+    disabled = Style {
+        color = #ccccccff
+    }
+    hover = Style {
+        color = #66b5e5ff
+    }
+    active = Style {
+        color = #88b5e5ff
+    }
+    focus = Style {
+        color = #88b5e5ff
+    }
+}
+
+Style {
+    id = Outline
+    color = #33b5e5ff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle_outline.png
+        left = 18
+        right = 18
+        top = 0
+        bottom = 0
     }
 
-    // Style that can be used as a background for a container
-    style Panel : Default
-    {
-        background
-        {
-            border
-            {
-                left = 15
-                right = 15
-                top = 15
-                bottom = 15
-            }
-            image=panel.png
-        }
-        textAlignment = ALIGN_VCENTER_HCENTER
+    disabled = Style {
+        color = #ccccccff
+    }
+    hover = Style {
+        color = #66b5e5ff
+    }
+    active = Style {
+        color = #88b5e5ff
+    }
+    focus = Style {
+        color = #88b5e5ff
+    }
+}
+
+Style {
+    id = TextBoxNormal
+    color = #ffffffff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_TOP_LEFT
+    background = {
+        image = res/ui/panel.png
+        left = 15
+        right = 15
+        top = 15
+        bottom = 15
     }
 
-    style Button : Default
-    {
-        background
-        {
-            border
-            {
-                left = 15
-                right = 15
-                top = 15
-                bottom = 15
-            }
-            image = button.png
-        }
-        normalColor = #33b5e5ff
-        hoverColor = #66b5e5ff
-        activeColor = #88b5e5ff
-        focusColor = #88b5e5ff
-        disabledColor = #ccccccff
-        textAlignment = ALIGN_VCENTER_HCENTER
+    disabled = Style {
+        color = #ccccccff
+    }
+}
+
+Style {
+    id = TextBox
+    color = #ffffffff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_TOP_LEFT
+    background = {
+        image = res/ui/input.png
+        left = 10
+        right = 10
+        top = 10
+        bottom = 10
     }
 
-    style RoundButton : Default
-    {
-        background
-        {
-            border
-            {
-                left = 18
-                right = 18
-                top = 0
-                bottom = 0
-            }
-            image = circle37.png
-        }
-        normalColor = #33b5e5ff
-        hoverColor = #66b5e5ff
-        activeColor = #88b5e5ff
-        focusColor = #88b5e5ff
-        disabledColor = #ccccccff
-        textAlignment = ALIGN_VCENTER_HCENTER
+    disabled = Style {
+        color = #ccccccff
+    }
+}
+
+Style {
+    id = Slider
+    color = #ffffffff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_TOP_LEFT
+}
+
+Style {
+    id = ComboBox
+    color = #ffffffff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/comboBox.png
+        left = 10
+        right = 10
+        top = 10
+        bottom = 10
+    }
+}
+
+Style {
+    id = MenuItem
+    color = #f9f9f9ff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/empty.png
+        left = 1
+        right = 1
+        top = 1
+        bottom = 1
     }
 
-    style Outline : Default
-    {
-        background
-        {
-            border
-            {
-                left = 18
-                right = 18
-                top = 0
-                bottom = 0
-            }
-            image = circle_outline.png
-        }
-        normalColor = #33b5e5ff
-        hoverColor = #66b5e5ff
-        activeColor = #88b5e5ff
-        focusColor = #88b5e5ff
-        disabledColor = #ccccccff
-        textAlignment = ALIGN_VCENTER_HCENTER
-        fontSize = 14
+    
+    disabled = Style {
+        color = #ccccccff
+    }
+    hover = Style {
+        color = #aaaaaaff
+    }
+    active = Style {
+        color = #eeeeeeff
+    }
+    focus = Style {
+        color = #eeeeeeff
+    }
+}
+
+Style {
+    id = Icon
+    color = #f9f9f9ff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/outline.png
+        left = 15
+        right = 15
+        top = 15
+        bottom = 15
     }
 
-    style TextBoxNormal : Default
-    {
-        background
-        {
-            border
-            {
-                left = 15
-                right = 15
-                top = 15
-                bottom = 15
-            }
-            image=panel.png
-        }
-        textColor = #000000ff
-        textAlignment = ALIGN_TOP_LEFT
+    
+    disabled = Style {
+        color = #ccccccff
     }
-
-    style TextBox : Default
-    {
-        background
-        {
-            border
-            {
-                left = 10
-                right = 10
-                top = 10
-                bottom = 10
-            }
-            image=input.png
-        }
-        textColor = #ffffffff
-        textAlignment = ALIGN_TOP_LEFT
+    hover = Style {
+        color = #aaaaaaff
     }
-
-    style Slider : Default
-    {
-        textAlignment = ALIGN_TOP_LEFT
+    active = Style {
+        color = #eeeeeeff
     }
-
-    style ComboBox : Default
-    {
-        background
-        {
-            border
-            {
-                left = 10
-                right = 10
-                top = 10
-                bottom = 10
-            }
-            image=comboBox.png
-        }
-        //textColor = #000000ff
-        textAlignment = ALIGN_TOP_LEFT
+    focus = Style {
+        color = #55eeeeff
     }
+}
 
-    style MenuItem : Default
-    {
-        background
-        {
-            border
-            {
-                left = 1
-                right = 1
-                top = 1
-                bottom = 1
-            }
-            image = empty.png
-        }
-        normalColor = #f9f9f9ff
-        hoverColor = #aaaaaaff
-        activeColor = #eeeeeeff
-        focusColor = #eeeeeeff
-        disabledColor = #ccccccff
-        textColor = #000000ff
-    }
+Style {
+    id = Rect
+    color = #f9f9f9ff
+    textColor = #000000ff
 
-    style Icon: Default
-    {
-        background
-        {
-            border
-            {
-                left = 15
-                right = 15
-                top = 15
-                bottom = 15
-            }
-            image=outline.png
-        }
-        normalColor = #f9f9f9ff
-        hoverColor = #aaaaaaff
-        activeColor = #eeeeeeff
-        focusColor = #55eeeeff
-        disabledColor = #ccccccff
-        textColor = #000000ff
-    }
+    textAlignment = ALIGN_TOP_LEFT
 
-    style Rect : Default
-    {
-        background
-        {
-            border
-            {
-                left = 1
-                right = 1
-                top = 1
-                bottom = 1
-            }
-            image = empty.png
-        }
-        normalColor = #f9f9f9ff
-        hoverColor = #aaaaaaff
-        activeColor = #eeeeeeff
-        focusColor = #eeeeeeff
-        disabledColor = #ccccccff
-        textColor = #000000ff
+    background = {
+        image = res/ui/empty.png
+        left = 1
+        right = 1
+        top = 1
+        bottom = 1
     }
 }

@@ -9,8 +9,8 @@ class MainApp : public Application, Control::Listener {
     //Button* button;
 
     void initialize() {
-        /*auto theme = Theme::create("res/ui/default.theme");
-        Theme::setDefault(theme.get());*/
+        //auto theme = Theme::create("res/ui/default.theme");
+        //Theme::setDefault(theme.get());
 
         UPtr<Form> form = Form::create();
         form->getContent()->setSize(600, 700);

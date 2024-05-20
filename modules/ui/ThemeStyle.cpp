@@ -4,20 +4,16 @@ namespace mgp
 {
 
 Style::Style(SPtr<Theme> theme, const char* id)
-    : _theme(theme), _id(id), _background(NULL), _font(NULL),
+    : _theme(theme), _id(id), _background(NULL), _font(NULL), _image(nullptr), _color(Vector4::one()), _bgColor(Vector4::one()),
     _fontSize(16), _alignment(FontLayout::ALIGN_TOP_LEFT), _textRightToLeft(false), _textColor(Vector4::one()), _opacity(1.0f)
 {
-    for (int i=0; i<OVERLAY_MAX; ++i) {
-        _colors[i].x = 1;
-        _colors[i].y = 1;
-        _colors[i].z = 1;
-        _colors[i].w = 1;
-    }
 }
 
 Style::~Style()
 {
+    _stateStyles.clear();
     SAFE_RELEASE(_background);
+    SAFE_RELEASE(_image);
     SAFE_RELEASE(_font);
 }
 
@@ -31,11 +27,21 @@ const char* Style::getId() const
     return _id.c_str();
 }
 
-Style::Style(const Style& copy) : _background(NULL), _font(NULL), _theme(NULL)
+void Style::setId(const char* id)
+{
+    _id = id;
+}
+
+Style::Style(const Style& copy) : _background(NULL), _font(NULL), _theme(NULL), _image(nullptr)
 {
     if (copy._background)
     {
         _background = copy._background->clone();
+    }
+
+    if (copy._image)
+    {
+        _image = new ThemeImage(copy._image->getRegion());
     }
 
     _theme = copy._theme;
@@ -47,14 +53,33 @@ Style::Style(const Style& copy) : _background(NULL), _font(NULL), _theme(NULL)
     _textColor = Vector4(copy._textColor);
     _opacity = copy._opacity;
 
-    for (int i = 0; i < OVERLAY_MAX; ++i) {
-        _colors[i] = copy._colors[i];
-    }
+    _color = copy._color;
+    _bgColor = copy._bgColor;
 
     if (_font)
     {
         _font->addRef();
     }
+}
+
+Style* Style::getStateStyle(OverlayType state)
+{
+    if (_stateStyles.size() == 0) {
+        return this;
+    }
+    Style* s = _stateStyles[state].get();
+    if (!s) {
+        return this;
+    }
+    return s;
+}
+
+void Style::setStateStyle(UPtr<Style> style, OverlayType state)
+{
+    if (_stateStyles.size() == 0) {
+        _stateStyles.resize(OVERLAY_MAX);
+    }
+    _stateStyles[state] = std::move(style);
 }
 
 float Style::getOpacity() const
@@ -90,21 +115,21 @@ void Style::setOpacity(float opacity)
 //    }
 //}
 
-void Style::setColor(const Vector4& color, OverlayType state)
+void Style::setColor(const Vector4& color)
 {
-    if (state == OVERLAY_MAX) {
-        for (int i = 0; i < OVERLAY_MAX; ++i) {
-            _colors[i] = color;
-        }
-    }
-    else {
-        _colors[state] = color;
-    }
+    _color = color;
 }
 
-const Vector4& Style::getColor(OverlayType state) const
+const Vector4& Style::getColor() const
 {
-    return _colors[state];
+    return _color;
+}
+
+void Style::setBgColor(const Vector4& color) {
+    _bgColor = color;
+}
+const Vector4& Style::getBgColor() const {
+    return _bgColor;
 }
 
 Font* Style::getFont() const
@@ -184,6 +209,22 @@ void Style::setBgImage(BorderImage* skin)
 BorderImage* Style::getBgImage() const
 {
     return _background;
+}
+
+void Style::setImage(ThemeImage* image) {
+    if (_image != image)
+    {
+        SAFE_RELEASE(_image);
+        _image = image;
+
+        if (_image)
+        {
+            _image->addRef();
+        }
+    }
+}
+ThemeImage* Style::getImage() const {
+    return _image;
 }
 
 // Implementation of AnimationHandler

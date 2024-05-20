@@ -259,7 +259,7 @@ private:
     /**
      * Hidden copy assignment operator.
      */
-    Theme& operator=(const Theme&);
+    Theme& operator=(const Theme&) = delete;
 
     std::string _url;
     //ThemeImage* _emptyImage;

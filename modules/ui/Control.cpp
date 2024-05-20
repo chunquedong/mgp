@@ -705,6 +705,14 @@ Style* Control::getStyle() const
     return _style.get();
 }
 
+
+Style* Control::getStateStyle() const
+{
+    if (!_style.get())
+        return nullptr;
+    return _style.get()->getStateStyle((Style::OverlayType)getState());
+}
+
 void Control::setStyle(SPtr<Style> style)
 {
     if (style != _style)
@@ -1201,7 +1209,7 @@ unsigned int Control::drawBorder(Form* form, const Rectangle& clip, RenderInfo* 
     SpriteBatch* batch = getStyle()->getTheme()->getSpriteBatch();
     startBatch(form, batch, 0);
 
-    Vector4 skinColor = getStyle()->getColor((Style::OverlayType)getState());
+    Vector4 skinColor = getStateStyle()->getColor();
     skinColor.w *= getStyle()->getOpacity();
 
     drawCalls += _skin->draw(batch, _absoluteBounds, skinColor, clip, getPadding());

@@ -121,7 +121,7 @@ unsigned int CheckBox::drawImages(Form* form, const Rectangle& clip, RenderInfo*
 
     const Rectangle& region = _image->getRegion();
     //const Vector4& uvs = _image->getUVs();
-    Vector4 color = getStyle()->getColor((Style::OverlayType)getState());
+    Vector4 color = getStateStyle()->getColor();
     color.w *= _opacity;
 
     //Vector2 pos(_viewportBounds.x, _viewportBounds.y);

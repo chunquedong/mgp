@@ -99,7 +99,7 @@ unsigned int Icon::drawImages(Form* form, const Rectangle& clip, RenderInfo* vie
     if (!_image) return 0;
 
     const Rectangle& region = _image->getRegion();
-    Vector4 color = getStyle()->getColor((Style::OverlayType)getState());
+    Vector4 color = getStateStyle()->getColor();
     color.w *= _opacity;
 
     SpriteBatch* batch = getStyle()->getTheme()->getSpriteBatch();
@@ -126,7 +126,7 @@ unsigned int LoadingView::drawImages(Form* form, const Rectangle& clip, RenderIn
     if (!_image) return 0;
 
     const Rectangle& region = _image->getRegion();
-    Vector4 color = getStyle()->getColor((Style::OverlayType)getState());
+    Vector4 color = getStateStyle()->getColor();
     color.w *= _opacity;
 
     SpriteBatch* batch = getStyle()->getTheme()->getSpriteBatch();

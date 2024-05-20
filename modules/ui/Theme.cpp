@@ -4,6 +4,9 @@
 #include "platform/Toolkit.h"
 #include "base/FileSystem.h"
 
+#include "jvalue.hpp"
+#include "HimlParser.hpp"
+
 namespace mgp
 {
 
@@ -101,6 +104,201 @@ void Theme::finalize()
     }
 }
 
+static void parserColor(jc::Value* json, const char* name, Vector4& color) {
+    jc::Value* lineColor = json->get(name);
+    //if (lineColor && lineColor->size() == 4) {
+    //    auto c = lineColor->begin();
+    //    color.x = c->as_float();
+    //    ++c;
+    //    color.y = c->as_float();
+    //    ++c;
+    //    color.z = c->as_float();
+    //    ++c;
+    //    color.w = c->as_float();
+    //    //++c;
+    //}
+    if (lineColor) {
+        const char* str = lineColor->as_str();
+        color = Vector4::fromColorString(str);
+    }
+}
+
+Style* readStyle(jc::Value* jcstyle, Style* parentStyle, SPtr<Theme> theme) {
+
+    Style* style;
+    if (parentStyle) {
+        style = new Style(*parentStyle);
+    }
+    else {
+        jc::Value* id = jcstyle->get("id");
+        if (!id)
+            return NULL;
+        Style* defaultStyle = theme->getStyle("Default");
+        if (defaultStyle) {
+            style = new Style(*defaultStyle);
+            style->setId(id->as_str());
+        }
+        else {
+            //printf("readStyle: %s\n", id->as_str());
+            style = new Style(theme, id->as_str());
+        }
+    }
+
+    //Font
+    if (true) {
+        Vector4 textColor(0, 0, 0, 1);
+        parserColor(jcstyle, "textColor", textColor);
+        style->setTextColor(textColor);
+
+        std::string fontPath;
+        if (jcstyle->get("font")) {
+            fontPath = jcstyle->get("font")->as_str();
+        }
+        if (fontPath.size() > 0)
+        {
+#if WIN32
+            fontPath = "C:/Windows/Fonts/msyh.ttc";
+#endif
+            UPtr<Font> font = Font::create(fontPath.c_str());
+            if (font.get())
+            {
+                style->setFont(font.get());
+                //font->release();
+            }
+        }
+
+        if (jcstyle->get("fontSize")) {
+            unsigned int fontSize = jcstyle->get("fontSize")->as_int();
+            style->setFontSize(fontSize);
+        }
+
+        if (jcstyle->get("textAlignment")) {
+            const char* textAlignmentString = jcstyle->get("textAlignment")->as_str();
+            FontLayout::Justify textAlignment = FontLayout::ALIGN_TOP_LEFT;
+            if (textAlignmentString)
+            {
+                textAlignment = FontLayout::getJustify(textAlignmentString);
+            }
+            style->setTextAlignment(textAlignment);
+        }
+
+        if (jcstyle->get("rightToLeft")) {
+            bool rightToLeft = jcstyle->get("rightToLeft")->as_bool();
+            style->setTextRightToLeft(rightToLeft);
+        }
+    }
+
+    if (jcstyle->get("opacity"))
+    {
+        float opacity = 1.0f;
+        opacity = jcstyle->get("opacity")->as_float();
+        style->setOpacity(opacity);
+    }
+
+    if (jcstyle->get("color"))
+    {
+        Vector4 color;
+        parserColor(jcstyle, "color", color);
+        style->setColor(color);
+    }
+
+    if (jcstyle->get("bgColor"))
+    {
+        Vector4 color;
+        parserColor(jcstyle, "bgColor", color);
+        style->setBgColor(color);
+    }
+
+    if (jcstyle->get("background"))
+    {
+        jc::Value* jcbg = jcstyle->get("background");
+        if (jcbg->get("image")) {
+            std::string imagePath = jcbg->get("image")->as_str();
+            if (imagePath.size() == 0) {
+                imagePath = "empty.png";
+            }
+            ThemeImage* image = theme->getImageFullName(imagePath.c_str());
+            if (!image) {
+                GP_ERROR("image not found:%d", imagePath.c_str());
+            }
+
+            Border border;
+            if (jcbg->get("top")) {
+                border.top = jcbg->get("top")->as_float();
+            }
+            if (jcbg->get("bottom")) {
+                border.bottom = jcbg->get("bottom")->as_float();
+            }
+            if (jcbg->get("left")) {
+                border.left = jcbg->get("left")->as_float();
+            }
+            if (jcbg->get("right")) {
+                border.right = jcbg->get("right")->as_float();
+            }
+
+            BorderImage* bg = new BorderImage(image->getRegion(), border);
+            style->setBgImage(bg);
+            bg->release();
+        }
+    }
+
+    if (jcstyle->get("image"))
+    {
+        std::string imagePath = jcstyle->get("image")->as_str();
+        if (imagePath.size() == 0) {
+            GP_ERROR("image not found:%d", imagePath.c_str());
+        }
+        ThemeImage* image = theme->getImageFullName(imagePath.c_str());
+        if (!image) {
+            GP_ERROR("image not found:%d", imagePath.c_str());
+        }
+        style->setImage(image);
+    }
+
+    if (jcstyle->get("focus")) {
+        Style* s = readStyle(jcstyle->get("focus"), style, theme);
+        std::string id = style->getId();
+        id += ":focus";
+        s->setId(id.c_str());
+        style->setStateStyle(UPtr<Style>(s), Style::OVERLAY_FOCUS);
+    }
+
+    if (jcstyle->get("active")) {
+        Style* s = readStyle(jcstyle->get("active"), style, theme);
+        std::string id = style->getId();
+        id += ":active";
+        s->setId(id.c_str());
+        style->setStateStyle(UPtr<Style>(s), Style::OVERLAY_ACTIVE);
+    }
+
+    if (jcstyle->get("disabled")) {
+        Style* s = readStyle(jcstyle->get("disabled"), style, theme);
+        std::string id = style->getId();
+        id += ":disabled";
+        s->setId(id.c_str());
+        style->setStateStyle(UPtr<Style>(s), Style::OVERLAY_DISABLED);
+    }
+
+    if (jcstyle->get("hover")) {
+        Style* s = readStyle(jcstyle->get("hover"), style, theme);
+        std::string id = style->getId();
+        id += ":hover";
+        s->setId(id.c_str());
+        style->setStateStyle(UPtr<Style>(s), Style::OVERLAY_HOVER);
+    }
+
+    if (!parentStyle) {
+        theme->setStyle(style->getId(), style);
+        
+        if (strcmpnocase(style->getId(), "Default") == 0) {
+            theme->setStyle("EMPTY_STYLE", style);
+        }
+
+        style->release();
+    }
+    return style;
+}
+
 SPtr<Theme> Theme::create(const char* url)
 {
     GP_ASSERT(url);
@@ -118,30 +316,18 @@ SPtr<Theme> Theme::create(const char* url)
         }
     }
 
-    // Load theme properties from file path.
-    UPtr<Properties> properties = Properties::create(url);
-    GP_ASSERT(properties.get());
-    if (properties.get() == NULL)
-    {
-        return SPtr<Theme>(NULL);
-    }
-
-    // Check if the Properties is valid and has a valid namespace.
-    Properties* themeProperties = (strlen(properties->getNamespace()) > 0) ? properties.get() : properties->getNextNamespace();
-    GP_ASSERT(themeProperties);
-    if (!themeProperties || !(strcmpnocase(themeProperties->getNamespace(), "theme") == 0))
-    {
-        //SAFE_DELETE(properties);
-        return SPtr<Theme>(NULL);
+    jc::JsonAllocator allocator;
+    jc::HimlParser parser(&allocator);
+    char* buffer = FileSystem::readAll(url);
+    jc::JsonNode* root = (jc::JsonNode*)parser.parse(buffer);
+    
+    if (!root) {
+        return SPtr<Theme>();
     }
 
     // Create a new theme.
     SPtr<Theme> theme(new Theme());
     theme->_url = url;
-
-    // Parse the Properties object and set up the theme.
-    //std::string textureFile;
-    //themeProperties->getPath("texture", &textureFile);
     theme->_texture = new TextureAtlas(Image::RGBA, 1024, 1024);//Texture::create(textureFile.c_str(), false);
     GP_ASSERT(theme->_texture);
     Texture* texture = theme->_texture->getTexture();
@@ -150,174 +336,22 @@ SPtr<Theme> Theme::create(const char* url)
     texture->setFilterMode(Texture::LINEAR, Texture::LINEAR);
     texture->setWrapMode(Texture::CLAMP, Texture::CLAMP);
 
-    float tw = 1.0f / texture->getWidth();
-    float th = 1.0f / texture->getHeight();
+    //float tw = 1.0f / texture->getWidth();
+    //float th = 1.0f / texture->getHeight();
 
-    //theme->_emptyImage = new ThemeImage(Rectangle::empty());
-    
-    //themeProperties->rewind();
-    Properties* space = themeProperties->getNextNamespace();
-    while (space != NULL)
-    {
-        const char* spacename = space->getNamespace();
-        if (strcmpnocase(spacename, "style") == 0)
-        {
-            Style* style = new Style(theme, space->getId());
+    //std::string str;
+    //root->to_json(str, false);
+    //printf("%s\n", str.c_str());
 
-            Properties* innerSpace = space;
-            
-            //Font
-            if (true) {
-                if (innerSpace->exists("textColor"))
-                {
-                    Vector4 textColor(0, 0, 0, 1);
-                    innerSpace->getColor("textColor", &textColor);
-                    style->setTextColor(textColor);
-                }
-
-                std::string fontPath;
-                innerSpace->getPath("font", &fontPath);
-                if (fontPath.size() > 0)
-                {
-#if WIN32
-                    fontPath = "C:/Windows/Fonts/msyh.ttc";
-#endif
-                    UPtr<Font> font = Font::create(fontPath.c_str());
-                    if (font.get())
-                    {
-                        style->setFont(font.get());
-                        //font->release();
-                    }
-                }
-
-                if (innerSpace->exists("fontSize")) {
-                    unsigned int fontSize = innerSpace->getInt("fontSize");
-                    style->setFontSize(fontSize);
-                }
-
-                const char* textAlignmentString = innerSpace->getString("textAlignment");
-                FontLayout::Justify textAlignment = FontLayout::ALIGN_TOP_LEFT;
-                if (textAlignmentString)
-                {
-                    textAlignment = FontLayout::getJustify(textAlignmentString);
-                }
-                style->setTextAlignment(textAlignment);
-
-                bool rightToLeft = innerSpace->getBool("rightToLeft");
-                style->setTextRightToLeft(rightToLeft);
-            }
-            
-            if (innerSpace->exists("opacity"))
-            {
-                float opacity = 1.0f;
-                opacity = innerSpace->getFloat("opacity");
-                style->setOpacity(opacity);
-            }
-
-            if (innerSpace->exists("color"))
-            {
-                Vector4 color;
-                innerSpace->getColor("color", &color);
-                style->setColor(color, Style::OVERLAY_MAX);
-            }
-
-            if (innerSpace->exists("normalColor"))
-            {
-                Vector4 normalColor;
-                innerSpace->getColor("normalColor", &normalColor);
-                style->setColor(normalColor, Style::OVERLAY_NORMAL);
-            }
-
-            if (innerSpace->exists("hoverColor"))
-            {
-                Vector4 hoverColor;
-                innerSpace->getColor("hoverColor", &hoverColor);
-                style->setColor(hoverColor, Style::OVERLAY_HOVER);
-            }
-
-            if (innerSpace->exists("activeColor"))
-            {
-                Vector4 activeColor;
-                innerSpace->getColor("activeColor", &activeColor);
-                style->setColor(activeColor, Style::OVERLAY_ACTIVE);
-            }
-
-            if (innerSpace->exists("focusColor"))
-            {
-                Vector4 focusColor;
-                innerSpace->getColor("focusColor", &focusColor);
-                style->setColor(focusColor, Style::OVERLAY_FOCUS);
-            }
-
-            if (innerSpace->exists("disabledColor"))
-            {
-                Vector4 disabledColor;
-                innerSpace->getColor("disabledColor", &disabledColor);
-                style->setColor(disabledColor, Style::OVERLAY_DISABLED);
-            }
-
-
-            // background
-            innerSpace = space->getNextNamespace();
-            while (innerSpace != NULL)
-            {
-                const char* innerSpacename = innerSpace->getNamespace();
-                if (strcmpnocase(innerSpacename, "background") == 0)
-                {
-                    std::string imagePath;
-                    innerSpace->getPath("image", &imagePath);
-                    if (imagePath.size() == 0) {
-                        imagePath = "empty.png";
-                    }
-                    ThemeImage* image = theme->getImageFullName(imagePath.c_str());
-                    if (!image) {
-                        GP_ERROR("image not found:%d", imagePath.c_str());
-                        break;
-                    }
-
-                    Border border;
-                    Properties* borderSpace = innerSpace->getNextNamespace();
-                    while (borderSpace != NULL) {
-                        const char* innerSpacename = borderSpace->getNamespace();
-                        if (strcmpnocase(innerSpacename, "border") == 0)
-                        {
-                            border.top = borderSpace->getFloat("top");
-                            border.bottom = borderSpace->getFloat("bottom");
-                            border.left = borderSpace->getFloat("left");
-                            border.right = borderSpace->getFloat("right");
-                            break;
-                        }
-                        borderSpace = innerSpace->getNextNamespace();
-                    }
-
-                    BorderImage* bg = new BorderImage(image->getRegion(), border);
-                    style->setBgImage(bg);
-                    bg->release();
-
-                    // Done with this pass.
-                    break;
-                }
-
-                innerSpace = space->getNextNamespace();
-            }
-
-            theme->setStyle(style->getId(), style);
-            style->release();
-
-            if (strcmpnocase(style->getId(), "Default") == 0) {
-                theme->setStyle("EMPTY_STYLE", style);
-            }
-        }
-
-        space = themeProperties->getNextNamespace();
+    jc::Value* children = root->children();
+    for (auto it = children->begin(); it != children->end(); ++it) {
+        readStyle(*it, nullptr, theme);
     }
     
-
     // Add this theme to the cache.
     __themeCache.push_back(theme.get());
 
-    //SAFE_DELETE(properties);
-
+    delete[] buffer;
     return SPtr<Theme>(theme);
 }
 
@@ -329,6 +363,9 @@ Style* Theme::getStyle(const char* name) const
 }
 
 void Theme::setStyle(const char* id, Style* style) {
+    if (_styles[id]) {
+        _styles[id]->release();
+    }
     _styles[id] = style;
     style->addRef();
 }

@@ -54,6 +54,10 @@ public:
 
     static const int ANIMATE_OPACITY = 1;
 
+    
+    Style* getStateStyle(OverlayType state = OverlayType::OVERLAY_NORMAL);
+    void setStateStyle(UPtr<Style> style, OverlayType state);
+
     /**
      * Get the opacity of this control for a given state. 
      *
@@ -71,6 +75,9 @@ public:
      */
     void setOpacity(float opacity);
 
+    void setBgColor(const Vector4& color);
+    const Vector4& getBgColor() const;
+
     /**
      * Set the blend color of this control's skin.
      *
@@ -78,7 +85,7 @@ public:
      * @param states The states to set this property on.
      *               One or more members of the Control::State enum, ORed together.
      */
-    void setColor(const Vector4& color, OverlayType state=OverlayType::OVERLAY_NORMAL);
+    void setColor(const Vector4& color);
 
     /**
      * Get the blend color of this control's skin for a given state.
@@ -87,7 +94,7 @@ public:
      *
      * @return The blend color of this control's skin.
      */
-    const Vector4& getColor(OverlayType state=OverlayType::OVERLAY_NORMAL) const;
+    const Vector4& getColor() const;
 
     /**
      * Get the font used by this control for a given state.
@@ -165,6 +172,15 @@ public:
      */
     void setTextColor(const Vector4& color);
 
+
+    void setBgImage(BorderImage* BorderImage);
+    BorderImage* getBgImage() const;
+
+    void setImage(ThemeImage* image);
+    ThemeImage* getImage() const;
+
+
+
     /**
     * @see AnimationTarget::getAnimationPropertyComponentCount
     */
@@ -179,9 +195,6 @@ public:
     * @see AnimationTarget::setAnimationProperty
     */
     void setAnimationPropertyValue(int propertyId, AnimationValue* value, float blendWeight = 1.0f);
-    
-    void setBgImage(BorderImage* BorderImage);
-    BorderImage* getBgImage() const;
 
     /**
      * Constructor.
@@ -201,18 +214,20 @@ public:
     /**
      * Hidden copy assignment operator.
      */
-    Style& operator=(const Style&);
+    Style& operator=(const Style&) = delete;
 
     /**
      * Returns the Id of this Style.
      */
     const char* getId() const;
-    
+    void setId(const char* id);
 private:
     SPtr<Theme> _theme;
     std::string _id;
     BorderImage* _background;
-    Vector4 _colors[OVERLAY_MAX];
+    ThemeImage* _image;
+    Vector4 _bgColor;
+    Vector4 _color;
 
     //font
     Font* _font;
@@ -221,6 +236,8 @@ private:
     bool _textRightToLeft;
     Vector4 _textColor;
     float _opacity;
+
+    std::vector<UPtr<Style> > _stateStyles;
 };
 
 }

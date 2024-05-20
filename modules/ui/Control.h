@@ -639,6 +639,7 @@ public:
      * @return This control's style.
      */
     Style* getStyle() const;
+    Style* getStateStyle() const;
 
     Style* overrideStyle();
 
