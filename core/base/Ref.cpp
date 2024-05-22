@@ -46,9 +46,22 @@ void Refable::addRef()
     ++_refCount;
 }
 
+void Refable::disposeWeakRef() {
+    if (_weakRefBlock) {
+        std::lock_guard<std::mutex> guard(traceLock);
+        if (_weakRefBlock->_weakRefCount == 0) {
+            delete _weakRefBlock;
+        }
+        else {
+            _weakRefBlock->_pointer = NULL;
+        }
+    }
+}
+
 void Refable::release()
 {
     if (_isUnique) {
+        disposeWeakRef();
         delete this;
         return;
     }
@@ -56,15 +69,7 @@ void Refable::release()
     GP_ASSERT(_refCount > 0 && _refCount < 1000000);
     if ((--_refCount) <= 0)
     {
-        if (_weakRefBlock) {
-            std::lock_guard<std::mutex> guard(traceLock);
-            if (_weakRefBlock->_weakRefCount == 0) {
-                delete _weakRefBlock;
-            }
-            else {
-                _weakRefBlock->_pointer = NULL;
-            }
-        }
+        disposeWeakRef();
         delete this;
     }
 }

@@ -96,6 +96,8 @@ protected:
     virtual ~Refable();
 
 private:
+    void disposeWeakRef();
+
 #if NO_THREAD_SAFE
     unsigned int _refCount;
 #else
