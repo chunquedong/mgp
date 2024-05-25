@@ -108,6 +108,8 @@ protected:
      */
     ~TextBox();
 
+    void updateAbsoluteBounds(const Vector2& offset);
+
 
     virtual void onSerialize(Serializer* serializer);
 

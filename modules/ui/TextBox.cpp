@@ -1,6 +1,21 @@
 #include "TextBox.h"
 #include "platform/Toolkit.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+
+extern "C" {
+  extern void editTextCreate(int type, const char* text, mgp::TextBox* textBox);
+  extern void editTextRemove();
+  extern void editTextUpdate(int x, int y, int w, int h, int fontSize);
+
+  void EMSCRIPTEN_KEEPALIVE editTextOnTextChange(mgp::TextBox* textBox, const char* text) {
+      textBox->setText(text);
+      textBox->notifyListeners(mgp::Control::Listener::TEXT_CHANGED);
+  }
+}
+#endif
+
 namespace mgp
 {
 
@@ -84,6 +99,10 @@ void TextBox::setCaretLocation(unsigned int index)
 
 bool TextBox::touchEvent(MotionEvent::MotionType evt, int x, int y, unsigned int contactIndex)
 {
+#ifdef __EMSCRIPTEN__
+    return false;
+#endif
+
     if (getState() == ACTIVE) {
         switch (evt)
         {
@@ -151,6 +170,9 @@ static unsigned int findNextWord(const std::string& text, unsigned int from, boo
 
 bool TextBox::keyEvent(Keyboard::KeyEvent evt, int key)
 {
+#ifdef __EMSCRIPTEN__
+    return false;
+#endif
     switch (evt)
     {
         case Keyboard::KEY_PRESS:
@@ -333,16 +355,31 @@ void TextBox::controlEvent(Control::Listener::EventType evt)
 
     switch (evt)
     {
-    case Control::Listener::FOCUS_GAINED:
+    case Control::Listener::FOCUS_GAINED: {
+#ifdef __EMSCRIPTEN__
+        editTextCreate(_inputMode, _text.c_str(), this);
+
+        int fontSize = getStyle()->getFontSize();
+        editTextUpdate(_absoluteBounds.x + getPadding().left, _absoluteBounds.y + getPadding().top,
+            _absoluteBounds.width - getPadding().left - getPadding().right,
+            _absoluteBounds.height - getPadding().top - getPadding().bottom, fontSize);
+#endif
         Toolkit::cur()->displayKeyboard(true);
         break;
-
+    }
     case Control::Listener::FOCUS_LOST:
+    #ifdef __EMSCRIPTEN__
+        editTextRemove();
+    #endif
         Toolkit::cur()->displayKeyboard(false);
         break;
     default:
         break;
     }
+}
+
+void TextBox::updateAbsoluteBounds(const Vector2& offset) {
+    Label::updateAbsoluteBounds(offset);
 }
 
 void TextBox::updateState(State state)
