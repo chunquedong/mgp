@@ -5,14 +5,13 @@
 
 namespace mgp
 {
-    class CompressedTexture {
+    class GLCompressedTexture : public CompressedTexture {
     public:
-        static UPtr<Texture> createCompressedDdsKtx(const char* path);
+        UPtr<Texture> createCompressedDdsKtx(const char* path);
 
-        static UPtr<Texture> createCompressedPVRTC(const char* path);
+        UPtr<Texture> createCompressedPVRTC(const char* path);
 
-        static UPtr<Texture> createCompressedDDS(const char* path);
-
+        UPtr<Texture> createCompressedDDS(const char* path);
     };
 }
 

@@ -13,6 +13,15 @@ namespace mgp
 /** Texture handle. */
 typedef unsigned int TextureHandle;
 
+class CompressedTexture {
+public:
+    virtual UPtr<Texture> createCompressedDdsKtx(const char* path) { return UPtr<Texture>(); }
+
+    virtual UPtr<Texture> createCompressedPVRTC(const char* path) { return UPtr<Texture>(); }
+
+    virtual UPtr<Texture> createCompressedDDS(const char* path) { return UPtr<Texture>(); }
+};
+
 /**
  * Defines a standard texture.
  */

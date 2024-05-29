@@ -94,7 +94,7 @@ void* load_file(const char*file, int *outSize) {
     return data;
 }
 
-UPtr<Texture> CompressedTexture::createCompressedDdsKtx(const char* path) {
+UPtr<Texture> GLCompressedTexture::createCompressedDdsKtx(const char* path) {
     int size;
     void* dds_data = load_file(path, &size);
     if (!dds_data) return UPtr<Texture>(NULL);
@@ -162,7 +162,7 @@ UPtr<Texture> CompressedTexture::createCompressedDdsKtx(const char* path) {
 }
 
 #else
-UPtr<Texture> CompressedTexture::createCompressedDdsKtx(const char* path) {
+UPtr<Texture> GLCompressedTexture::createCompressedDdsKtx(const char* path) {
     return UPtr<Texture>();
 }
 #endif
@@ -196,7 +196,7 @@ GLubyte* readCompressedPVRTC(const char* path, Stream* stream, GLsizei* width, G
 
 GLubyte* readCompressedPVRTCLegacy(const char* path, Stream* stream, GLsizei* width, GLsizei* height, GLenum* format, unsigned int* mipMapCount, unsigned int* faceCount, GLenum faces[6]);
 
-UPtr<Texture> CompressedTexture::createCompressedPVRTC(const char* path)
+UPtr<Texture> GLCompressedTexture::createCompressedPVRTC(const char* path)
 {
     UPtr<Texture> texture;
 
@@ -564,7 +564,7 @@ GLubyte* readCompressedPVRTCLegacy(const char* path, Stream* stream, GLsizei* wi
     return data;
 }
 #else
-UPtr<Texture> CompressedTexture::createCompressedPVRTC(const char* path) {
+UPtr<Texture> GLCompressedTexture::createCompressedPVRTC(const char* path) {
     return UPtr<Texture>();
 }
 #endif
@@ -589,7 +589,7 @@ int getMaskByteIndex(unsigned int mask)
 }
 
 
-UPtr<Texture> CompressedTexture::createCompressedDDS(const char* path)
+UPtr<Texture> GLCompressedTexture::createCompressedDDS(const char* path)
 {
     GP_ASSERT(path);
 
@@ -950,7 +950,7 @@ UPtr<Texture> CompressedTexture::createCompressedDDS(const char* path)
     return texture;
 }
 #else
-UPtr<Texture> CompressedTexture::createCompressedDDS(const char* path) {
+UPtr<Texture> GLCompressedTexture::createCompressedDDS(const char* path) {
     return UPtr<Texture>();
 }
 #endif
