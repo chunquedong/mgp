@@ -11,7 +11,7 @@
 namespace mgp
 {
 
-    static AudioController* g_cur;
+static AudioController* g_cur;
 
 AudioController::AudioController() 
 : _alcDevice(NULL), _alcContext(NULL), _pausingSource(NULL), _streamingThreadActive(true)
@@ -29,12 +29,17 @@ AudioController* AudioController::cur()
     return g_cur;
 }
 
+bool AudioController::isValid()
+{
+    return _alcDevice && _alcContext;
+}
+
 void AudioController::initialize()
 {
     _alcDevice = alcOpenDevice(NULL);
     if (!_alcDevice)
     {
-        GP_ERROR("Unable to open OpenAL device.\n");
+        GP_WARN("Unable to open OpenAL device.\n");
         return;
     }
     
@@ -58,6 +63,8 @@ void AudioController::initialize()
 
 void AudioController::finalize()
 {
+    if (!_alcDevice)
+        return;
     GP_ASSERT(_streamingSources.empty());
     if (_streamingThread.get())
     {
@@ -81,6 +88,8 @@ void AudioController::finalize()
 
 void AudioController::pause()
 {
+    if (!_alcDevice)
+        return;
     std::set<AudioSource*>::iterator itr = _playingSources.begin();
 
     // For each source that is playing, pause it.
@@ -101,6 +110,8 @@ void AudioController::pause()
 
 void AudioController::resume()
 {   
+    if (!_alcDevice)
+        return;
     alcMakeContextCurrent(_alcContext);
 #ifdef ALC_SOFT_pause_device
     alcDeviceResumeSOFT(_alcDevice);
@@ -121,6 +132,8 @@ void AudioController::resume()
 
 void AudioController::update(float elapsedTime)
 {
+    if (!_alcDevice)
+        return;
     AudioListener* listener = AudioListener::getInstance();
     if (listener)
     {
