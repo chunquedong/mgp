@@ -356,6 +356,16 @@ void Node::getAllDrawable(std::vector<Drawable*> &list) {
     }
 }
 
+void Node::getAllAnimations(std::set<Animation*>& animations)
+{
+    getAnimations(animations);
+
+    // Recurse.
+    for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
+        child->getAllAnimations(animations);
+    }
+}
+
 Scene* Node::getScene() const
 {
     if (_scene)

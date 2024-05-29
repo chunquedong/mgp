@@ -45,11 +45,14 @@ UPtr<MeshSkin> MeshSkin::clone(NodeCloneContext &context) const
     const unsigned int jointCount = getJointCount();
     skin->setJointCount(jointCount);
     
-    skin->_rootJoint = _rootJoint;
+    //skin->_rootJoint = _rootJoint;
+    skin->_rootJointName = _rootJointName;
     for (unsigned int i = 0; i < jointCount; ++i)
     {  
         BoneJoint* newJoint = skin->getJoint(i);
-        *newJoint = _joints[i];
+        //*newJoint = _joints[i];
+        newJoint->_bindPose = _joints[i]._bindPose;
+        newJoint->_name = _joints[i]._name;
     }
     
     return UPtr<MeshSkin>(skin);
@@ -124,6 +127,7 @@ Node* MeshSkin::getRootJoint() const
 void MeshSkin::setRootJoint(Node* joint)
 {
     _rootJoint = joint;
+    _rootJointName = _rootJoint->getName();
 }
 
 void MeshSkin::bindByRootJoint() {

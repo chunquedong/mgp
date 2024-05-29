@@ -195,6 +195,8 @@ public:
 
     void getAllDrawable(std::vector<Drawable*> &list);
 
+    void getAllAnimations(std::set<Animation*>& animations);
+
     /**
      * Gets the scene this node is currenlty within.
      *

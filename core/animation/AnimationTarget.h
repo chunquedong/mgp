@@ -3,6 +3,7 @@
 
 #include "math/Curve.h"
 #include "AnimationController.h"
+#include <set>
 
 namespace mgp
 {
@@ -145,6 +146,7 @@ public:
      */
     Animation* getAnimation(const char* id = NULL) const;
 
+    void getAnimations(std::set<Animation*>& animations) const;
 protected:
 
     /**

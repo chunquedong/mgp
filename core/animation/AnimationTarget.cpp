@@ -340,6 +340,18 @@ Animation* AnimationTarget::getAnimation(const char* id) const
     return NULL;
 }
 
+void AnimationTarget::getAnimations(std::set<Animation*>& animations) const
+{
+    if (_animationChannels)
+    {
+        std::vector<AnimationChannel*>::iterator itr = _animationChannels->begin();
+        GP_ASSERT(*itr);
+
+        Animation* anim = (*itr)->getAnimation();
+        animations.insert(anim);
+    }
+}
+
 int AnimationTarget::getPropertyId(TargetType type, const char* propertyIdStr)
 {
     GP_ASSERT(propertyIdStr);
