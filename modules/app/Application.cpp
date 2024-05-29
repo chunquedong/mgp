@@ -11,7 +11,7 @@
 #include "SceneView.h"
 #include "base/ThreadPool.h"
 #include "objects/Terrain.h"
-
+#include "openGL/CompressedTexture.h"
 #include "scene/AssetManager.h"
 
 
@@ -28,6 +28,7 @@ ALenum __al_error_code = AL_NO_ERROR;
 
 extern mgp::Renderer* g_rendererInstance;
 //extern mgp::ThreadPool* g_threadPool;
+extern mgp::CompressedTexture* g_compressedTexture;
 
 namespace mgp
 {
@@ -137,6 +138,8 @@ Application::Application()
 
     regiseterSerializer();
 
+    g_compressedTexture = new GLCompressedTexture();
+
     _timeStart = System::millisTicks();
 
     printf("MGP 1.0\n");
@@ -155,6 +158,8 @@ Application::~Application()
     delete _eventTimer;
 
     __gameInstance = NULL;
+
+    delete g_compressedTexture;
 
     //if (g_threadPool) {
     //    g_threadPool->stop();

@@ -71,18 +71,18 @@ void TreeView::addItemLabel(TreeItem* item, int level) {
         image->setImagePath("res/ui/right.png");
         image->setSize(23, 23);
         image->setPadding(4, 4, 4, 4);
-        image->addListener(this, Listener::CLICK);
+        image->addListener(this, Control::Listener::CLICK);
         item->_contronl->addControl(std::move(image));
         
         UPtr<Label> label = Control::create<Label>("treeItemLabel");
-        label->addListener(this, Listener::CLICK);
+        label->addListener(this, Control::Listener::CLICK);
         //label->setWidth(1, true);
         item->_contronl->addControl(std::move(label));
 
         if (_useCheckBox) {
             UPtr<CheckBox> checkbox = Control::create<CheckBox>("tree_item_checkbox");
             checkbox->setHeight(1, Control::AUTO_PERCENT_PARENT);
-            checkbox->addListener(this, Listener::CLICK);
+            checkbox->addListener(this, Control::Listener::CLICK);
             item->_contronl->addControl(std::move(checkbox));
         }
     }
@@ -172,8 +172,8 @@ void TreeView::checkedChange(TreeItem* item) {
 
 }
 
-void TreeView::controlEvent(Control* control, Listener::EventType evt) {
-    if (evt == Listener::CLICK) {
+void TreeView::controlEvent(Control* control, Control::Listener::EventType evt) {
+    if (evt == Control::Listener::CLICK) {
         TreeItem* item = findTreeItem(control, root.get());
 
         bool checkedChanged = false;
@@ -193,7 +193,7 @@ void TreeView::controlEvent(Control* control, Listener::EventType evt) {
         if (Icon* checkbox = dynamic_cast<Icon*>(control)) {
             item->expanded = !item->expanded;
             _isDirty = true;
-            notifyListeners(Listener::EXPANDED);
+            notifyListeners(Control::Listener::EXPANDED);
         }
 
     }
@@ -210,7 +210,7 @@ void TreeView::setSelectItem(TreeItem* item) {
 
         _selectItem = item;
         _isDirty = true;
-        notifyListeners(Listener::SELECT_CHANGE);
+        notifyListeners(Control::Listener::SELECT_CHANGE);
 
         if (_selectItem && _selectItem->_contronl.get()) {
             Control* control = _selectItem->_contronl->findControl("treeItemLabel");

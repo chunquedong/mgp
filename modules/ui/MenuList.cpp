@@ -41,7 +41,7 @@ void MenuList::onDeserialize(Serializer* serializer) {
 }
 
 void MenuList::controlEvent(Control* control, EventType evt) {
-    if (evt == Listener::CLICK) {
+    if (evt == Control::Listener::CLICK) {
         int index = -1;
         for (int i = 0; i < getControlCount(); ++i) {
             Control* c = getControl(i);
@@ -53,7 +53,7 @@ void MenuList::controlEvent(Control* control, EventType evt) {
 
         _selectIndex = index;
         if (index != -1) {
-            notifyListeners(Listener::SELECT_CHANGE);
+            notifyListeners(Control::Listener::SELECT_CHANGE);
         }
 
         close();
@@ -68,7 +68,7 @@ void MenuList::initItems(std::vector<std::string>& items) {
         label->setStyleName("MenuItem");
         label->setText(name.c_str());
         label->setWidth(1, Control::AUTO_PERCENT_PARENT);
-        label->addListener(this, Listener::CLICK);
+        label->addListener(this, Control::Listener::CLICK);
         this->addControl(std::move(label));
     }
 }

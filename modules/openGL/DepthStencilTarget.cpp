@@ -2,6 +2,8 @@
 #include "ogl.h"
 #include "DepthStencilTarget.h"
 
+#include <algorithm>
+
 #ifndef GL_DEPTH24_STENCIL8_OES
 #define GL_DEPTH24_STENCIL8_OES 0x88F0
 #endif

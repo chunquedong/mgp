@@ -8,6 +8,8 @@
 #include "script/ScriptTarget.h"
 #include "math/Quaternion.h"
 
+#include <map>
+
 namespace mgp
 {
 

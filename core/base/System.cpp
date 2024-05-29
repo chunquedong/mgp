@@ -13,7 +13,7 @@
 
 using namespace mgp;
 
-#ifndef WIN32
+#ifndef _WIN32
 
   #include <sys/types.h>
   #include <time.h>
@@ -131,7 +131,7 @@ int64_t System::currentTimeMillis() {
 
 
 
-#ifndef WIN32
+#ifndef _WIN32
 
   #include <sys/types.h>
   #include <time.h>
@@ -173,7 +173,7 @@ int64_t System::currentTimeMillis() {
 #include <thread>
 
 uint64_t System::currentThreadId() {
-#ifdef WIN32
+#ifdef _WIN32
   //unsigned long GetCurrentThreadId(void);
   return GetCurrentThreadId();
 #else

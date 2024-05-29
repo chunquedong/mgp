@@ -7,6 +7,8 @@
 #define LUA_COMPAT_APIINTCASTS
 #include <lua.hpp>
 
+#include <map>
+
 namespace mgp
 {
 

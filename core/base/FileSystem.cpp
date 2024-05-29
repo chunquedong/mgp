@@ -2,7 +2,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef WIN32
+#ifdef _WIN32
     #include <windows.h>
     #include <tchar.h>
     #include <stdio.h>
@@ -158,7 +158,7 @@ bool FileSystem::mkdirs(const char* cpath) {
         if (i > 0) dirPath += "/";
         dirPath += dirs[i];
         //printf("mkdir: %s\n", dirPath.c_str());
-#ifdef WIN32
+#ifdef _WIN32
         DWORD rc = GetFileAttributesA(dirPath.c_str());
         if (rc == INVALID_FILE_ATTRIBUTES) {
             if (CreateDirectoryA(dirPath.c_str(), NULL) == 0) {
@@ -201,7 +201,7 @@ const char* FileSystem::resolvePath(const char* path)
 
 bool FileSystem::listFiles(const char* dirPath, std::vector<std::string>& files)
 {
-#ifdef WIN32
+#ifdef _WIN32
     std::string path(FileSystem::getResourcePath());
     if (dirPath && strlen(dirPath) > 0)
     {
@@ -438,7 +438,7 @@ bool FileSystem::isAbsolutePath(const char* filePath)
 {
     if (filePath == 0 || filePath[0] == '\0')
         return false;
-#ifdef WIN32
+#ifdef _WIN32
     if (filePath[1] != '\0')
     {
         char first = filePath[0];
@@ -518,7 +518,7 @@ std::string FileSystem::getDirectoryName(const char* path)
     {
         return "";
     }
-#ifdef WIN32
+#ifdef _WIN32
     char drive[_MAX_DRIVE];
     char dir[_MAX_DIR];
     _splitpath(path, drive, dir, NULL, NULL);
@@ -570,7 +570,7 @@ std::string FileSystem::getExtension(const char* path, bool uppper)
 
 std::string FileSystem::getParentPath(const char* path) {
     std::string spath = path;
-#if WIN32
+#if _WIN32
     std::replace(spath.begin(), spath.end(), '\\', '/');
 #endif
 
@@ -583,7 +583,7 @@ std::string FileSystem::getParentPath(const char* path) {
 
 std::string FileSystem::getBaseName(const char* path) {
     std::string spath = path;
-#if WIN32
+#if _WIN32
     std::replace(spath.begin(), spath.end(), '\\', '/');
 #endif
 
@@ -600,7 +600,7 @@ std::string FileSystem::getBaseName(const char* path) {
 }
 
 bool FileSystem::remove(const char* path) {
-#ifdef WIN32
+#ifdef _WIN32
     if (DeleteFileA(path)) {
         return true;
     }

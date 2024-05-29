@@ -5,6 +5,7 @@
 
 #include <thread>
 #include <mutex>
+#include <set>
 
 namespace mgp
 {
@@ -29,6 +30,7 @@ public:
 
     static AudioController* cur();
 
+    bool isValid();
 private:
     
     /**
