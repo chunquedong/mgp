@@ -27,7 +27,7 @@ namespace mgp
 GLFWwindow* window;
 static bool __multiSampling = false;
 
-#ifndef WIN32
+#ifndef _WIN32
 int __argc = 0;
 char** __argv = 0;
 #endif
@@ -39,7 +39,7 @@ PlatformGlfw::PlatformGlfw() {
 
 extern int strcmpnocase(const char* s1, const char* s2)
 {
-#ifdef WIN32
+#ifdef _WIN32
     return _strcmpi(s1, s2);
 #else
     return strcasecmp(s1, s2);
@@ -303,7 +303,7 @@ static void getContentScale(GLFWwindow* window) {
 
 static void getCursorPosPixel(GLFWwindow* window, double* x, double* y) {
     glfwGetCursorPos(window, x, y);
-#if defined(WIN32) || defined(__EMSCRIPTEN__)
+#if defined(_WIN32) || defined(__EMSCRIPTEN__)
 #else
     getContentScale(window);
     *x *= lastXScale;
@@ -313,7 +313,7 @@ static void getCursorPosPixel(GLFWwindow* window, double* x, double* y) {
 
 static void cursor_position_callback(GLFWwindow* window, double x, double y)
 {
-#if defined(WIN32) || defined(__EMSCRIPTEN__)
+#if defined(_WIN32) || defined(__EMSCRIPTEN__)
 #else
     getContentScale(window);
     x *= lastXScale;
@@ -410,7 +410,7 @@ void PlatformGlfw::init(const char* title, int w, int h)
     if (!glfwInit())
         goto error;
 
-#if WIN32
+#if _WIN32
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     //glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);

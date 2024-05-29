@@ -4,6 +4,8 @@
 #include "platform/Toolkit.h"
 #include "base/FileSystem.h"
 
+#include <algorithm>
+
 #include "jvalue.hpp"
 #include "HimlParser.hpp"
 

@@ -5,6 +5,8 @@
 #include "platform/Toolkit.h"
 #include "AIController.h"
 
+#include <algorithm>
+
 namespace mgp
 {
 

@@ -116,17 +116,17 @@ UPtr<Texture> Texture::create(const char* path, bool generateMipmaps)
             else if (tolower(ext[1]) == 'p' && tolower(ext[2]) == 'v' && tolower(ext[3]) == 'r')
             {
                 // PowerVR Compressed Texture RGBA.
-                texture = CompressedTexture::createCompressedPVRTC(path);
+                //texture = CompressedTexture::createCompressedPVRTC(path);
             }
             else if (tolower(ext[1]) == 'd' && tolower(ext[2]) == 'd' && tolower(ext[3]) == 's')
             {
                 // DDS file format (DXT/S3TC) compressed textures
-                texture = CompressedTexture::createCompressedDDS(path);
+                //texture = CompressedTexture::createCompressedDDS(path);
             }
             else if (tolower(ext[1]) == 'k' && tolower(ext[2]) == 't' && tolower(ext[3]) == 'x')
             {
                 // KTX file format compressed textures
-                texture = CompressedTexture::createCompressedDdsKtx(path);
+                //texture = CompressedTexture::createCompressedDdsKtx(path);
             }
             break;
         }

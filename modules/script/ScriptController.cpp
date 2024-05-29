@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <sstream>
-
+#include <algorithm>
 
 #ifndef GP_NO_LUA_BINDINGS
 #include "lua/lua_all_bindings.h"

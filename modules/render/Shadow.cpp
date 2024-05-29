@@ -13,6 +13,8 @@
 #include "RenderPath.h"
 #include "scene/Drawable.h"
 
+#include <limits>
+
 using namespace mgp;
 
 Shadow::Shadow(): _material(NULL), _cascadeCount(2), _cascadeTextureSize(1024) {

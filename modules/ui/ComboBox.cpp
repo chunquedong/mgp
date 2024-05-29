@@ -50,7 +50,7 @@ void ComboBox::setSelectIndex(int v, bool fireEvent) {
         else {
             setText("");
         }
-        if (fireEvent) this->notifyListeners(Listener::SELECT_CHANGE);
+        if (fireEvent) this->notifyListeners(Control::Listener::SELECT_CHANGE);
     }
 }
 
@@ -65,7 +65,7 @@ void ComboBox::controlEvent(Control::Listener::EventType evt)
         list->initItems(this->_items);
         auto b = this->getAbsoluteBounds();
         list->setPosition(b.x, b.bottom());
-        list->addListener(this, Listener::SELECT_CHANGE);
+        list->addListener(this, Control::Listener::SELECT_CHANGE);
         list->show(this);
         break;
     }
@@ -73,7 +73,7 @@ void ComboBox::controlEvent(Control::Listener::EventType evt)
 
 void ComboBox::controlEvent(Control* control, EventType evt) {
     MenuList* list = dynamic_cast<MenuList*>(control);
-    if (list && evt == Listener::SELECT_CHANGE) {
+    if (list && evt == Control::Listener::SELECT_CHANGE) {
         setSelectIndex(list->getSelectIndex());
     }
 }

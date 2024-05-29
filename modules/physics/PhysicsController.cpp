@@ -6,6 +6,8 @@
 #include "objects/Terrain.h"
 #include "material/MaterialParameter.h"
 
+#include <algorithm>
+
 #ifdef GP_USE_MEM_LEAK_DETECTION
 #undef new
 #endif
