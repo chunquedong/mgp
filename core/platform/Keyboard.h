@@ -188,10 +188,10 @@ public:
     };
 
     enum Modifier {
-        MOD_SHIFT           =0x0001,
-        MOD_CONTROL         =0x0002,
-        MOD_ALT             =0x0004,
-        MOD_SUPER           =0x0008
+        ModShift           =0x0001,
+        ModControl         =0x0002,
+        ModAlt             =0x0004,
+        ModSuper           =0x0008
     };
 public:
 

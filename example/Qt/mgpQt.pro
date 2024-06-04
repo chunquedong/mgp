@@ -67,9 +67,9 @@ CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/mgpModules-1.0-de
 CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/mgpPro-1.0-debug/lib
 CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/glfw-3.3.8-debug/lib
 
-LIBS += -lmgpCore
-LIBS += -lmgpModules
 # LIBS += -lmgpPro
+LIBS += -lmgpModules
+LIBS += -lmgpCore
 LIBS += -lglew
 LIBS += -lopenal
 LIBS += -lbullet
