@@ -20,6 +20,7 @@ class Texture : public Resource, public Serializable
 {
     friend class Sampler;
     friend class CompressedTexture;
+    friend class GLCompressedTexture;
     friend class GLRenderer;
 public:
 
