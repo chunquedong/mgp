@@ -23,12 +23,12 @@
 namespace mgp
 {
 
-    static PhysicsController* g_cur;
+static PhysicsController* g_cur;
 
-const int PhysicsController::DIRTY         = 0x01;
-const int PhysicsController::COLLISION     = 0x02;
-const int PhysicsController::REGISTERED    = 0x04;
-const int PhysicsController::REMOVE        = 0x08;
+const int PhysicsController::Dirty         = 0x01;
+const int PhysicsController::Collision     = 0x02;
+const int PhysicsController::Registered    = 0x04;
+const int PhysicsController::Remove        = 0x08;
 
 PhysicsController::PhysicsController()
   : _isUpdating(false), _collisionConfiguration(NULL), _dispatcher(NULL),
@@ -421,13 +421,13 @@ btScalar PhysicsController::CollisionCallback::addSingleResult(btManifoldPoint& 
     }
 
     // Fire collision event.
-    if ((collisionInfo->_status & COLLISION) == 0)
+    if ((collisionInfo->_status & Collision) == 0)
     {
         std::vector<PhysicsCollisionObject::CollisionListener*>::const_iterator iter = collisionInfo->_listeners.begin();
         for (; iter != collisionInfo->_listeners.end(); iter++)
         {
             GP_ASSERT(*iter);
-            if ((collisionInfo->_status & REMOVE) == 0)
+            if ((collisionInfo->_status & Remove) == 0)
             {
                 (*iter)->collisionEvent(PhysicsCollisionObject::CollisionListener::COLLIDING, pair, Vector3(cp.getPositionWorldOnA().x(), cp.getPositionWorldOnA().y(), cp.getPositionWorldOnA().z()),
                     Vector3(cp.getPositionWorldOnB().x(), cp.getPositionWorldOnB().y(), cp.getPositionWorldOnB().z()));
@@ -438,8 +438,8 @@ btScalar PhysicsController::CollisionCallback::addSingleResult(btManifoldPoint& 
     // Update the collision status cache (we remove the dirty bit
     // set in the controller's update so that this particular collision pair's
     // status is not reset to 'no collision' when the controller's update completes).
-    collisionInfo->_status &= ~DIRTY;
-    collisionInfo->_status |= COLLISION;
+    collisionInfo->_status &= ~Dirty;
+    collisionInfo->_status |= Collision;
     return 0.0f;
 }
 
@@ -548,10 +548,10 @@ void PhysicsController::update(float elapsedTime)
         }
     }
 
-    // All statuses are set with the DIRTY bit before collision processing occurs.
+    // All statuses are set with the Dirty bit before collision processing occurs.
     // During collision processing, if a collision occurs, the status is 
-    // set to COLLISION and the DIRTY bit is cleared. Then, after collision processing 
-    // is finished, if a given status is still dirty, the COLLISION bit is cleared.
+    // set to Collision and the Dirty bit is cleared. Then, after collision processing 
+    // is finished, if a given status is still dirty, the Collision bit is cleared.
     //
     // If an entry was marked for removal in the last frame, fire NOT_COLLIDING if appropriate and remove it now.
 
@@ -559,9 +559,9 @@ void PhysicsController::update(float elapsedTime)
     std::map<PhysicsCollisionObject::CollisionPair, CollisionInfo>::iterator iter = _collisionStatus.begin();
     for (; iter != _collisionStatus.end();)
     {
-        if ((iter->second._status & REMOVE) != 0)
+        if ((iter->second._status & Remove) != 0)
         {
-            if ((iter->second._status & COLLISION) != 0 && iter->first.objectB)
+            if ((iter->second._status & Collision) != 0 && iter->first.objectB)
             {
                 size_t size = iter->second._listeners.size();
                 for (size_t i = 0; i < size; i++)
@@ -577,7 +577,7 @@ void PhysicsController::update(float elapsedTime)
         }
         else
         {
-            iter->second._status |= DIRTY;
+            iter->second._status |= Dirty;
             iter++;
         }
     }
@@ -589,7 +589,7 @@ void PhysicsController::update(float elapsedTime)
         // If this collision pair was one that was registered for listening, then perform the collision test.
         // (In the case where we register for all collisions with a rigid body, there will be a lot
         // of collision pairs in the status cache that we did not explicitly register for.)
-        if ((iter->second._status & REGISTERED) != 0 && (iter->second._status & REMOVE) == 0)
+        if ((iter->second._status & Registered) != 0 && (iter->second._status & Remove) == 0)
         {
             if (iter->first.objectB)
                 _world->contactPairTest(iter->first.objectA->getCollisionObject(), iter->first.objectB->getCollisionObject(), *_collisionCallback);
@@ -602,9 +602,9 @@ void PhysicsController::update(float elapsedTime)
     iter = _collisionStatus.begin();
     for ( ; iter != _collisionStatus.end(); iter++)
     {
-        if ((iter->second._status & DIRTY) != 0)
+        if ((iter->second._status & Dirty) != 0)
         {
-            if ((iter->second._status & COLLISION) != 0 && iter->first.objectB)
+            if ((iter->second._status & Collision) != 0 && iter->first.objectB)
             {
                 size_t size = iter->second._listeners.size();
                 for (size_t i = 0; i < size; i++)
@@ -613,7 +613,7 @@ void PhysicsController::update(float elapsedTime)
                 }
             }
 
-            iter->second._status &= ~COLLISION;
+            iter->second._status &= ~Collision;
         }
     }
 
@@ -631,7 +631,7 @@ void PhysicsController::addCollisionListener(PhysicsCollisionObject::CollisionLi
     // Add the listener and ensure the status includes that this collision pair is registered.
     CollisionInfo& info = _collisionStatus[pair];
     info._listeners.push_back(listener);
-    info._status |= PhysicsController::REGISTERED;
+    info._status |= PhysicsController::Registered;
 }
 
 void PhysicsController::removeCollisionListener(PhysicsCollisionObject::CollisionListener* listener, PhysicsCollisionObject* objectA, PhysicsCollisionObject* objectB)
@@ -643,7 +643,7 @@ void PhysicsController::removeCollisionListener(PhysicsCollisionObject::Collisio
     // Mark the collision pair for these objects for removal.
     if (_collisionStatus.count(pair) > 0)
     {
-        _collisionStatus[pair]._status |= REMOVE;
+        _collisionStatus[pair]._status |= Remove;
     }
 }
 
@@ -712,7 +712,7 @@ void PhysicsController::removeCollisionObject(PhysicsCollisionObject* object, bo
         for (; iter != _collisionStatus.end(); iter++)
         {
             if (iter->first.objectA == object || iter->first.objectB == object)
-                iter->second._status |= REMOVE;
+                iter->second._status |= Remove;
         }
     }
 }

@@ -367,10 +367,10 @@ private:
     };
 
     // Internal constants for the collision status cache.
-    static const int DIRTY;
-    static const int COLLISION;
-    static const int REGISTERED;
-    static const int REMOVE;
+    static const int Dirty;
+    static const int Collision;
+    static const int Registered;
+    static const int Remove;
 
     // Represents the collision listeners and status for a given collision pair (used by the collision status cache).
     struct CollisionInfo
