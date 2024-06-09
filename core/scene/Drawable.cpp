@@ -60,6 +60,7 @@ bool Drawable::raycast(RayQuery& query) {
             query.target = localQuery.target;
             query.path.swap(localQuery.path);
             query.drawable = this;
+            query.id = localQuery.id;
         }
         return true;
     }

@@ -49,6 +49,11 @@ struct RayQuery {
     * element index: [partIndex/batchIndex,triangleIndex]
     */
     std::vector<int> path;
+
+    /**
+    * element id; invalid for MeshBatch
+    */
+    int id = -1;
     /**
     * min distance to ray origin
     */

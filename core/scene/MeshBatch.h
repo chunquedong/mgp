@@ -89,7 +89,7 @@ public:
      * @param indices Array of indices into the vertex array (should be NULL for non-indexed batches).
      * @param indexCount Number of indices (should be zero for non-indexed batches).
      */
-    void add(const void* vertices, unsigned int vertexCount, const void* indices = NULL, unsigned int indexCount = 0);
+    void add(const void* vertices, unsigned int vertexCount, const void* indices = NULL, unsigned int indexCount = 0, int32_t id = -1);
 
     /**
      * Starts batching.
@@ -101,7 +101,7 @@ public:
      * Calling this method will clear any primitives currently in the batch and set the
      * position of the batch back to the beginning.
      */
-    void start();
+    virtual void start();
 
     /**
     * Determines if the batch has been started and not yet finished.
@@ -160,7 +160,12 @@ protected:
 
     UPtr<Material> _material;
     Mesh _mesh;
+
+    //submesh to vertex index mapping
     std::vector<uint32_t> _batchIndex;
+
+    //submesh to id mapping
+    std::vector<int32_t> _ids;
 public:
     UPtr<Mesh> _highlightMesh;
     UPtr<Material> _highlightMaterial;

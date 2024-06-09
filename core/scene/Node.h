@@ -592,6 +592,9 @@ public:
     */
     void setUserObject(UPtr<Refable> obj);
 
+    int64_t getUserId() { return _userId; }
+    void setUserId(int64_t v) { _userId = v; }
+
     /**
      * Returns the bounding sphere for the Node, in world space.
      *
@@ -822,6 +825,9 @@ protected:
 
     /** The user object component attached to this node. */
     UPtr<Refable> _userObject;
+
+    int64_t _userId = -1;
+
     /** The world matrix for this node. */
     mutable Matrix _world;
     /** The bounding sphere for this node. */

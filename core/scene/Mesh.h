@@ -312,7 +312,8 @@ public:
     void setVertexBuffer(SPtr<RenderBuffer> b) { _vertexBuffer = b; }
     void setIndexBuffer(SPtr<RenderBuffer> b) { _indexBuffer = b; }
 public:
-    template<typename T> bool raycastPart(RayQuery& query, int _bufferOffset, int _indexCount, int partIndex, PrimitiveType _primitiveType);
+    template<typename T> 
+    bool raycastPart(RayQuery& query, int _bufferOffset, int _indexCount, int partIndex, PrimitiveType _primitiveType, int id = -1);
 
     /**
      * Constructor.
@@ -360,8 +361,10 @@ protected:
 };
 
 
-template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset, int _indexCount, int partIndex, PrimitiveType _primitiveType) {
-    if (_primitiveType == Mesh::TRIANGLE_FAN || _primitiveType == Mesh::TRIANGLE_STRIP || _primitiveType == Mesh::LINE_LOOP || _primitiveType == Mesh::LINE_STRIP) {
+template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset,
+        int _indexCount, int partIndex, PrimitiveType _primitiveType, int id) {
+    if (_primitiveType == Mesh::TRIANGLE_FAN || _primitiveType == Mesh::TRIANGLE_STRIP || 
+        _primitiveType == Mesh::LINE_LOOP || _primitiveType == Mesh::LINE_STRIP) {
         return false;
     }
     int minTriangle = -1;
@@ -451,6 +454,7 @@ template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset, 
     if (minTriangle != -1) {
         std::vector<int> path = { partIndex, minTriangle };
         query.path = path;
+        query.id = id;
         return true;
     }
     return false;

@@ -63,7 +63,7 @@ bool MeshBatch::read(Stream* file) {
     return true;
 }
 
-void MeshBatch::add(const void* vertices, unsigned int vertexCount, const void* indices, unsigned int indexCount)
+void MeshBatch::add(const void* vertices, unsigned int vertexCount, const void* indices, unsigned int indexCount, int32_t id)
 {
     if (indices) {
         _batchIndex.push_back(_mesh.getIndexCount());
@@ -72,6 +72,10 @@ void MeshBatch::add(const void* vertices, unsigned int vertexCount, const void* 
         _batchIndex.push_back(_mesh.getVertexCount());
     }
     _mesh.merge(vertices, vertexCount, indices, indexCount);
+
+    if (id != -1) {
+        _ids.push_back(id);
+    }
 }
 
 static int getElementVertexCount(Mesh::PrimitiveType _primitiveType, int capacity) {
@@ -118,6 +122,7 @@ void MeshBatch::start()
     _started = true;
     _batchIndex.clear();
     _highlightMesh.clear();
+    _ids.clear();
 }
 
 bool MeshBatch::isStarted() const
@@ -159,12 +164,16 @@ bool MeshBatch::doRaycast(RayQuery& query) {
         int offset = _batchIndex[i];
         int end = i + 1 < _batchIndex.size() ? _batchIndex[i + 1] : getMesh()->getIndexCount();
         int size = end - offset;
+        int id = -1;
+        if (i < _ids.size()) {
+            id = _ids[i];
+        }
 
         if (_mesh.getIndexFormat() == Mesh::INDEX16) {
-            if (_mesh.raycastPart<uint16_t>(query, offset*2, size, i, _mesh.getPrimitiveType())) res = true;
+            if (_mesh.raycastPart<uint16_t>(query, offset*2, size, i, _mesh.getPrimitiveType(), id)) res = true;
         }
         else if (_mesh.getIndexFormat() == Mesh::INDEX32) {
-            if (_mesh.raycastPart<uint32_t>(query, offset*4, size, i, _mesh.getPrimitiveType())) res = true;
+            if (_mesh.raycastPart<uint32_t>(query, offset*4, size, i, _mesh.getPrimitiveType(), id)) res = true;
         }
     }
     return res;
