@@ -173,8 +173,8 @@ void Matrix4::createOrthographicOffCenter(Float left, Float right, Float bottom,
                                          Float zNearPlane, Float zFarPlane, Matrix4* dst)
 {
     GP_ASSERT(dst);
-    GP_ASSERT(right != left);
-    GP_ASSERT(top != bottom);
+    GP_ASSERT(right != left || left == 0);
+    GP_ASSERT(top != bottom || top == 0);
     GP_ASSERT(zFarPlane != zNearPlane);
 
     memset(dst, 0, MATRIX_SIZE);
