@@ -249,6 +249,13 @@ void Material::bindCamera(Camera* camera, Rectangle& viewport) {
         param->_temporary = true;
     }
 
+    uniform = _shaderProgram->getUniform("u_fovDivisor");
+    if (uniform) {
+        MaterialParameter* param = getParameter("u_fovDivisor");
+        double fovDivisor = tan(MATH_DEG_TO_RAD(camera->getFieldOfView()) / 2) / (viewport.height / 2);
+        param->setFloat(fovDivisor);
+        param->_temporary = true;
+    }
 
     uniform = _shaderProgram->getUniform("u_viewport");
     if (uniform) {
@@ -280,6 +287,14 @@ void Material::bindNode(Camera* camera, Node *node, Drawable* drawable) {
         MaterialParameter* param = getParameter("u_worldViewProjectionMatrix");
         param->setMatrix(worldViewProj);
         param->_temporary = true;
+
+        Uniform *uniform2 = _shaderProgram->getUniform("u_inverseWorldViewProjectionMatrix");
+        if (uniform2) {
+            worldViewProj.invert();
+            MaterialParameter* param = getParameter("u_inverseWorldViewProjectionMatrix");
+            param->setMatrix(worldViewProj);
+            param->_temporary = true;
+        }
     }
 
     uniform = _shaderProgram->getUniform("u_worldMatrix");
