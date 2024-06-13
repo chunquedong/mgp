@@ -62,6 +62,8 @@ void StringUtil::replace(String& self, const String& src, const String& dst) {
 
 std::vector<String> StringUtil::split(const String& self, const String &sep) {
   std::vector<String> tokens;
+  if (self.size() == 0)
+      return tokens;
   std::size_t start = 0, end = 0;
   while ((end = self.find(sep, start)) != std::string::npos) {
     tokens.push_back(self.substr(start, end - start));
