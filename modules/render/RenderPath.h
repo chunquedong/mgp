@@ -34,7 +34,7 @@ namespace mgp {
 		Renderer* _renderer;
 		RenderDataManager _renderDataManager;
 
-		static Model* _quadModel;
+		Model* _quadModel = NULL;
 
 		FrameBuffer* _frameBuffer;
 		FrameBuffer* _previousFrameBuffer;
@@ -63,8 +63,7 @@ namespace mgp {
 		RenderData* makeRenderDataSet();
 		void commitRenderData();
 		
-		static Model* fullscreenQuadModel();
-		static void releaseStatic();
+		Model* fullscreenQuadModel();
 
 		void setClearColor(const Vector4& color);
 		std::vector<RenderStage*>& getRenderStages() { return _renderStages; }

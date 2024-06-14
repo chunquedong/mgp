@@ -90,7 +90,7 @@ void SerializerManager::registerType(const std::string&  className, CreateObject
     }
     else
     {
-        GP_ERROR("className already registered:%s", className.c_str());
+        //GP_ERROR("className already registered:%s", className.c_str());
     }
 }
     
@@ -103,35 +103,12 @@ void SerializerManager::registerEnum(const std::string& enumName, EnumToStringCa
     }
     else
     {
-        GP_ERROR("enumName already registered:%s", enumName.c_str());
+        //GP_ERROR("enumName already registered:%s", enumName.c_str());
     }
 }
 
 void SerializerManager::registerSystemTypes()
 {
-    // Register engine types with
-    //this->registerType("mgp::Application::Config", Application::Config::createObject);
-    //this->registerType("mgp::Scene", Scene::createObject);
-    //this->registerType("mgp::Node", Node::createObject);
-    //this->registerType("mgp::Camera", Camera::createObject);
-    //this->registerType("mgp::Light", Light::createObject);
-    //this->registerType("mgp::Model", Model::createObject);
-    //this->registerType("mgp::Material", Material::createObject);
-    //this->registerType("mgp::Texture", Texture::createObject);
-    //this->registerType("mgp::MaterialParameter", MaterialParameter::createObject);
-
-    //// Register engine enums
-    //this->registerEnum("mgp::Camera::Mode", Camera::enumToString, Camera::enumParse);
-    //this->registerEnum("mgp::Light::Type", Light::enumToString, Light::enumParse);
-    //this->registerEnum("mgp::Light::Mode", Light::enumToString, Light::enumParse);
-    //this->registerEnum("mgp::Light::Shadows", Light::enumToString, Light::enumParse);
-
-    //this->registerEnum("mgp::Image::Format", Texture::enumToString, Texture::enumParse);
-    //this->registerEnum("mgp::Texture::Type", Texture::enumToString, Texture::enumParse);
-    //this->registerEnum("mgp::Texture::Wrap", Texture::enumToString, Texture::enumParse);
-    //this->registerEnum("mgp::Texture::Filter", Texture::enumToString, Texture::enumParse);
-
-    //this->registerEnum("mgp::MaterialParameter::Type", MaterialParameter::enumToString, MaterialParameter::enumParse);
 }
 
 }

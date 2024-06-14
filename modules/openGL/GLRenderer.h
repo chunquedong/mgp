@@ -14,16 +14,29 @@
 namespace mgp
 {
 class FrameBuffer;
+class GLFrameBuffer;
 
 class GLRenderer : public Renderer {
+	friend class GLFrameBuffer;
+	
 	uint64_t __currentShaderProgram = 0;
 	StateBlock stateBlock;
 	int _drawCallCount = 0;
+
+	int _width = 0;
+	int _height = 0;
+
+	GLFrameBuffer* _defaultFrameBuffer = NULL;
+    GLFrameBuffer* _currentFrameBuffer = NULL;
 public:
 	GLRenderer();
     ~GLRenderer();
 
 	void init() override;
+
+	unsigned int getWidth() const override;
+	unsigned int getHeight() const override;
+	void onResize(int w, int h) override;
 
 	void clear(ClearFlags flags, const Vector4& color = Vector4::zero(), float clearDepth = 1.0, int clearStencil = 0.0) override;
 	void setViewport(int x, int y, int w, int h) override;

@@ -33,11 +33,7 @@ extern mgp::CompressedTexture* g_compressedTexture;
 namespace mgp
 {
 
-static Application* __gameInstance = NULL;
-double Application::_pausedTimeLast = 0.0;
-double Application::_pausedTimeTotal = 0.0;
-double Application::_timeStart = 0.0;
-
+int g_appInstanceCount = 0;
 
 void regiseterSerializer() {
     SerializerManager *mgr = SerializerManager::getActivator();
@@ -118,7 +114,7 @@ Application::Application()
     : _initialized(false), _state(UNINITIALIZED), _pausedCount(0),
     _frameLastFPS(0), _frameCount(0), _frameRate(0), _width(0), _height(0),
     _clearDepth(1.0f), _clearStencil(0),
-    _animationController(NULL), 
+    _animationController(NULL), _renderer(NULL),
     #ifndef __EMSCRIPTEN__
     _audioController(NULL),
     _physicsController(NULL), _aiController(NULL), _audioListener(NULL),
@@ -127,14 +123,10 @@ Application::Application()
     _scriptController(NULL), _scriptTarget(NULL),
     #endif
     _inputListener(NULL), _forms(NULL),
+    _pausedTimeLast(0), _pausedTimeTotal(0), _timeStart(0),
     _showFps(true)
 {
-    GP_ASSERT(__gameInstance == NULL);
-
-    __gameInstance = this;
-    _eventTimer = new EventTimer();
-
-    Toolkit::g_instance = this;
+    ++g_appInstanceCount;
 
     regiseterSerializer();
 
@@ -147,6 +139,8 @@ Application::Application()
 
 Application::~Application()
 {
+    --g_appInstanceCount;
+
     SerializerManager::releaseStatic();
 
 #if GP_SCRIPT_ENABLE
@@ -155,30 +149,23 @@ Application::~Application()
 #endif
     // Do not call any virtual functions from the destructor.
     // Finalization is done from outside this class.
-    delete _eventTimer;
-
-    __gameInstance = NULL;
 
     delete g_compressedTexture;
+    g_compressedTexture = NULL;
 
     //if (g_threadPool) {
     //    g_threadPool->stop();
     //    g_threadPool = NULL;
     //}
 
+    if (g_appInstanceCount == 0) {
 #ifdef GP_USE_REF_TRACE
-    Refable::printLeaks();
+        Refable::printLeaks();
 #endif
 #ifdef GP_USE_MEM_LEAK_DETECTION
-    printMemoryLeaks();
+        printMemoryLeaks();
 #endif
-
-}
-
-Application* Application::getInstance()
-{
-    GP_ASSERT(__gameInstance);
-    return __gameInstance;
+    }
 }
 
 void Application::initialize()
@@ -267,7 +254,8 @@ bool Application::startup()
     if (_state != UNINITIALIZED)
         return false;
 
-    g_rendererInstance = new GLRenderer();
+    _renderer = new GLRenderer();
+    g_rendererInstance = _renderer;
     _sceneViews.push_back(new SceneView());
     _sceneViews[0]->setRenderPath(UPtr<RenderPath>(new RenderPath(Renderer::cur()) ));
 
@@ -343,6 +331,7 @@ bool Application::startup()
 
 void Application::shutdown()
 {
+    g_rendererInstance = _renderer;
     // Call user finalization.
     if (_state != UNINITIALIZED)
     {
@@ -355,7 +344,7 @@ void Application::shutdown()
 
         //Platform::signalShutdown();
 
-        _eventTimer->clearSchedule();
+        Platform::cur()->clearSchedule();
 
 		// Call user finalize
         finalize();
@@ -413,7 +402,7 @@ void Application::shutdown()
         _font.clear();
 
 
-        RenderPath::releaseStatic();
+        //RenderPath::releaseStatic();
 
 
         AssetManager::getInstance()->clear();
@@ -422,7 +411,8 @@ void Application::shutdown()
         SAFE_DELETE(_animationController);
 
 
-        delete g_rendererInstance;
+        delete _renderer;
+        _renderer = NULL;
         g_rendererInstance = NULL;
 
 		_state = UNINITIALIZED;
@@ -493,7 +483,7 @@ void Application::exit()
 	// This handles the case of shutting down the script system from
 	// within a script function (which can cause errors).
 	static ShutdownListener listener;
-	schedule(0, &listener);
+	Toolkit::cur()->schedule(0, &listener, this);
 
 #else
 
@@ -506,6 +496,7 @@ void Application::exit()
 
 void Application::frame()
 {
+    g_rendererInstance = _renderer;
     if (!_initialized)
     {
         // Perform lazy first time initialization
@@ -524,7 +515,7 @@ void Application::frame()
 	double frameTime = getGameTime();
 
     // Fire time events to scheduled TimeListeners
-    _eventTimer->fireTimeEvents();
+    Platform::cur()->fireTimeEvents();
 
     if (_state == Application::RUNNING)
     {
@@ -678,6 +669,9 @@ void Application::notifyResizeEvent(unsigned int width, unsigned int height)
         _height = height;
     }
 
+    if (_renderer)
+        _renderer->onResize(width, height);
+
     if (_initialized) {
         this->resizeEvent(width, height);
 
@@ -692,7 +686,7 @@ void Application::notifyResizeEvent(unsigned int width, unsigned int height)
 
 void Application::ShutdownListener::timeEvent(int64_t timeDiff, void* cookie)
 {
-	Application::getInstance()->shutdown();
+	((Application*)cookie)->shutdown();
 }
 
 void Application::setInputListener(InputListener* t) {

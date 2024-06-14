@@ -32,8 +32,9 @@ int __argc = 0;
 char** __argv = 0;
 #endif
 
+Application* _game = NULL;
+
 PlatformGlfw::PlatformGlfw() {
-    Platform::cur = this;
 }
 
 
@@ -277,7 +278,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     /*if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);*/
 
-    Application::getInstance()->notifyKeyEvent(evt);
+    _game->notifyKeyEvent(evt);
 }
 
 void character_callback(GLFWwindow* window, unsigned int codepoint)
@@ -286,7 +287,7 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
     evt.evt = Keyboard::KeyEvent::KEY_CHAR;
     evt.key = codepoint;
 
-    Application::getInstance()->notifyKeyEvent(evt);
+    _game->notifyKeyEvent(evt);
 }
 
 float lastXScale = 0;
@@ -338,7 +339,7 @@ static void cursor_position_callback(GLFWwindow* window, double x, double y)
         evt.button = mgp::MotionEvent::middle;
     }
 
-    Application::getInstance()->notifyMouseEvent(evt);
+    _game->notifyMouseEvent(evt);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -365,7 +366,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         evt.button = mgp::MotionEvent::middle;
     }
 
-    Application::getInstance()->notifyMouseEvent(evt);
+    _game->notifyMouseEvent(evt);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -386,12 +387,12 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     evt.wheelDelta = yoffset;
 #endif
 
-    Application::getInstance()->notifyMouseEvent(evt);
+    _game->notifyMouseEvent(evt);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    Application::getInstance()->notifyResizeEvent(width, height);
+    _game->notifyResizeEvent(width, height);
 }
 
 void window_content_scale_callback(GLFWwindow* window, float xscale, float yscale)
@@ -403,6 +404,7 @@ void window_content_scale_callback(GLFWwindow* window, float xscale, float yscal
 void PlatformGlfw::init(const char* title, int w, int h)
 {
     //FileSystem::setResourcePath("./");
+    ::mgp::_game = this->_game;
 
     glfwSetErrorCallback(error_callback);
 
@@ -467,7 +469,6 @@ error:
 
 
 static int doFrame(double time, void* userData) {
-    Application* _game = Application::getInstance();
     GP_ASSERT(_game);
 
     _game->frame();
@@ -483,7 +484,6 @@ static int doFrame(double time, void* userData) {
 
 int PlatformGlfw::enterMessagePump()
 {
-    Application* _game = Application::getInstance();
     if (_game->getState() != Application::RUNNING) {
         int width = getDisplayWidth();
         int height = getDisplayHeight();

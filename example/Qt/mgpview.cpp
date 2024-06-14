@@ -19,7 +19,7 @@ public:
 
 MgpView::MgpView(QWidget* parent) : QOpenGLWidget(parent)
 {
-    Platform::cur = new PlatformQt();
+    Platform::_cur = new PlatformQt();
 }
 
 
@@ -29,8 +29,8 @@ MgpView::~MgpView()
         this->makeCurrent();
         this->shutdown();
     }
-    delete Platform::cur;
-    Platform::cur = NULL;
+    //delete Platform::_cur;
+    //Platform::_cur = NULL;
     //Game::exit();
 }
 

@@ -90,7 +90,7 @@ UPtr<SpriteBatch> SpriteBatch::createColord(ShaderProgram* effect, unsigned int 
     batch->_textureHeightRatio = 1.0f;
 
     // Bind an ortho projection to the material by default (user can override with setProjectionMatrix)
-    Toolkit* game = Toolkit::cur();
+    Renderer* game = Renderer::cur();
     Matrix::createOrthographicOffCenter(0, game->getDpWidth(), game->getDpHeight(), 0, 0, 1, &batch->_projectionMatrix);
     meshBatch->getMaterial()->getParameter("u_projectionMatrix")->bindValue(batch, &SpriteBatch::getProjectionMatrix);
 
@@ -178,7 +178,7 @@ UPtr<SpriteBatch> SpriteBatch::create(Texture* texture, ShaderProgram* effect, u
     batch->_textureHeightRatio = 1.0f / (float)texture->getHeight();
 
 	// Bind an ortho projection to the material by default (user can override with setProjectionMatrix)
-	Toolkit* game = Toolkit::cur();
+	Renderer* game = Renderer::cur();
     Matrix::createOrthographicOffCenter(0, game->getDpWidth(), game->getDpHeight(), 0, 0, 1, &batch->_projectionMatrix);
     meshBatch->getMaterial()->getParameter("u_projectionMatrix")->bindValue(batch, &SpriteBatch::getProjectionMatrix);
 	

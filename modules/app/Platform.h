@@ -5,21 +5,27 @@
 #include "platform/Keyboard.h"
 #include "platform/Mouse.h"
 #include "base/FileSystem.h"
+#include "app/EventTimer.h"
 
 namespace mgp
 {
 
 class Application;
+class EventTimer;
 
 /**
  * Defines a platform abstraction.
  *
  * This class has only a few public methods for creating a platform
  */
-class Platform
+class Platform : public Toolkit
 {
+protected:
+    EventTimer* _eventTimer = NULL;
+    Application* _game = NULL;
 public:
-    static Platform* cur;
+    static Platform* _cur;
+    static Platform* cur() { return _cur; }
 
     Platform();
     virtual ~Platform();
@@ -53,6 +59,33 @@ public:
 
     virtual void requestRepaint() {}
 
+    virtual double getGameTime() {
+        return System::currentTimeMillis();
+    }
+
+    /**
+    * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.
+    * Application time stops while the game is paused. A time offset of zero will fire the time event in the next frame.
+    *
+    * @param timeOffset The number of game milliseconds in the future to schedule the event to be fired.
+    * @param timeListener The TimeListener that will receive the event.
+    * @param cookie The cookie data that the time event will contain.
+    * @script{ignore}
+    */
+    virtual void schedule(int64_t timeOffset, TimeListener* timeListener, void* cookie = 0) {
+        _eventTimer->schedule(timeOffset, timeListener, cookie);
+    }
+    virtual void setTimeout(int64_t timeMillis, std::function<void()> callback) {
+        _eventTimer->setTimeout(timeMillis, callback);
+    }
+
+
+    /**
+     * Clears all scheduled time events.
+     */
+    virtual void clearSchedule() { _eventTimer->clearSchedule(); }
+    virtual void fireTimeEvents() { _eventTimer->fireTimeEvents(); }
+
     /**
      * This method informs the platform that the game is shutting down
      * and anything platform specific should be shutdown as well or halted
@@ -85,7 +118,7 @@ public:
     /**
     * Screen density scale
     */
-    virtual float getScreenScale()  { return 1.0f; }
+    virtual float getScreenScale() { return 1.0f; }
 
     /**
      * Gets whether vertical sync is enabled for the game display.
@@ -239,10 +272,8 @@ public:
      */
     //static void shutdownInternal();
 
-    static int run(const char* title = "MGP Engine", int w = 1920, int h = 1080);
-private:
+    static int run(Application* game, const char* title = "MGP Engine", int w = 1920, int h = 1080);
 
-    //Application* _game;                // The game this platform is interfacing with.
 };
 
 }

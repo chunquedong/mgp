@@ -34,7 +34,6 @@ class SceneView;
 class FormManager;
 class Font;
 
-
 /**
  * Defines the base class your game will extend for game initialization, logic and platform delegates.
  *
@@ -43,7 +42,7 @@ class Font;
  *
  * @see http://gameplay3d.github.io/GamePlay/docs/file-formats.html#wiki-Game_Config
  */
-class Application : public Toolkit
+class Application
 {
     friend class Platform;
     //friend class Gamepad;
@@ -70,13 +69,6 @@ public:
      * Destructor.
      */
     virtual ~Application();
-
-    /**
-     * Gets the single instance of the game.
-     *
-     * @return The single instance of the game.
-     */
-    static Application* getInstance();
 
     /**
      * Gets the total game time (in milliseconds). This is the total accumulated game time (unpaused).
@@ -153,42 +145,6 @@ public:
      */
     inline unsigned int getHeight() const { return _height; }
 
-    /**
-    * Screen density scale
-    */
-    float getScreenScale() const { return Platform::cur->getScreenScale(); }
-
-    /**
-    * Request next frame to render.
-    * Do nothing in game main loop mode.
-    */
-    void requestRepaint() { Platform::cur->requestRepaint(); }
-
-    /**
-    * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.
-    * Application time stops while the game is paused. A time offset of zero will fire the time event in the next frame.
-    *
-    * @param timeOffset The number of game milliseconds in the future to schedule the event to be fired.
-    * @param timeListener The TimeListener that will receive the event.
-    * @param cookie The cookie data that the time event will contain.
-    * @script{ignore}
-    */
-    virtual void schedule(int64_t timeOffset, TimeListener* timeListener, void* cookie = 0) {
-        _eventTimer->schedule(timeOffset, timeListener, cookie);
-    }
-    virtual void setTimeout(int64_t timeMillis, std::function<void()> callback) {
-        _eventTimer->setTimeout(timeMillis, callback);
-    }
-
-
-    /**
-     * Clears all scheduled time events.
-     */
-    virtual void clearSchedule() { _eventTimer->clearSchedule(); }
-
-    virtual bool isMouseCaptured() { return Platform::cur->isMouseCaptured(); }
-
-    virtual void displayKeyboard(bool display) { Platform::cur->displayKeyboard(display); }
 
 protected:
     /**
@@ -315,9 +271,9 @@ private:
     bool _initialized;                          // If game has initialized yet.
     State _state;                               // The game state.
     unsigned int _pausedCount;                  // Number of times pause() has been called.
-    static double _pausedTimeLast;              // The last time paused.
-    static double _pausedTimeTotal;             // The total time paused.
-    static double _timeStart;
+    double _pausedTimeLast;              // The last time paused.
+    double _pausedTimeTotal;             // The total time paused.
+    double _timeStart;
     double _frameLastFPS;                       // The last time the frame count was updated.
     unsigned int _frameCount;                   // The current frame count.
     unsigned int _frameRate;                    // The current frame rate.
@@ -329,6 +285,7 @@ private:
 
 protected:
     AnimationController* _animationController;  // Controls the scheduling and running of animations.
+    Renderer* _renderer;
 
 #ifndef __EMSCRIPTEN__
     AudioController* _audioController;          // Controls audio sources that are playing in the game.
@@ -342,8 +299,7 @@ protected:
     ScriptTarget* _scriptTarget;                // Script target for the game
 #endif
 
-private:
-    EventTimer* _eventTimer;
+
 protected:
     InputListener* _inputListener;
 protected:

@@ -17,8 +17,6 @@
 using namespace mgp;
 
 
-Model* RenderPath::_quadModel = NULL;
-
 RenderPath::RenderPath(Renderer* renderer) : _renderer(renderer),
     _frameBuffer(NULL), _previousFrameBuffer(NULL), _width(0), _height(0) {
     _use_ssao = false;
@@ -45,14 +43,6 @@ Model* RenderPath::fullscreenQuadModel() {
         //SAFE_RELEASE(mesh);
     }
     return _quadModel;
-}
-
-void RenderPath::releaseStatic() {
-    if (_quadModel) {
-        _quadModel->getNode()->release();
-        //SAFE_RELEASE(_quadModel);
-        _quadModel = NULL;
-    }
 }
 
 void RenderPath::updateShadowMap(Scene* scene, Camera* camera) {
@@ -366,6 +356,12 @@ void RenderPath::finalize() {
     }
     _shadowMapCache.clear();
     _renderer = NULL;
+
+    if (_quadModel) {
+        _quadModel->getNode()->release();
+        //SAFE_RELEASE(_quadModel);
+        _quadModel = NULL;
+    }
 }
 
 

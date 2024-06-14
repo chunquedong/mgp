@@ -264,8 +264,8 @@ unsigned int Form::draw(RenderInfo* view)
         Renderer::cur()->clear(Renderer::CLEAR_DEPTH);
 
         // Setup an ortho matrix that maps to the current viewport
-        int w = Toolkit::cur()->getDpWidth();
-        int h = Toolkit::cur()->getDpHeight();
+        int w = Renderer::cur()->getDpWidth();
+        int h = Renderer::cur()->getDpHeight();
         //printf("Form projectionMatrix:%d,%d,%f\n", w, h, Toolkit::cur()->getScreenScale());
         Matrix::createOrthographicOffCenter(0, w, h, 0, 0, 1, &_projectionMatrix);
     }
@@ -742,7 +742,7 @@ bool Form::projectPoint(int x, int y, Vector3* point)
 
         // Unproject point into world space.
         Ray ray;
-        Rectangle vp(0, 0, Toolkit::cur()->getWidth(), Toolkit::cur()->getHeight());
+        Rectangle vp(0, 0, Renderer::cur()->getWidth(), Renderer::cur()->getHeight());
         camera->pickRay(vp, x, y, &ray);
 
         // Find the quad's plane.  We know its normal is the quad's forward vector.

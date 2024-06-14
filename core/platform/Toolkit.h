@@ -48,22 +48,7 @@ public:
      *
      * The default viewport is Rectangle(0, 0, Application::getWidth(), Application::getHeight()).
      */
-    virtual unsigned int getWidth() const = 0;
-    virtual unsigned int getHeight() const = 0;
-    virtual float getScreenScale() const = 0;
-    virtual unsigned int getDpWidth() { return (unsigned int)(getWidth() / getScreenScale()); }
-    virtual unsigned int getDpHeight() { return (unsigned int)(getHeight() / getScreenScale()); }
-
-    /**
-     * Returns the game configuration object.
-     *
-     * This method returns a Properties object containing the contents
-     * of the game.config file.
-     *
-     * @return The game configuration Properties object.
-     */
-    //virtual Properties* getConfig() const = 0;
-
+    virtual float getScreenScale() = 0;
 
     /**
      * Shows or hides the virtual keyboard (if supported).
@@ -71,7 +56,6 @@ public:
      * @param display true when virtual keyboard needs to be displayed; false otherwise.
      */
      virtual void displayKeyboard(bool display) = 0;
-
 
      /**
      * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.
@@ -91,22 +75,17 @@ public:
     virtual void clearSchedule() = 0;
 
     /**
-     * Gets the command line arguments.
-     * 
-     * @param argc The number of command line arguments.
-     * @param argv The array of command line arguments.
-     * @script{ignore}
-     */
-    //virtual void getArguments(int* argc, char*** argv) const = 0;
-
-
-    /**
      * Gets whether mouse input is currently captured.
      *
      * @return is the mouse captured.
      */
     virtual bool isMouseCaptured() = 0;
 
+    /**
+    * Request next frame to render.
+    * Do nothing in game main loop mode.
+    */
+    virtual void requestRepaint() = 0;
 
     /**
      * Gets the total game time (in milliseconds). This is the total accumulated game time (unpaused).
@@ -117,13 +96,6 @@ public:
      * @return The total game time (in milliseconds).
      */
     virtual double getGameTime() = 0;
-
-
-    /**
-    * Request next frame to render.
-    * Do nothing in game main loop mode.
-    */
-    virtual void requestRepaint() = 0;
 };
 
 }

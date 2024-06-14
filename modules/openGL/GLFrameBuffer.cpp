@@ -4,16 +4,12 @@
 #include "DepthStencilTarget.h"
 #include "platform/Toolkit.h"
 #include "scene/Renderer.h"
-
-#define FRAMEBUFFER_ID_DEFAULT "framebuffer.default"
+#include "GLRenderer.h"
 
 namespace mgp
 {
 
 unsigned int GLFrameBuffer::_maxRenderTargets = 8;
-GLFrameBuffer* GLFrameBuffer::_defaultFrameBuffer = NULL;
-GLFrameBuffer* GLFrameBuffer::_currentFrameBuffer = NULL;
-
 
 GLFrameBuffer::GLFrameBuffer(const char* id, unsigned int width, unsigned int height, FrameBufferHandle handle)
     : _id(id ? id : ""), _handle(handle), _renderTargets(NULL), _renderTargetCount(0), _depthStencilTarget(NULL)
@@ -41,24 +37,16 @@ GLFrameBuffer::~GLFrameBuffer()
     if (_handle)
         GL_ASSERT( glDeleteFramebuffers(1, &_handle) );
 
-    if (this == _currentFrameBuffer) {
-        if (_defaultFrameBuffer && glIsFramebuffer(_defaultFrameBuffer->_handle)) {
-            GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, _defaultFrameBuffer->_handle));
+    if (this == _renderer->_currentFrameBuffer) {
+        if (_renderer->_defaultFrameBuffer && glIsFramebuffer(_renderer->_defaultFrameBuffer->_handle)) {
+            GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, _renderer->_defaultFrameBuffer->_handle));
         }
-        _currentFrameBuffer = _defaultFrameBuffer;
+        _renderer->_currentFrameBuffer = _renderer->_defaultFrameBuffer;
     }
 }
 
 void GLFrameBuffer::initialize()
 {
-    if (_defaultFrameBuffer) return;
-    // Query the current/initial FBO handle and store is as out 'default' frame buffer.
-    // On many platforms this will simply be the zero (0) handle, but this is not always the case.
-    GLint fbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
-    _defaultFrameBuffer = new GLFrameBuffer(FRAMEBUFFER_ID_DEFAULT, 0, 0, (FrameBufferHandle)fbo);
-    _currentFrameBuffer = _defaultFrameBuffer;
-
     // Query the max supported color attachments. This glGet operation is not supported
     // on GL ES 2.x, so if the define does not exist, assume a value of 1.
 #ifdef GL_MAX_COLOR_ATTACHMENTS
@@ -71,17 +59,13 @@ void GLFrameBuffer::initialize()
 #endif
 }
 
-void GLFrameBuffer::finalize()
+UPtr<FrameBuffer> GLFrameBuffer::create(GLRenderer* renderer, const char* id)
 {
-    SAFE_RELEASE(_defaultFrameBuffer);
+    return create(renderer, id, 0, 0);
 }
 
-UPtr<FrameBuffer> GLFrameBuffer::create(const char* id)
-{
-    return create(id, 0, 0);
-}
-
-UPtr<FrameBuffer> GLFrameBuffer::create(const char* id, unsigned int width, unsigned int height, Image::Format format)
+UPtr<FrameBuffer> GLFrameBuffer::create(GLRenderer* renderer, const char* id, 
+    unsigned int width, unsigned int height, Image::Format format)
 {
     UPtr<Texture> renderTarget;
     if (width > 0 && height > 0)
@@ -99,6 +83,7 @@ UPtr<FrameBuffer> GLFrameBuffer::create(const char* id, unsigned int width, unsi
     GLuint handle = 0;
     GL_ASSERT( glGenFramebuffers(1, &handle) );
     GLFrameBuffer* frameBuffer = new GLFrameBuffer(id, width, height, handle);
+    frameBuffer->_renderer = renderer;
 
     // Create the render target array for the new frame buffer
     frameBuffer->_renderTargets = new Texture*[_maxRenderTargets];
@@ -201,7 +186,7 @@ void GLFrameBuffer::setRenderTarget(Texture* target, unsigned int index, GLenum 
         }
 
         // Restore the FBO binding
-        GL_ASSERT( glBindFramebuffer(GL_FRAMEBUFFER, _currentFrameBuffer->_handle) );
+        GL_ASSERT( glBindFramebuffer(GL_FRAMEBUFFER, _renderer->_currentFrameBuffer->_handle) );
     }
 }
 
@@ -213,7 +198,7 @@ bool GLFrameBuffer::check() {
         GP_ERROR("Framebuffer status incomplete: 0x%x", fboStatus);
     }
     // Restore the FBO binding
-    GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, _currentFrameBuffer->_handle));
+    GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, _renderer->_currentFrameBuffer->_handle));
     return fboStatus == GL_FRAMEBUFFER_COMPLETE;
 }
 
@@ -226,7 +211,7 @@ void GLFrameBuffer::disableDrawBuffer() {
     glDrawBuffers(0, NULL);
 #endif
     // Restore the FBO binding
-    GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, _currentFrameBuffer->_handle));
+    GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, _renderer->_currentFrameBuffer->_handle));
 }
 
 Texture* GLFrameBuffer::getRenderTarget(unsigned int index) const
@@ -281,7 +266,7 @@ void GLFrameBuffer::setDepthStencilTarget(DepthStencilTarget* target)
         }
 
         // Restore the FBO binding
-        GL_ASSERT( glBindFramebuffer(GL_FRAMEBUFFER, _currentFrameBuffer->_handle) );
+        GL_ASSERT( glBindFramebuffer(GL_FRAMEBUFFER, _renderer->_currentFrameBuffer->_handle) );
     }
 }
 
@@ -298,7 +283,7 @@ DepthStencilTarget* GLFrameBuffer::getDepthStencilTarget() const
 
 bool GLFrameBuffer::isDefault() const
 {
-    return (this == _defaultFrameBuffer);
+    return (this == _renderer->_defaultFrameBuffer);
 }
 
 FrameBuffer* GLFrameBuffer::bind(Type type)
@@ -312,8 +297,8 @@ FrameBuffer* GLFrameBuffer::bind(Type type)
     }
 
     GL_ASSERT( glBindFramebuffer(glType, _handle) );
-    GLFrameBuffer* previousGLFrameBuffer = _currentFrameBuffer;
-    _currentFrameBuffer = this;
+    GLFrameBuffer* previousGLFrameBuffer = _renderer->_currentFrameBuffer;
+    _renderer->_currentFrameBuffer = this;
     return previousGLFrameBuffer;
 }
 
@@ -321,8 +306,8 @@ void GLFrameBuffer::getScreenshot(Image* image)
 {
     GP_ASSERT( image );
 
-    unsigned int width = _currentFrameBuffer->getWidth();
-    unsigned int height = _currentFrameBuffer->getHeight();
+    unsigned int width = _renderer->_currentFrameBuffer->getWidth();
+    unsigned int height = _renderer->_currentFrameBuffer->getHeight();
 
     if (image->getWidth() == width && image->getHeight() == height) {
         GLenum format = image->getFormat() == Image::RGB ? GL_RGB : GL_RGBA;
@@ -332,22 +317,22 @@ void GLFrameBuffer::getScreenshot(Image* image)
 
 UPtr<Image> GLFrameBuffer::createScreenshot(Image::Format format)
 {
-    UPtr<Image> screenshot = Image::create(_currentFrameBuffer->getWidth(), _currentFrameBuffer->getHeight(), format, NULL);
+    UPtr<Image> screenshot = Image::create(_renderer->_currentFrameBuffer->getWidth(), _renderer->_currentFrameBuffer->getHeight(), format, NULL);
     getScreenshot(screenshot.get());
 
     return screenshot;
 }
 
-FrameBuffer* GLFrameBuffer::bindDefault(GLenum type)
-{
-    GL_ASSERT( glBindFramebuffer(type, _defaultFrameBuffer->_handle) );
-    _currentFrameBuffer = _defaultFrameBuffer;
-    return _defaultFrameBuffer;
-}
+// FrameBuffer* GLFrameBuffer::bindDefault(GLenum type)
+// {
+//     GL_ASSERT( glBindFramebuffer(type, _renderer->_defaultFrameBuffer->_handle) );
+//     _renderer->_currentFrameBuffer = _renderer->_defaultFrameBuffer;
+//     return _renderer->_defaultFrameBuffer;
+// }
 
-FrameBuffer* GLFrameBuffer::getCurrent()
-{
-    return _currentFrameBuffer;
-}
+// FrameBuffer* GLFrameBuffer::getCurrent()
+// {
+//     return _renderer->_currentFrameBuffer;
+// }
 
 }

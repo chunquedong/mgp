@@ -14,6 +14,7 @@
 #include "material/MaterialParameter.h"
 #include <algorithm>
 #include "base/StringUtil.h"
+#include "scene/Renderer.h"
 
 extern "C" {
 #include "3rd/utf8.h"
@@ -247,8 +248,8 @@ void Font::finish(RenderInfo* view)
             _batch->setProjectionMatrix(projectionMatrix);
         }
         else {
-            int w = Toolkit::cur()->getDpWidth();
-            int h = Toolkit::cur()->getDpHeight();
+            int w = Renderer::cur()->getDpWidth();
+            int h = Renderer::cur()->getDpHeight();
             if (w && h)
             {
                 Matrix projectionMatrix;

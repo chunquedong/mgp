@@ -14,16 +14,14 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="MgpView" name="widget" native="true">
-    <property name="geometry">
-     <rect>
-      <x>80</x>
-      <y>60</y>
-      <width>591</width>
-      <height>371</height>
-     </rect>
-    </property>
-   </widget>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="MgpView" name="openGLWidget1"/>
+    </item>
+    <item>
+     <widget class="MgpView" name="openGLWidget2"/>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -40,9 +38,8 @@
  <customwidgets>
   <customwidget>
    <class>MgpView</class>
-   <extends>QWidget</extends>
+   <extends>QOpenGLWidget</extends>
    <header>mgpview.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

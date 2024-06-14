@@ -10,17 +10,46 @@
 /** @script{ignore} */
 GLenum __gl_error_code = GL_NO_ERROR;
 
+#define FRAMEBUFFER_ID_DEFAULT "framebuffer.default"
+
 using namespace mgp;
 
 GLRenderer::GLRenderer() {
 }
 
 void GLRenderer::init() {
+    if (_defaultFrameBuffer) {
+        _defaultFrameBuffer->release();
+    }
+
+    // Query the current/initial FBO handle and store is as out 'default' frame buffer.
+    // On many platforms this will simply be the zero (0) handle, but this is not always the case.
+    GLint fbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+
+    GLint dims[4] = { 0 };
+    glGetIntegerv(GL_SCISSOR_BOX, dims);
+
+    _defaultFrameBuffer = new GLFrameBuffer(FRAMEBUFFER_ID_DEFAULT, dims[2], dims[3], (FrameBufferHandle)fbo);
+    _defaultFrameBuffer->_renderer = this;
+    _currentFrameBuffer = _defaultFrameBuffer;
+
     GLFrameBuffer::initialize();
 }
 
 GLRenderer::~GLRenderer() {
-  GLFrameBuffer::finalize();
+    SAFE_RELEASE(_defaultFrameBuffer);
+}
+
+unsigned int GLRenderer::getWidth() const {
+    return _width;
+}
+unsigned int GLRenderer::getHeight() const {
+    return _height;
+}
+void GLRenderer::onResize(int w, int h) {
+    _width = w;
+    _height = h;
 }
 
 void GLRenderer::clear(ClearFlags flags, const Vector4& color, float clearDepth, int clearStencil) {
@@ -58,7 +87,7 @@ void GLRenderer::setViewport(int x, int y, int w, int h) {
     FrameBuffer *curFrameBuffer = getCurrentFrameBuffer();
     if (curFrameBuffer) {
         if (curFrameBuffer->isDefault()) {
-            y = (Toolkit::cur()->getHeight() - y) - h;
+            y = (_height - y) - h;
         }
         else {
             y = (curFrameBuffer->getHeight() - y) - h;
@@ -1214,11 +1243,11 @@ void GLRenderer::deleteVertexAttributeObj(VertexAttributeObject* vertextAttribut
 }
 
 UPtr<FrameBuffer> GLRenderer::createFrameBuffer(const char* id, unsigned int width, unsigned int height, Image::Format format) {
-    return GLFrameBuffer::create(id, width, height, format);
+    return GLFrameBuffer::create(this, id, width, height, format);
 }
 
 FrameBuffer* GLRenderer::getCurrentFrameBuffer() {
-    return GLFrameBuffer::getCurrent();
+    return _currentFrameBuffer;
 }
 
 int GLRenderer::drawCallCount() {

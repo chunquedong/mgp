@@ -49,7 +49,7 @@ void RenderPass::render() {
         preBuffer = _dstFrameBuffer->bind();
     }
 
-    Model* _quadModel = RenderPath::fullscreenQuadModel();
+    Model* _quadModel = _renderPath->fullscreenQuadModel();
 
     
     RenderData* view = _renderPath->makeRenderDataSet();
@@ -79,8 +79,8 @@ void RenderPass::render() {
         else if (_useScreenViewport) {
             int vpx = 0;
             int vpy = 0;
-            int vpw = Toolkit::cur()->getWidth();
-            int vph = Toolkit::cur()->getHeight();
+            int vpw = Renderer::cur()->getWidth();
+            int vph = Renderer::cur()->getHeight();
             _renderPath->getRenderer()->setViewport(vpx, vpy, vpw, vph);
         }
         else if (_drawToScreen) {
@@ -199,12 +199,12 @@ LightShading::LightShading()
 }
 
 void LightShading::beforeRender(RenderData* view) {
-    Model* _quadModel = RenderPath::fullscreenQuadModel();
+    Model* _quadModel = _renderPath->fullscreenQuadModel();
     _quadModel->setLightMask(1);
 }
 
 void LightShading::afterRender(RenderData* view) {
-    Model* _quadModel = RenderPath::fullscreenQuadModel();
+    Model* _quadModel = _renderPath->fullscreenQuadModel();
     _quadModel->setLightMask(0);
 }
 

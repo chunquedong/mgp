@@ -8,6 +8,7 @@
 #include "Label.h"
 #include "ModalLayer.h"
 #include "base/StringUtil.h"
+#include "scene/Renderer.h"
 
 namespace mgp
 {
@@ -1034,7 +1035,7 @@ void Control::measureSize() {
         leftHeight = _parent->_leftHeight;
     }
     else {
-        Toolkit* game = Toolkit::cur();
+        Renderer* game = Renderer::cur();
         leftWidth = game->getDpWidth();
         leftHeight = game->getDpHeight();
         parentAbsoluteBounds = Rectangle(0, 0, leftWidth, leftHeight);
@@ -1065,7 +1066,7 @@ void Control::measureSize() {
 }
 
 void Control::applyAlignment() {
-    Toolkit* game = Toolkit::cur();
+    Renderer* game = Renderer::cur();
 
     const Margin& margin = getMargin();
 
@@ -1132,7 +1133,7 @@ void Control::applyAlignment() {
 
 void Control::updateAbsoluteBounds(const Vector2& offset)
 {
-    Toolkit* game = Toolkit::cur();
+    Renderer* game = Renderer::cur();
 
     const Rectangle parentAbsoluteBounds = _parent ? _parent->_viewportBounds : Rectangle(0, 0, game->getDpWidth(), game->getDpHeight());
     const Rectangle parentAbsoluteClip = _parent ? _parent->_viewportClipBounds : parentAbsoluteBounds;

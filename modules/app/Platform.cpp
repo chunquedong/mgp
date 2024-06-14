@@ -8,19 +8,20 @@
 namespace mgp
 {
     Platform::Platform() {
-
+        _eventTimer = new EventTimer();
+        Toolkit::g_instance = this;
     }
     Platform::~Platform() {
-
+        delete _eventTimer;
     }
 
-	Platform* Platform::cur = NULL;
+	Platform* Platform::_cur = NULL;
 
-    int Platform::run(const char* title, int w, int h) {
+    int Platform::run(Application* game, const char* title, int w, int h) {
         PlatformGlfw* platform = new PlatformGlfw();
-        Platform::cur = platform;
+        Platform::_cur = platform;
+        platform->_game = game;
 
-        Application* game = Application::getInstance();
         GP_ASSERT(game);
         platform->init(title, w, h);
         int result = platform->enterMessagePump();

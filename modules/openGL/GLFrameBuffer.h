@@ -26,8 +26,7 @@ typedef unsigned int FrameBufferHandle;
  */
 class GLFrameBuffer : public FrameBuffer
 {
-    friend class Application;
-
+    friend class GLRenderer;
 public:
 
 
@@ -43,7 +42,7 @@ public:
      * @return A newly created FrameBuffer.
      * @script{create}
      */
-    static UPtr<FrameBuffer> create(const char* id);
+    static UPtr<FrameBuffer> create(GLRenderer* renderer, const char* id);
 
     /**
      * Creates a new FrameBuffer with a single RenderTarget of the specified width and height,
@@ -62,7 +61,8 @@ public:
      * @return A newly created FrameBuffer.
      * @script{create}
      */
-    static UPtr<FrameBuffer> create(const char* id, unsigned int width, unsigned int height, Image::Format format = Image::RGBA);
+    static UPtr<FrameBuffer> create(GLRenderer* renderer, const char* id, 
+        unsigned int width, unsigned int height, Image::Format format = Image::RGBA);
 
     /**
      * Get the ID of this FrameBuffer.
@@ -178,19 +178,19 @@ public:
      */
     void getScreenshot(Image* image);
 
-    /**
-     * Binds the default FrameBuffer for rendering to the display.
-     *
-     * @ return The default framebuffer.
-     */
-    static FrameBuffer* bindDefault(unsigned int type = 0x8D40/*GL_FRAMEBUFFER*/);
+    // /**
+    //  * Binds the default FrameBuffer for rendering to the display.
+    //  *
+    //  * @ return The default framebuffer.
+    //  */
+    // static FrameBuffer* bindDefault(unsigned int type = 0x8D40/*GL_FRAMEBUFFER*/);
 
-    /**
-     * Gets the currently bound FrameBuffer.
-     *
-     * @return The currently bound FrameBuffer.
-     */
-    static FrameBuffer* getCurrent();
+    // /**
+    //  * Gets the currently bound FrameBuffer.
+    //  *
+    //  * @return The currently bound FrameBuffer.
+    //  */
+    // static FrameBuffer* getCurrent();
 
 private:
     friend class GLRenderer;
@@ -213,9 +213,7 @@ private:
 
     static void initialize();
 
-    static void finalize();
-
-    static bool isPowerOfTwo(unsigned int value);
+    //static bool isPowerOfTwo(unsigned int value);
 
     std::string _id;
     FrameBufferHandle _handle;
@@ -224,8 +222,8 @@ private:
     DepthStencilTarget* _depthStencilTarget;
 
     static unsigned int _maxRenderTargets;
-    static GLFrameBuffer* _defaultFrameBuffer;
-    static GLFrameBuffer* _currentFrameBuffer;
+
+    GLRenderer* _renderer = NULL;
 };
 
 }

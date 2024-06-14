@@ -5,6 +5,7 @@
 #include "scene/Scene.h"
 #include "platform/Toolkit.h"
 #include "material/MaterialParameter.h"
+#include "scene/Renderer.h"
 
 #include <iostream>
 #include <sstream>
@@ -568,8 +569,8 @@ unsigned int TerrainPatch::computeLOD(Camera* camera, const BoundingBox& worldBo
     _bits &= ~TERRAINPATCH_DIRTY_LEVEL;
 
     // Compute LOD to use based on very simple distance metric. TODO: Optimize me.
-    int width = Toolkit::cur()->getWidth();
-    int height = Toolkit::cur()->getHeight();
+    int width = Renderer::cur()->getWidth();
+    int height = Renderer::cur()->getHeight();
     Rectangle vp(0, 0, width, height);
     Vector3 corners[8];
     Vector2 min(FLT_MAX, FLT_MAX);

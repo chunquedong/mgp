@@ -67,6 +67,16 @@ public:
         CLEAR_COLOR_DEPTH_STENCIL = CLEAR_COLOR | CLEAR_DEPTH | CLEAR_STENCIL
     };
 
+
+public:
+    virtual unsigned int getWidth() const = 0;
+    virtual unsigned int getHeight() const = 0;
+
+    unsigned int getDpWidth();
+    unsigned int getDpHeight();
+
+    virtual void onResize(int w, int h) = 0;
+
     virtual void init() = 0;
 
     virtual void clear(ClearFlags flags, const Vector4 &color = Vector4::zero(), float clearDepth = 1.0, int clearStencil = 0.0) = 0;
