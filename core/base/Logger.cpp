@@ -34,7 +34,7 @@ extern void print(const char* format, ...)
     va_end(argptr);
 }
 
-//#elif defined(WIN32)
+//#elif defined(_WIN32)
 //#include <windowsx.h>
 //extern void print(const char* format, ...)
 //{

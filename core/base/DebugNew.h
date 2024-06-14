@@ -22,7 +22,7 @@ extern void printMemoryLeaks();
 #endif
 void* operator new (std::size_t size, const char* file, int line);
 void* operator new[] (std::size_t size, const char* file, int line);
-#ifdef WIN32
+#ifdef _WIN32
 void* operator new (std::size_t size) throw(std::bad_alloc);
 void* operator new[] (std::size_t size) throw(std::bad_alloc);
 #endif

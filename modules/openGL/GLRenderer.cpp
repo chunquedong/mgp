@@ -25,10 +25,10 @@ void GLRenderer::init() {
     // Query the current/initial FBO handle and store is as out 'default' frame buffer.
     // On many platforms this will simply be the zero (0) handle, but this is not always the case.
     GLint fbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+    GL_ASSERT(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo));
 
     GLint dims[4] = { 0 };
-    glGetIntegerv(GL_SCISSOR_BOX, dims);
+    GL_ASSERT(glGetIntegerv(GL_SCISSOR_BOX, dims));
 
     _defaultFrameBuffer = new GLFrameBuffer(FRAMEBUFFER_ID_DEFAULT, dims[2], dims[3], (FrameBufferHandle)fbo);
     _defaultFrameBuffer->_renderer = this;
@@ -56,13 +56,13 @@ void GLRenderer::clear(ClearFlags flags, const Vector4& color, float clearDepth,
     GLbitfield bits = 0;
     if (flags & CLEAR_COLOR)
     {
-        glClearColor(color.x, color.y, color.z, color.w);
+        GL_ASSERT(glClearColor(color.x, color.y, color.z, color.w));
         bits |= GL_COLOR_BUFFER_BIT;
     }
 
     if (flags & CLEAR_DEPTH)
     {
-        glClearDepth(clearDepth);
+        GL_ASSERT(glClearDepth(clearDepth));
         bits |= GL_DEPTH_BUFFER_BIT;
 
         // We need to explicitly call the static enableDepthWrite() method on StateBlock
@@ -73,10 +73,10 @@ void GLRenderer::clear(ClearFlags flags, const Vector4& color, float clearDepth,
 
     if (flags & CLEAR_STENCIL)
     {
-        glClearStencil(clearStencil);
+        GL_ASSERT(glClearStencil(clearStencil));
         bits |= GL_STENCIL_BUFFER_BIT;
     }
-    glClear(bits);
+    GL_ASSERT(glClear(bits));
 
     //reset state
     //StateBlock state;

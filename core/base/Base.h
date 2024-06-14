@@ -55,7 +55,7 @@ extern int strcmpnocase(const char* s1, const char* s2);
 }
 
 // Current function macro.
-#ifdef WIN32
+#ifdef _WIN32
 #define __current__func__ __FUNCTION__
 #else
 #define __current__func__ __func__
@@ -68,7 +68,7 @@ extern int strcmpnocase(const char* s1, const char* s2);
 #define GP_ASSERT(expression)
 #endif
 
-#if defined(WIN32) && defined(_MSC_VER)
+#if defined(_WIN32) && defined(_MSC_VER)
 #define DEBUG_BREAK() __debugbreak()
 #else
 #define DEBUG_BREAK()
@@ -84,8 +84,7 @@ extern int strcmpnocase(const char* s1, const char* s2);
         mgp::Logger::log(mgp::Logger::LEVEL_ERROR, __VA_ARGS__); \
         mgp::Logger::log(mgp::Logger::LEVEL_ERROR, "\n"); \
         DEBUG_BREAK(); \
-        assert(0); \
-        std::exit(-1); \
+        abort(); \
     } while (0)
 #endif
 
@@ -110,19 +109,17 @@ extern int strcmpnocase(const char* s1, const char* s2);
 #define GP_DEBUG(...) do{}while(0)
 #endif
 
-#if defined(WIN32)
-    #pragma warning( disable : 4005 )
-    #pragma warning( disable : 4172 )
-    #pragma warning( disable : 4244 )
-    #pragma warning( disable : 4267 )
-    #pragma warning( disable : 4311 )
-    #pragma warning( disable : 4316 )
-    #pragma warning( disable : 4390 )
-    #pragma warning( disable : 4800 )
-    #pragma warning( disable : 4996 )
-#endif
-
-
+// #if defined(_WIN32)
+//     #pragma warning( disable : 4005 )
+//     #pragma warning( disable : 4172 )
+//     #pragma warning( disable : 4244 )
+//     #pragma warning( disable : 4267 )
+//     #pragma warning( disable : 4311 )
+//     #pragma warning( disable : 4316 )
+//     #pragma warning( disable : 4390 )
+//     #pragma warning( disable : 4800 )
+//     #pragma warning( disable : 4996 )
+// #endif
 
 // Debug new for memory leak detection
 #include "DebugNew.h"
@@ -167,7 +164,7 @@ extern int strcmpnocase(const char* s1, const char* s2);
 
 
 // NOMINMAX makes sure that windef.h doesn't add macros min and max
-#ifdef WIN32
+#ifdef _WIN32
     #define NOMINMAX
 #endif
 

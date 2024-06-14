@@ -158,7 +158,7 @@ Style* readStyle(jc::Value* jcstyle, Style* parentStyle, SPtr<Theme> theme) {
         }
         if (fontPath.size() > 0)
         {
-#if WIN32
+#if _WIN32
             fontPath = "C:/Windows/Fonts/msyh.ttc";
 #endif
             UPtr<Font> font = Font::create(fontPath.c_str());

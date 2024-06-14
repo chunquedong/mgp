@@ -79,7 +79,7 @@ LIBS += -lljs
 LIBS += -lglfw
 
 win32 {
-    DEFINES += _WINDOWS WIN32
+    DEFINES += _WINDOWS _WIN32
     DEFINES += VK_USE_PLATFORM_WIN32_KHR
     INCLUDEPATH += $$(VULKAN_SDK)/Include
     LIBS += -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lodbc32 -lodbccp32 -limm32 -limagehlp -lversion -lwinmm -lxinput

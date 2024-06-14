@@ -17,7 +17,7 @@
     #define glClearDepth glClearDepthf
     #define OPENGL_ES
     #define GP_USE_VAO
-#elif WIN32
+#elif _WIN32
     #define WIN32_LEAN_AND_MEAN
     #define GLEW_STATIC
     #include <GL/glew.h>
@@ -71,7 +71,7 @@
  * mode and is therefore safe to use for realtime/per-frame GL
  * function calls.
  */
-#if defined(NDEBUG) || (defined(__APPLE__) && !defined(_DEBUG)) || defined(__EMSCRIPTEN__)
+#if defined(NDEBUG) || !defined(_DEBUG) || defined(__EMSCRIPTEN__)
     #define GL_ASSERT( gl_code ) gl_code
 #else
     #define GL_ASSERT( gl_code ) do \
