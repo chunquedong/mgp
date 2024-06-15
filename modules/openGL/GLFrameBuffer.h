@@ -11,6 +11,8 @@ namespace mgp
 {
 typedef unsigned int FrameBufferHandle;
 
+class GLRenderer;
+
 /**
  * Defines a frame buffer object that may contain one or more render targets and optionally
  * a depth-stencil target.

@@ -6,7 +6,6 @@
 #include "scene/Transform.h"
 #include "math/Frustum.h"
 #include "math/Rectangle.h"
-#include "base/Properties.h"
 #include "scene/Component.h"
 
 namespace mgp
@@ -86,7 +85,7 @@ public:
      *
      * @return The new Camera.
      */
-    static UPtr<Camera> create(Properties* properties);
+    //static UPtr<Camera> create(Properties* properties);
 
     /**
      * Gets the type of camera.
