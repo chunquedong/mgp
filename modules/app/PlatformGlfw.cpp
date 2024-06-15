@@ -479,12 +479,12 @@ static int doFrame(double time, void* userData) {
     /* Poll for and process events */
     glfwPollEvents();
 
-    return _game->getState() != Application::UNINITIALIZED;
+    return _game->getState() != Application::Uninitialized;
 }
 
 int PlatformGlfw::enterMessagePump()
 {
-    if (_game->getState() != Application::RUNNING) {
+    if (_game->getState() != Application::Runing) {
         int width = getDisplayWidth();
         int height = getDisplayHeight();
         _game->run(width, height);
@@ -500,7 +500,7 @@ int PlatformGlfw::enterMessagePump()
             break;
     }
 
-    if (_game->getState() == Application::RUNNING) {
+    if (_game->getState() == Application::Runing) {
         _game->shutdown();
     }
 #endif

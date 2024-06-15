@@ -111,9 +111,9 @@ public:
 #endif
 
 Application::Application()
-    : _initialized(false), _state(UNINITIALIZED), _pausedCount(0),
-    _frameLastFPS(0), _frameCount(0), _frameRate(0), _width(0), _height(0),
-    _clearDepth(1.0f), _clearStencil(0),
+    : _state(Uninitialized), _pausedCount(0),
+    _frameTimeLastFPS(0), _frameCount(0), _frameRate(0), _width(0), _height(0),
+    //_clearDepth(1.0f), _clearStencil(0),
     _animationController(NULL), _renderer(NULL),
     #ifndef __EMSCRIPTEN__
     _audioController(NULL),
@@ -123,7 +123,7 @@ Application::Application()
     _scriptController(NULL), _scriptTarget(NULL),
     #endif
     _inputListener(NULL), _forms(NULL),
-    _pausedTimeLast(0), _pausedTimeTotal(0), _timeStart(0),
+    _pausedTimeLast(0), _pausedTimeTotal(0),
     _showFps(true)
 {
     ++g_appInstanceCount;
@@ -131,8 +131,6 @@ Application::Application()
     regiseterSerializer();
 
     g_compressedTexture = new GLCompressedTexture();
-
-    _timeStart = System::millisTicks();
 
     printf("MGP 1.0\n");
 }
@@ -226,12 +224,12 @@ void Application::showFps(bool v) {
 
 double Application::getGameTime()
 {
-    return System::millisTicks() - _timeStart - _pausedTimeTotal;
+    return Toolkit::cur()->getGameTime() - _pausedTimeTotal;
 }
 
 int Application::run(int w, int h)
 {
-    if (_state != UNINITIALIZED)
+    if (_state != Uninitialized)
         return -1;
 
     //loadConfig();
@@ -251,7 +249,7 @@ int Application::run(int w, int h)
 
 bool Application::startup()
 {
-    if (_state != UNINITIALIZED)
+    if (_state != Uninitialized)
         return false;
 
     _renderer = new GLRenderer();
@@ -324,7 +322,7 @@ bool Application::startup()
         }
     }
 #endif
-    _state = RUNNING;
+    _state = Initing;
 
     return true;
 }
@@ -333,7 +331,7 @@ void Application::shutdown()
 {
     g_rendererInstance = _renderer;
     // Call user finalization.
-    if (_state != UNINITIALIZED)
+    if (_state != Uninitialized)
     {
         GP_ASSERT(_animationController);
     #ifndef __EMSCRIPTEN__
@@ -415,13 +413,13 @@ void Application::shutdown()
         _renderer = NULL;
         g_rendererInstance = NULL;
 
-		_state = UNINITIALIZED;
+		_state = Uninitialized;
     }
 }
 
 void Application::pause()
 {
-    if (_state == RUNNING)
+    if (_state == Runing)
     {
         GP_ASSERT(_animationController);
     #ifndef __EMSCRIPTEN__
@@ -429,7 +427,7 @@ void Application::pause()
         GP_ASSERT(_physicsController);
         GP_ASSERT(_aiController);
     #endif
-        _state = PAUSED;
+        _state = Paused;
         _pausedTimeLast = System::millisTicks();
         _animationController->pause();
     #ifndef __EMSCRIPTEN__
@@ -444,7 +442,7 @@ void Application::pause()
 
 void Application::resume()
 {
-    if (_state == PAUSED)
+    if (_state == Paused)
     {
         --_pausedCount;
 
@@ -456,7 +454,7 @@ void Application::resume()
             GP_ASSERT(_physicsController);
             GP_ASSERT(_aiController);
         #endif
-            _state = RUNNING;
+            _state = Runing;
             _pausedTimeTotal += System::millisTicks() - _pausedTimeLast;
             _animationController->resume();
 
@@ -497,7 +495,7 @@ void Application::exit()
 void Application::frame()
 {
     g_rendererInstance = _renderer;
-    if (!_initialized)
+    if (_state != Runing)
     {
         // Perform lazy first time initialization
         Renderer::cur()->init();
@@ -506,7 +504,7 @@ void Application::frame()
         if (_scriptTarget)
             _scriptTarget->fireScriptEvent<void>(GP_GET_SCRIPT_EVENT(GameScriptTarget, initialize));
         #endif
-        _initialized = true;
+        _state = Runing;
         // Fire first game resize event
         notifyResizeEvent(_width, _height);
     }
@@ -517,7 +515,7 @@ void Application::frame()
     // Fire time events to scheduled TimeListeners
     Platform::cur()->fireTimeEvents();
 
-    if (_state == Application::RUNNING)
+    if (_state == Application::Runing)
     {
         GP_ASSERT(_animationController);
 
@@ -569,14 +567,14 @@ void Application::frame()
 
         // Update FPS.
         ++_frameCount;
-        if ((Application::getGameTime() - _frameLastFPS) >= 1000)
+        if ((Application::getGameTime() - _frameTimeLastFPS) >= 1000)
         {
             _frameRate = _frameCount;
             _frameCount = 0;
-            _frameLastFPS = getGameTime();
+            _frameTimeLastFPS = getGameTime();
         }
     }
-	else if (_state == Application::PAUSED)
+	else if (_state == Application::Paused)
     {
         // Update gamepads.
         //Gamepad::updateInternal(0);
@@ -672,7 +670,7 @@ void Application::notifyResizeEvent(unsigned int width, unsigned int height)
     if (_renderer)
         _renderer->onResize(width, height);
 
-    if (_initialized) {
+    if (_state == Runing) {
         this->resizeEvent(width, height);
 
 #if GP_SCRIPT_ENABLE

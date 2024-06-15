@@ -234,8 +234,9 @@ int main() {
     
     #if __EMSCRIPTEN__
         MainApp* instance = new MainApp();
+        return Platform::run(instance);
     #else
         MainApp instance;
+        return Platform::run(&instance);
     #endif
-    return Platform::run();
 }

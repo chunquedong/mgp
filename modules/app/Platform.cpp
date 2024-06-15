@@ -7,15 +7,21 @@
 
 namespace mgp
 {
+
+    Platform* Platform::_cur = NULL;
+
     Platform::Platform() {
         _eventTimer = new EventTimer();
         Toolkit::g_instance = this;
+        _timeStart = System::millisTicks();
     }
     Platform::~Platform() {
         delete _eventTimer;
     }
 
-	Platform* Platform::_cur = NULL;
+    double Platform::getGameTime() {
+        return System::millisTicks() - _timeStart;
+    }
 
     int Platform::run(Application* game, const char* title, int w, int h) {
         PlatformGlfw* platform = new PlatformGlfw();

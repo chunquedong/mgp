@@ -55,9 +55,10 @@ public:
      */
     enum State
     {
-        UNINITIALIZED,
-        RUNNING,
-        PAUSED
+        Uninitialized,
+        Initing,
+        Runing,
+        Paused
     };
 
     /**
@@ -86,13 +87,6 @@ public:
      * @return The current game state.
      */
     inline State getState() const { return _state; }
-
-    /**
-     * Determines if the game has been initialized.
-     *
-     * @return true if the game initialization has completed, false otherwise.
-     */
-    inline bool isInitialized() const { return _initialized; }
 
     /**
      * Called to initialize the game, and begin running the game.
@@ -254,11 +248,6 @@ private:
      */
     bool startup();
 
-    /**
-     * Loads the game configuration.
-     */
-    //void loadConfig();
-
     void drawFps();
 public:
     void showFps(bool v);
@@ -268,20 +257,18 @@ public:
     void notifyResizeEvent(unsigned int width, unsigned int height);
 
 private:
-    bool _initialized;                          // If game has initialized yet.
     State _state;                               // The game state.
     unsigned int _pausedCount;                  // Number of times pause() has been called.
-    double _pausedTimeLast;              // The last time paused.
-    double _pausedTimeTotal;             // The total time paused.
-    double _timeStart;
-    double _frameLastFPS;                       // The last time the frame count was updated.
+    double _pausedTimeLast;                     // The last time paused.
+    double _pausedTimeTotal;                    // The total time paused.
+    double _frameTimeLastFPS;                       // The last time the frame count was updated.
     unsigned int _frameCount;                   // The current frame count.
     unsigned int _frameRate;                    // The current frame rate.
     unsigned int _width;                        // The game's display width.
     unsigned int _height;                       // The game's display height.
-    Vector4 _clearColor;                        // The clear color value last used for clearing the color buffer.
-    float _clearDepth;                          // The clear depth value last used for clearing the depth buffer.
-    int _clearStencil;                          // The clear stencil value last used for clearing the stencil buffer.
+    //Vector4 _clearColor;                        // The clear color value last used for clearing the color buffer.
+    //float _clearDepth;                          // The clear depth value last used for clearing the depth buffer.
+    //int _clearStencil;                          // The clear stencil value last used for clearing the stencil buffer.
 
 protected:
     AnimationController* _animationController;  // Controls the scheduling and running of animations.

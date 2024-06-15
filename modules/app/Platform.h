@@ -23,6 +23,7 @@ class Platform : public Toolkit
 protected:
     EventTimer* _eventTimer = NULL;
     Application* _game = NULL;
+    double _timeStart;
 public:
     static Platform* _cur;
     static Platform* cur() { return _cur; }
@@ -59,9 +60,7 @@ public:
 
     virtual void requestRepaint() {}
 
-    virtual double getGameTime() {
-        return System::currentTimeMillis();
-    }
+    virtual double getGameTime();
 
     /**
     * Schedules a time event to be sent to the given TimeListener a given number of game milliseconds from now.
