@@ -158,6 +158,8 @@ public:
      */
     virtual UPtr<Drawable> clone(NodeCloneContext& context) { return UPtr<Drawable>(NULL); }
 protected:
+
+    void copyFrom(Drawable* drawable);
     /**
      * Sets the node this drawable is attached to.
      *

@@ -218,6 +218,8 @@ unsigned int Model::draw(RenderInfo* view)
 UPtr<Drawable> Model::clone(NodeCloneContext& context)
 {
     UPtr<Model> model(new Model());
+    model->copyFrom(this);
+
     for (int i = 0; i < _meshParts.size(); ++i) {
         model->addMesh(uniqueFromInstant(getMesh(i)));
     }

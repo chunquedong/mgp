@@ -4,9 +4,9 @@
 
 #ifdef INSTANCED
     in mat4 a_instanceMatrix;
+#else
+    uniform mat4 u_worldViewMatrix;
 #endif
-
-uniform mat4 u_worldViewMatrix;
 
 vec4 getPosition()
 {
@@ -35,7 +35,12 @@ vec4 getPosition()
 
     vec3 getViewSpaceVector(vec3 normal) {
         // Transform the normal, tangent and binormals to view space.
-        mat3 inverseTransposeWorldViewMatrix = mat3(u_inverseTransposeWorldViewMatrix[0].xyz, u_inverseTransposeWorldViewMatrix[1].xyz, u_inverseTransposeWorldViewMatrix[2].xyz);
+        #ifdef INSTANCED
+            mat4 it = transpose(inverse(a_instanceMatrix));
+            mat3 inverseTransposeWorldViewMatrix = mat3(it[0].xyz, it[1].xyz, it[2].xyz);
+        #else
+            mat3 inverseTransposeWorldViewMatrix = mat3(u_inverseTransposeWorldViewMatrix[0].xyz, u_inverseTransposeWorldViewMatrix[1].xyz, u_inverseTransposeWorldViewMatrix[2].xyz);
+        #endif
         vec3 normalVector = normalize(inverseTransposeWorldViewMatrix * normal);
         return normalVector;
     }

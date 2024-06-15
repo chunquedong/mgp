@@ -23,6 +23,15 @@ Node* Drawable::getNode() const
     return _node;
 }
 
+void mgp::Drawable::copyFrom(Drawable* drawable)
+{
+    _renderLayer = drawable->_renderLayer;
+    _lightMask = drawable->_lightMask;
+    _visiable = drawable->_visiable;
+    _pickMask = drawable->_pickMask;
+    _highlightType = drawable->_highlightType;
+}
+
 void Drawable::setNode(Node* node)
 {
     _node = node;

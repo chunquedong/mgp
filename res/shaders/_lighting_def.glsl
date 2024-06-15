@@ -21,7 +21,9 @@
         uniform sampler2D u_normalmapTexture;
     #endif
 
-    uniform mat4 u_inverseTransposeWorldViewMatrix;
+    #ifndef INSTANCED
+        uniform mat4 u_inverseTransposeWorldViewMatrix;
+    #endif
 
     #if (DIRECTIONAL_LIGHT_COUNT > 0)
         uniform vec3 u_directionalLightColor[DIRECTIONAL_LIGHT_COUNT];

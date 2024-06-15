@@ -93,7 +93,7 @@ bool Material::initialize(Drawable* drawable, std::vector<Light*>* lights, int l
         if (dynamicDefines.size() > 0) {
             dynamicDefines += ";";
         }
-        dynamicDefines += "INSTANCED;NO_MVP";
+        dynamicDefines += "INSTANCED";
     }
 
     if (_dynamicDefines != dynamicDefines) {

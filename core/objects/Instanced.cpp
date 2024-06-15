@@ -16,6 +16,9 @@ Instanced::~Instanced() {
 
 void Instanced::setModel(UPtr<Drawable> model) {
     _model = std::move(model);
+    if (_model.get()) {
+        this->setLightMask(_model->getLightMask());
+    }
 }
 
 void Instanced::setInstanceMatrix(Matrix* data, int count) {
@@ -48,6 +51,9 @@ void Instanced::finish() {
 }
 
 void Instanced::setDrawCall(DrawCall* drawCall) {
+    if (drawCall->_drawable) {
+        this->setLightMask(drawCall->_drawable->getLightMask());
+    }
     drawCall->_instanceVbo = _instanceVbo;
     drawCall->_instanceCount = _instanceCount;
     drawCall->_drawable = this;
