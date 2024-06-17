@@ -17,6 +17,10 @@ using namespace mgp;
 GLRenderer::GLRenderer() {
 }
 
+GLRenderer::~GLRenderer() {
+    SAFE_RELEASE(_defaultFrameBuffer);
+}
+
 void GLRenderer::init() {
     if (_defaultFrameBuffer) {
         _defaultFrameBuffer->release();
@@ -37,8 +41,17 @@ void GLRenderer::init() {
     GLFrameBuffer::initialize();
 }
 
-GLRenderer::~GLRenderer() {
-    SAFE_RELEASE(_defaultFrameBuffer);
+void GLRenderer::beginFrame() {
+    GP_ASSERT(_defaultFrameBuffer);
+    // Query the current/initial FBO handle and store is as out 'default' frame buffer.
+    // On many platforms this will simply be the zero (0) handle, but this is not always the case.
+    GLint fbo;
+    GL_ASSERT(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo));
+    _defaultFrameBuffer->_handle = fbo;
+}
+
+void GLRenderer::endFrame() {
+
 }
 
 unsigned int GLRenderer::getWidth() const {

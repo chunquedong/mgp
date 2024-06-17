@@ -34,6 +34,8 @@ public:
 
 	void init() override;
 
+	void beginFrame() override;
+	void endFrame() override;
 	unsigned int getWidth() const override;
 	unsigned int getHeight() const override;
 	void onResize(int w, int h) override;

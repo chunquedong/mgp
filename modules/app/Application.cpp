@@ -194,7 +194,7 @@ void Application::render(float elapsedTime)
     }
 
     Rectangle* viewport = getView()->getViewport();
-    Renderer::cur()->setViewport((int)viewport->x, (int)viewport->y, (int)viewport->width, (int)viewport->height);
+    _renderer->setViewport((int)viewport->x, (int)viewport->y, (int)viewport->width, (int)viewport->height);
 
     _forms->draw(NULL);
 
@@ -211,11 +211,10 @@ void Application::drawFps() {
     float y = viewport->height / Toolkit::cur()->getScreenScale() - fontSize - padding;
     float x = 100+padding;
     char buffer[256] = { 0 };
-    int drawCall = Renderer::cur()->drawCallCount();
+    int drawCall = _renderer->drawCallCount();
     snprintf(buffer, 256, "FPS:%d, DC:%d", _frameRate, drawCall);
     _font->drawText(buffer, x, y, Vector4::one(), fontSize);
     _font->finish(NULL);
-    //Renderer::cur()->drawCallCount();
 }
 
 void Application::showFps(bool v) {
@@ -255,7 +254,7 @@ bool Application::startup()
     _renderer = new GLRenderer();
     g_rendererInstance = _renderer;
     _sceneViews.push_back(new SceneView());
-    _sceneViews[0]->setRenderPath(UPtr<RenderPath>(new RenderPath(Renderer::cur()) ));
+    _sceneViews[0]->setRenderPath(UPtr<RenderPath>(new RenderPath(_renderer) ));
 
     _animationController = new AnimationController();
     _animationController->initialize();
@@ -498,7 +497,7 @@ void Application::frame()
     if (_state != Runing)
     {
         // Perform lazy first time initialization
-        Renderer::cur()->init();
+        _renderer->init();
         initialize();
         #if GP_SCRIPT_ENABLE
         if (_scriptTarget)
@@ -515,6 +514,7 @@ void Application::frame()
     // Fire time events to scheduled TimeListeners
     Platform::cur()->fireTimeEvents();
 
+    _renderer->beginFrame();
     if (_state == Application::Runing)
     {
         GP_ASSERT(_animationController);
@@ -600,6 +600,7 @@ void Application::frame()
             _scriptTarget->fireScriptEvent<void>(GP_GET_SCRIPT_EVENT(GameScriptTarget, render), 0);
     #endif
     }
+    _renderer->endFrame();
 }
 
 bool Application::keyEvent(Keyboard evt) {
@@ -642,6 +643,10 @@ void Application::notifyKeyEvent(Keyboard evt)
 
 bool Application::notifyMouseEvent(Mouse evt)
 {
+    if (!evt.time) {
+        evt.time = System::currentTimeMillis();
+    }
+
     if (_forms->mouseEventInternal(evt))
         return true;
 

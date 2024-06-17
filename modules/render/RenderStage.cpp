@@ -79,8 +79,8 @@ void RenderPass::render() {
         else if (_useScreenViewport) {
             int vpx = 0;
             int vpy = 0;
-            int vpw = Renderer::cur()->getWidth();
-            int vph = Renderer::cur()->getHeight();
+            int vpw = _renderPath->getRenderer()->getWidth();
+            int vph = _renderPath->getRenderer()->getHeight();
             _renderPath->getRenderer()->setViewport(vpx, vpy, vpw, vph);
         }
         else if (_drawToScreen) {

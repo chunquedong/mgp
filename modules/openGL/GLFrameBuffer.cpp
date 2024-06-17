@@ -18,6 +18,18 @@ GLFrameBuffer::GLFrameBuffer(const char* id, unsigned int width, unsigned int he
 
 GLFrameBuffer::~GLFrameBuffer()
 {
+    if (this == _renderer->_currentFrameBuffer) {
+        if (_renderer->_defaultFrameBuffer && glIsFramebuffer(_renderer->_defaultFrameBuffer->_handle)) {
+            GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, _renderer->_defaultFrameBuffer->_handle));
+        }
+        _renderer->_currentFrameBuffer = _renderer->_defaultFrameBuffer;
+    }
+
+    //do not release default fbo handle
+    if (this == _renderer->_defaultFrameBuffer) {
+        return;
+    }
+
     if (_renderTargets)
     {
         for (unsigned int i = 0; i < _maxRenderTargets; ++i)
@@ -36,13 +48,6 @@ GLFrameBuffer::~GLFrameBuffer()
     // Release GL resource.
     if (_handle)
         GL_ASSERT( glDeleteFramebuffers(1, &_handle) );
-
-    if (this == _renderer->_currentFrameBuffer) {
-        if (_renderer->_defaultFrameBuffer && glIsFramebuffer(_renderer->_defaultFrameBuffer->_handle)) {
-            GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, _renderer->_defaultFrameBuffer->_handle));
-        }
-        _renderer->_currentFrameBuffer = _renderer->_defaultFrameBuffer;
-    }
 }
 
 void GLFrameBuffer::initialize()
@@ -159,7 +164,7 @@ void GLFrameBuffer::setRenderTarget(Texture* target, unsigned int index, GLenum 
 
     if (target)
     {
-        Renderer::cur()->updateTexture(target);
+        _renderer->updateTexture(target);
 
         ++_renderTargetCount;
 

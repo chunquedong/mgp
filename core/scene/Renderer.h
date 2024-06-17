@@ -49,7 +49,7 @@ public:
 class Renderer {
 public:
     static Renderer* cur();
-    void finalize();
+    virtual void finalize();
 
 public:
     virtual ~Renderer() {}
@@ -69,6 +69,9 @@ public:
 
 
 public:
+    virtual void beginFrame() = 0;
+    virtual void endFrame() = 0;
+
     virtual unsigned int getWidth() const = 0;
     virtual unsigned int getHeight() const = 0;
 
