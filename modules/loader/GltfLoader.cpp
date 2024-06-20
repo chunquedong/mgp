@@ -113,7 +113,7 @@ public:
 		delete _dracoCache;
 #endif
 	}
-	bool lighting = false;
+	int lighting = 0;
 	UPtr<Scene> load(const char* file) {
 		baseDir = FileSystem::getDirectoryName(file);
 
@@ -275,7 +275,19 @@ private:
 			}
 			else {
 				if (lighting) {
-					UPtr<Material> material = Material::create("res/shaders/colored.vert", "res/shaders/colored.frag", "PBR;LDR");
+					std::string defines;
+					if (lighting & GltfLoader::Pbr) {
+						defines += "PBR";
+					}
+					if (lighting && GltfLoader::NoSpecular) {
+						if (defines.size() > 0) defines += ";";
+						defines += "NO_SPECULAR";
+					}
+					if (lighting & GltfLoader::Ldr) {
+						if (defines.size() > 0) defines += ";";
+						defines += "LDR";
+					}
+					UPtr<Material> material = Material::create("res/shaders/colored.vert", "res/shaders/colored.frag", defines.c_str());
 					float* color = cmaterial->pbr_metallic_roughness.base_color_factor;
 					material->getParameter("u_diffuseColor")->setVector4(Vector4(color[0], color[1], color[2], color[3]));
 

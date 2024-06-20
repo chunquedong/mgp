@@ -15,9 +15,21 @@
 
 namespace mgp
 {
+/**
+ * Loading GLTF format from file or buffer.
+ * support skin animation and morph animation
+ */
 class GltfLoader {
 public:
-	bool lighting = false;
+	enum LightingType {
+		Pbr = 1, //physic base lighting
+		NoSpecular = 2, //no specular lighting
+		Ldr = 4,  //convert result from HDR to LDR
+	};
+
+	//LightingType: Pbr | NoSpecular | Ldr
+	int lighting = 0;
+
 	UPtr<Scene> load(const std::string &file);
 	UPtr<Scene> loadFromBuf(const char* file_data, size_t file_size);
 	std::vector<SPtr<MeshSkin> > loadSkins(const std::string& file);
