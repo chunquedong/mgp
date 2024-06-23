@@ -243,3 +243,18 @@ Style {
         bottom = 1
     }
 }
+
+Style {
+    id = Toast
+    color = #000000ff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle37.png
+        left = 18
+        right = 18
+        top = 18
+        bottom = 18
+    }
+}

@@ -207,7 +207,7 @@ class MainApp : public Application, Control::Listener {
     }
 
     void render(float elapsedTime) override {
-        Renderer::cur()->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL);
+        Renderer::cur()->clear(Renderer::CLEAR_COLOR_DEPTH_STENCIL, Vector4::fromColor(0x888888ff));
         Application::render(elapsedTime);
     }
 
@@ -223,6 +223,7 @@ class MainApp : public Application, Control::Listener {
             if (strcmp("testButton", control->getId()) == 0)
             {
                 if (_label) _label->setText("clicked");
+                Toast::showToast(control, "Message");
             }
         }
     }

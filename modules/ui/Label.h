@@ -121,6 +121,19 @@ private:
     Label(const Label& copy);
 };
 
+
+class Toast : public Label, public AnimationClip::Listener {
+    friend class Control;
+protected:
+    Toast();
+
+    virtual void animationEvent(AnimationClip* clip, EventType type) override;
+public:
+    void show(Control* any);
+
+    static void showToast(Control* any, const char* message);
+};
+
 }
 
 #endif

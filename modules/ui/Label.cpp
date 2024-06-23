@@ -1,5 +1,7 @@
 #include "base/Base.h"
 #include "Label.h"
+#include "Form.h"
+#include "ModalLayer.h"
 
 namespace mgp
 {
@@ -142,6 +144,39 @@ unsigned int Label::drawText(Form* form, const Rectangle& clip, RenderInfo* view
     }
 
     return 0;
+}
+
+Toast::Toast()
+{
+    _className = "Toast";
+    setAlignment(Control::ALIGN_VCENTER_HCENTER);
+    setPadding(10);
+}
+
+void Toast::animationEvent(AnimationClip* clip, EventType type)
+{
+    if (type == AnimationClip::Listener::END) {
+        this->getTopLevelForm()->getOverlay()->remove(this);
+    }
+}
+
+void Toast::show(Control* any)
+{
+    GP_ASSERT(any);
+    any->getTopLevelForm()->getOverlay()->add(this, 0);
+
+    unsigned int keyTimes[] = { 0, 1000, 3000, 4000 };
+    float keyValues[] = { 0.0, 1.0, 1.0, 0.0 };
+    auto anim = this->createAnimation("toast", Control::ANIMATE_OPACITY, 4, keyTimes, keyValues, Curve::LINEAR);
+    anim->getClip()->addEndListener(this);
+    anim->getClip()->play();
+}
+
+void Toast::showToast(Control* any, const char* message)
+{
+    auto toast = Control::create<Toast>("toast");
+    toast->setText(message);
+    toast->show(any);
 }
 
 }
