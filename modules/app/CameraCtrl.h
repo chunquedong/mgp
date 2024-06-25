@@ -40,6 +40,7 @@ class EditorCameraCtrl : public CameraCtrl {
     bool _dirty = false;
 public:
     bool _reverseZoom = false;
+    bool _autoRotateCenter = true;
     SceneView* sceneView;
     EditorCameraCtrl();
 

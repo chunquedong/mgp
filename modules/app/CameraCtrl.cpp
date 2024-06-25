@@ -70,6 +70,9 @@ bool EditorCameraCtrl::updateSurfaceDistance() {
     }
     if (query.minDistance != Ray::INTERSECTS_NONE) {
         _surfaceDistance = query.minDistance;// query.target.distance(_camera->getNode()->getTranslationWorld());
+        if (_autoRotateCenter) {
+            _rotateCenter = query.target;
+        }
         return true;
     }
     if (_surfaceDistance == -1) {
