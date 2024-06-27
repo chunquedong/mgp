@@ -16,7 +16,7 @@ FileStream::~FileStream()
     }
 }
 
-UPtr<FileStream> FileStream::create(const char* filePath, const char* mode)
+UniquePtr<FileStream, true> FileStream::create(const char* filePath, const char* mode)
 {
     FILE* file = fopen(filePath, mode);
     if (file)
@@ -33,6 +33,9 @@ UPtr<FileStream> FileStream::create(const char* filePath, const char* mode)
         }
 
         return UPtr<FileStream>(stream);
+    }
+    else {
+        GP_DEBUG("open file fail:%s", filePath);
     }
     return UPtr<FileStream>(NULL);
 }
