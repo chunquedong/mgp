@@ -44,9 +44,9 @@ void RenderDataManager::clear() {
     _orderedInstance.clear();
 
     //clear
-    for (unsigned int i = 0; i < Drawable::RenderLayer::Count; ++i)
+    for (auto it = _renderQueues.begin(); it != _renderQueues.end(); ++it)
     {
-        auto& queue = _renderQueues[i];
+        auto& queue = it->second;
         queue.clear();
     }
     _lights.clear();
@@ -63,9 +63,9 @@ void RenderDataManager::endFill() {
 
     //init _distanceToCamera
     Vector3 cameraPosition = _camera->getNode()->getTranslationWorld();
-    for (unsigned int i = 0; i < Drawable::RenderLayer::Count; ++i)
+    for (auto it = _renderQueues.begin(); it != _renderQueues.end(); ++it)
     {
-        auto& queue = _renderQueues[i];
+        auto& queue = it->second;
         for (auto it = queue.begin(); it != queue.end(); ++it) {
             if (it->_drawable) {
                 it->_distanceToCamera = it->_drawable->getDistance(cameraPosition);
@@ -238,6 +238,9 @@ void RenderDataManager::sort() {
     );
 }
 
-void RenderDataManager::getRenderData(RenderData* view, Drawable::RenderLayer layer) {
-    view->_drawList.insert(view->_drawList.begin(), _renderQueues[layer].begin(), _renderQueues[layer].end());
+void RenderDataManager::getRenderData(RenderData* view, int layer) {
+    auto it = _renderQueues.find(layer);
+    if (it != _renderQueues.end()) {
+        view->_drawList.insert(view->_drawList.begin(), it->second.begin(), it->second.end());
+    }
 }

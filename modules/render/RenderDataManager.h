@@ -54,7 +54,7 @@ class RenderDataManager {
     RenderInfo _renderInfo;
 
 public:
-    std::vector<DrawCall> _renderQueues[Drawable::RenderLayer::Count];
+    std::map<int, std::vector<DrawCall> > _renderQueues;
     std::vector<Light*> _lights;
 
     RenderDataManager();
@@ -62,7 +62,7 @@ public:
     void fill(Scene* scene, Camera *camera, Rectangle *viewport, bool viewFrustumCulling = true);
     void fillDrawables(std::vector<Drawable*>& drawables, Camera *camera, Rectangle *viewport, bool viewFrustumCulling = true);
     void sort();
-    void getRenderData(RenderData* view, Drawable::RenderLayer layer);
+    void getRenderData(RenderData* view, int layer);
 protected:
     bool buildRenderQueues(Node* node);
     void addInstanced(DrawCall* drawCall);

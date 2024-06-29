@@ -74,7 +74,7 @@ namespace mgp {
 		void render(Scene* scene, Camera *camera, Rectangle *viewport);
 		void renderDrawables(std::vector<Drawable*>& drawables, Camera* camera, Rectangle* viewport);
 
-		void onResize(int w, int h);
+		virtual void onResize(int w, int h);
 
 		virtual void finalize();
 
