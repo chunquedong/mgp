@@ -20,6 +20,7 @@ public:
         std::string name;
         uint64_t id = 0;
         bool _isChecked = true;
+        bool hasChildren = true;
 
         bool isChecked();
         void setChecked(bool v);
@@ -32,6 +33,7 @@ public:
 
     SPtr<TreeItem> root;
 
+    std::function<void(TreeItem* item)> onItemCliked;
 protected:
     TreeItem* _selectItem = NULL;
     bool _isDirty = true;

@@ -98,7 +98,7 @@ void TreeView::addItemLabel(TreeItem* item, int level) {
             icon->setImagePath("res/ui/right.png");
         }
     }
-    if (item->expanded && item->children.size() == 0) {
+    if (!item->hasChildren || (item->expanded && item->children.size() == 0)) {
         icon->setVisible(false);
     }
     else {
@@ -196,6 +196,9 @@ void TreeView::controlEvent(Control* control, Control::Listener::EventType evt) 
             notifyListeners(Control::Listener::EXPANDED);
         }
 
+        if (onItemCliked) {
+            onItemCliked(item);
+        }
     }
 }
 
