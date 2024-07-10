@@ -18,7 +18,7 @@ static std::mutex __textureCacheMutex;
 
 Texture::Texture() : _handle(0), _format(Image::UNKNOWN), _type((Texture::Type)0), _width(0), _height(0), _arrayDepth(0), _mipmapped(false), _cached(false), _compressed(false),
     _wrapS(Texture::REPEAT), _wrapT(Texture::REPEAT), _wrapR(Texture::REPEAT), _minFilter(Texture::NEAREST), _magFilter(Texture::LINEAR),
-    _keepMemory(false), _dataDirty(true)
+    _keepMemory(false), _dataDirty(true), _anisotropy(false)
 {
 }
 
@@ -336,6 +336,9 @@ Serializable* Texture::createObject() {
     return new Texture();
 }
 
+void Texture::setAnisotropy(bool anisotropy) {
+    _anisotropy = anisotropy;
+}
 
 std::string Texture::enumToString(const std::string& enumName, int value)
 {

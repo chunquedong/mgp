@@ -696,6 +696,12 @@ void GLRenderer::bindTextureSampler(Texture* sampler) {
     if (target == GL_TEXTURE_CUBE_MAP) // We don't want to run this on something that we know will fail
         GL_ASSERT(glTexParameteri(target, GL_TEXTURE_WRAP_R, (GLenum)sampler->_wrapR));
 #endif
+    if (sampler->_anisotropy) {
+        GLfloat max_tex = 1;
+        GL_ASSERT(glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_tex));
+        //printf("GL_TEXTURE_MAX_ANISOTROPY_EXT:%d\n", max_tex);
+        GL_ASSERT(glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_tex));
+    }
 }
 
 static void writeToFile(const char* filePath, const char* source)

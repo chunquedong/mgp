@@ -283,6 +283,8 @@ public:
      * Constructor.
      */
     Texture();
+
+    void setAnisotropy(bool anisotropy);
 private:
     /**
      * Copy constructor.
@@ -321,6 +323,7 @@ private:
 
     TextureHandle _handle;
     Filter _minFilter;
+    bool _anisotropy;
 private:
     std::vector<SPtr<Image> > _datas;
 };
