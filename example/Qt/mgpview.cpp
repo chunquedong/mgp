@@ -149,6 +149,17 @@ static void mouseEventConvert(QMouseEvent* evt, mgp::MotionEvent &mouse) {
     else if (evt->buttons() & Qt::MiddleButton) {
         mouse.button = MotionEvent::middle;
     }
+    else {
+        if (evt->button() == Qt::LeftButton) {
+            mouse.button = MotionEvent::left;
+        }
+        else if (evt->button() == Qt::RightButton) {
+            mouse.button = MotionEvent::right;
+        }
+        else if (evt->button() == Qt::MiddleButton) {
+            mouse.button = MotionEvent::middle;
+        }
+    }
 }
 
 void MgpView::mousePressEvent(QMouseEvent* evt)
