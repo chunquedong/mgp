@@ -3,11 +3,14 @@
 #include "platform/Toolkit.h"
 #include "scene/Node.h"
 
+#include <mutex>
+
 namespace mgp
 {
 
 int Transform::_suspendTransformChanged(0);
 std::vector<Transform*> Transform::_transformsChanged;
+std::mutex g_transformLock;
 
 Transform::Transform()
     : _matrixDirtyBits(0), _listeners(NULL)
@@ -56,11 +59,13 @@ Transform::~Transform()
 
 void Transform::suspendTransformChanged()
 {
+    std::lock_guard<std::mutex> guard(g_transformLock);
     _suspendTransformChanged++;
 }
 
 void Transform::resumeTransformChanged()
 {
+    std::lock_guard<std::mutex> guard(g_transformLock);
     if (_suspendTransformChanged == 0) // We haven't suspended transformChanged() calls, so do nothing.
         return;
     
@@ -93,6 +98,7 @@ void Transform::resumeTransformChanged()
 
 bool Transform::isTransformChangedSuspended()
 {
+    std::lock_guard<std::mutex> guard(g_transformLock);
     return (_suspendTransformChanged > 0);
 }
 
@@ -983,6 +989,7 @@ bool Transform::isDirty(char matrixDirtyBits) const
 
 void Transform::suspendTransformChange(Transform* transform)
 {
+    std::lock_guard<std::mutex> guard(g_transformLock);
     GP_ASSERT(transform);
     transform->_matrixDirtyBits |= DIRTY_NOTIFY;
     _transformsChanged.push_back(transform);

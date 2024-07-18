@@ -10,6 +10,10 @@ precision mediump float;
 // Uniforms
 uniform sampler2D u_diffuseTexture;
 
+#if defined(DIFFUSE_COLOR)
+    uniform vec4 u_diffuseColor;
+#endif
+
 ///////////////////////////////////////////////////////////
 // Varyings
 in vec2 v_texCoord;
@@ -40,6 +44,9 @@ void main()
     #endif
  
     _baseColor = texture(u_diffuseTexture, v_texCoord);
+    #if defined(DIFFUSE_COLOR)
+        _baseColor = _baseColor * u_diffuseColor;
+    #endif
  
     FragColor.a = _baseColor.a;
 
