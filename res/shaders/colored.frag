@@ -8,7 +8,6 @@ precision mediump float;
 
 
 ///////////////////////////////////////////////////////////
-uniform vec4 u_diffuseColor;
 
 #if defined(MODULATE_COLOR)
     uniform vec4 u_modulateColor;
@@ -20,6 +19,10 @@ uniform vec4 u_diffuseColor;
 
 #if defined(VERTEX_COLOR)
     in vec3 v_color;
+#elif defined(VERTEX_COLOR4)
+    in vec4 v_color;
+#else
+    uniform vec4 u_diffuseColor;
 #endif
 
 ///////////////////////////////////////////////////////////
@@ -48,6 +51,8 @@ void main()
         #if defined(VERTEX_COLOR)
             _baseColor.rgb = v_color;
             _baseColor.a = 1.0;
+        #elif defined(VERTEX_COLOR4)
+            _baseColor = v_color;
         #else
             _baseColor = u_diffuseColor;
         #endif
@@ -57,6 +62,8 @@ void main()
         #if defined(VERTEX_COLOR)
             FragColor.rgb = v_color;
             FragColor.a = 1.0;
+        #elif defined(VERTEX_COLOR4)
+            FragColor = v_color;
         #else
             FragColor = u_diffuseColor;
         #endif

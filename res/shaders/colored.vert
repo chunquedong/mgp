@@ -5,6 +5,9 @@
 #if defined(VERTEX_COLOR)
     in vec3 a_color;
     out vec3 v_color;
+#elif defined(VERTEX_COLOR4)
+    in vec4 a_color;
+    out vec4 v_color;
 #endif
 
 ///////////////////////////////////////////////////////////
@@ -33,7 +36,7 @@ void main()
     #endif
     
     // Pass the vertex color
-    #if defined(VERTEX_COLOR)
+    #if defined(VERTEX_COLOR) || defined(VERTEX_COLOR4)
 	    v_color = a_color;
     #endif
 
