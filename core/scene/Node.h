@@ -801,9 +801,9 @@ protected:
     std::string _name;
 
     /** The nodes first child. */
-    UniquePtr<Node, true> _firstChild;
+    OwnPtr<Node, true> _firstChild;
     /** The nodes next sibiling. */
-    UniquePtr<Node, true> _nextSibling;
+    OwnPtr<Node, true> _nextSibling;
     /** The nodes previous sibiling. */
     Node* _prevSibling;
 

@@ -221,7 +221,7 @@ protected:
     std::vector<UPtr<Mesh> > _meshParts;
     UPtr<Material> _material;
     std::vector<UPtr<Material> > _partMaterials;
-    UniquePtr<MeshSkin, true> _skin;
+    OwnPtr<MeshSkin, true> _skin;
     float _lodLimit;
     BoundingSphere _bounds;
 };

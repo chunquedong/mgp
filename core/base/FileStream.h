@@ -31,7 +31,7 @@ public:
     virtual bool seek(long int offset, int origin = SEEK_SET);
     virtual bool rewind();
 
-    static UniquePtr<FileStream, true> create(const char* filePath, const char* mode);
+    static OwnPtr<FileStream, true> create(const char* filePath, const char* mode);
 
 private:
     FileStream(FILE* file);

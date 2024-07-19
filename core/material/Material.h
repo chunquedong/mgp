@@ -279,7 +279,7 @@ private:
     std::string shaderDefines;
     std::string _dynamicDefines;
     //VertexAttributeBinding* _vertexAttributeBinding;
-    UniquePtr<Material, true> _nextPass;
+    OwnPtr<Material, true> _nextPass;
 
     //MaterialParamBinding _paramBinding;
     //Node* _node;

@@ -16,7 +16,7 @@ FileStream::~FileStream()
     }
 }
 
-UniquePtr<FileStream, true> FileStream::create(const char* filePath, const char* mode)
+OwnPtr<FileStream, true> FileStream::create(const char* filePath, const char* mode)
 {
     FILE* file = fopen(filePath, mode);
     if (file)

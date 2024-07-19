@@ -46,29 +46,29 @@ template<typename T>
 class SharedPtr;
 
 template<typename T, bool nullable = false>
-class UniquePtr {
+class OwnPtr {
     T* pointer;
 
-    template <class U, bool nullable2> friend class UniquePtr;
+    template <class U, bool nullable2> friend class OwnPtr;
 
 public:
-    UniquePtr() : pointer(nullptr) {
+    OwnPtr() : pointer(nullptr) {
         //if (!nullable) static_assert(false, "non-nullable");
     }
 
-    explicit UniquePtr(T* p) : pointer(p) {
+    explicit OwnPtr(T* p) : pointer(p) {
         /*if (!nullable) {
             mgp_assert(p, "non-nullable");
         }*/
     }
 
-    ~UniquePtr() {
+    ~OwnPtr() {
         clear();
     }
 
-    UniquePtr(const UniquePtr& other) = delete;
+    OwnPtr(const OwnPtr& other) = delete;
 
-    UniquePtr(UniquePtr&& other) {
+    OwnPtr(OwnPtr&& other) {
         if (!nullable) {
             mgp_assert(other.pointer, "non-nullable");
         }
@@ -82,7 +82,7 @@ public:
     }
 
     template <class U>
-    UniquePtr(UniquePtr<U>&& other) {
+    OwnPtr(OwnPtr<U>&& other) {
         if (!nullable) {
             mgp_assert(other.pointer, "non-nullable");
         }
@@ -95,9 +95,9 @@ public:
         }
     }
 
-    UniquePtr& operator=(const UniquePtr& other) = delete;
+    OwnPtr& operator=(const OwnPtr& other) = delete;
 
-    UniquePtr& operator=(UniquePtr&& other) {
+    OwnPtr& operator=(OwnPtr&& other) {
         if (!nullable) {
             mgp_assert(other.pointer, "non-nullable");
         }
@@ -139,25 +139,31 @@ public:
         return p;
     }
 
-    void swap(UniquePtr& other) {
+    void swap(OwnPtr& other) {
         T* p = pointer;
         pointer = other.pointer;
         other.pointer = p;
     }
 
-    template <class U> UniquePtr<U> staticCastTo()
+    template <class U> OwnPtr<U> staticCastTo()
     {
-        UniquePtr<U> copy(static_cast<U*>(take()));
+        OwnPtr<U> copy(static_cast<U*>(take()));
         return copy;
     }
 
-    template <class U> UniquePtr<U> dynamicCastTo()
+    template <class U> OwnPtr<U> dynamicCastTo()
     {
-        UniquePtr<U> copy(dynamic_cast<U*>(take()));
+        OwnPtr<U> copy(dynamic_cast<U*>(take()));
         return copy;
     }
 
-    SharedPtr<T> share() {
+    OwnPtr<T> share() {
+        if (pointer)
+            pointer->addRef();
+        return OwnPtr<T>(pointer);
+    }
+
+    SharedPtr<T> toShared() {
         SharedPtr<T> sptr;
         sptr = get();
         return sptr;
@@ -165,9 +171,9 @@ public:
 };
 
 template <class T>
-UniquePtr<T> uniqueFromInstant(T* ptr) {
+OwnPtr<T> uniqueFromInstant(T* ptr) {
     ptr->addRef();
-    return UniquePtr<T>(ptr);
+    return OwnPtr<T>(ptr);
 }
 
 /**
@@ -281,8 +287,8 @@ public:
         return copy;
     }
 
-    UniquePtr<T> asUPtr() {
-        UniquePtr<T> uptr(pointer);
+    OwnPtr<T> asUPtr() {
+        OwnPtr<T> uptr(pointer);
         pointer = nullptr;
         return uptr;
     }
@@ -298,6 +304,14 @@ public:
     }
 
     WeakPtr(SharedPtr<T>& p) : pointer(NULL) {
+        Refable* refp = dynamic_cast<Refable*>(p.get());
+        if (refp) {
+            pointer = refp->getWeakRefBlock();
+            pointer->addRef();
+        }
+    }
+
+    WeakPtr(OwnPtr<T>& p) : pointer(NULL) {
         Refable* refp = dynamic_cast<Refable*>(p.get());
         if (refp) {
             pointer = refp->getWeakRefBlock();
@@ -342,6 +356,13 @@ public:
         return ptr.dynamicCastTo<T>();
     }
 
+    OwnPtr<T, true> lockOwn() {
+        if (!pointer) {
+            return OwnPtr<T, true>();
+        }
+        return uniqueFromInstant(pointer->lock()).dynamicCastTo<T>();
+    }
+
     void clear() {
         if (pointer) {
             pointer->release();
@@ -353,7 +374,7 @@ public:
 
 
 template<typename T> using SPtr = SharedPtr<T>;
-template<typename T> using UPtr = UniquePtr<T>;
+template<typename T> using UPtr = OwnPtr<T>;
 
 }
 #endif
