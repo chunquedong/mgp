@@ -360,7 +360,7 @@ public:
         if (!pointer) {
             return OwnPtr<T, true>();
         }
-        return uniqueFromInstant(pointer->lock()).dynamicCastTo<T>();
+        return OwnPtr<Refable>(pointer->lock()).dynamicCastTo<T>();
     }
 
     void clear() {
