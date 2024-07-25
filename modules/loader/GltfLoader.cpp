@@ -304,6 +304,9 @@ private:
 				else {
 					UPtr<Material> material = Material::create("res/shaders/colored.vert", "res/shaders/colored.frag");
 					float* color = cmaterial->pbr_metallic_roughness.base_color_factor;
+					if (lighting) {
+						material->getParameter("u_specularExponent")->setFloat(5.0);
+					}
 					material->getParameter("u_diffuseColor")->setVector4(Vector4(color[0], color[1], color[2], color[3]));
 					loadCommonMatrialProperty(cmaterial, material.get(), model);
 					return material;
@@ -323,7 +326,9 @@ private:
 						UPtr<Texture> texture = loadTexture(ctexture);
 						UPtr<Material> material = Material::create("res/shaders/textured.vert", "res/shaders/textured.frag");
 						material->getParameter("u_diffuseTexture")->setSampler(texture.get());
-						//SAFE_RELEASE(texture);
+						if (lighting) {
+							material->getParameter("u_specularExponent")->setFloat(5.0);
+						}
 						loadCommonMatrialProperty(cmaterial, material.get(), model);
 						return material;
 					}
@@ -335,6 +340,9 @@ private:
 		//fallback
 		UPtr<Material> mat = Material::create("res/shaders/colored.vert", "res/shaders/colored.frag");
 		mat->getParameter("u_diffuseColor")->setVector4(Vector4(1.0, 0.0, 0.0, 1.0));
+		if (lighting) {
+			mat->getParameter("u_specularExponent")->setFloat(5.0);
+		}
 		loadCommonMatrialProperty(cmaterial, mat.get(), model);
 		return mat;
 	}
@@ -402,6 +410,9 @@ private:
 
 		if (!hasMaterial) {
 			Material* mat = model->setMaterial("res/shaders/colored.vert", "res/shaders/colored.frag");
+			if (lighting) {
+				mat->getParameter("u_specularExponent")->setFloat(5.0);
+			}
 			mat->getParameter("u_diffuseColor")->setVector4(Vector4(1.0, 0.0, 0.0, 1.0));
 		}
 	}
