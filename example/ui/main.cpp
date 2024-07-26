@@ -41,7 +41,7 @@ class MainApp : public Application, Control::Listener {
         };
         form->getContent()->addControl(std::move(tree));
 #endif
-#if 0
+#if 1
         UPtr<ComboBox> combobox = Control::create<ComboBox>("combobox");
         combobox->setWidth(100);
         combobox->setText("Combobox");
@@ -193,7 +193,7 @@ class MainApp : public Application, Control::Listener {
         form->getContent()->addControl(std::move(button));
 
 #endif
-
+#if 0
         form->getContent()->setLayout(Layout::LAYOUT_VERTICAL);
         auto accordion1 = Control::create<Accordion>("accord1");
         accordion1->getButton()->setText("Accord1");
@@ -205,7 +205,7 @@ class MainApp : public Application, Control::Listener {
         accordion2->getContent()->setHeight(100);
         accordion2->getContent()->setStyleName("Panel");
         form->getContent()->addControl(std::move(accordion2));
-
+#endif
         /*auto sceneWriter = mgp::SerializerJson::createWriter("ui.hml", true);
         sceneWriter->writeObject(nullptr, form->getContent());
         sceneWriter->close();
