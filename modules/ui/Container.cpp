@@ -57,7 +57,7 @@ void Container::clearContacts()
 
 Container::Container()
     : _layout(NULL), _activeControl(NULL),
-    _zIndexDefault(0), _form(NULL), _leftWidth(0), _leftHeight(0)
+    _zIndexDefault(0), _form(NULL), _leftWidth(0), _leftHeight(0), _leftWidthWeight(1), _leftHeightWeight(1)
 {
     clearContacts();
     _consumeInputEvents = false;
@@ -457,6 +457,8 @@ void Container::layoutChildren(bool dirtyBounds) {
 
 void Container::updateChildBounds() {
     bool hasExpand = false;
+    _leftWidthWeight = 0;
+    _leftHeightWeight = 0;
     for (size_t i = 0, count = _controls.size(); i < count; ++i)
     {
         Control* ctrl = _controls[i];
@@ -467,6 +469,12 @@ void Container::updateChildBounds() {
             if (ctrl->getAutoSizeW() == AUTO_PERCENT_LEFT || ctrl->getAutoSizeH() == AUTO_PERCENT_LEFT) {
                 //pass
                 hasExpand = true;
+                if (ctrl->getAutoSizeW() == AUTO_PERCENT_LEFT) {
+                    _leftWidthWeight += ctrl->_desiredBounds.width;
+                }
+                else if (ctrl->getAutoSizeH() == AUTO_PERCENT_LEFT) {
+                    _leftHeightWeight += ctrl->_desiredBounds.height;
+                }
             }
             else {
                 ctrl->measureSize();

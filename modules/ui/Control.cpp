@@ -1028,30 +1028,39 @@ void Control::measureSize() {
 
     float leftWidth = 0;
     float leftHeight = 0;
+    float _leftWidthWeight = 1;
+    float _leftHeightWeight = 1;
     Rectangle parentAbsoluteBounds;
     if (_parent) {
         parentAbsoluteBounds = _parent->_viewportBounds;
         leftWidth = _parent->_leftWidth;
         leftHeight = _parent->_leftHeight;
+        _leftWidthWeight = _parent->_leftWidthWeight;
+        _leftHeightWeight = _parent->_leftHeightWeight;
     }
     else {
         Renderer* game = Renderer::cur();
         leftWidth = game->getDpWidth();
         leftHeight = game->getDpHeight();
         parentAbsoluteBounds = Rectangle(0, 0, leftWidth, leftHeight);
+        _leftWidthWeight = _desiredBounds.width;
+        _leftHeightWeight = _desiredBounds.height;
     }
+
+    if (_leftWidthWeight == 0) _leftWidthWeight = 1;
+    if (_leftHeightWeight == 0) _leftHeightWeight = 1;
 
     if (_autoSizeW == AUTO_PERCENT_PARENT)
         _measureBounds.width = _desiredBounds.width * parentAbsoluteBounds.width;
     else if (_autoSizeW == AUTO_PERCENT_LEFT)
-        _measureBounds.width = _desiredBounds.width * leftWidth - (_margin.right+_margin.left);
+        _measureBounds.width = _desiredBounds.width * (leftWidth / _leftWidthWeight) - (_margin.right+_margin.left);
     else if (_autoSizeW == AUTO_SIZE_NONE)
         _measureBounds.width = _desiredBounds.width;
 
     if (_autoSizeH == AUTO_PERCENT_PARENT)
         _measureBounds.height = _desiredBounds.height * parentAbsoluteBounds.height;
     else if (_autoSizeH == AUTO_PERCENT_LEFT)
-        _measureBounds.height = _desiredBounds.height * leftHeight - (_margin.top + _margin.bottom);
+        _measureBounds.height = _desiredBounds.height * (leftHeight / _leftHeightWeight) - (_margin.top + _margin.bottom);
     else if (_autoSizeH == AUTO_SIZE_NONE)
         _measureBounds.height = _desiredBounds.height;
 

@@ -258,3 +258,19 @@ Style {
         bottom = 18
     }
 }
+
+Style {
+    id = AccordionButton
+    color = #abababff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_VCENTER_LEFT
+
+    background = {
+        image = res/ui/band.png
+        left = 1
+        right = 1
+        top = 1
+        bottom = 1
+    }
+}

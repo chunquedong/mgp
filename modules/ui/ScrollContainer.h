@@ -358,6 +358,17 @@ private:
     bool _scrollWheelRequiresFocus;
 };
 
+class Button;
+class Accordion : public Container {
+    UPtr<Control> _content;
+    Button* _button;
+public:
+    Accordion();
+    Button* getButton() { return _button; }
+    Control* getContent() { return _content.get(); }
+    void setContent(UPtr<Control> c);
+};
+
 }
 
 #endif

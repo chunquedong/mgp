@@ -17,7 +17,7 @@ class Container : public Control
     friend class Form;
     friend class Control;
     //friend class ControlFactory;
-
+    friend class Accordion;
 public:
 
     /**
@@ -282,7 +282,8 @@ protected:
 
     float _leftWidth;
     float _leftHeight;
-    
+    float _leftWidthWeight;
+    float _leftHeightWeight;
 private:
 
     /**

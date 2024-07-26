@@ -895,4 +895,51 @@ void ScrollContainer::setAnimationPropertyValue(int propertyId, AnimationValue* 
     }
 }
 
+Accordion::Accordion()
+{
+    this->setLayout(Layout::LAYOUT_VERTICAL);
+    auto button = Control::create<Button>("accordinButton", NULL, "AccordionButton");
+    button->setText("Accordion");
+    _button = button.get();
+    button->setWidth(1.0, Control::AUTO_PERCENT_PARENT);
+    button->setHeight(1.0, Control::AUTO_WRAP_CONTENT);
+    this->addControl(std::move(button));
+
+    auto content = Control::create<ScrollContainer>("accordinContent");
+    _content = uniqueFromInstant(content.get());
+    content->setWidth(1.0, Control::AUTO_PERCENT_PARENT);
+    content->setHeight(1.0, Control::AUTO_PERCENT_LEFT);
+    this->addControl(std::move(content));
+
+    this->setHeight(1.0, Control::AUTO_PERCENT_LEFT);
+    this->setWidth(1.0, Control::AUTO_PERCENT_PARENT);
+
+    _button->setListener([=](Control* control, Control::Listener::EventType evt) {
+        if (evt == Listener::CLICK) {
+            //_content->setVisible(_content->isVisible());
+            //this->setDirty(DIRTY_BOUNDS);
+            if (_content->getParent()) {
+                _content->getParent()->removeControl(_content.get());
+                this->setHeight(1.0, Control::AUTO_WRAP_CONTENT);
+            }
+            else {
+                this->addControl(uniqueFromInstant(_content.get()));
+                this->setHeight(1.0, Control::AUTO_PERCENT_LEFT);
+            }
+
+            if (this->getParent()) {
+                this->getParent()->setDirty(DIRTY_BOUNDS, true);
+            }
+        }
+    });
+}
+
+void Accordion::setContent(UPtr<Control> c) {
+    if (_content->getParent()) {
+        _content->getParent()->removeControl(_content.get());
+    }
+    _content = std::move(c);
+    this->addControl(uniqueFromInstant(_content.get()));
+}
+
 }
