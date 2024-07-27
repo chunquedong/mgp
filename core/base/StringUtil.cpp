@@ -77,10 +77,14 @@ String StringUtil::substr(const String& self, size_t pos, size_t len) {
     return self.substr(pos, len);
 }
 
+static bool isSpace(char ch) {
+    return (ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t');
+}
+
 void StringUtil::trimEnd(String& str) {
   int i = str.size()-1;
   for (; i >=0; --i) {
-    if (!isspace(str[i])) {
+    if (!isSpace(str[i])) {
       break;
     }
   }
@@ -92,7 +96,7 @@ void StringUtil::trimEnd(String& str) {
 void StringUtil::trimStart(String& str) {
   int i = 0;
   for (; i < str.size(); ++i) {
-    if (!isspace(str[i])) {
+    if (!isSpace(str[i])) {
       break;
     }
   }
