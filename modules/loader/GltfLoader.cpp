@@ -93,6 +93,10 @@ static void decodeDracoMeshes(DracoCache* dracoCache, cgltf_data* _gltf_data) {
 }
 #endif
 
+#ifdef  _WIN32
+	extern std::string Utf8ToGbk(const char* src_str);
+#endif
+
 class GltfLoaderImp {
 	std::map<cgltf_node*, Node*> nodeMap;
 	std::map<cgltf_mesh*, Model*> meshRes;
@@ -115,6 +119,10 @@ public:
 	}
 	int lighting = 0;
 	UPtr<Scene> load(const char* file) {
+#ifdef  _WIN32
+		std::string fileStr = Utf8ToGbk(file);
+		file = fileStr.c_str();
+#endif
 		baseDir = FileSystem::getDirectoryName(file);
 
 		cgltf_options options = {};

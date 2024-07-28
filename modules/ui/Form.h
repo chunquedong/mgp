@@ -209,6 +209,7 @@ private:
 
     Container* _content = NULL;
     ModalLayer* _overlay = NULL;
+    bool _relayout = true;
 };
 
 }

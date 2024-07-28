@@ -101,10 +101,45 @@ float FlowLayout::prefContentWidth(const Container* container) {
         if (ctrl->isVisible() && !ctrl->isWidthPercentage())
         {
             float w = ctrl->getMeasureBufferedWidth();
-            
             width += w + _horizontalSpacing;
         }
     }
     return width;
+}
+float FlowLayout::prefContentHeight(const Container* container)
+{
+    const Rectangle& containerBounds = container->getBounds();
+    //const Border& containerBorder = container->getBorder(container->getState());
+    const Padding& containerPadding = container->getPadding();
+    float clipWidth = containerBounds.width - containerPadding.left - containerPadding.right;
+
+    // Size ourself to tightly fit the width of our children
+    float width = 0;
+    float height = 0;
+    float tallestHeight = 0;
+    for (size_t i = 0, count = container->getControls().size(); i < count; ++i)
+    {
+        Control* ctrl = container->getControls()[i];
+        if (ctrl->isVisible() && !ctrl->isWidthPercentage())
+        {
+            float w = ctrl->getMeasureBufferedWidth();
+            float h = ctrl->getMeasureBufferedHeight();
+
+            if (width + w > clipWidth) {
+                height += tallestHeight;
+                tallestHeight = 0;
+                width = 0;
+            }
+
+            width += w + _horizontalSpacing;
+
+            if (h > tallestHeight)
+            {
+                tallestHeight = h;
+            }
+        }
+    }
+    height += tallestHeight;
+    return height;
 }
 }

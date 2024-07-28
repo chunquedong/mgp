@@ -34,6 +34,7 @@ public:
 struct RayQuery {
     Ray ray;
     bool backfaceCulling = true;
+    bool autoCullFace = true;
     int pickMask = 1;
 
     //camera fovDivisor = tan(camera.fov*0.5)/(viewport.h/2);

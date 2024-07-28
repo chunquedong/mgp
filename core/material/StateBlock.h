@@ -142,6 +142,7 @@ namespace mgp
          * @param enabled true to enable, false to disable.
          */
         void setCullFace(bool enabled);
+        bool cullFaceEnabled();
 
         /**
          * Sets the side of the facets to cull.

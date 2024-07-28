@@ -333,6 +333,10 @@ void StateBlock::setCullFace(bool enabled)
     //_bits |= RS_CULL_FACE;
 }
 
+bool StateBlock::cullFaceEnabled() {
+    return _cullFaceEnabled;
+}
+
 void StateBlock::setCullFaceSide(CullFaceSide side)
 {
     _cullFaceSide = side;

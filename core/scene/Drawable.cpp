@@ -60,7 +60,10 @@ bool Drawable::raycast(RayQuery& query) {
 
     RayQuery localQuery = query;
     localQuery.ray.transform(matrix);
-
+    localQuery.minDistance = Ray::INTERSECTS_NONE;
+    if (query.autoCullFace && this->getMainMaterial()) {
+        localQuery.backfaceCulling = this->getMainMaterial()->getStateBlock()->cullFaceEnabled();
+    }
     if (doRaycast(localQuery)) {
         _node->getWorldMatrix().transformPoint(&localQuery.target);
         double distance = localQuery.target.distance(query.ray.getOrigin());

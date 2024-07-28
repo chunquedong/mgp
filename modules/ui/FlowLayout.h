@@ -64,6 +64,7 @@ protected:
     void update(const Container* container) override;
 
     float prefContentWidth(const Container* container) override;
+    float prefContentHeight(const Container* container) override;
 
     /**
      * Horizontal spacing between controls.
