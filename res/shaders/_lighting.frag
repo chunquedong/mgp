@@ -47,8 +47,16 @@ vec3 getNormalFromMap(vec3 normalVector)
     vec2 st2 = dFdy(v_texCoord);
 
     vec3 N   = normalize(normalVector);
-    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    //vec3 T  = normalize((Q1*st2.t - Q2*st1.t)/(st1.s*st2.t - st2.s*st1.t));
+
+    vec3 T  = (Q1*st2.t - Q2*st1.t);
+    //vec3 T  = ((Q1*st2.t - Q2*st1.t)/(st1.s*st2.t - st2.s*st1.t));
+
+    if (length(T) == 0.0) {
+        T = vec3(1.0, 0.0, 0.0);
+    }
+
+    T = normalize(T);
+
     vec3 B  = -normalize(cross(N, T));
     mat3 TBN = mat3(T, B, N);
 
