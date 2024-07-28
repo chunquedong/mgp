@@ -74,7 +74,7 @@ public:
      * @return The newly created image.
      * @script{create}
      */
-    static UPtr<Image> create(unsigned int width, unsigned int height, Format format, unsigned char* data = NULL, bool copy = true);
+    static UPtr<Image> create(unsigned int width, unsigned int height, Format format, unsigned char* data = NULL, bool copy = true, bool alloc = false);
 
     /**
      * Gets the image's raw pixel data.
@@ -130,6 +130,8 @@ public:
     * set default formt to save
     */
     void setDefaultFileFormat(const char* format);
+
+    void flipY();
 private:
     /**
      * Destructor.

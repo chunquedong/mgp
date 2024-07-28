@@ -330,7 +330,7 @@ SPtr<Theme> Theme::create(const char* url)
     // Create a new theme.
     SPtr<Theme> theme(new Theme());
     theme->_url = url;
-    theme->_texture = new TextureAtlas(Image::RGBA, 1024, 1024);//Texture::create(textureFile.c_str(), false);
+    theme->_texture = new TextureAtlas(Image::RGBA, 1024*2, 1024*2);//Texture::create(textureFile.c_str(), false);
     GP_ASSERT(theme->_texture);
     Texture* texture = theme->_texture->getTexture();
     theme->_spriteBatch = SpriteBatch::create(texture).take();

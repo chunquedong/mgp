@@ -104,7 +104,7 @@ unsigned int Icon::drawImages(Form* form, const Rectangle& clip, RenderInfo* vie
 
     SpriteBatch* batch = getStyle()->getTheme()->getSpriteBatch();
     startBatch(form, batch);
-    batch->drawImage(Rectangle(_viewportBounds.x, _viewportBounds.y, _viewportBounds.height, _viewportBounds.height), 
+    batch->drawImage(Rectangle(_viewportBounds.x, _viewportBounds.y, _viewportBounds.width, _viewportBounds.height), 
         region, color, &_viewportClipBounds);
     finishBatch(form, batch, view);
     return 1;

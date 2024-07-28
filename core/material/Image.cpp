@@ -292,7 +292,7 @@ bool Image::save(const char* file, const char* format) {
 #endif
 
 
-UPtr<Image> Image::create(unsigned int width, unsigned int height, Image::Format format, unsigned char* data, bool copy)
+UPtr<Image> Image::create(unsigned int width, unsigned int height, Image::Format format, unsigned char* data, bool copy, bool alloc)
 {
     GP_ASSERT(width > 0 && height > 0);
 
@@ -312,6 +312,9 @@ UPtr<Image> Image::create(unsigned int width, unsigned int height, Image::Format
             memcpy(image->_data, data, dataSize);
         else
             memset(image->_data, 0, dataSize);
+    }
+    else if (data == NULL && alloc) {
+        image->_data = (unsigned char*)malloc(dataSize);
     }
     else {
         image->_data = data;
@@ -388,6 +391,23 @@ size_t Image::getFormatBPP(Format format)
 
 void Image::setDefaultFileFormat(const char* format) {
     _defaultFileFormat = format;
+}
+
+void mgp::Image::flipY()
+{
+    if (!_data) return;
+    int bpp = getFormatBPP(_format);
+    int row = _width * bpp;
+    unsigned char* tem = (unsigned char*)malloc(row);
+    for (int i = 0, n = _height / 2; i < n; ++i) {
+        unsigned char* pos = _data + (i * row);
+        int j = _height - i - 1;
+        unsigned char* pos2 = _data + (j * row);
+        memcpy(tem, pos, row);
+        memcpy(pos, pos2, row);
+        memcpy(pos2, tem, row);
+    }
+    free(tem);
 }
 
 void Image::write(Stream* file) {

@@ -311,18 +311,20 @@ void GLFrameBuffer::getScreenshot(Image* image)
 {
     GP_ASSERT( image );
 
-    unsigned int width = _renderer->_currentFrameBuffer->getWidth();
-    unsigned int height = _renderer->_currentFrameBuffer->getHeight();
+    unsigned int width = getWidth();
+    unsigned int height = getHeight();
 
     if (image->getWidth() == width && image->getHeight() == height) {
+        GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, _handle));
         GLenum format = image->getFormat() == Image::RGB ? GL_RGB : GL_RGBA;
         GL_ASSERT( glReadPixels(0, 0, width, height, format, GL_UNSIGNED_BYTE, image->getData()) );
+        GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, _renderer->_currentFrameBuffer->_handle));
     }
 }
 
 UPtr<Image> GLFrameBuffer::createScreenshot(Image::Format format)
 {
-    UPtr<Image> screenshot = Image::create(_renderer->_currentFrameBuffer->getWidth(), _renderer->_currentFrameBuffer->getHeight(), format, NULL);
+    UPtr<Image> screenshot = Image::create(getWidth(), getHeight(), format, NULL, true, true);
     getScreenshot(screenshot.get());
 
     return screenshot;
