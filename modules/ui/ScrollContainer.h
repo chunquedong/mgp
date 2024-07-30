@@ -362,11 +362,14 @@ class Button;
 class Accordion : public Container {
     UPtr<Control> _content;
     Button* _button;
+    bool _expanded = true;
 public:
+    std::function<void(bool expand)> onClik;
     Accordion();
     Button* getButton() { return _button; }
     Control* getContent() { return _content.get(); }
     void setContent(UPtr<Control> c);
+    bool isExpanded() { return _expanded; }
 };
 
 }

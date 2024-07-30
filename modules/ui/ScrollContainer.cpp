@@ -918,14 +918,20 @@ Accordion::Accordion()
     _button->setListener([=](Control* control, Control::Listener::EventType evt) {
         if (evt == Listener::CLICK) {
             //_content->setVisible(_content->isVisible());
-            //this->setDirty(DIRTY_BOUNDS);
+            
             if (_content->getParent()) {
                 _content->getParent()->removeControl(_content.get());
                 this->setHeight(1.0, Control::AUTO_WRAP_CONTENT);
+                _expanded = false;
             }
             else {
                 this->addControl(uniqueFromInstant(_content.get()));
                 this->setHeight(1.0, Control::AUTO_PERCENT_LEFT);
+                _expanded = true;
+            }
+
+            if (onClik) {
+                onClik(_expanded);
             }
 
             if (this->getParent()) {

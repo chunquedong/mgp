@@ -466,6 +466,7 @@ void Container::updateChildBounds() {
 
         if (ctrl->isVisible())
         {
+            ctrl->_localBounds = ctrl->_measureBounds;
             if (ctrl->getAutoSizeW() == AUTO_PERCENT_LEFT || ctrl->getAutoSizeH() == AUTO_PERCENT_LEFT) {
                 //pass
                 hasExpand = true;

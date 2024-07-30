@@ -190,11 +190,11 @@ void Form::update(float elapsedTime)
     //  2. Second pass updates parent controls that depend on child sizes
     //if (_root->updateLayout(Vector2::zero()))
     _root->updateLayout(Vector2::zero());
-    if (_relayout) {
-        _root->setDirty(Control::DIRTY_BOUNDS, true);
-        _root->updateLayout(Vector2::zero());
-        _relayout = false;
-    }
+    //if (_relayout) {
+    //    _root->setDirty(Control::DIRTY_BOUNDS, true);
+    //    _root->updateLayout(Vector2::zero());
+    //    _relayout = false;
+    //}
 }
 
 void Form::startBatch(BatchableLayer* batch)
