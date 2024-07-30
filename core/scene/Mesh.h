@@ -363,8 +363,7 @@ protected:
 
 template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset,
         int _indexCount, int partIndex, PrimitiveType _primitiveType, int id) {
-    if (_primitiveType == Mesh::TRIANGLE_FAN || _primitiveType == Mesh::TRIANGLE_STRIP || 
-        _primitiveType == Mesh::LINE_LOOP || _primitiveType == Mesh::LINE_STRIP) {
+    if (_primitiveType == Mesh::LINE_LOOP || _primitiveType == Mesh::LINE_STRIP) {
         return false;
     }
     int minTriangle = -1;
@@ -376,7 +375,57 @@ template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset,
     if (!positionElement || positionElement->size != 3) return false;
     int count = _indexCount;
 
-    if (_primitiveType == Mesh::TRIANGLES) {
+    if (_primitiveType == Mesh::TRIANGLE_STRIP) {
+        Vector3 a;
+        Vector3 b;
+        Vector3 c;
+        for (int j = 0; j+2 < count; j += 1) {
+            T ia = indices[j];
+            T ib = indices[j + 1];
+            T ic = indices[j + 2];
+            float* af = (float*)(verteix + (positionElement->stride * ia) + positionElement->offset);
+            float* bf = (float*)(verteix + (positionElement->stride * ib) + positionElement->offset);
+            float* cf = (float*)(verteix + (positionElement->stride * ic) + positionElement->offset);
+            //float to double
+            a.x = af[0]; a.y = af[1]; a.z = af[2];
+            b.x = bf[0]; b.y = bf[1]; b.z = bf[2];
+            c.x = cf[0]; c.y = cf[1]; c.z = cf[2];
+            double dis = query.ray.intersectTriangle(a, b, c, query.backfaceCulling, &curTarget);
+            if (dis != Ray::INTERSECTS_NONE) {
+                if (dis < query.minDistance) {
+                    query.minDistance = dis;
+                    minTriangle = j;
+                    query.target = curTarget;
+                }
+            }
+        }
+    }
+    else if (_primitiveType == Mesh::TRIANGLE_FAN) {
+        Vector3 a;
+        Vector3 b;
+        Vector3 c;
+        for (int j = 1; j + 1 < count; j += 1) {
+            T ia = indices[0];
+            T ib = indices[j];
+            T ic = indices[j + 1];
+            float* af = (float*)(verteix + (positionElement->stride * ia) + positionElement->offset);
+            float* bf = (float*)(verteix + (positionElement->stride * ib) + positionElement->offset);
+            float* cf = (float*)(verteix + (positionElement->stride * ic) + positionElement->offset);
+            //float to double
+            a.x = af[0]; a.y = af[1]; a.z = af[2];
+            b.x = bf[0]; b.y = bf[1]; b.z = bf[2];
+            c.x = cf[0]; c.y = cf[1]; c.z = cf[2];
+            double dis = query.ray.intersectTriangle(a, b, c, query.backfaceCulling, &curTarget);
+            if (dis != Ray::INTERSECTS_NONE) {
+                if (dis < query.minDistance) {
+                    query.minDistance = dis;
+                    minTriangle = j;
+                    query.target = curTarget;
+                }
+            }
+        }
+    }
+    else if (_primitiveType == Mesh::TRIANGLES) {
         Vector3 a;
         Vector3 b;
         Vector3 c;
