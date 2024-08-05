@@ -518,11 +518,11 @@ int Font::indexAtCoord(const wchar_t* utext, unsigned int fontSize, bool clipToF
 
     for (size_t i = 0; i < textLen; i++)
     {
-        if (xPos == x) {
+        if (i != 0 && xPos == x) {
             return i;
         }
-        else if (xPos > x) {
-            if (clipToFloor) return i-1;
+        else if (i != 0 && xPos > x) {
+            if (i > 1 && clipToFloor) return i-1;
             else return i;
         }
 

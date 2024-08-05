@@ -19,7 +19,7 @@ UPtr<HorizontalLayout> HorizontalLayout::create()
 
 Layout::Type HorizontalLayout::getType()
 {
-    return Layout::LAYOUT_VERTICAL;
+    return Layout::LAYOUT_HORIZONTAL;
 }
 
 int HorizontalLayout::getSpacing() const

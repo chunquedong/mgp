@@ -65,7 +65,12 @@ std::string& Label::getDisplayedText() {
 void Label::updateFontLayout() {
     if (!_font) return;
     auto text = getDisplayedText();
-    fontLayout.update(_font, getStyle()->getFontSize(), text.c_str(), text.size());
+    int wrapWidth = -1;
+    if (multiLine) {
+        wrapWidth = _measureBounds.width - getPadding().left - getPadding().right;
+        if (wrapWidth <= 0) wrapWidth = -1;
+    }
+    fontLayout.update(_font, getStyle()->getFontSize(), text.c_str(), text.size(), wrapWidth);
 }
 
 void Label::update(float elapsedTime)

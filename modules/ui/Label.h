@@ -45,6 +45,7 @@ public:
      */
     virtual void addListener(Control::Listener* listener, Listener::EventType eventFlags);
 
+    void setMulitline(bool mul) { multiLine = mul; }
 protected:
 
     /**
@@ -111,6 +112,7 @@ protected:
     Rectangle _textBounds;
 
 
+    bool multiLine = false;
     FontLayout fontLayout;
 
 private:

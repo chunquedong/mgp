@@ -1037,6 +1037,10 @@ void Control::measureSize() {
         leftHeight = _parent->_leftHeight;
         _leftWidthWeight = _parent->_leftWidthWeight;
         _leftHeightWeight = _parent->_leftHeightWeight;
+        if (parentAbsoluteBounds.width == 0 && parentAbsoluteBounds.height == 0) {
+            parentAbsoluteBounds.width = _parent->_measureBounds.width - _parent->getPadding().left - _parent->getPadding().right;
+            parentAbsoluteBounds.height = _parent->_measureBounds.height - _parent->getPadding().top - _parent->getPadding().bottom;
+        }
     }
     else {
         Renderer* game = Renderer::cur();
