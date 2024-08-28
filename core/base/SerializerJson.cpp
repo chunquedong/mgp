@@ -228,8 +228,8 @@ void SerializerJson::writeVector(const char* propertyName, const Vector2& value,
     jc::JsonNode* array = (JsonNode*)allocator.allocNode(jc::Type::Array);
     auto p1 = json_new_f(allocator, value.x);
     auto p2 = json_new_f(allocator, value.y);
-    array->append(p1);
-    array->append(p2);
+    array->_append(p1);
+    array->_append(p2);
     node->insert_pair(json_strdup(allocator, propertyName), array);
 }
 
@@ -254,9 +254,9 @@ void SerializerJson::writeVector(const char* propertyName, const Vector3& value,
     auto p1 = json_new_f(allocator, value.x);
     auto p2 = json_new_f(allocator, value.y);
     auto p3 = json_new_f(allocator, value.z);
-    array->append(p1);
-    array->append(p2);
-    array->append(p3);
+    array->_append(p1);
+    array->_append(p2);
+    array->_append(p3);
     node->insert_pair(json_strdup(allocator, propertyName), array);
 }
 
@@ -283,10 +283,10 @@ void SerializerJson::writeVector(const char* propertyName, const Vector4& value,
     auto p2 = json_new_f(allocator, value.y);
     auto p3 = json_new_f(allocator, value.z);
     auto p4 = json_new_f(allocator, value.w);
-    array->append(p1);
-    array->append(p2);
-    array->append(p3);
-    array->append(p4);
+    array->_append(p1);
+    array->_append(p2);
+    array->_append(p3);
+    array->_append(p4);
     node->insert_pair(json_strdup(allocator, propertyName), array);
 }
 
