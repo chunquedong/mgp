@@ -110,8 +110,9 @@ linux {
     INCLUDEPATH += /usr/include/libpng12
     INCLUDEPATH += /usr/include/harfbuzz
     INCLUDEPATH += $$(VULKAN_SDK)/include
-    LIBS += -lrt -ldl -lX11 -lpthread -lgtk-x11-2.0 -lglib-2.0 -lgobject-2.0 -lxcb -lsndio
-    LIBS += -L$$(VULKAN_SDK)/lib/ -lvulkan
+    LIBS += -lrt -ldl -lX11 -lpthread  -lxcb
+    #LIBS += -lgtk-x11-2.0 -lglib-2.0 -lgobject-2.0 -lsndio
+    #LIBS += -L$$(VULKAN_SDK)/lib/ -lvulkan
 }
 
 macx {

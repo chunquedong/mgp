@@ -18,6 +18,7 @@
 //#include "ControlFactory.h"
 #include <algorithm>
 #include <float.h>
+#include <limits.h>
 
 namespace mgp
 {

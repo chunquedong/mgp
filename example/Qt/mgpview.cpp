@@ -25,7 +25,7 @@ MgpView::MgpView(QWidget* parent) : QOpenGLWidget(parent)
 
 MgpView::~MgpView()
 {
-    if (this->getState() == Application::RUNNING) {
+    if (this->getState() == Application::Runing) {
         this->makeCurrent();
         this->shutdown();
     }

@@ -5,7 +5,7 @@
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE
  *
  */
-#include "GLtfLoader.h"
+#include "GltfLoader.h"
 
 #ifdef GLTFIO_DRACO_SUPPORTED
 	#include "DracoCache.h"
