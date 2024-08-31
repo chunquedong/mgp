@@ -116,14 +116,15 @@ public:
      * @param rightToLeft Whether to draw text from right to left.
      * @return drawed height
      */
-    int drawText(const char* text, float x, float y, const Vector4& color, unsigned int fontSize = 0, int textLen = -1, const Rectangle* clip = NULL);
-    int drawText(const wchar_t* text, float x, float y, const Vector4& color, unsigned int fontSize, int textLen, const Rectangle* clip = NULL);
+    int drawText(const char* text, float x, float y, const Vector4& color, float fontSize = 0, int textLen = -1, const Rectangle* clip = NULL);
+    int drawText(const wchar_t* text, float x, float y, const Vector4& color, float fontSize, int textLen, const Rectangle* clip = NULL);
 
 
     /**
      * Finishes text batching for this font and renders all drawn text.
      */
     void finish(RenderInfo* view);
+    void finalDraw(RenderInfo* view);
 
     virtual void setProjectionMatrix(const Matrix& matrix);
     virtual bool isStarted() const;
@@ -136,8 +137,8 @@ public:
      * @param widthOut Destination for the text's width.
      * @param heightOut Destination for the text's height.
      */
-    void measureText(const char* text, unsigned int fontSize, unsigned int* widthOut, unsigned int* heightOut, int textLen = -1);
-    void measureText(const wchar_t* text, unsigned int fontSize, unsigned int* widthOut, unsigned int* heightOut, int textLen);
+    void measureText(const char* text, float fontSize, unsigned int* widthOut, unsigned int* heightOut, int textLen = -1);
+    void measureText(const wchar_t* text, float fontSize, unsigned int* widthOut, unsigned int* heightOut, int textLen);
 
 
     /**
@@ -203,6 +204,7 @@ private:
     bool _isStarted;
     float _spacing;
     int _outline;
+    bool _hasProjectionMatrix;
 
     std::vector<SpriteBatch*> fontDrawers;
     SPtr<FontCache> _fontCache;

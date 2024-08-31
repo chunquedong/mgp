@@ -15,9 +15,9 @@ namespace mgp {
 
 struct FontInfo {
 	char name[128];
-	int size;
+	float size;
 	int bold;
-	int outline;
+	float outline;
 
 	FontInfo() : size(30), bold(1), outline(1) { name[0] = 0; }
 };

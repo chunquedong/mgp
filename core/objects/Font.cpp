@@ -171,7 +171,7 @@ bool FontCache::getGlyph(FontInfo& fontInfo, wchar_t c, Glyph& glyph) {
     return true;
 }
 
-Font::Font() : _spacing(0.0f), _isStarted(false), shaderProgram(NULL), _outline(0)
+Font::Font() : _spacing(0.0f), _isStarted(false), shaderProgram(NULL), _outline(0), _hasProjectionMatrix(false)
 {
     //shaderProgram = ShaderProgram::createFromFile(FONT_VSH, FONT_FSH);
 }
@@ -239,22 +239,23 @@ void Font::finish(RenderInfo* view)
     for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
         SpriteBatch* _batch = fontDrawers[i];
         if (!_batch) continue;
-
-        if (view) {
-            int w = view->viewport.width / Toolkit::cur()->getScreenScale();
-            int h = view->viewport.height / Toolkit::cur()->getScreenScale();
-            Matrix projectionMatrix;
-            Matrix::createOrthographicOffCenter(0, w, h, 0, 0, 1, &projectionMatrix);
-            _batch->setProjectionMatrix(projectionMatrix);
-        }
-        else {
-            int w = Renderer::cur()->getDpWidth();
-            int h = Renderer::cur()->getDpHeight();
-            if (w && h)
-            {
+        if (!_hasProjectionMatrix) {
+            if (view) {
+                int w = view->viewport.width / Toolkit::cur()->getScreenScale();
+                int h = view->viewport.height / Toolkit::cur()->getScreenScale();
                 Matrix projectionMatrix;
                 Matrix::createOrthographicOffCenter(0, w, h, 0, 0, 1, &projectionMatrix);
                 _batch->setProjectionMatrix(projectionMatrix);
+            }
+            else {
+                int w = Renderer::cur()->getDpWidth();
+                int h = Renderer::cur()->getDpHeight();
+                if (w && h)
+                {
+                    Matrix projectionMatrix;
+                    Matrix::createOrthographicOffCenter(0, w, h, 0, 0, 1, &projectionMatrix);
+                    _batch->setProjectionMatrix(projectionMatrix);
+                }
             }
         }
 
@@ -266,12 +267,46 @@ void Font::finish(RenderInfo* view)
     _isStarted = false;
 }
 
+void Font::finalDraw(RenderInfo* view) {
+    for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
+        SpriteBatch* _batch = fontDrawers[i];
+        if (!_batch) continue;
+        if (!_hasProjectionMatrix) {
+            if (view) {
+                int w = view->viewport.width / Toolkit::cur()->getScreenScale();
+                int h = view->viewport.height / Toolkit::cur()->getScreenScale();
+                Matrix projectionMatrix;
+                Matrix::createOrthographicOffCenter(0, w, h, 0, 0, 1, &projectionMatrix);
+                _batch->setProjectionMatrix(projectionMatrix);
+            }
+            else {
+                int w = Renderer::cur()->getDpWidth();
+                int h = Renderer::cur()->getDpHeight();
+                if (w && h)
+                {
+                    Matrix projectionMatrix;
+                    Matrix::createOrthographicOffCenter(0, w, h, 0, 0, 1, &projectionMatrix);
+                    _batch->setProjectionMatrix(projectionMatrix);
+                }
+            }
+        }
+
+        if (_batch->isStarted()) {
+            _batch->finish(_immediatelyDraw ? NULL : view);
+        }
+        else {
+            _batch->getBatch()->draw(_immediatelyDraw ? NULL : view);
+        }
+    }
+}
+
 void Font::setProjectionMatrix(const Matrix& matrix) {
     for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
         SpriteBatch* _batch = fontDrawers[i];
         if (!_batch) continue;
         _batch->setProjectionMatrix(matrix);
     }
+    _hasProjectionMatrix = true;
 }
 
 bool Font::isStarted() const {
@@ -327,14 +362,14 @@ bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, c
 }
 
 
-int Font::drawText(const char* text, float x, float y, const Vector4& color, unsigned int fontSize, int textLen, const Rectangle* clip) {
+int Font::drawText(const char* text, float x, float y, const Vector4& color, float fontSize, int textLen, const Rectangle* clip) {
     std::wstring utext;
     int utextSize = utf8decode(text, textLen, utext, NULL);
 
     return drawText(utext.data(), x, y, color, fontSize, utextSize, clip);
 }
 
-int Font::drawText(const wchar_t* utext, float x, float y, const Vector4& color, unsigned int fontSize, int utextSize, const Rectangle* clip)
+int Font::drawText(const wchar_t* utext, float x, float y, const Vector4& color, float fontSize, int utextSize, const Rectangle* clip)
 {
     GP_ASSERT(utext);
 
@@ -393,14 +428,14 @@ int Font::drawText(const wchar_t* utext, float x, float y, const Vector4& color,
     return yPos + metrics.height - y;
 }
 
-void Font::measureText(const char* text, unsigned int fontSize, unsigned int* width, unsigned int* height, int textLen) {
+void Font::measureText(const char* text, float fontSize, unsigned int* width, unsigned int* height, int textLen) {
     std::wstring utext;
     int utextSize = utf8decode(text, textLen, utext, NULL);
 
     measureText(utext.data(), fontSize, width, height, utextSize);
 }
 
-void Font::measureText(const wchar_t* utext, unsigned int fontSize, unsigned int* width, unsigned int* height, int textLen)
+void Font::measureText(const wchar_t* utext, float fontSize, unsigned int* width, unsigned int* height, int textLen)
 {
     //GP_ASSERT(_size);
     GP_ASSERT(utext);
