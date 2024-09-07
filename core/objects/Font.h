@@ -173,6 +173,7 @@ public:
 
     bool isImmediatelyDraw() { return _immediatelyDraw; }
     void setImmediatelyDraw(bool g) { _immediatelyDraw = g; }
+    void set3D(bool s) { _is3D = s; }
 private:
     bool _immediatelyDraw = false;
 
@@ -205,6 +206,7 @@ private:
     float _spacing;
     int _outline;
     bool _hasProjectionMatrix;
+    bool _is3D;
 
     std::vector<SpriteBatch*> fontDrawers;
     SPtr<FontCache> _fontCache;

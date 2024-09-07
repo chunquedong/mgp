@@ -171,7 +171,7 @@ bool FontCache::getGlyph(FontInfo& fontInfo, wchar_t c, Glyph& glyph) {
     return true;
 }
 
-Font::Font() : _spacing(0.0f), _isStarted(false), shaderProgram(NULL), _outline(0), _hasProjectionMatrix(false)
+Font::Font() : _spacing(0.0f), _isStarted(false), shaderProgram(NULL), _outline(0), _hasProjectionMatrix(false), _is3D(false)
 {
     //shaderProgram = ShaderProgram::createFromFile(FONT_VSH, FONT_FSH);
 }
@@ -329,7 +329,9 @@ bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, c
     if (!_batch) {
         TextureAtlas* fontTexture = _fontCache->fontTextures[glyph.texture];
         _batch = SpriteBatch::create(fontTexture->getTexture(), shaderProgram).take();
-        _batch->getBatch()->setRenderLayer(Drawable::Overlay);
+        if (!_is3D) {
+            _batch->getBatch()->setRenderLayer(Drawable::Overlay);
+        }
         auto _cutoffParam = _batch->getMaterial()->getParameter("u_cutoff");
         _cutoffParam->setVector2(Vector2(0.50, 0.1));
         if (_outline) {
