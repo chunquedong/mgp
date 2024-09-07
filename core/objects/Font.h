@@ -120,6 +120,8 @@ public:
     int drawText(const wchar_t* text, float x, float y, const Vector4& color, float fontSize, int textLen, const Rectangle* clip = NULL);
 
 
+    void drawTextIn3D(const char* text, const Vector3& position, const Vector3& right, const Vector3& forward, const Vector4& color, float size, int textLen = -1);
+
     /**
      * Finishes text batching for this font and renders all drawn text.
      */
@@ -173,7 +175,7 @@ public:
 
     bool isImmediatelyDraw() { return _immediatelyDraw; }
     void setImmediatelyDraw(bool g) { _immediatelyDraw = g; }
-    void set3D(bool s) { _is3D = s; }
+    void setIsOverlay(bool s) { _isOverlay = s; }
 private:
     bool _immediatelyDraw = false;
 
@@ -198,6 +200,8 @@ private:
     Font& operator=(const Font&);
 
     bool drawChar(int c, FontInfo &fontInfo, Glyph &glyph, float x, float y, const Vector4& color, int previous, const Rectangle* clip);
+    bool drawChar3D(int c, FontInfo& fontInfo, Glyph& glyph, const Vector3& centerPosition, const Vector3& right, const Vector3& forward, const float scale,
+        const Vector4& color, int previous);
 
 
     void lazyStart();
@@ -206,7 +210,7 @@ private:
     float _spacing;
     int _outline;
     bool _hasProjectionMatrix;
-    bool _is3D;
+    bool _isOverlay;
 
     std::vector<SpriteBatch*> fontDrawers;
     SPtr<FontCache> _fontCache;

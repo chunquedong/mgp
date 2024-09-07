@@ -171,7 +171,7 @@ bool FontCache::getGlyph(FontInfo& fontInfo, wchar_t c, Glyph& glyph) {
     return true;
 }
 
-Font::Font() : _spacing(0.0f), _isStarted(false), shaderProgram(NULL), _outline(0), _hasProjectionMatrix(false), _is3D(false)
+Font::Font() : _spacing(0.0f), _isStarted(false), shaderProgram(NULL), _outline(0), _hasProjectionMatrix(false), _isOverlay(true)
 {
     //shaderProgram = ShaderProgram::createFromFile(FONT_VSH, FONT_FSH);
 }
@@ -329,7 +329,7 @@ bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, c
     if (!_batch) {
         TextureAtlas* fontTexture = _fontCache->fontTextures[glyph.texture];
         _batch = SpriteBatch::create(fontTexture->getTexture(), shaderProgram).take();
-        if (!_is3D) {
+        if (_isOverlay) {
             _batch->getBatch()->setRenderLayer(Drawable::Overlay);
         }
         auto _cutoffParam = _batch->getMaterial()->getParameter("u_cutoff");
@@ -363,6 +363,54 @@ bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, c
     return true;
 }
 
+bool Font::drawChar3D(int c, FontInfo& fontInfo, Glyph& glyph, const Vector3& centerPosition, const Vector3& right, const Vector3& forward, const float scale,
+    const Vector4& color, int previous) {
+    if (!_fontCache->getGlyph(fontInfo, c, glyph)) {
+        return false;
+    }
+
+    double fontSizeScale = fontInfo.size / (double)_fontCache->_size;
+
+    if (fontDrawers.size() != _fontCache->fontTextures.size()) {
+        fontDrawers.resize(_fontCache->fontTextures.size(), NULL);
+    }
+    SpriteBatch* _batch = fontDrawers[glyph.texture];
+    if (!_batch) {
+        TextureAtlas* fontTexture = _fontCache->fontTextures[glyph.texture];
+        _batch = SpriteBatch::create(fontTexture->getTexture(), shaderProgram).take();
+        //if (_isOverlay) {
+        //    _batch->getBatch()->setRenderLayer(Drawable::Overlay);
+        //}
+        auto _cutoffParam = _batch->getMaterial()->getParameter("u_cutoff");
+        _cutoffParam->setVector2(Vector2(0.50, 0.1));
+        if (_outline) {
+            auto u_outline = _batch->getMaterial()->getParameter("u_outline");
+            u_outline->setVector2(Vector2(0.45, 0.1));
+        }
+        fontDrawers[glyph.texture] = _batch;
+        _batch->start();
+    }
+
+    Vector3 pos = centerPosition;
+    if (previous > 0 && previous < 128 && c < 128) {
+        float kerning = _fontCache->fontFaces.at(0)->getKerning(fontInfo, previous, c);
+        pos.x += kerning* scale;
+    }
+
+    float w = glyph.imgW / glyph.imgScale * fontSizeScale * scale;
+    float h = glyph.imgH / glyph.imgScale * fontSizeScale * scale;
+
+    float u1 = (glyph.imgX) / (float)_fontCache->textureWidth;
+    float v1 = (glyph.imgY) / (float)_fontCache->textureHeight;
+    float u2 = (glyph.imgX + glyph.imgW) / (float)_fontCache->textureWidth;
+    float v2 = (glyph.imgY + glyph.imgH) / (float)_fontCache->textureHeight;
+    _batch->drawImageUpVector(pos, right, forward, Vector2(w, h),
+        u1, v2, u2, v1,
+        //u1, v1, u2, v2,
+        color, Vector2::zero(), 0);
+
+    return true;
+}
 
 int Font::drawText(const char* text, float x, float y, const Vector4& color, float fontSize, int textLen, const Rectangle* clip) {
     std::wstring utext;
@@ -428,6 +476,58 @@ int Font::drawText(const wchar_t* utext, float x, float y, const Vector4& color,
     }
 
     return yPos + metrics.height - y;
+}
+
+void Font::drawTextIn3D(const char* text, const Vector3& position, const Vector3& right, const Vector3& forward, const Vector4& color, float size, int textLen) {
+    std::wstring utext;
+    int utextSize = utf8decode(text, textLen, utext, NULL);
+
+    Vector3 aposition = position;
+    lazyStart();
+
+    float fontSize = 30;
+    float scale = size / 30.0;
+    float spacing = (fontSize * _spacing);
+
+    FontInfo fontInfo;
+    fontInfo.bold = 0;
+    fontInfo.size = fontSize;
+    GlyphMetrics metrics;
+    _fontCache->fontFaces.at(0)->merics(0, fontInfo, metrics);
+
+    wchar_t previous = 0;
+    for (size_t i = 0; i < utextSize; i++)
+    {
+        uint32_t c = utext[i];
+
+        // Draw this character.
+        switch (c)
+        {
+        case ' ':
+            aposition += right * (fontSize / 3.0 * scale);
+            break;
+        case '\r':
+            break;
+        case '\n':
+            aposition += forward * (-metrics.height * scale);
+            break;
+        case '\t':
+            aposition += right * (fontSize * 2 * scale);
+            break;
+        default: {
+            Glyph glyph;
+            if (drawChar3D(c, fontInfo, glyph, aposition, right, forward, scale, color, previous)) {
+                aposition += right * ((glyph.metrics.horiAdvance + spacing)* scale);
+            }
+            else {
+                aposition += right * (fontSize * scale);
+            }
+        }
+        }
+
+        previous = c;
+    }
+
 }
 
 void Font::measureText(const char* text, float fontSize, unsigned int* width, unsigned int* height, int textLen) {
