@@ -339,7 +339,7 @@ bool Font::drawChar(int c, FontInfo& fontInfo, Glyph& glyph, float x, float y, c
         TextureAtlas* fontTexture = _fontCache->fontTextures[glyph.texture];
         _batch = SpriteBatch::create(fontTexture->getTexture(), shaderProgram).take();
         if (_isOverlay) {
-            _batch->getBatch()->setRenderLayer(Drawable::Overlay);
+            _batch->setRenderLayer(Drawable::Overlay);
         }
         auto _cutoffParam = _batch->getMaterial()->getParameter("u_cutoff");
         _cutoffParam->setVector2(Vector2(0.50, 0.1));
@@ -388,7 +388,7 @@ bool Font::drawChar3D(int c, FontInfo& fontInfo, Glyph& glyph, const Vector3& ce
         TextureAtlas* fontTexture = _fontCache->fontTextures[glyph.texture];
         _batch = SpriteBatch::create(fontTexture->getTexture(), shaderProgram).take();
         //if (_isOverlay) {
-            _batch->getBatch()->setRenderLayer(Drawable::Custom);
+            _batch->setRenderLayer(Drawable::Custom);
         //}
         _batch->getMaterial()->getStateBlock()->setDepthTest(true);
         _batch->getMaterial()->getStateBlock()->setCullFace(true);
