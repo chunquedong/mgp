@@ -104,6 +104,7 @@ public:
      * Starts text drawing for this font.
      */
     void start();
+    void clearText();
 
     /**
      * Draws the specified text in a solid color, with a scaling factor.

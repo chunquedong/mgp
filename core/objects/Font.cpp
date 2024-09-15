@@ -221,6 +221,15 @@ void Font::start()
     }
 }
 
+void Font::clearText()
+{
+    for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
+        SpriteBatch* _batch = fontDrawers[i];
+        if (!_batch) continue;
+        _batch->start();
+    }
+}
+
 void Font::lazyStart()
 {
     for (size_t i = 0, count = fontDrawers.size(); i < count; ++i) {
@@ -379,8 +388,10 @@ bool Font::drawChar3D(int c, FontInfo& fontInfo, Glyph& glyph, const Vector3& ce
         TextureAtlas* fontTexture = _fontCache->fontTextures[glyph.texture];
         _batch = SpriteBatch::create(fontTexture->getTexture(), shaderProgram).take();
         //if (_isOverlay) {
-        //    _batch->getBatch()->setRenderLayer(Drawable::Overlay);
+            _batch->getBatch()->setRenderLayer(Drawable::Custom);
         //}
+        _batch->getMaterial()->getStateBlock()->setDepthTest(true);
+        _batch->getMaterial()->getStateBlock()->setCullFace(true);
         auto _cutoffParam = _batch->getMaterial()->getParameter("u_cutoff");
         _cutoffParam->setVector2(Vector2(0.50, 0.1));
         if (_outline) {
