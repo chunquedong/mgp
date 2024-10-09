@@ -409,8 +409,10 @@ void PlatformGlfw::init(const char* title, int w, int h)
     glfwSetErrorCallback(error_callback);
 
     /* Initialize the library */
-    if (!glfwInit())
+    if (!glfwInit()) {
+        GP_ERROR("Failed to initialize GLFW.");
         goto error;
+    }
 
 #if _WIN32
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -436,6 +438,12 @@ void PlatformGlfw::init(const char* title, int w, int h)
     if (!window)
     {
         glfwTerminate();
+#ifdef __EMSCRIPTEN__
+        EM_ASM(
+            alert('Your browser does not support WebGL 2.0');
+        );
+#endif
+        GP_ERROR("Failed to create Window.");
         goto error;
     }
 
