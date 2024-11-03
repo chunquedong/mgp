@@ -57,7 +57,7 @@ bool EditorCameraCtrl::updateSurfaceDistance() {
     Rectangle& viewport = *sceneView->getViewport();
 
     Ray ray;
-    _camera->pickRay(viewport, viewport.width/2, viewport.height/2, &ray);
+    _camera->pickRay(viewport, viewport.x+viewport.width/2, viewport.y+viewport.height/2, &ray);
     std::vector<Drawable*> drawables;
     sceneView->getScene()->getRootNode()->getAllDrawable(drawables);
 

@@ -193,9 +193,8 @@ void Application::render(float elapsedTime)
         onViewRender(view);
     }
 
-    Rectangle* viewport = getView()->getViewport();
-    _renderer->setViewport((int)viewport->x, (int)viewport->y, (int)viewport->width, (int)viewport->height);
-
+    //Rectangle* viewport = getView()->getViewport();
+    _renderer->setViewport(0, 0, _width, _height);
     _forms->draw(NULL);
 
     if (_showFps) {
