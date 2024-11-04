@@ -372,6 +372,19 @@ public:
     bool isExpanded() { return _expanded; }
 };
 
+class ListView : public ScrollContainer, public mgp::Control::Listener {
+    std::vector<std::string> items;
+    int _curSelection = -1;
+public:
+    ListView();
+    int getSelection() { return _curSelection; }
+    void setSelection(int i);
+    void setItems(std::vector<std::string>& list);
+protected:
+    virtual UPtr<Control> createRow(int i);
+    void controlEvent(Control* control, EventType evt) override;
+};
+
 }
 
 #endif

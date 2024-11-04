@@ -895,6 +895,8 @@ void ScrollContainer::setAnimationPropertyValue(int propertyId, AnimationValue* 
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////
+
 Accordion::Accordion()
 {
     this->setLayout(Layout::LAYOUT_VERTICAL);
@@ -947,6 +949,88 @@ void Accordion::setContent(UPtr<Control> c) {
     }
     _content = std::move(c);
     this->addControl(uniqueFromInstant(_content.get()));
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+ListView::ListView()
+{
+    this->setStyleName("Panel");
+    this->overrideStyle()->setColor(Vector4::fromColor(0x565656ff));
+    this->setHeight(1.0, Control::AUTO_PERCENT_LEFT);
+    this->setWidth(1.0, Control::AUTO_PERCENT_LEFT);
+    this->setPadding(4);
+    this->setLayout(Layout::LAYOUT_VERTICAL);
+    this->setScroll(SCROLL_VERTICAL);
+}
+
+void ListView::setSelection(int i)
+{
+    if (i == _curSelection) {
+        return;
+    }
+
+    if (_curSelection != -1) {
+        Control* item = this->getControl(_curSelection);
+        item->setStyleName(item->getClassName().c_str());
+    }
+    if (i >= items.size()) {
+        _curSelection = -1;
+    }
+    _curSelection = i;
+    Control* item = this->getControl(_curSelection);
+    item->setStyleName("Rect");
+
+    notifyListeners(Listener::SELECT_CHANGE);
+}
+
+void ListView::setItems(std::vector<std::string>& list)
+{
+    _curSelection = -1;
+    this->clear();
+    items = list;
+    for (int i = 0; i < items.size(); ++i) {
+        auto item = createRow(i);
+        item->_userData = i;
+        item->setCanFocus(true);
+        item->setConsumeInputEvents(true);
+
+        if (Container* pane = dynamic_cast<Container*>(item.get())) {
+            for (int i2 = 0; i2 < pane->getControlCount(); ++i2) {
+                Control* label = pane->getControl(i2);
+                label->_userData = i;
+                label->addListener(this, Listener::CLICK);
+            }
+        }
+        item->addListener(this, Listener::CLICK);
+        this->addControl(std::move(item));
+    }
+}
+
+UPtr<Control> ListView::createRow(int i)
+{
+    UPtr<Container> pane = Control::create<Container>("input_row");
+    pane->setWidth(1, Control::AUTO_PERCENT_PARENT);
+    pane->setMargin(0, 10, 0, 8);
+    pane->setLayout(Layout::LAYOUT_HORIZONTAL);
+    //pane->setStyleName("Rect");
+
+    auto label = Control::create<Label>("row_label"); {
+        label->setWidth(1, Control::AUTO_PERCENT_PARENT);
+        label->setAutoSizeH(Control::AUTO_WRAP_CONTENT);
+        label->setPadding(4);
+        label->setText(items.at(i).c_str());
+        pane->addControl(std::move(label));
+    }
+    return pane;
+}
+
+void ListView::controlEvent(Control* control, EventType evt)
+{
+    if (evt == Listener::CLICK) {
+        int i = control->_userData;
+        setSelection(i);
+    }
 }
 
 }

@@ -137,7 +137,12 @@ UPtr<Mesh> MeshFactory::createLines(Vector3* points, unsigned int pointCount)
     GP_ASSERT(pointCount);
 
     float* vertices = new float[pointCount*3];
-    memcpy(vertices, points, pointCount*3*sizeof(float));
+    for (int i = 0; i < pointCount; ++i) {
+        int pos = i * 3;
+        vertices[pos] = points[i].x;
+        vertices[pos+1] = points[i].y;
+        vertices[pos+2] = points[i].z;
+    }
 
     VertexFormat::Element elements[] =
     {
@@ -152,7 +157,7 @@ UPtr<Mesh> MeshFactory::createLines(Vector3* points, unsigned int pointCount)
     }
 
     mesh->_primitiveType = Mesh::LINE_STRIP;
-    mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
+    mesh->getVertexBuffer()->setData((char*)vertices, pointCount * 3 * sizeof(float));
 
     SAFE_DELETE_ARRAY(vertices);
     return mesh;
