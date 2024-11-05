@@ -426,7 +426,18 @@ void SpriteBatch::finish(RenderInfo* view)
     // Finish and draw the batch
     _batch->finish();
 
+    int i = 0;
+    if (view) {
+        i = view->_drawList.size();
+    }
+
     _batch->draw(view, NULL);
+
+    if (view) {
+        for (; i < view->_drawList.size(); ++i) {
+            view->_drawList[i]._renderLayer = _batch->getRenderLayer();
+        }
+    }
 }
 
 StateBlock* SpriteBatch::getStateBlock() const
