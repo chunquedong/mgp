@@ -27,7 +27,7 @@ namespace mgp
 static ShaderProgram* __spriteEffect = NULL;
 
 SpriteBatch::SpriteBatch()
-    : _batch(NULL), _sampler(NULL), _textureWidthRatio(0.0f), _textureHeightRatio(0.0f), _renderLayer(Drawable::Overlay), _customEffect(false)
+    : _batch(NULL), _sampler(NULL), _textureWidthRatio(0.0f), _textureHeightRatio(0.0f), _customEffect(false)
 {
 }
 
@@ -86,6 +86,7 @@ UPtr<SpriteBatch> SpriteBatch::createColord(ShaderProgram* effect, unsigned int 
     batch->_sampler = NULL;
     batch->_customEffect = true;
     batch->_batch = meshBatch.take();
+    batch->_batch->setRenderLayer(Drawable::Overlay);
     batch->_textureWidthRatio = 1.0f;
     batch->_textureHeightRatio = 1.0f;
 
@@ -174,6 +175,7 @@ UPtr<SpriteBatch> SpriteBatch::create(Texture* texture, ShaderProgram* effect, u
     batch->_sampler = texture;
     batch->_customEffect = customEffect;
     batch->_batch = meshBatch;
+    batch->_batch->setRenderLayer(Drawable::Overlay);
     batch->_textureWidthRatio = 1.0f / (float)texture->getWidth();
     batch->_textureHeightRatio = 1.0f / (float)texture->getHeight();
 
@@ -424,18 +426,7 @@ void SpriteBatch::finish(RenderInfo* view)
     // Finish and draw the batch
     _batch->finish();
 
-    int i = 0;
-    if (view) {
-        i = view->_drawList.size();
-    }
-
     _batch->draw(view, NULL);
-
-    if (view) {
-        for (; i < view->_drawList.size(); ++i) {
-            view->_drawList[i]._renderLayer = _renderLayer;
-        }
-    }
 }
 
 StateBlock* SpriteBatch::getStateBlock() const
@@ -523,6 +514,11 @@ bool SpriteBatch::clipSprite(const Rectangle& clip, float& x, float& y, float& w
     }
 
     return true;
+}
+
+void SpriteBatch::setRenderLayer(Drawable::RenderLayer renderLayer) {
+    //_renderLayer = renderLayer;
+    _batch->setRenderLayer(renderLayer);
 }
 
 }

@@ -277,9 +277,7 @@ public:
 
     MeshBatch* getBatch() { return _batch; }
 
-    void setRenderLayer(Drawable::RenderLayer renderLayer) {
-        _renderLayer = renderLayer;
-    }
+    void setRenderLayer(Drawable::RenderLayer renderLayer);
 private:
 
     /**
@@ -304,7 +302,7 @@ private:
     float _textureHeightRatio;
     mutable Matrix _projectionMatrix;
 
-    Drawable::RenderLayer _renderLayer;
+    //Drawable::RenderLayer _renderLayer;
 };
 
 }
