@@ -212,9 +212,9 @@ int Control::enumParse(const std::string& enumName, const std::string& str)
 
             if (h.compare("Top") == 0)
                 ih = static_cast<int>(ALIGN_TOP);
-            else if (v.compare("VCenter") == 0)
+            else if (h.compare("VCenter") == 0)
                 ih = static_cast<int>(ALIGN_VCENTER);
-            else if (v.compare("Bottom") == 0)
+            else if (h.compare("Bottom") == 0)
                 ih = static_cast<int>(ALIGN_BOTTOM);
 
             return iv | ih;
