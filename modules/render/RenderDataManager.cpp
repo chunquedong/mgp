@@ -241,6 +241,8 @@ void RenderDataManager::sort() {
 void RenderDataManager::getRenderData(RenderData* view, int layer) {
     auto it = _renderQueues.find(layer);
     if (it != _renderQueues.end()) {
-        view->_drawList.insert(view->_drawList.begin(), it->second.begin(), it->second.end());
+        for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+            view->_drawList.push_back(*it2);
+        }
     }
 }

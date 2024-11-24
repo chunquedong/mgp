@@ -553,6 +553,29 @@ bool Mesh::doRaycast(RayQuery& query) {
                 }
             }
         }
+        else if (_primitiveType == Mesh::TRIANGLE_STRIP) {
+            Vector3 a;
+            Vector3 b;
+            Vector3 c;
+            for (int j = 0; j+2 < count; j += 1) {
+                float* af = (float*)(verteix + (positionElement->stride * j) + positionElement->offset);
+                float* bf = (float*)(verteix + (positionElement->stride * (j + 1)) + positionElement->offset);
+                float* cf = (float*)(verteix + (positionElement->stride * (j + 2)) + positionElement->offset);
+                //float to double
+                a.x = af[0]; a.y = af[1]; a.z = af[2];
+                b.x = bf[0]; b.y = bf[1]; b.z = bf[2];
+                c.x = cf[0]; c.y = cf[1]; c.z = cf[2];
+                double dis = query.ray.intersectTriangle(a, b, c, query.backfaceCulling, &curTarget);
+                if (dis != Ray::INTERSECTS_NONE) {
+                    if (dis < query.minDistance) {
+                        query.minDistance = dis;
+                        minTriangle = j;
+                        query.target = curTarget;
+                    }
+                }
+            }
+        }
+
         if (minTriangle != -1) {
             std::vector<int> path = { -1, minTriangle };
             query.path = path;
