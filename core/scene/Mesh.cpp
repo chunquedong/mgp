@@ -6,6 +6,7 @@
 #include "scene/Renderer.h"
 #include "scene/Drawable.h"
 #include <float.h>
+#include "math/LineSegment.h"
 
 namespace mgp
 {
@@ -549,6 +550,9 @@ bool Mesh::doRaycast(RayQuery& query) {
                         query.minDistance = dis;
                         minTriangle = j;
                         query.target = curTarget;
+                        if (query.getNormal) {
+                            triangleNormal(a, b, c, &query.normal);
+                        }
                     }
                 }
             }
@@ -571,6 +575,9 @@ bool Mesh::doRaycast(RayQuery& query) {
                         query.minDistance = dis;
                         minTriangle = j;
                         query.target = curTarget;
+                        if (query.getNormal) {
+                            triangleNormal(a, b, c, &query.normal);
+                        }
                     }
                 }
             }

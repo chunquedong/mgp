@@ -310,7 +310,7 @@ public:
      *
      * @param dst The destination vector.
      */
-    void normalize(Vector3* dst) const;
+    bool normalize(Vector3* dst) const;
 
     /**
      * Scales all elements of this vector by the specified value.

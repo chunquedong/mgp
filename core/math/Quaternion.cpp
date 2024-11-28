@@ -101,6 +101,13 @@ void Quaternion::createFromAxisAngle(const Vector3& axis, Float angle, Quaternio
     dst->w = cosf(halfAngle);
 }
 
+void Quaternion::createFromTo(const Vector3& from, const Vector3& to, Quaternion* dst) {
+    Vector3 axis;
+    Vector3::cross(from, to, &axis);
+    Float a = Vector3::angle(from, to);
+    createFromAxisAngle(axis, a, dst);
+}
+
 void Quaternion::computeEuler(Float* yaw, Float* pitch, Float* roll)
 {
 	GP_ASSERT(yaw);

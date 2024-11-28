@@ -50,3 +50,10 @@ Float LineSegment::distanceToPoint(const Vector3& point) const {
     Vector3 vecS1; Vector3::cross(v1, v2, &vecS1);
     return vecS1.length() / v1.length();
 }
+
+bool mgp::triangleNormal(const Vector3& p1, const Vector3& p2, const Vector3& p3, Vector3* normal) {
+    Vector3 d1 = p2 - p1;
+    Vector3 d2 = p3 - p1;
+    Vector3::cross(d1, d2, normal);
+    return normal->normalize(normal);
+}

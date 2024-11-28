@@ -169,6 +169,8 @@ public:
      */
     static void createFromAxisAngle(const Vector3& axis, Float angle, Quaternion* dst);
 
+    static void createFromTo(const Vector3& from, const Vector3& to, Quaternion* dst);
+
 	/**
 	* Calculates (in radians) the yaw, pitch and roll angles of this quaternion
 	* and stores the results in the specified pointers.

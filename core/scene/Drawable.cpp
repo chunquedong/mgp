@@ -66,10 +66,15 @@ bool Drawable::raycast(RayQuery& query) {
     }
     if (doRaycast(localQuery)) {
         _node->getWorldMatrix().transformPoint(&localQuery.target);
+        if (query.getNormal) {
+            _node->getWorldMatrix().transformVector(&localQuery.normal);
+            localQuery.normal.normalize();
+        }
         double distance = localQuery.target.distance(query.ray.getOrigin());
         if (query.minDistance == Ray::INTERSECTS_NONE || distance < query.minDistance) {
             query.minDistance = distance;
             query.target = localQuery.target;
+            query.normal = localQuery.normal;
             query.path.swap(localQuery.path);
             query.drawable = this;
             query.id = localQuery.id;

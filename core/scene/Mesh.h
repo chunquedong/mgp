@@ -11,6 +11,7 @@
 #include "Drawable.h"
 #include "base/Resource.h"
 #include "material/VertexAttributeBinding.h"
+#include "math/LineSegment.h"
 
 namespace mgp
 {
@@ -396,6 +397,9 @@ template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset,
                     query.minDistance = dis;
                     minTriangle = j;
                     query.target = curTarget;
+                    if (query.getNormal) {
+                        triangleNormal(a, b, c, &query.normal);
+                    }
                 }
             }
         }
@@ -421,6 +425,9 @@ template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset,
                     query.minDistance = dis;
                     minTriangle = j;
                     query.target = curTarget;
+                    if (query.getNormal) {
+                        triangleNormal(a, b, c, &query.normal);
+                    }
                 }
             }
         }
@@ -446,6 +453,9 @@ template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset,
                     query.minDistance = dis;
                     minTriangle = j;
                     query.target = curTarget;
+                    if (query.getNormal) {
+                        triangleNormal(a, b, c, &query.normal);
+                    }
                 }
             }
         }

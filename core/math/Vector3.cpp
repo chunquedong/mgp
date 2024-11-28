@@ -257,7 +257,7 @@ Vector3& Vector3::normalize()
     return *this;
 }
 
-void Vector3::normalize(Vector3* dst) const
+bool Vector3::normalize(Vector3* dst) const
 {
     GP_ASSERT(dst);
 
@@ -271,17 +271,18 @@ void Vector3::normalize(Vector3* dst) const
     Float n = x * x + y * y + z * z;
     // Already normalized.
     if (n == 1.0f)
-        return;
+        return true;
 
     n = sqrt(n);
     // Too close to zero.
     if (n < MATH_TOLERANCE)
-        return;
+        return false;
 
     n = 1.0f / n;
     dst->x *= n;
     dst->y *= n;
     dst->z *= n;
+    return true;
 }
 
 void Vector3::scale(Float scalar)

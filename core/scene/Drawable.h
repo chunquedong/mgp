@@ -35,6 +35,7 @@ struct RayQuery {
     Ray ray;
     bool backfaceCulling = true;
     bool autoCullFace = true;
+    bool getNormal = false;
     int pickMask = 1;
 
     //camera fovDivisor = tan(camera.fov*0.5)/(viewport.h/2);
@@ -46,6 +47,12 @@ struct RayQuery {
     * intersection point
     */
     Vector3 target;
+
+    /**
+    * intersection point normal direction
+    */
+    Vector3 normal;
+
     /**
     * element index: [partIndex/batchIndex,triangleIndex]
     */
