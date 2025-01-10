@@ -196,7 +196,7 @@ public:
      *
      * @return A MaterialParameter for the specified index.
      */
-    MaterialParameter* getParameterByIndex(unsigned int index);
+    //MaterialParameter* getParameterByIndex(unsigned int index);
 
     /**
      * Adds a MaterialParameter to the render state.
@@ -268,8 +268,8 @@ private:
     ~Material();
 
     bool initialize(Drawable* drawable, std::vector<Light*>* lights, int lightMask, int instanced);
-    void bindCamera(Camera* camera, Rectangle& viewport);
-    void bindNode(Camera* camera, Node* node, Drawable* drawable);
+    //void bindCamera(Camera* camera, Rectangle& viewport);
+    void bindNode(Camera* camera, Node* node, Drawable* drawable, Rectangle& viewport);
     void bindLights(Camera* camera, std::vector<Light*>* lights, int lightMask);
 
     //std::string name;
@@ -292,7 +292,7 @@ private:
     /**
      * Collection of MaterialParameter's to be applied to the mgp::ShaderProgram.
      */
-    mutable std::vector<MaterialParameter*> _parameters;
+    mutable std::map<std::string, MaterialParameter*> _parameters;
 };
 
 }

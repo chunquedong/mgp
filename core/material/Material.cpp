@@ -20,11 +20,12 @@ Material::Material() :
 Material::~Material()
 {
     // Destroy all the material parameters
-    for (size_t i = 0, count = _parameters.size(); i < count; ++i)
+    for (auto it = _parameters.begin(); it != _parameters.end(); ++it)
     {
-        SAFE_RELEASE(_parameters[i]);
+        MaterialParameter* param = it->second;
+        SAFE_RELEASE(param);
     }
-
+    _parameters.clear();
     SAFE_RELEASE(_shaderProgram);
     //SAFE_RELEASE(_vertexAttributeBinding);
 }
@@ -196,194 +197,182 @@ void Material::bindLights(Camera* camera, std::vector<Light*>* lights, int light
     }
 }
 
-void Material::bindCamera(Camera* camera, Rectangle& viewport) {
-    Uniform* uniform = uniform = _shaderProgram->getUniform("u_viewMatrix");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_worldMatrix");
-        param->setMatrix(camera->getViewMatrix());
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_projectionMatrix");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_projectionMatrix");
-        param->setMatrix(camera->getProjectionMatrix());
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_inverseProjectionMatrix");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_inverseProjectionMatrix");
-        Matrix m = camera->getProjectionMatrix();
-        m.invert();
-        param->setMatrix(m);
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_viewProjectionMatrix");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_viewProjectionMatrix");
-        param->setMatrix(camera->getViewProjectionMatrix());
-        param->_temporary = true;
-    }
-
-
-    uniform = _shaderProgram->getUniform("u_cameraPosition");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_cameraPosition");
-        param->setVector3(camera->getNode()->getTranslationWorld());
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_nearPlane");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_nearPlane");
-        param->setFloat(camera->getNearPlane());
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_farPlane");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_farPlane");
-        param->setFloat(camera->getFarPlane());
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_fovDivisor");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_fovDivisor");
-        double fovDivisor = tan(MATH_DEG_TO_RAD(camera->getFieldOfView()) / 2) / (viewport.height / 2);
-        param->setFloat(fovDivisor);
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_viewport");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_viewport");
-        Vector2 vp(viewport.width, viewport.height);
-        param->setVector2(vp);
-        param->_temporary = true;
-    }
-
-
-    uniform = _shaderProgram->getUniform("u_time");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_time");
-        double milliTime = Toolkit::cur()->getGameTime();
-        param->setFloat(milliTime / (double)1000);
-        param->_temporary = true;
-    }
-}
-
-void Material::bindNode(Camera* camera, Node *node, Drawable* drawable) {
+void Material::bindNode(Camera* camera, Node *node, Drawable* drawable, Rectangle& viewport) {
     
     GP_ASSERT(camera);
-    GP_ASSERT(node);
 
-    Uniform *uniform = _shaderProgram->getUniform("u_worldViewProjectionMatrix");
-    if (uniform) {
-        Matrix worldViewProj;
-        Matrix::multiply(camera->getViewProjectionMatrix(), node->getWorldMatrix(), &worldViewProj);
-        MaterialParameter* param = getParameter("u_worldViewProjectionMatrix");
-        param->setMatrix(worldViewProj);
-        param->_temporary = true;
+    for (auto uniformItr = _shaderProgram->getUniforms().begin(); uniformItr != _shaderProgram->getUniforms().end(); ++uniformItr) {
+        const std::string& name = uniformItr->first;
+        Uniform* uniform = uniformItr->second;
 
-        Uniform *uniform2 = _shaderProgram->getUniform("u_inverseWorldViewProjectionMatrix");
-        if (uniform2) {
-            worldViewProj.invert();
-            MaterialParameter* param = getParameter("u_inverseWorldViewProjectionMatrix");
-            param->setMatrix(worldViewProj);
-            param->_temporary = true;
-        }
-    }
+        if (node) {
+            bool ok = true;
+            if (name == "u_worldViewProjectionMatrix") {
+                Matrix worldViewProj;
+                Matrix::multiply(camera->getViewProjectionMatrix(), node->getWorldMatrix(), &worldViewProj);
+                MaterialParameter* param = getParameter("u_worldViewProjectionMatrix");
+                param->setMatrix(worldViewProj);
+                param->_temporary = true;
 
-    uniform = _shaderProgram->getUniform("u_worldMatrix");
-    if (uniform) {
-        MaterialParameter* param = getParameter("u_worldMatrix");
-        param->setMatrix(node->getWorldMatrix());
-        param->_temporary = true;
-    }
+                Uniform* uniform2 = _shaderProgram->getUniform("u_inverseWorldViewProjectionMatrix");
+                if (uniform2) {
+                    worldViewProj.invert();
+                    MaterialParameter* param = getParameter("u_inverseWorldViewProjectionMatrix");
+                    param->setMatrix(worldViewProj);
+                    param->_temporary = true;
+                }
+            }
 
-    uniform = _shaderProgram->getUniform("u_worldViewMatrix");
-    if (uniform) {
-        Matrix worldViewProj;
-        Matrix::multiply(camera->getViewMatrix(), node->getWorldMatrix(), &worldViewProj);
-        MaterialParameter* param = getParameter("u_worldViewMatrix");
-        param->setMatrix(worldViewProj);
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_inverseTransposeWorldMatrix");
-    if (uniform) {
-        Matrix invTransWorld;
-        invTransWorld = node->getWorldMatrix();
-        invTransWorld.invert();
-        invTransWorld.transpose();
-        MaterialParameter* param = getParameter("u_inverseTransposeWorldMatrix");
-        param->setMatrix(invTransWorld);
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_inverseTransposeWorldViewMatrix");
-    if (uniform) {
-        Matrix invTransWorld;
-        Matrix::multiply(camera->getViewMatrix(), node->getWorldMatrix(), &invTransWorld);
-        invTransWorld.invert();
-        invTransWorld.transpose();
-        MaterialParameter* param = getParameter("u_inverseTransposeWorldViewMatrix");
-        param->setMatrix(invTransWorld);
-        param->_temporary = true;
-    }
-
-    uniform = _shaderProgram->getUniform("u_normalMatrix");
-    if (uniform) {
-        Matrix invTransWorld;
-        Matrix::multiply(camera->getViewMatrix(), node->getWorldMatrix(), &invTransWorld);
-        invTransWorld.invert();
-        invTransWorld.transpose();
-        MaterialParameter* param = getParameter("u_normalMatrix");
-        param->setMatrix(invTransWorld);
-        param->_temporary = true;
-    }
-
-
-    uniform = _shaderProgram->getUniform("u_matrixPalette");
-    if (uniform) {
-        Model* model = dynamic_cast<Model*>(drawable);
-        if (model)
-        {
-            MeshSkin* skin = model->getSkin();
-            if (skin) {
-                MaterialParameter* param = getParameter("u_matrixPalette");
-                param->setVector4Array(skin->getMatrixPalette(&camera->getViewMatrix(), node), skin->getMatrixPaletteSize());
+            else if (name == "u_worldMatrix") {
+                MaterialParameter* param = getParameter("u_worldMatrix");
+                param->setMatrix(node->getWorldMatrix());
                 param->_temporary = true;
             }
-        }
-    }
 
-    uniform = _shaderProgram->getUniform("u_morphWeights");
-    if (uniform) {
-        if (node)
-        {
-            int n = node->getWeights().size();
-            std::vector<float> weights(n);
-            for (int i = 0; i < n; ++i) {
-                weights[i] = node->getWeights()[i];
+            else if (name == "u_worldViewMatrix") {
+                Matrix worldViewProj;
+                Matrix::multiply(camera->getViewMatrix(), node->getWorldMatrix(), &worldViewProj);
+                MaterialParameter* param = getParameter("u_worldViewMatrix");
+                param->setMatrix(worldViewProj);
+                param->_temporary = true;
             }
-            MaterialParameter* param = getParameter("u_morphWeights");
-            param->setFloatArray(weights.data(), n, true);
+
+            else if (name == "u_inverseTransposeWorldMatrix") {
+                Matrix invTransWorld;
+                invTransWorld = node->getWorldMatrix();
+                invTransWorld.invert();
+                invTransWorld.transpose();
+                MaterialParameter* param = getParameter("u_inverseTransposeWorldMatrix");
+                param->setMatrix(invTransWorld);
+                param->_temporary = true;
+            }
+
+            else if (name == "u_inverseTransposeWorldViewMatrix") {
+                Matrix invTransWorld;
+                Matrix::multiply(camera->getViewMatrix(), node->getWorldMatrix(), &invTransWorld);
+                invTransWorld.invert();
+                invTransWorld.transpose();
+                MaterialParameter* param = getParameter("u_inverseTransposeWorldViewMatrix");
+                param->setMatrix(invTransWorld);
+                param->_temporary = true;
+            }
+
+            else if (name == "u_normalMatrix") {
+                Matrix invTransWorld;
+                Matrix::multiply(camera->getViewMatrix(), node->getWorldMatrix(), &invTransWorld);
+                invTransWorld.invert();
+                invTransWorld.transpose();
+                MaterialParameter* param = getParameter("u_normalMatrix");
+                param->setMatrix(invTransWorld);
+                param->_temporary = true;
+            }
+
+            else if (name == "u_matrixPalette") {
+                Model* model = dynamic_cast<Model*>(drawable);
+                if (model)
+                {
+                    MeshSkin* skin = model->getSkin();
+                    if (skin) {
+                        MaterialParameter* param = getParameter("u_matrixPalette");
+                        param->setVector4Array(skin->getMatrixPalette(&camera->getViewMatrix(), node), skin->getMatrixPaletteSize());
+                        param->_temporary = true;
+                    }
+                }
+            }
+
+            else if (name == "u_morphWeights") {
+                if (node)
+                {
+                    int n = node->getWeights().size();
+                    std::vector<float> weights(n);
+                    for (int i = 0; i < n; ++i) {
+                        weights[i] = node->getWeights()[i];
+                    }
+                    MaterialParameter* param = getParameter("u_morphWeights");
+                    param->setFloatArray(weights.data(), n, true);
+                    param->_temporary = true;
+                }
+            }
+
+            else if (name == "u_ambientColor") {
+                Scene* scene = node->getScene();
+                MaterialParameter* param = getParameter("u_ambientColor");
+                param->setVector3(scene->getAmbientColor());
+                param->_temporary = true;
+            }
+            else {
+                ok = false;
+            }
+
+            if (ok) 
+                continue;
+        }
+
+        if (name == "u_viewMatrix") {
+            MaterialParameter* param = getParameter("u_worldMatrix");
+            param->setMatrix(camera->getViewMatrix());
+            param->_temporary = true;
+        }
+
+        else if (name == "u_projectionMatrix") {
+            MaterialParameter* param = getParameter("u_projectionMatrix");
+            param->setMatrix(camera->getProjectionMatrix());
+            param->_temporary = true;
+        }
+
+        else if (name == "u_inverseProjectionMatrix") {
+            MaterialParameter* param = getParameter("u_inverseProjectionMatrix");
+            Matrix m = camera->getProjectionMatrix();
+            m.invert();
+            param->setMatrix(m);
+            param->_temporary = true;
+        }
+
+        else if (name == "u_viewProjectionMatrix") {
+            MaterialParameter* param = getParameter("u_viewProjectionMatrix");
+            param->setMatrix(camera->getViewProjectionMatrix());
+            param->_temporary = true;
+        }
+
+        else if (name == "u_cameraPosition") {
+            MaterialParameter* param = getParameter("u_cameraPosition");
+            param->setVector3(camera->getNode()->getTranslationWorld());
+            param->_temporary = true;
+        }
+
+        else if (name == "u_nearPlane") {
+            MaterialParameter* param = getParameter("u_nearPlane");
+            param->setFloat(camera->getNearPlane());
+            param->_temporary = true;
+        }
+
+        else if (name == "u_farPlane") {
+            MaterialParameter* param = getParameter("u_farPlane");
+            param->setFloat(camera->getFarPlane());
+            param->_temporary = true;
+        }
+
+        else if (name == "u_fovDivisor") {
+            MaterialParameter* param = getParameter("u_fovDivisor");
+            double fovDivisor = tan(MATH_DEG_TO_RAD(camera->getFieldOfView()) / 2) / (viewport.height / 2);
+            param->setFloat(fovDivisor);
+            param->_temporary = true;
+        }
+
+        else if (name == "u_viewport") {
+            MaterialParameter* param = getParameter("u_viewport");
+            Vector2 vp(viewport.width, viewport.height);
+            param->setVector2(vp);
+            param->_temporary = true;
+        }
+
+        else if (name == "u_time") {
+            MaterialParameter* param = getParameter("u_time");
+            double milliTime = Toolkit::cur()->getGameTime();
+            param->setFloat(milliTime / (double)1000);
             param->_temporary = true;
         }
     }
-
-    uniform = _shaderProgram->getUniform("u_ambientColor");
-    if (uniform) {
-        Scene* scene = node->getScene();
-        MaterialParameter* param = getParameter("u_ambientColor");
-        param->setVector3(scene->getAmbientColor());
-        param->_temporary = true;
-    }
-
 }
 
 UPtr<Material> Material::create(ShaderProgram* effect)
@@ -464,9 +453,9 @@ UPtr<Material> Material::clone() const
 void Material::copyFrom(const Material* src) {
     Material* material = this;
     material->_parameters.clear();
-    for (std::vector<MaterialParameter*>::const_iterator it = src->_parameters.begin(); it != src->_parameters.end(); ++it)
+    for (auto it = src->_parameters.begin(); it != src->_parameters.end(); ++it)
     {
-        const MaterialParameter* param = *it;
+        const MaterialParameter* param = it->second;
         GP_ASSERT(param);
 
         // If this parameter is a method binding auto binding, don't clone it - it will get setup automatically
@@ -477,7 +466,7 @@ void Material::copyFrom(const Material* src) {
         MaterialParameter* paramCopy = new MaterialParameter(param->getName());
         param->cloneInto(paramCopy);
 
-        material->_parameters.push_back(paramCopy);
+        material->_parameters[it->first] = paramCopy;
     }
 
     // Clone our state block
@@ -531,20 +520,19 @@ void Material::bind() {
     // Bind our effect.
     _shaderProgram->bind();
 
-    std::map<std::string, int> allParams;
     // Bind our render state
-    for (size_t i = 0, count = _parameters.size(); i < count; ++i)
+    for (auto it = _parameters.begin(); it != _parameters.end(); ++it)
     {
-        GP_ASSERT(_parameters[i]);
-        _parameters[i]->bind(this->_shaderProgram);
-        allParams[_parameters[i]->getName()] = 1;
+        MaterialParameter* p = it->second;
+        GP_ASSERT(p);
+        p->bind(this->_shaderProgram);
     }
     _state.bind();
 
-    for (int i = 0; i < _shaderProgram->getUniformCount(); ++i) {
-        auto uniform = _shaderProgram->getUniform(i);
-        std::string name = uniform->getName();
-        if (allParams.find(name) == allParams.end() && allParams.find(name+"[0]") == allParams.end()) {
+    for (auto uniformItr = _shaderProgram->getUniforms().begin(); uniformItr != _shaderProgram->getUniforms().end(); ++uniformItr) {
+        const std::string& name = uniformItr->first;
+        Uniform* uniform = uniformItr->second;
+        if (_parameters.find(name) == _parameters.end() && _parameters.find(name+"[0]") == _parameters.end()) {
             GP_ERROR("Uniform not set: %s", name.c_str());
         }
     }
@@ -566,10 +554,7 @@ void Material::setParams(std::vector<Light*>* lights,
     if (camera) bindLights(camera, lights, lightMask);
 
     if (camera && drawable) {
-        bindCamera(camera, *viewport);
-        if (drawable && drawable->getNode()) {
-            bindNode(camera, drawable->getNode(), drawable);
-        }
+        bindNode(camera, drawable != nullptr ? drawable->getNode() : nullptr, drawable, *viewport);
     }
     else {
         //printf("DEBUG");
@@ -616,15 +601,15 @@ void Material::onSerialize(Serializer* serializer) {
     _state.onSerialize(serializer);
 
     int count = 0;
-    for (int i = 0; i < getParameterCount(); ++i) {
-        MaterialParameter* p = getParameterByIndex(i);
+    for (auto it = _parameters.begin(); it != _parameters.end(); ++it) {
+        MaterialParameter* p = it->second;
         if (p->_temporary) continue;
         ++count;
     }
 
     serializer->writeList("parameters", count);
-    for (int i=0; i<getParameterCount(); ++i) {
-        MaterialParameter *p = getParameterByIndex(i);
+    for (auto it = _parameters.begin(); it != _parameters.end(); ++it) {
+        MaterialParameter *p = it->second;
         if (p->_temporary) continue;
         serializer->writeObject(NULL, p);
     }
@@ -644,7 +629,7 @@ void Material::onDeserialize(Serializer* serializer) {
     int size = serializer->readList("parameters");
     for (int i = 0; i < size; ++i) {
         MaterialParameter* p = dynamic_cast<MaterialParameter*>(serializer->readObject(NULL).take());
-        _parameters.push_back(p);
+        _parameters[p->getName()] = p;
     }
     serializer->finishColloction();
 }
@@ -677,22 +662,16 @@ MaterialParameter* Material::getParameter(const char* name, bool add, bool tempo
     GP_ASSERT(name);
 
     // Search for an existing parameter with this name.
-    MaterialParameter* param;
-    for (size_t i = 0, count = _parameters.size(); i < count; ++i)
-    {
-        param = _parameters[i];
-        GP_ASSERT(param);
-        if (strcmp(param->getName(), name) == 0)
-        {
-            return param;
-        }
+    auto it = _parameters.find(name);
+    if (it != _parameters.end()) {
+        return it->second;
     }
 
     if (!add) return NULL;
 
     // Create a new parameter and store it in our list.
-    param = new MaterialParameter(name);
-    _parameters.push_back(param);
+    auto param = new MaterialParameter(name);
+    _parameters[name] = (param);
     param->_temporary = temporary;
 
     return param;
@@ -703,28 +682,24 @@ unsigned int Material::getParameterCount() const
     return _parameters.size();
 }
 
-MaterialParameter* Material::getParameterByIndex(unsigned int index)
-{
-    return _parameters[index];
-}
+//MaterialParameter* Material::getParameterByIndex(unsigned int index)
+//{
+//
+//}
 
 void Material::addParameter(MaterialParameter* param)
 {
-    _parameters.push_back(param);
+    _parameters[param->getName()] = (param);
     param->addRef();
 }
 
 void Material::removeParameter(const char* name)
 {
-    for (size_t i = 0, count = _parameters.size(); i < count; ++i)
-    {
-        MaterialParameter* p = _parameters[i];
-        if (p->_name == name)
-        {
-            _parameters.erase(_parameters.begin() + i);
-            SAFE_RELEASE(p);
-            break;
-        }
+    auto it = _parameters.find(name);
+    if (it != _parameters.end()) {
+        MaterialParameter* p = it->second;
+        _parameters.erase(it);
+        SAFE_RELEASE(p);
     }
 }
 }

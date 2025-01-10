@@ -104,7 +104,7 @@ public:
      * @return The currently bound effect, or NULL if no effect is currently bound.
      */
     //static ShaderProgram* getCurrentEffect();
-
+    std::unordered_map<std::string, Uniform*>& getUniforms() { return _uniforms; }
 public:
 
     /**

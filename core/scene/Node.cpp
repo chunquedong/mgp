@@ -623,11 +623,12 @@ Animation* Node::getAnimation(const char* id) const
         if (material)
         {
             // How to access material parameters? hidden on the Material::MaterialParamBinding.
-            std::vector<MaterialParameter*>::iterator itr = material->_parameters.begin();
+            auto itr = material->_parameters.begin();
             for (; itr != material->_parameters.end(); itr++)
             {
-                GP_ASSERT(*itr);
-                animation = ((MaterialParameter*)(*itr))->getAnimation(id);
+                MaterialParameter* param = itr->second;
+                GP_ASSERT(param);
+                animation = (param)->getAnimation(id);
                 if (animation)
                     return animation;
             }

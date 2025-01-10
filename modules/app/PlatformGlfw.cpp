@@ -476,7 +476,7 @@ error:
 }
 
 
-static int doFrame(double time, void* userData) {
+static bool doFrame(double time, void* userData) {
     GP_ASSERT(_game);
 
     _game->frame();
