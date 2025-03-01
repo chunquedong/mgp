@@ -96,7 +96,7 @@ bool FormManager::mouseEventInternal(MotionEvent& evt)
     int x = evt.x / Toolkit::cur()->getScreenScale();
     int y = evt.y / Toolkit::cur()->getScreenScale();
 
-    for (size_t i = 0, size = __forms.size(); i < size; ++i)
+    for (int i = __forms.size()-1; i >= 0; --i)
     {
         Form* form = __forms[i];
         if (form)

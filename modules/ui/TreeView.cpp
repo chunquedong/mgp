@@ -64,19 +64,24 @@ void TreeView::addItemLabel(TreeItem* item, int level) {
     if (item->_contronl.isNull()) {
         item->_contronl = Control::create<Container>("tree_item");
         item->_contronl->setHeight(25);
-        //item->_contronl->setWidth(200);
+        item->_contronl->setWidth(1, AUTO_PERCENT_PARENT);
         //item->_contronl->setLayout(Layout::LAYOUT_HORIZONTAL);
 
         UPtr<Icon> image = Control::create<Icon>("image");
+        image->overrideStyle()->setColor(Vector4::fromColor(0x000000ff));
         image->setImagePath("res/ui/right.png");
-        image->setSize(23, 23);
-        image->setPadding(4, 4, 4, 4);
+        image->setSize(24, 24);
+        image->setPadding(8,8,8,8);
+        image->setMargin(0, 10, 0, 0);
         image->addListener(this, Control::Listener::CLICK);
+        image->setAlignment(Control::ALIGN_TOP_RIGHT);
         item->_contronl->addControl(std::move(image));
         
         UPtr<Label> label = Control::create<Label>("treeItemLabel");
         label->addListener(this, Control::Listener::CLICK);
         //label->setWidth(1, true);
+        label->setWidth(1, Control::AUTO_PERCENT_PARENT);
+        label->setMargin(4, 50, 0, 0);
         item->_contronl->addControl(std::move(label));
 
         if (_useCheckBox) {
@@ -219,8 +224,9 @@ void TreeView::setSelectItem(TreeItem* item) {
             Control* control = _selectItem->_contronl->findControl("treeItemLabel");
             if (control) {
                 Vector4 color = control->getStyle()->getTextColor();
-                color.x *= 0.5;
-                color.y *= 1.5;
+                color.x *= 0.1;
+                color.y *= 3;
+                color.z *= 3;
                 control->overrideStyle()->setTextColor(color);
             }
         }

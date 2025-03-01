@@ -1,0 +1,566 @@
+Style {
+    id = Default
+    color = #ffffffff
+    bgColor = #ffffffff
+    textColor = #000000ff
+    font = res/ui/sans.ttf
+    fontSize = 12
+    opacity = 1.0
+    textAlignment = ALIGN_VCENTER_LEFT
+}
+
+Style {
+    id = Background
+    color = #dde7f1ff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/empty.png
+        left = 1
+        right = 1
+        top = 1
+        bottom = 1
+    }
+}
+
+Style {
+    id = Panel56
+    color = #ffffffff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle56.png
+        left = 26
+        right = 26
+        top = 26
+        bottom = 26
+    }
+}
+
+Style {
+    id = Panel37
+    color = #edf4f8ff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle37.png
+        left = 18
+        right = 18
+        top = 18
+        bottom = 18
+    }
+}
+
+Style {
+    id = Panel37White
+    color = #ffffffff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle37.png
+        left = 18
+        right = 18
+        top = 18
+        bottom = 18
+    }
+}
+
+Style {
+    id = PanelBlue
+    color = #078bedff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle37.png
+        left = 18
+        right = 18
+        top = 18
+        bottom = 18
+    }
+}
+
+Style {
+    id = InputBox
+    color = #ffffffff
+    textColor = #343434ff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle37.png
+        left = 18
+        right = 18
+        top = 18
+        bottom = 18
+    }
+}
+
+Style {
+    id = Button80
+    color = #078bedff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle80.png
+        left = 38
+        right = 38
+        top = 38
+        bottom = 38
+    }
+    disabled = Style {
+        color = #aaaaaaff
+    }
+    hover = Style {
+        color = #66b5e5ff
+    }
+    active = Style {
+        color = #88b5e5ff
+    }
+    focus = Style {
+        color = #88b5e5ff
+    }
+}
+
+Style {
+    id = Button80_outline
+    color = #078bedff
+    textColor = #078bedff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle80_outline.png
+        left = 38
+        right = 38
+        top = 38
+        bottom = 38
+    }
+    disabled = Style {
+        color = #aaaaaaff
+    }
+    hover = Style {
+        color = #66b5e5ff
+    }
+    active = Style {
+        color = #88b5e5ff
+    }
+    focus = Style {
+        color = #88b5e5ff
+    }
+}
+
+Style {
+    id = Button56
+    color = #078bedff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle56.png
+        left = 27
+        right = 27
+        top = 27
+        bottom = 27
+    }
+    disabled = Style {
+        color = #aaaaaaff
+    }
+    hover = Style {
+        color = #66b5e5ff
+    }
+    active = Style {
+        color = #88b5e5ff
+    }
+    focus = Style {
+        color = #88b5e5ff
+    }
+}
+
+Style {
+    id = Button37
+    color = #078bedff
+    textColor = #ffffffff
+    fontSize = 10
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle37.png
+        left = 18
+        right = 18
+        top = 18
+        bottom = 18
+    }
+    disabled = Style {
+        color = #aaaaaaff
+    }
+    hover = Style {
+        color = #66b5e5ff
+    }
+    active = Style {
+        color = #88b5e5ff
+    }
+    focus = Style {
+        color = #88b5e5ff
+    }
+}
+
+Style {
+    id = Button37_outline
+    color = #078bedff
+    textColor = #078bedff
+    fontSize = 10
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle_outline.png
+        left = 18
+        right = 18
+        top = 18
+        bottom = 18
+    }
+    disabled = Style {
+        color = #aaaaaaff
+    }
+    hover = Style {
+        color = #66b5e5ff
+    }
+    active = Style {
+        color = #88b5e5ff
+    }
+    focus = Style {
+        color = #88b5e5ff
+    }
+}
+
+Style {
+    id = Title
+    color = #ffffffff
+    textColor = #000000ff
+    fontSize = 19
+    textAlignment = ALIGN_VCENTER_LEFT
+}
+
+Style {
+    id = Title2
+    color = #ffffffff
+    textColor = #000000ff
+    fontSize = 15
+    textAlignment = ALIGN_VCENTER_LEFT
+}
+
+Style {
+    id = Title3
+    color = #ffffffff
+    textColor = #000000ff
+    fontSize = 12
+    textAlignment = ALIGN_VCENTER_LEFT
+}
+
+Style {
+    id = Label
+    color = #ffffffff
+    textColor = #343434ff
+    fontSize = 10
+}
+
+Style {
+    id = SmallLabel
+    color = #ffffffff
+    textColor = #343434ff
+    fontSize = 9
+}
+
+Style {
+    id = GrayLabel
+    color = #ffffffff
+    textColor = #898989ff
+    fontSize = 9
+}
+
+Style {
+    id = smallTriangle
+    color = #000000ff
+    textColor = #343434ff
+    fontSize = 10
+    background = {
+        image = res/ui/triangle.png
+        left = 0
+        right = 19
+        top = 10
+        bottom = 7
+    }
+}
+
+Style {
+    id = PaneWhite
+    color = #ffffffff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/button.png
+        left = 9
+        right = 9
+        top = 9
+        bottom = 9
+    }
+}
+
+Style {
+    id = RoundButton
+    color = #33b5e5ff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle37.png
+        left = 18
+        right = 18
+        top = 0
+        bottom = 0
+    }
+    disabled = Style {
+        color = #ccccccff
+    }
+    hover = Style {
+        color = #66b5e5ff
+    }
+    active = Style {
+        color = #88b5e5ff
+    }
+    focus = Style {
+        color = #88b5e5ff
+    }
+}
+
+Style {
+    id = Outline
+    color = #33b5e5ff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle_outline.png
+        left = 18
+        right = 18
+        top = 0
+        bottom = 0
+    }
+
+    disabled = Style {
+        color = #ccccccff
+    }
+    hover = Style {
+        color = #66b5e5ff
+    }
+    active = Style {
+        color = #88b5e5ff
+    }
+    focus = Style {
+        color = #88b5e5ff
+    }
+}
+
+Style {
+    id = TextBoxNormal
+    color = #ffffffff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_TOP_LEFT
+    background = {
+        image = res/ui/panel.png
+        left = 15
+        right = 15
+        top = 15
+        bottom = 15
+    }
+
+    disabled = Style {
+        color = #ccccccff
+    }
+}
+
+Style {
+    id = TextBox
+    color = #ffffffff
+    textColor = #787878ff
+
+    textAlignment = ALIGN_VCENTER_LEFT
+    background = {
+        image = res/ui/circle37.png
+        left = 18
+        right = 18
+        top = 18
+        bottom = 18
+    }
+
+    disabled = Style {
+        color = #ccccccff
+    }
+}
+
+
+
+Style {
+    id = Slider
+    color = #ffffffff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_TOP_LEFT
+}
+
+Style {
+    id = ComboBox
+    color = #efefefff
+    textColor = #111111ff
+
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/comboBox.png
+        left = 25
+        right = 32
+        top = 24
+        bottom = 24
+    }
+}
+
+Style {
+    id = MenuItem
+    color = #f9f9f9ff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/empty.png
+        left = 1
+        right = 1
+        top = 1
+        bottom = 1
+    }
+
+    
+    disabled = Style {
+        color = #ccccccff
+    }
+    hover = Style {
+        color = #aaaaaaff
+    }
+    active = Style {
+        color = #eeeeeeff
+    }
+    focus = Style {
+        color = #eeeeeeff
+    }
+}
+
+Style {
+    id = Icon
+    color = #f9f9f9ff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/outline.png
+        left = 15
+        right = 15
+        top = 15
+        bottom = 15
+    }
+
+    
+    disabled = Style {
+        color = #ccccccff
+    }
+    hover = Style {
+        color = #aaaaaaff
+    }
+    active = Style {
+        color = #eeeeeeff
+    }
+    focus = Style {
+        color = #55eeeeff
+    }
+}
+
+Style {
+    id = Rect
+    color = #f9f9f9ff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/empty.png
+        left = 1
+        right = 1
+        top = 1
+        bottom = 1
+    }
+}
+
+Style {
+    id = TextRange
+    color = #fafafaff
+    textColor = #989898ff
+    fontSize = 9
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/empty.png
+        left = 1
+        right = 1
+        top = 1
+        bottom = 1
+    }
+}
+
+Style {
+    id = Toast
+    color = #000000ff
+    textColor = #ffffffff
+
+    textAlignment = ALIGN_VCENTER_HCENTER
+    background = {
+        image = res/ui/circle37.png
+        left = 18
+        right = 18
+        top = 18
+        bottom = 18
+    }
+}
+
+Style {
+    id = AccordionButton
+    color = #f1f5f9ff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_VCENTER_LEFT
+
+    background = {
+        image = res/ui/empty.png
+        left = 1
+        right = 1
+        top = 1
+        bottom = 1
+    }
+}
+
+Style {
+    id = DirPan
+    color = #ffffffff
+    background = {
+        image = res/icon/pan.png
+        left = 2
+        right = 2
+        top = 2
+        bottom = 2
+    }
+}

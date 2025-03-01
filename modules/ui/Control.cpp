@@ -1055,14 +1055,14 @@ void Control::measureSize() {
     if (_leftHeightWeight == 0) _leftHeightWeight = 1;
 
     if (_autoSizeW == AUTO_PERCENT_PARENT)
-        _measureBounds.width = _desiredBounds.width * parentAbsoluteBounds.width;
+        _measureBounds.width = _desiredBounds.width * parentAbsoluteBounds.width - (_margin.right + _margin.left);
     else if (_autoSizeW == AUTO_PERCENT_LEFT)
         _measureBounds.width = _desiredBounds.width * (leftWidth / _leftWidthWeight) - (_margin.right+_margin.left);
     else if (_autoSizeW == AUTO_SIZE_NONE)
         _measureBounds.width = _desiredBounds.width;
 
     if (_autoSizeH == AUTO_PERCENT_PARENT)
-        _measureBounds.height = _desiredBounds.height * parentAbsoluteBounds.height;
+        _measureBounds.height = _desiredBounds.height * parentAbsoluteBounds.height - (_margin.top + _margin.bottom);
     else if (_autoSizeH == AUTO_PERCENT_LEFT)
         _measureBounds.height = _desiredBounds.height * (leftHeight / _leftHeightWeight) - (_margin.top + _margin.bottom);
     else if (_autoSizeH == AUTO_SIZE_NONE)

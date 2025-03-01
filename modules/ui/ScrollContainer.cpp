@@ -902,7 +902,8 @@ Accordion::Accordion()
     this->setLayout(Layout::LAYOUT_VERTICAL);
     auto button = Control::create<Button>("accordinButton", NULL, "AccordionButton");
     button->setText("Accordion");
-    button->setPadding(5, 12, 5, 12);
+    button->setPadding(10, 10, 10, 22);
+    button->setMargin(1, 0, 0, 0);
     _button = button.get();
     button->setWidth(1.0, Control::AUTO_PERCENT_PARENT);
     button->setHeight(1.0, Control::AUTO_WRAP_CONTENT);
