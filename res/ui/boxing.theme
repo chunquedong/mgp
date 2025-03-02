@@ -108,10 +108,10 @@ Style {
     textAlignment = ALIGN_VCENTER_HCENTER
     background = {
         image = res/ui/circle80.png
-        left = 38
-        right = 38
-        top = 38
-        bottom = 38
+        left = 36
+        right = 36
+        top = 36
+        bottom = 36
     }
     disabled = Style {
         color = #aaaaaaff
@@ -135,10 +135,10 @@ Style {
     textAlignment = ALIGN_VCENTER_HCENTER
     background = {
         image = res/ui/circle80_outline.png
-        left = 38
-        right = 38
-        top = 38
-        bottom = 38
+        left = 40
+        right = 40
+        top = 40
+        bottom = 40
     }
     disabled = Style {
         color = #aaaaaaff
@@ -162,10 +162,10 @@ Style {
     textAlignment = ALIGN_VCENTER_HCENTER
     background = {
         image = res/ui/circle56.png
-        left = 27
-        right = 27
-        top = 27
-        bottom = 27
+        left = 25
+        right = 25
+        top = 25
+        bottom = 25
     }
     disabled = Style {
         color = #aaaaaaff
@@ -416,6 +416,22 @@ Style {
 
 Style {
     id = ComboBox
+    color = #ffffffff
+    textColor = #565656ff
+
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/comboBox2.png
+        left = 18
+        right = 18
+        top = 16
+        bottom = 16
+    }
+}
+
+Style {
+    id = ComboBox2
     color = #efefefff
     textColor = #111111ff
 
@@ -514,11 +530,11 @@ Style {
     textAlignment = ALIGN_TOP_LEFT
 
     background = {
-        image = res/ui/empty.png
-        left = 1
-        right = 1
-        top = 1
-        bottom = 1
+        image = res/ui/rect.png
+        left = 2
+        right = 2
+        top = 2
+        bottom = 2
     }
 }
 
@@ -563,4 +579,9 @@ Style {
         top = 2
         bottom = 2
     }
+}
+
+Style {
+    id = CheckBox
+    color = #565656ff
 }
