@@ -26,6 +26,22 @@ Style {
 }
 
 Style {
+    id = LeftPane
+    color = #e7eef5ff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/empty.png
+        left = 1
+        right = 1
+        top = 1
+        bottom = 1
+    }
+}
+
+Style {
     id = Panel56
     color = #ffffffff
     textColor = #ffffffff
@@ -77,11 +93,11 @@ Style {
 
     textAlignment = ALIGN_VCENTER_HCENTER
     background = {
-        image = res/ui/circle37.png
-        left = 18
-        right = 18
-        top = 18
-        bottom = 18
+        image = res/ui/circle56.png
+        left = 25
+        right = 25
+        top = 25
+        bottom = 25
     }
 }
 
@@ -508,7 +524,23 @@ Style {
 
 Style {
     id = Rect
-    color = #f9f9f9ff
+    color = #e4e4e4ff
+    textColor = #000000ff
+
+    textAlignment = ALIGN_TOP_LEFT
+
+    background = {
+        image = res/ui/empty.png
+        left = 1
+        right = 1
+        top = 1
+        bottom = 1
+    }
+}
+
+Style {
+    id = White
+    color = #ffffffff
     textColor = #000000ff
 
     textAlignment = ALIGN_TOP_LEFT
