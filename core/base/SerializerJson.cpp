@@ -63,9 +63,9 @@ UPtr<Serializer> SerializerJson::create(Stream* stream, bool isHiml)
     if (isHiml) {
         HimlParser parser(&allocator);
         root = (JsonNode*)parser.parse(buffer);
-        if (root->children() && root->get("version") == NULL && root->children()->begin() != root->children()->end()) {
+        /*if (root->children() && root->get("version") == NULL && root->children()->begin() != root->children()->end()) {
             root = (JsonNode*)*root->children()->begin();
-        }
+        }*/
     }
     else {
         JsonParser parser(&allocator);

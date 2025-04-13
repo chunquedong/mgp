@@ -321,6 +321,7 @@ SPtr<Theme> Theme::create(const char* url)
     jc::JsonAllocator allocator;
     jc::HimlParser parser(&allocator);
     char* buffer = FileSystem::readAll(url);
+    parser.insertTopLevelObject = true;
     jc::JsonNode* root = (jc::JsonNode*)parser.parse(buffer);
     
     if (!root) {
