@@ -3,7 +3,9 @@
 #include "PhysicsController.h"
 #include "platform/Toolkit.h"
 #include "scene/Node.h"
+#ifdef GP_SCRIPT_ENABLE
 #include "script/ScriptController.h"
+#endif
 #include "PhysicsRigidBody.h"
 #include "PhysicsCharacter.h"
 #include "PhysicsGhostObject.h"
@@ -37,7 +39,11 @@ struct CollidesWithCallback : public btCollisionWorld::ContactResultCallback
 };
 
 PhysicsCollisionObject::PhysicsCollisionObject(Node* node, int group, int mask)
-    : _collisionShape(NULL), _enabled(true), _scriptListeners(NULL), _motionState(NULL), _group(group), _mask(mask)
+    : _collisionShape(NULL), _enabled(true), 
+    #ifdef GP_SCRIPT_ENABLE
+    _scriptListeners(NULL), 
+#endif
+    _motionState(NULL), _group(group), _mask(mask)
 {
     _node = node;
 }
@@ -45,7 +51,7 @@ PhysicsCollisionObject::PhysicsCollisionObject(Node* node, int group, int mask)
 PhysicsCollisionObject::~PhysicsCollisionObject()
 {
     SAFE_DELETE(_motionState);
-
+#ifdef GP_SCRIPT_ENABLE
     if (_scriptListeners)
     {
         for (size_t i = 0, count = _scriptListeners->size(); i < count; ++i)
@@ -54,7 +60,7 @@ PhysicsCollisionObject::~PhysicsCollisionObject()
         }
         SAFE_DELETE(_scriptListeners);
     }
-
+#endif
     GP_ASSERT(PhysicsController::cur());
     PhysicsController::cur()->destroyShape(_collisionShape);
 }
@@ -144,7 +150,7 @@ void PhysicsCollisionObject::removeCollisionListener(CollisionListener* listener
     GP_ASSERT(PhysicsController::cur());
     PhysicsController::cur()->removeCollisionListener(listener, this, object);
 }
-
+#ifdef GP_SCRIPT_ENABLE
 void PhysicsCollisionObject::addCollisionListener(const char* function, PhysicsCollisionObject* object)
 {
     ScriptListener* listener = ScriptListener::create(function);
@@ -175,7 +181,7 @@ void PhysicsCollisionObject::removeCollisionListener(const char* function, Physi
         }
     }
 }
-
+#endif
 bool PhysicsCollisionObject::collidesWith(PhysicsCollisionObject* object) const
 {
     GP_ASSERT(PhysicsController::cur() && PhysicsController::cur()->_world);
@@ -282,6 +288,7 @@ void PhysicsCollisionObject::PhysicsMotionState::setCenterOfMassOffset(const Vec
     _centerOfMassOffset.setOrigin(BV(centerOfMassOffset));
 }
 
+#ifdef GP_SCRIPT_ENABLE
 PhysicsCollisionObject::ScriptListener::ScriptListener()
     : script(NULL)
 {
@@ -329,7 +336,7 @@ void PhysicsCollisionObject::ScriptListener::collisionEvent(PhysicsCollisionObje
         NULL,
         type, &collisionPair, &contactPointA, &contactPointB);
 }
-
+#endif
 
 PhysicsCollisionObject* PhysicsCollisionObject::load(const std::string& url, Node* node) {
     UPtr<Properties> properties = Properties::create(url.c_str());

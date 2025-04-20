@@ -236,7 +236,7 @@ public:
      * @param object Optional collision object used to filter the collision event.
      */
     void removeCollisionListener(CollisionListener* listener, PhysicsCollisionObject* object = NULL);
-
+#ifdef GP_SCRIPT_ENABLE
     /**
      * Adds a collision listener for this collision object.
      * 
@@ -255,7 +255,7 @@ public:
      * @param object Optional collision object used to filter the collision event.
      */
     void removeCollisionListener(const char* function, PhysicsCollisionObject* object = NULL);
-
+#endif
     /**
      * Checks if this collision object collides with the given object.
      * 
@@ -334,7 +334,7 @@ public:
         int mask = PHYSICS_COLLISION_MASK_DEFAULT);
 
 protected:
-
+#ifdef GP_SCRIPT_ENABLE
     /**
      * Handles collision event callbacks to Lua script functions.
      */
@@ -376,7 +376,7 @@ protected:
          */
         ScriptListener();
     };
-
+#endif
     /**
      * Constructor.
      */
@@ -403,12 +403,12 @@ protected:
      * If the collision object is enabled or not.
      */
     bool _enabled;
-
+#ifdef GP_SCRIPT_ENABLE
     /**
      * The list of script listeners.
      */
     std::vector<ScriptListener*>* _scriptListeners;
-
+#endif
 private:
 
     /**

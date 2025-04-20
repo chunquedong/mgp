@@ -25,17 +25,6 @@ sh build.sh -G -debug
 
 #### WebAssembly
 
-fanx/etc/fmake/config.props:
-```
-compiler=gcc
-gcc.home=/C:/soft/emsdk/upstream/emscripten/
-gcc.name@{cpp}=emcc.bat @{cppflags} -pthread
-gcc.name@{c}=emcc.bat @{cflags} -pthread
-gcc.ar=emar.bat
-gcc.link=emcc.bat -pthread
-gcc.exe=@{gcc.link} @{linkflags} -o @{outFile}.js @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
-```
-
 ```
 fan fmake core/fmake_wasm.props
 fan fmake modules/fmake_wasm.props

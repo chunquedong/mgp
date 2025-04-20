@@ -88,10 +88,10 @@ bool AIAgent::processMessage(AIMessage* message)
     // Dispatch message to registered listener.
     if (_listener && _listener->messageReceived(message))
         return true;
-#ifdef GP_SCRIPT
+#ifdef GP_SCRIPT_ENABLE
     if (_node && _node->fireScriptEvent<bool>(GP_GET_SCRIPT_EVENT(Node, messageReceived), dynamic_cast<void*>(_node), message))
         return true;
-#endif // GP_SCRIPT
+#endif // GP_SCRIPT_ENABLE
     return false;
 }
 

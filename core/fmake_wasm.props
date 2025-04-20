@@ -8,4 +8,5 @@ incDir = ./
 //debug.defines = GP_USE_MEM_LEAK_DETECTION
 defines=GP_NO_LUA_BINDINGS
 gcc.extConfigs.cppflags = -std=c++17
-compiler = gcc
+emcc.extConfigs.cppflags = -std=c++17
+compiler = emcc
