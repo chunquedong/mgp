@@ -36,13 +36,21 @@ PhysicsGhostObject::PhysicsGhostObject(Node* node, const PhysicsCollisionShape::
 
 PhysicsGhostObject::~PhysicsGhostObject()
 {
-    GP_ASSERT(_node);
-    _node->removeListener(this);
+    if (_node) {
+        _node->removeListener(this);
+    }
 
     GP_ASSERT(PhysicsController::cur());
     PhysicsController::cur()->removeCollisionObject(this, true);
 
     SAFE_DELETE(_ghostObject);
+}
+
+void PhysicsGhostObject::setNode(Node* node) {
+    if (node == nullptr) {
+        _node->removeListener(this);
+    }
+    PhysicsCollisionObject::setNode(node);
 }
 
 PhysicsGhostObject* PhysicsGhostObject::create(Node* node, Properties* properties)

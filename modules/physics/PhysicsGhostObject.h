@@ -33,6 +33,7 @@ public:
      */
     void transformChanged(Transform* transform, long cookie);
 
+    virtual void setNode(Node* node) override;
 protected:
 
     /**
