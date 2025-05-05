@@ -12,6 +12,11 @@ SPtr<TreeView::TreeItem> TreeView::TreeItem::create(uint64_t id, const char* nam
     return item;
 }
 
+void TreeView::TreeItem::addChild(SPtr<TreeItem>& c) {
+    children.push_back(c);
+    c->_parent = this;
+}
+
 bool TreeView::TreeItem::isChecked() {
     if (_parent) {
         return _parent->isChecked() && _isChecked;
@@ -67,32 +72,32 @@ void TreeView::addItemLabel(TreeItem* item, int level) {
         item->_contronl->setWidth(1, AUTO_PERCENT_PARENT);
         //item->_contronl->setLayout(Layout::LAYOUT_HORIZONTAL);
 
-        UPtr<Icon> image = Control::create<Icon>("image");
-        image->overrideStyle()->setColor(Vector4::fromColor(0x000000ff));
-        image->setImagePath("res/ui/right.png");
-        image->setSize(24, 24);
-        image->setPadding(8,8,8,8);
-        image->setMargin(0, 10, 0, 0);
-        image->addListener(this, Control::Listener::CLICK);
-        image->setAlignment(Control::ALIGN_TOP_RIGHT);
-        item->_contronl->addControl(std::move(image));
-        
         UPtr<Label> label = Control::create<Label>("treeItemLabel");
         label->addListener(this, Control::Listener::CLICK);
         //label->setWidth(1, true);
         label->setWidth(1, Control::AUTO_PERCENT_PARENT);
-        label->setMargin(4, 50, 0, 0);
+        label->setMargin(4);
         item->_contronl->addControl(std::move(label));
+
+        UPtr<Icon> image = Control::create<Icon>("image");
+        image->overrideStyle()->setColor(Vector4::fromColor(0x000000ff));
+        image->setImagePath("res/ui/right.png");
+        image->setSize(18, 18);
+        image->setPadding(5,5,5,5);
+        image->setMargin(1);
+        image->addListener(this, Control::Listener::CLICK);
+        //image->setAlignment(Control::ALIGN_TOP_RIGHT);
+        item->_contronl->addControl(std::move(image));
 
         if (_useCheckBox) {
             UPtr<CheckBox> checkbox = Control::create<CheckBox>("tree_item_checkbox");
-            checkbox->setHeight(1, Control::AUTO_PERCENT_PARENT);
+            checkbox->setHeight(0.7, Control::AUTO_PERCENT_PARENT);
             checkbox->addListener(this, Control::Listener::CLICK);
             item->_contronl->addControl(std::move(checkbox));
         }
     }
     Container* control = item->_contronl.get();
-    Icon* icon = dynamic_cast<Icon*>(control->getControl(0));
+    Icon* icon = dynamic_cast<Icon*>(control->findControl("image"));
     if (item->expanded) {
         if (strcmp(icon->getImagePath(), "res/ui/down.png") != 0) {
             icon->setImagePath("res/ui/down.png");
@@ -110,18 +115,18 @@ void TreeView::addItemLabel(TreeItem* item, int level) {
         icon->setVisible(true);
     }
 
-    Label* label = dynamic_cast<Label*>(control->getControl(1));
+    Label* label = dynamic_cast<Label*>(control->findControl("treeItemLabel"));
     label->setText(item->name.c_str());
 
-    float baseX = (level - 1) * 20;
+    float baseX = (level - 1) * 12;
     if (_useCheckBox) {
-        baseX += 30;
+        baseX += 16;
     }
     icon->setX(baseX);
-    label->setX(baseX+20);
+    label->setX(baseX+16);
 
     if (_useCheckBox) {
-        CheckBox* checkbox = dynamic_cast<CheckBox*>(control->getControl(2));
+        CheckBox* checkbox = dynamic_cast<CheckBox*>(control->findControl("tree_item_checkbox"));
         checkbox->setChecked(item->isChecked());
     }
 

@@ -370,6 +370,7 @@ public:
     Control* getContent() { return _content.get(); }
     void setContent(UPtr<Control> c);
     bool isExpanded() { return _expanded; }
+    void setExpand(bool expand);
 };
 
 class ListView : public ScrollContainer, public mgp::Control::Listener {

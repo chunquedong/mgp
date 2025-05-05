@@ -278,18 +278,29 @@ unsigned int ScrollContainer::draw(Form* form, const Rectangle& clip, RenderInfo
 
             clipRegion.width += verticalRegion.width;
 
-            Rectangle bounds(_viewportBounds.right() + (_absoluteBounds.right() - _viewportBounds.right()) * 0.5f - topRegion.width * 0.5f, _viewportBounds.y + _scrollBarBounds.y, topRegion.width, topRegion.height);
-            batch->drawImage(bounds, topRegion, topColor, &clipRegion);
+            float middleHeight = _scrollBarBounds.height - topRegion.height - bottomRegion.height;
+            if (middleHeight > 0) {
+                //top
+                Rectangle bounds(_viewportBounds.right() + (_absoluteBounds.right() - _viewportBounds.right()) * 0.5f - topRegion.width * 0.5f, _viewportBounds.y + _scrollBarBounds.y, topRegion.width, topRegion.height);
+                batch->drawImage(bounds, topRegion, topColor, &clipRegion);
 
-            bounds.y += topRegion.height;
-            bounds.height = _scrollBarBounds.height - topRegion.height - bottomRegion.height;
-            batch->drawImage(bounds, verticalRegion, verticalColor, &clipRegion);
+                //bottom
+                bounds.y += topRegion.height + middleHeight;
+                bounds.height = bottomRegion.height;
+                batch->drawImage(bounds, bottomRegion, bottomColor, &clipRegion);
 
-            bounds.y += bounds.height;
-            bounds.height = bottomRegion.height;
-            batch->drawImage(bounds, bottomRegion, bottomColor, &clipRegion);
+                //middle
+                bounds.y -= middleHeight;
+                bounds.height = middleHeight;
+                batch->drawImage(bounds, verticalRegion, verticalColor, &clipRegion);
 
-            drawCalls += 3;
+                drawCalls += 3;
+            }
+            else {
+                Rectangle bounds(_viewportBounds.right() + (_absoluteBounds.right() - _viewportBounds.right()) * 0.5f - topRegion.width * 0.5f, _viewportBounds.y + _scrollBarBounds.y, topRegion.width, topRegion.height);
+                bounds.height = _scrollBarBounds.height;
+                batch->drawImage(bounds, verticalRegion, verticalColor, &clipRegion);
+            }
         }
 
         if (_scrollBarBounds.width > 0 && ((_scroll & SCROLL_HORIZONTAL) == SCROLL_HORIZONTAL))
@@ -922,16 +933,18 @@ Accordion::Accordion()
         if (evt == Listener::CLICK) {
             //_content->setVisible(_content->isVisible());
             
-            if (_content->getParent()) {
-                _content->getParent()->removeControl(_content.get());
-                this->setHeight(1.0, Control::AUTO_WRAP_CONTENT);
-                _expanded = false;
-            }
-            else {
-                this->addControl(uniqueFromInstant(_content.get()));
-                this->setHeight(1.0, Control::AUTO_PERCENT_LEFT);
-                _expanded = true;
-            }
+            //if (_content->getParent()) {
+            //    _content->getParent()->removeControl(_content.get());
+            //    this->setHeight(1.0, Control::AUTO_WRAP_CONTENT);
+            //    _expanded = false;
+            //}
+            //else {
+            //    this->addControl(uniqueFromInstant(_content.get()));
+            //    this->setHeight(1.0, Control::AUTO_PERCENT_LEFT);
+            //    _expanded = true;
+            //}
+
+            setExpand(!_expanded);
 
             if (onClik) {
                 onClik(_expanded);
@@ -944,12 +957,30 @@ Accordion::Accordion()
     });
 }
 
+void Accordion::setExpand(bool expand) {
+    if (_expanded != expand) {
+        if (expand) {
+            if (!_content->getParent()) {
+                this->addControl(uniqueFromInstant(_content.get()));
+            }
+            this->setHeight(1.0, Control::AUTO_PERCENT_LEFT);
+        }
+        else {
+            _content->getParent()->removeControl(_content.get());
+            this->setHeight(1.0, Control::AUTO_WRAP_CONTENT);
+        }
+        _expanded = expand;
+    }
+}
+
 void Accordion::setContent(UPtr<Control> c) {
     if (_content->getParent()) {
         _content->getParent()->removeControl(_content.get());
     }
     _content = std::move(c);
-    this->addControl(uniqueFromInstant(_content.get()));
+    if (_expanded) {
+        this->addControl(uniqueFromInstant(_content.get()));
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
