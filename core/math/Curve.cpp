@@ -1471,4 +1471,44 @@ int Curve::getInterpolationType(const char* curveId)
     return -1;
 }
 
+Vector3 catmullRomSpline(const Vector3& p0, const Vector3& p1,
+    const Vector3& p2, const Vector3& p3,
+    double t, double tau) {
+    double t2 = t * t;
+    double t3 = t2 * t;
+
+    Vector3 result;
+    result.x = p1.x + tau * (-p0.x + p2.x) * t +
+        tau * (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+        tau * (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3;
+
+    result.y = p1.y + tau * (-p0.y + p2.y) * t +
+        tau * (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
+        tau * (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3;
+
+    result.z = p1.z + tau * (-p0.z + p2.z) * t +
+        tau * (2 * p0.z - 5 * p1.z + 4 * p2.z - p3.z) * t2 +
+        tau * (-p0.z + 3 * p1.z - 3 * p2.z + p3.z) * t3;
+    return result;
+}
+
+Vector3 bezierCurve(const Vector3& p0, const Vector3& p1,
+    const Vector3& p2, const Vector3& p3,
+    double t, double tau) {
+
+    double st = t;
+    double dt = (1 - st);
+
+    double st2 = st * st;
+    double dt2 = dt * dt;
+
+    double t0 = dt * dt2;
+    double t1 = dt2 * st * 3;
+    double t2 = dt * st2 * 3;
+    double t3 = st * st2;
+
+    Vector3 p = p0 * t0 + p1 * t1 + p2 * t2 + p3 * t3;
+    return p;
+}
+
 }

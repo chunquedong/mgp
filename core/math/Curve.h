@@ -4,6 +4,7 @@
 #include "base/Ref.h"
 #include "Math.h"
 #include "base/Ptr.h"
+#include "Vector3.h"
 
 namespace mgp
 {
@@ -550,6 +551,14 @@ private:
     Point* _points;                     // The points on the curve.
 };
 
-}
 
+Vector3 catmullRomSpline(const Vector3& p0, const Vector3& p1,
+    const Vector3& p2, const Vector3& p3,
+    double t, double tau = 0.5f);
+
+Vector3 bezierCurve(const Vector3& p0, const Vector3& p1,
+    const Vector3& p2, const Vector3& p3,
+    double t, double tau = 0.5f);
+
+}
 #endif
