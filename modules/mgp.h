@@ -8,13 +8,6 @@
 #include "app/FirstPersonCamera.h"
 #include "app/SceneView.h"
 
-#ifndef __EMSCRIPTEN__
-// Audio
-#include "audio/AudioController.h"
-#include "scene/AudioListener.h"
-#include "audio/AudioBuffer.h"
-#include "audio/AudioSource.h"
-
 // Physics
 #include "physics/PhysicsController.h"
 #include "physics/PhysicsConstraint.h"
@@ -25,6 +18,13 @@
 #include "physics/PhysicsCharacter.h"
 #include "physics/PhysicsVehicle.h"
 #include "physics/PhysicsVehicleWheel.h"
+
+#ifndef __EMSCRIPTEN__
+// Audio
+#include "audio/AudioController.h"
+#include "scene/AudioListener.h"
+#include "audio/AudioBuffer.h"
+#include "audio/AudioSource.h"
 
 // AI
 #include "ai/AIController.h"
