@@ -36,8 +36,9 @@ PhysicsController::PhysicsController()
     _debugDrawer(NULL), _status(PhysicsController::Listener::DEACTIVATED), _listeners(NULL),
     _gravity(btScalar(0.0), btScalar(-9.8), btScalar(0.0)), _collisionCallback(NULL)
 {
+#ifdef GP_SCRIPT_ENABLE
     GP_REGISTER_SCRIPT_EVENTS();
-
+#endif
     // Default gravity is 9.8 along the negative Y axis.
     _collisionCallback = new CollisionCallback(this);
     g_cur = this;
@@ -54,6 +55,7 @@ PhysicsController::~PhysicsController()
 
 PhysicsController* PhysicsController::cur()
 {
+    GP_ASSERT(g_cur);
     return g_cur;
 }
 
@@ -499,7 +501,11 @@ void PhysicsController::update(float elapsedTime)
     _world->stepSimulation(elapsedTime * 0.001f, 10);
 
     // If we have status listeners, then check if our status has changed.
+#ifdef GP_SCRIPT_ENABLE
     if (_listeners || hasScriptListener(GP_GET_SCRIPT_EVENT(PhysicsController, statusEvent)))
+#else
+    if (_listeners)
+#endif
     {
         Listener::EventType oldStatus = _status;
 
@@ -543,8 +549,9 @@ void PhysicsController::update(float elapsedTime)
                     (*_listeners)[k]->statusEvent(_status);
                 }
             }
-
+#ifdef GP_SCRIPT_ENABLE
             fireScriptEvent<void>(GP_GET_SCRIPT_EVENT(PhysicsController, statusEvent), _status);
+#endif
         }
     }
 
@@ -1344,7 +1351,7 @@ PhysicsController::DebugDrawer::DebugDrawer()
     // Fragment shader for drawing colored lines.
     const char* fs_str = 
     {
-    #ifdef OPENGL_ES
+    #if defined(OPENGL_ES) || defined(__EMSCRIPTEN__)
         "precision highp float;\n"
     #endif
         "in vec4 v_color;\n"

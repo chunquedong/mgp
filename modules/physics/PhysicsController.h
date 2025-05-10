@@ -5,7 +5,11 @@
 #include "PhysicsCollisionObject.h"
 #include "scene/MeshBatch.h"
 #include "objects/HeightField.h"
-#include "script/ScriptTarget.h"
+
+#ifdef GP_SCRIPT_ENABLE
+    #include "script/ScriptTarget.h"
+#endif
+
 #include "math/Quaternion.h"
 
 #include <map>
@@ -20,7 +24,10 @@ class ScriptListener;
  *
  * @see http://gameplay3d.github.io/GamePlay/docs/file-formats.html#wiki-Physics
  */
-class PhysicsController : public ScriptTarget
+class PhysicsController
+#ifdef GP_SCRIPT_ENABLE
+    : public ScriptTarget
+#endif
 {
     friend class Application;
     friend class PhysicsConstraint;
@@ -29,11 +36,11 @@ class PhysicsController : public ScriptTarget
     friend class PhysicsVehicle;
     friend class PhysicsCollisionObject;
     friend class PhysicsGhostObject;
-
+#ifdef GP_SCRIPT_ENABLE
     GP_SCRIPT_EVENTS_START();
     GP_SCRIPT_EVENT(statusEvent, "[PhysicsController::Listener::EventType]");
     GP_SCRIPT_EVENTS_END();
-
+#endif
 public:
 
     static PhysicsController* cur();

@@ -17,10 +17,10 @@
 #include "EventTimer.h"
 #include "Platform.h"
 #include "AppConfig.h"
+#include "physics/PhysicsController.h"
 
 #ifndef __EMSCRIPTEN__
     #include "audio/AudioController.h"
-    #include "physics/PhysicsController.h"
     #include "ai/AIController.h"
 #endif
 
@@ -274,9 +274,10 @@ protected:
     AnimationController* _animationController;  // Controls the scheduling and running of animations.
     Renderer* _renderer;
 
+    PhysicsController* _physicsController;      // Controls the simulation of a physics scene and entities.
 #ifndef __EMSCRIPTEN__
     AudioController* _audioController;          // Controls audio sources that are playing in the game.
-    PhysicsController* _physicsController;      // Controls the simulation of a physics scene and entities.
+    
     AIController* _aiController;                // Controls AI simulation.
     AudioListener* _audioListener;              // The audio listener in 3D space.
 #endif

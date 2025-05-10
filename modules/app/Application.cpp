@@ -114,10 +114,10 @@ Application::Application()
     : _state(Uninitialized), _pausedCount(0),
     _frameTimeLastFPS(0), _frameCount(0), _frameRate(0), _width(0), _height(0),
     //_clearDepth(1.0f), _clearStencil(0),
-    _animationController(NULL), _renderer(NULL),
+    _animationController(NULL), _renderer(NULL), _physicsController(NULL), 
     #ifndef __EMSCRIPTEN__
     _audioController(NULL),
-    _physicsController(NULL), _aiController(NULL), _audioListener(NULL),
+    _aiController(NULL), _audioListener(NULL),
     #endif
     #if GP_SCRIPT_ENABLE
     _scriptController(NULL), _scriptTarget(NULL),
@@ -258,12 +258,11 @@ bool Application::startup()
     _animationController = new AnimationController();
     _animationController->initialize();
 
+    _physicsController = new PhysicsController();
+    _physicsController->initialize();
 #ifndef __EMSCRIPTEN__
     _audioController = new AudioController();
     _audioController->initialize();
-
-    _physicsController = new PhysicsController();
-    _physicsController->initialize();
 
     _aiController = new AIController();
     _aiController->initialize();
@@ -332,9 +331,9 @@ void Application::shutdown()
     if (_state != Uninitialized)
     {
         GP_ASSERT(_animationController);
+        GP_ASSERT(_physicsController);
     #ifndef __EMSCRIPTEN__
         GP_ASSERT(_audioController);
-        GP_ASSERT(_physicsController);
         GP_ASSERT(_aiController);
     #endif
 
@@ -366,6 +365,8 @@ void Application::shutdown()
 		_scriptController->finalize();
 
     #endif
+        _physicsController->finalize();
+        SAFE_DELETE(_physicsController);
     #ifndef __EMSCRIPTEN__
         /*unsigned int gamepadCount = Gamepad::getGamepadCount();
         for (unsigned int i = 0; i < gamepadCount; i++)
@@ -377,8 +378,6 @@ void Application::shutdown()
         _audioController->finalize();
         SAFE_DELETE(_audioController);
 
-        _physicsController->finalize();
-        SAFE_DELETE(_physicsController);
         _aiController->finalize();
         SAFE_DELETE(_aiController);
 
@@ -420,17 +419,17 @@ void Application::pause()
     if (_state == Runing)
     {
         GP_ASSERT(_animationController);
+        GP_ASSERT(_physicsController);
     #ifndef __EMSCRIPTEN__
         GP_ASSERT(_audioController);
-        GP_ASSERT(_physicsController);
         GP_ASSERT(_aiController);
     #endif
         _state = Paused;
         _pausedTimeLast = System::millisTicks();
         _animationController->pause();
+        _physicsController->pause();
     #ifndef __EMSCRIPTEN__
         _audioController->pause();
-        _physicsController->pause();
         _aiController->pause();
     #endif
     }
@@ -447,18 +446,18 @@ void Application::resume()
         if (_pausedCount == 0)
         {
             GP_ASSERT(_animationController);
+            GP_ASSERT(_physicsController);
         #ifndef __EMSCRIPTEN__
             GP_ASSERT(_audioController);
-            GP_ASSERT(_physicsController);
             GP_ASSERT(_aiController);
         #endif
             _state = Runing;
             _pausedTimeTotal += System::millisTicks() - _pausedTimeLast;
             _animationController->resume();
 
+            _physicsController->resume();
         #ifndef __EMSCRIPTEN__
             _audioController->resume();
-            _physicsController->resume();
             _aiController->resume();
         #endif
         }
@@ -517,10 +516,9 @@ void Application::frame()
     if (_state == Application::Runing)
     {
         GP_ASSERT(_animationController);
-
+        GP_ASSERT(_physicsController);
     #ifndef __EMSCRIPTEN__
         GP_ASSERT(_audioController);
-        GP_ASSERT(_physicsController);
         GP_ASSERT(_aiController);
     #endif
         // Update Time.
@@ -530,10 +528,9 @@ void Application::frame()
         // Update the scheduled and running animations.
         _animationController->update(elapsedTime);
 
-    #ifndef __EMSCRIPTEN__
         // Update the physics.
         _physicsController->update(elapsedTime);
-
+    #ifndef __EMSCRIPTEN__
         // Update AI.
         _aiController->update(elapsedTime);
     #endif
