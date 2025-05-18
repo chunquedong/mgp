@@ -628,6 +628,11 @@ void AnimationClip::onEnd()
     // Fire script end event
     fireScriptEvent<void>(GP_GET_SCRIPT_EVENT(AnimationClip, clipEnd), this);
 #endif
+
+    if (onAnimEnd) {
+        onAnimEnd();
+    }
+
     this->release();
 }
 

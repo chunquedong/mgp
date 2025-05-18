@@ -7,6 +7,7 @@
 #ifdef GP_SCRIPT
 #include "script/ScriptTarget.h"
 #endif
+#include <functional>
 
 namespace mgp
 {
@@ -413,6 +414,9 @@ private:
     std::vector<Listener*>* _endListeners;              // Collection of end listeners on the clip.
     std::list<ListenerEvent*>* _listeners;              // Ordered collection of listeners on the clip.
     std::list<ListenerEvent*>::iterator* _listenerItr;  // Iterator that points to the next listener event to be triggered.
+
+public:
+    std::function<void()> onAnimEnd;
 };
 
 }
