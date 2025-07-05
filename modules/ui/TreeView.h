@@ -27,6 +27,7 @@ public:
         static SPtr<TreeView::TreeItem> create(uint64_t id, const char* name, const std::vector<SPtr<TreeItem> >& cs);
         bool expanded = false;
         void addChild(SPtr<TreeItem>& c);
+        TreeItem* getParent() { return _parent; }
     private:
         UPtr<Container> _contronl;
         TreeItem* _parent = NULL;
