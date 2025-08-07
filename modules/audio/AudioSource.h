@@ -10,9 +10,10 @@
 namespace mgp
 {
 
-class AudioBuffer;
+//class AudioBuffer;
 class Node;
 class NodeCloneContext;
+class AudioController;
 
 /**
  * Defines an audio source in 3D space.
@@ -50,15 +51,6 @@ public:
      * @script{create}
      */
     static UPtr<AudioSource> create(const char* url, bool streamed = false);
-
-    /**
-     * Create an audio source from the given properties object.
-     * 
-     * @param properties The properties object defining the audio source (must have namespace equal to 'audio').
-     * @return The newly created audio source, or <code>NULL</code> if the audio source failed to load.
-     * @script{create}
-     */
-    static UPtr<AudioSource> create(Properties* properties);
 
     /**
      * Plays the audio source.
@@ -176,7 +168,7 @@ private:
     /**
      * Constructor that takes an AudioBuffer.
      */
-    AudioSource(AudioBuffer* buffer, ALuint source);
+    AudioSource(AudioController* ctrl);
 
     /**
      * Destructor.
@@ -206,15 +198,16 @@ private:
      */
     AudioSource* clone(NodeCloneContext& context);
 
-    bool streamDataIfNeeded();
 
-    ALuint _alSource;
-    AudioBuffer* _buffer;
+    ma_sound _sound;
+
     bool _looped;
     float _gain;
     float _pitch;
     Vector3 _velocity;
     //Node* _node;
+    State _state;
+    AudioController* _audioController;
 };
 
 }

@@ -27,12 +27,6 @@
 //#include "net/HttpClient.hpp"
 #endif
 
-
-#ifndef __EMSCRIPTEN__
-/** @script{ignore} */
-ALenum __al_error_code = AL_NO_ERROR;
-#endif
-
 extern mgp::Renderer* g_rendererInstance;
 //extern mgp::ThreadPool* g_threadPool;
 extern mgp::CompressedTexture* g_compressedTexture;
