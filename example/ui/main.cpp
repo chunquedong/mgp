@@ -10,18 +10,17 @@ using namespace mgp;
 class MainApp : public Application {
 
     void initialize() {
-        //auto frame = new_<Frame>();
-        //{
-        //    auto it = new_<waseGui::Button>();
-        //    it->setText("Button");
-        //    it->onClick = ([=](RefPtr<Widget> w) {
-        //        waseGui::Toast::showText("hello world");
-        //        });
-        //    frame->add(std::move(it));
-        //    frame->background.rgba = 0;
-        //}
-        //frame->show();
-        this->showFps(false);
+        auto frame = new_<Frame>();
+        {
+            auto it = new_<waseGui::Button>();
+            it->setText("Button");
+            it->onClick = ([=](RefPtr<Widget> w) {
+                waseGui::Toast::showText("hello world");
+                });
+            frame->add(std::move(it));
+            frame->background.rgba = 0;
+        }
+        frame->show();
     }
 
     void render(float elapsedTime) override {
