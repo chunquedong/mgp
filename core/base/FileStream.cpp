@@ -18,7 +18,7 @@ FileStream::~FileStream()
 
 #ifdef  _WIN32
 #include <Windows.h>
-std::string Utf8ToGbk(const char* src_str)
+static std::string Utf8ToGbk(const char* src_str)
 {
     int len = MultiByteToWideChar(CP_UTF8, 0, src_str, -1, NULL, 0);
     wchar_t* wszGBK = new wchar_t[len + 1];

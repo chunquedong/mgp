@@ -2,9 +2,12 @@
 #include "Platform.h"
 #include "base/FileSystem.h"
 #include "render/FrameBuffer.h"
-//#include "ui/ControlFactory.h"
-#include "ui/Theme.h"
-#include "ui/FormManager.h"
+
+#ifdef GP_UI
+    #include "ui/Theme.h"
+    #include "ui/FormManager.h"
+#endif
+
 #include "render/RenderPath.h"
 #include "base/SerializerManager.h"
 #include "openGL/GLRenderer.h"
@@ -13,7 +16,11 @@
 #include "objects/Terrain.h"
 #include "openGL/CompressedTexture.h"
 #include "scene/AssetManager.h"
+#include "objects/Font.h"
 
+#ifdef WASE_UI
+    #include "waseUI/WaseWindow.h"
+#endif
 
 #ifndef __EMSCRIPTEN__
 #include "script/ScriptController.h"
@@ -49,8 +56,9 @@ void regiseterSerializer() {
     mgr->registerType("mgp::Terrain", Terrain::createObject);
     mgr->registerType("mgp::Terrain::Layer", Terrain::createLayerObject);
 
-
+#ifdef GP_UI
     FormManager::regiseterSerializer(mgr);
+#endif
 
     // Register engine enums
     mgr->registerEnum("mgp::Camera::Mode", Camera::enumToString, Camera::enumParse);
@@ -116,13 +124,16 @@ Application::Application()
     //_clearDepth(1.0f), _clearStencil(0),
     _animationController(NULL), _renderer(NULL), _physicsController(NULL), 
     #ifndef __EMSCRIPTEN__
-    _audioController(NULL),
-    _aiController(NULL), _audioListener(NULL),
+        _audioController(NULL),
+        _aiController(NULL), _audioListener(NULL),
     #endif
     #if GP_SCRIPT_ENABLE
-    _scriptController(NULL), _scriptTarget(NULL),
+        _scriptController(NULL), _scriptTarget(NULL),
     #endif
-    _inputListener(NULL), _forms(NULL),
+    _inputListener(NULL),
+    #ifdef GP_UI
+        _forms(NULL),
+    #endif
     _pausedTimeLast(0), _pausedTimeTotal(0),
     _showFps(true)
 {
@@ -195,9 +206,17 @@ void Application::render(float elapsedTime)
 
     //Rectangle* viewport = getView()->getViewport();
     _renderer->setViewport(0, 0, _width, _height);
+
+#ifdef GP_UI
     _forms->draw(NULL);
+#endif
+
+#ifdef WASE_UI
+    waseUI::doFrame();
+#endif
 
     if (_showFps) {
+        _renderer->resetState();
         drawFps();
     }
 }
@@ -269,8 +288,13 @@ bool Application::startup()
 
     _audioListener = new AudioListener();
 #endif
-    _forms = new FormManager();
 
+#ifdef WASE_UI
+    waseUI::init();
+#endif
+#ifdef GP_UI
+    _forms = new FormManager();
+#endif
     _font = Font::create("res/ui/sans.ttf");
 
     // Load any gamepads, ui or physical.
@@ -349,10 +373,14 @@ void Application::shutdown()
             SAFE_DELETE(view);
         }
         _sceneViews.clear();
-
+        
+#ifdef WASE_UI
+    waseUI::finalize();
+#endif
+#ifdef GP_UI
         _forms->finalize();
         SAFE_DELETE(_forms);
-
+#endif
     #if GP_SCRIPT_ENABLE
         // Call script finalize
         if (_scriptTarget)
@@ -385,9 +413,9 @@ void Application::shutdown()
     #endif
         
         //ControlFactory::finalize();
-
+#ifdef GP_UI
         Theme::finalize();
-
+#endif
         // Note: we do not clean up the script controller here
         // because users can call Application::exit() from a script.
 
@@ -539,10 +567,10 @@ void Application::frame()
 
         // Application Update.
         update(elapsedTime);
-
-        // Update forms.
+    #ifdef GP_UI
+            // Update forms.
         _forms->updateInternal(elapsedTime);
-
+    #endif
     #if GP_SCRIPT_ENABLE
         // Run script update.
         if (_scriptTarget)
@@ -577,9 +605,10 @@ void Application::frame()
 
         // Application Update.
         update(0);
-
-        // Update forms.
+    #ifdef GP_UI
+            // Update forms.
         _forms->updateInternal(0);
+    #endif
 
     #if GP_SCRIPT_ENABLE
         // Script update.
@@ -622,9 +651,16 @@ void Application::resizeEvent(unsigned int width, unsigned int height) {
 
 void Application::notifyKeyEvent(Keyboard evt)
 {
+#ifdef WASE_UI
+    if (waseUI::keyEvent(evt)) {
+        return;
+    }
+#endif
+#ifdef GP_UI
     if (_forms->keyEventInternal(evt.evt, evt.key)) {
         return;
     }
+#endif
     if (_inputListener && _inputListener->keyEvent(evt))
         return;
 
@@ -643,9 +679,15 @@ bool Application::notifyMouseEvent(Mouse evt)
         evt.time = System::currentTimeMillis();
     }
 
+#ifdef WASE_UI
+    if (waseUI::mouseEvent(evt)) {
+        return true;
+    }
+#endif
+#ifdef GP_UI
     if (_forms->mouseEventInternal(evt))
         return true;
-
+#endif
     if (_inputListener && _inputListener->mouseEvent(evt))
         return true;
 
@@ -680,7 +722,12 @@ void Application::notifyResizeEvent(unsigned int width, unsigned int height)
 #endif
     }
 
+#ifdef WASE_UI
+    waseUI::resize(width, height);
+#endif
+#ifdef GP_UI
     _forms->resizeEventInternal(width, height);
+#endif
 }
 
 void Application::ShutdownListener::timeEvent(int64_t timeDiff, void* cookie)

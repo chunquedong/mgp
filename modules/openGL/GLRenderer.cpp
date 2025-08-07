@@ -92,8 +92,12 @@ void GLRenderer::clear(ClearFlags flags, const Vector4& color, float clearDepth,
     GL_ASSERT(glClear(bits));
 
     //reset state
-    //StateBlock state;
+    resetState();
+}
+
+void GLRenderer::resetState() {
     updateState(&stateBlock, 2);
+    __currentShaderProgram = 0;
 }
 
 void GLRenderer::setViewport(int x, int y, int w, int h) {

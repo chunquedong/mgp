@@ -222,8 +222,9 @@ public:
 
     SceneView* getView(int i = 0) { return _sceneViews[i]; }
 
+#ifdef GP_UI
     FormManager* getFormManager() { return _forms; }
-
+#endif
 
     /**
      * Shuts down the game.
@@ -291,7 +292,9 @@ protected:
 protected:
     InputListener* _inputListener;
 protected:
+#ifdef GP_UI
     FormManager* _forms;
+#endif
     std::vector<SceneView*> _sceneViews;
 
     UPtr<Font> _font;

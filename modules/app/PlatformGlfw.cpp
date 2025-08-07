@@ -19,6 +19,11 @@
 //#include <GL/wglew.h>
 #include <GLFW/glfw3.h>
 
+#ifdef _WIN32
+	#define GLFW_EXPOSE_NATIVE_WIN32
+	#include <GLFW/glfw3native.h>
+#endif
+
 #include "PlatformGlfw.h"
 #include "app/Application.h"
 
@@ -37,6 +42,12 @@ Application* _game = NULL;
 PlatformGlfw::PlatformGlfw() {
 }
 
+#ifdef _WIN32
+HWND getWin32Window() {
+    HWND hwnd = glfwGetWin32Window(window);
+    return hwnd;
+}
+#endif
 
 extern int strcmpnocase(const char* s1, const char* s2)
 {
