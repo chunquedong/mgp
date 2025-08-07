@@ -125,9 +125,7 @@ Application::Application()
         _scriptController(NULL), _scriptTarget(NULL),
     #endif
     _inputListener(NULL),
-    #ifdef GP_UI
-        _forms(NULL),
-    #endif
+    _forms(NULL),
     _pausedTimeLast(0), _pausedTimeTotal(0),
     _showFps(true)
 {

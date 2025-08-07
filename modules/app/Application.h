@@ -292,9 +292,9 @@ protected:
 protected:
     InputListener* _inputListener;
 protected:
-#ifdef GP_UI
+
     FormManager* _forms;
-#endif
+
     std::vector<SceneView*> _sceneViews;
 
     UPtr<Font> _font;
