@@ -2,10 +2,10 @@ name = mgpModules
 summary = MGP modules
 outType = lib
 version = 1.0
-depends = mgpCore 1.0, jsonc 2.0, draco 1.4.1, bullet 3.24
-srcDirs = app/,render/,openGL/,loader/,ui/,physics/
+depends = mgpCore 1.0, jsonc 2.0, draco 1.4.1, bullet 3.24, sric 1.0, waseGraphics 1.0, waseGui 1.0, serial 1.0, waseNanovg 1.0, cstd 1.0
+srcDirs = app/,render/,openGL/,loader/,ui/,physics/,waseUI/
 incDir = ./
 //debug.defines = GP_USE_MEM_LEAK_DETECTION
-defines=GP_NO_LUA_BINDINGS,GP_GLFW,GLTFIO_DRACO_SUPPORTED,GP_UI
+defines=GP_NO_LUA_BINDINGS,GP_GLFW,GLTFIO_DRACO_SUPPORTED,GP_UI,WASE_UI
 emcc.extConfigs.cppflags = -std=c++17
 compiler = emcc

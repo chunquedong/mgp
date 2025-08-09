@@ -5,7 +5,7 @@
 #include <emscripten.h>
 
 extern "C" {
-  extern void editTextCreate(int type, const char* text, mgp::TextBox* textBox);
+  extern void editTextCreate(int type, const char* text, mgp::TextBox* textBox, const char* callback);
   extern void editTextRemove();
   extern void editTextUpdate(int x, int y, int w, int h, int fontSize);
 
@@ -357,7 +357,7 @@ void TextBox::controlEvent(Control::Listener::EventType evt)
     {
     case Control::Listener::FOCUS_GAINED: {
 #ifdef __EMSCRIPTEN__
-        editTextCreate(_inputMode, _text.c_str(), this);
+        editTextCreate(_inputMode, _text.c_str(), this, "editTextOnTextChange");
 
         int fontSize = getStyle()->getFontSize();
         editTextUpdate(_absoluteBounds.x + getPadding().left, _absoluteBounds.y + getPadding().top,

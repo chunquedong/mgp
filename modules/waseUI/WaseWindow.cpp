@@ -33,9 +33,11 @@ extern bool g_autoScale;
 	LRESULT CALLBACK EditSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
 
+#ifdef _WIN32
 namespace mgp {
     HWND getWin32Window();
 }
+#endif
 
 class MgpWindow : public Window
 {
