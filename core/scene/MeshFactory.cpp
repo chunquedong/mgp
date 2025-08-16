@@ -271,6 +271,45 @@ UPtr<Mesh> MeshFactory::createCube2(float size)
     return mesh;
 }
 
+UPtr<Mesh> MeshFactory::createCubeLine(float size)
+{
+    float a = size * 0.5f;
+    float vertices[] =
+    {
+        -a, -a,  a,
+         a, -a,  a,
+        -a,  a,  a,
+         a,  a,  a,
+        -a, -a,  -a,
+         a, -a,  -a,
+        -a,  a,  -a,
+         a,  a,  -a,
+    };
+    short indices[] =
+    {
+        0, 1, 0, 2, 1, 3, 2, 3, 
+        2, 6, 0, 4, 1, 5, 3, 7,
+        4, 5, 4, 6, 5, 7 , 6, 7
+    };
+    unsigned int vertexCount = 8;
+    unsigned int indexCount = 24;
+    VertexFormat::Element elements[] =
+    {
+        VertexFormat::Element(VertexFormat::POSITION, 3),
+    };
+    UPtr<Mesh> mesh = Mesh::createMesh(VertexFormat(elements, 1), vertexCount);
+    if (mesh.get() == NULL)
+    {
+        GP_ERROR("Failed to create mesh.");
+        return UPtr<Mesh>(NULL);
+    }
+    mesh->setId("CubeLine");
+    mesh->getVertexBuffer()->setData((char*)vertices, sizeof(vertices));
+    mesh->setIndex(Mesh::LINES, indexCount);
+    mesh->getIndexBuffer()->setData((char*)indices, sizeof(indices));
+    return mesh;
+}
+
 UPtr<Mesh> MeshFactory::createTorus(int radial_resolution, int tubular_resolution, float radius, float thickness)
 {
     std::vector<float> vertices;

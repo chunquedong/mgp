@@ -1,0 +1,11 @@
+name = mgpModules
+summary = MGP modules
+outType = lib
+version = 1.0
+depends = mgpCore 1.0, glfw 3.3.8, glew 2.2.0, bullet 3.24, freetype 2.4.12, jsonc 2.0, ljs 1.0, curl 8.0.1, draco 1.4.1, sric 1.0, waseGraphics 1.0, waseGui 1.0, serial 1.0, waseNanovg 1.0, cstd 1.0
+srcDirs = ai/,app/,audio/,physics/,render/,script/,waseUI/,openGL/,loader/,ui/
+incDir = ./
+win32.defines = UNICODE,GP_NO_LUA_BINDINGS,GP_GLFW,CURL_DISABLE_LDAP,CURL_STATICLIB
+//debug.defines = GP_USE_MEM_LEAK_DETECTION
+defines=GP_NO_LUA_BINDINGS,GP_GLFW,CURL_DISABLE_LDAP,CURL_STATICLIB,GLTFIO_DRACO_SUPPORTED,GP_DDSKTX,GP_PVR,GP_DDS,NVGSWU_GL3,WASE_UI,GP_UI
+gcc.extConfigs.cppflags = -std=c++14

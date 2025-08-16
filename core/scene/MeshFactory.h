@@ -73,6 +73,7 @@ public:
 
     static UPtr<Mesh> createCube(float size = 1.0f);
     static UPtr<Mesh> createCube2(float size = 1.0f);
+    static UPtr<Mesh> createCubeLine(float size = 1.0f);
     static UPtr<Mesh> createSimpleCube();
     static UPtr<Mesh> createSpherical(int subdivision = 64);
     static UPtr<Mesh> createTorus(int radial_resolution, int tubular_resolution, float radius, float thickness);
