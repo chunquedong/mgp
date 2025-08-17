@@ -804,6 +804,32 @@ const BoundingSphere& Node::getBoundingSphere() const
     return _bounds;
 }
 
+void Node::getBoundingBox(BoundingBox* out, bool merge) const
+{
+    const Node* node = this;
+    GP_ASSERT(node);
+    GP_ASSERT(out);
+
+    Model* model = dynamic_cast<Model*>(node->getDrawable());
+    if (model != NULL)
+    {
+        GP_ASSERT(model->getMesh());
+        BoundingBox bb = model->getMesh()->getBoundingBox();
+        bb.transform(getWorldMatrix());
+        if (merge)
+            out->merge(bb);
+        else
+        {
+            out->set(bb);
+            merge = true;
+        }
+    }
+
+    for (Node* child = node->getFirstChild(); child != NULL; child = child->getNextSibling()) {
+        child->getBoundingBox(out, merge);
+    }
+}
+
 void Node::moveChildrenTo(Node* that) {
     while (this->_firstChild.get())
     {

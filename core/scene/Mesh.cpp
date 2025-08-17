@@ -340,6 +340,7 @@ bool Mesh::read(Stream* file) {
 
 void Mesh::computeBounds()
 {
+    if (_vertexCount == 0) return;
     // If we have a Model with a MeshSkin associated with it,
     // compute the bounds from the skin - otherwise compute
     // it from the local mesh data.

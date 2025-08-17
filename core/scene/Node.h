@@ -617,6 +617,12 @@ public:
     virtual const BoundingSphere& getBoundingSphere() const;
 
     /**
+     * Returns the bounding box for the Node, in world space.
+     *
+     */
+    virtual void getBoundingBox(BoundingBox* out, bool merge = false) const;
+
+    /**
      * Clones the node and all of its child nodes.
      *
      * @return A new node.
