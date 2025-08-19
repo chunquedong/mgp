@@ -88,42 +88,34 @@ UPtr<Texture> Texture::create(const char* path, bool generateMipmaps)
     UPtr<Texture> texture;
 
     // Filter loading based on file extension.
-    const char* ext = strrchr(FileSystem::resolvePath(path), '.');
-    if (ext)
+    std::string ext = FileSystem::getExtension(FileSystem::resolvePath(path));
+    if (ext.size() > 0)
     {
-        switch (strlen(ext))
+        if (ext == ".PNG" || ext == ".JPG" || ext == ".HDR" || ext == ".JPEG")
         {
-        case 4:
-            if ((tolower(ext[1]) == 'p' && tolower(ext[2]) == 'n' && tolower(ext[3]) == 'g') ||
-                (tolower(ext[1]) == 'j' && tolower(ext[2]) == 'p' && tolower(ext[3]) == 'g') ||
-                (tolower(ext[1]) == 'h' && tolower(ext[2]) == 'd' && tolower(ext[3]) == 'r')
-                )
-            {
-                bool flipY = false;
-                UPtr<Image> image = Image::create(path, flipY);
-                if (image.get())
-                    texture = create(std::move(image), generateMipmaps);
-                //SAFE_RELEASE(image);
-            }
-            else if (tolower(ext[1]) == 'p' && tolower(ext[2]) == 'v' && tolower(ext[3]) == 'r')
-            {
-                // PowerVR Compressed Texture RGBA.
-                if (g_compressedTexture)
-                    texture = g_compressedTexture->createCompressedPVRTC(path);
-            }
-            else if (tolower(ext[1]) == 'd' && tolower(ext[2]) == 'd' && tolower(ext[3]) == 's')
-            {
-                // DDS file format (DXT/S3TC) compressed textures
-                if (g_compressedTexture)
-                    texture = g_compressedTexture->createCompressedDDS(path);
-            }
-            else if (tolower(ext[1]) == 'k' && tolower(ext[2]) == 't' && tolower(ext[3]) == 'x')
-            {
-                // KTX file format compressed textures
-                if (g_compressedTexture)
-                    texture = g_compressedTexture->createCompressedDdsKtx(path);
-            }
-            break;
+            bool flipY = false;
+            UPtr<Image> image = Image::create(path, flipY);
+            if (image.get())
+                texture = create(std::move(image), generateMipmaps);
+            //SAFE_RELEASE(image);
+        }
+        else if (ext == ".PVR")
+        {
+            // PowerVR Compressed Texture RGBA.
+            if (g_compressedTexture)
+                texture = g_compressedTexture->createCompressedPVRTC(path);
+        }
+        else if (ext == ".DDS")
+        {
+            // DDS file format (DXT/S3TC) compressed textures
+            if (g_compressedTexture)
+                texture = g_compressedTexture->createCompressedDDS(path);
+        }
+        else if (ext == ".KTX")
+        {
+            // KTX file format compressed textures
+            if (g_compressedTexture)
+                texture = g_compressedTexture->createCompressedDdsKtx(path);
         }
     }
 
