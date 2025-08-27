@@ -4,8 +4,9 @@
 #include "math/Vector3.h"
 #include "base/Ref.h"
 #include "scene/Transform.h"
-#include "audio.h"
 #include "scene/Component.h"
+
+struct ma_sound;
 
 namespace mgp
 {
@@ -199,7 +200,7 @@ private:
     AudioSource* clone(NodeCloneContext& context);
 
 
-    ma_sound _sound;
+    ma_sound* _sound;
 
     bool _looped;
     float _gain;

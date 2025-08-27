@@ -1,11 +1,11 @@
 #ifndef AUDIOCONTROLLER_H_
 #define AUDIOCONTROLLER_H_
 
-#include "audio.h"
-
 #include <thread>
 #include <mutex>
 #include <set>
+
+struct ma_engine;
 
 namespace mgp
 {

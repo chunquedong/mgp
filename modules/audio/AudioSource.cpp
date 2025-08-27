@@ -12,13 +12,16 @@ namespace mgp
 {
 
 AudioSource::AudioSource(AudioController* ctrl) 
-    : _state(INITIAL), _looped(false), _gain(1.0f), _pitch(1.0f), _audioController(ctrl)
+    : _state(INITIAL), _looped(false), _gain(1.0f), _pitch(1.0f), _audioController(ctrl), _sound(NULL)
 {
+    _sound = (ma_sound*)malloc(sizeof(ma_sound));
 }
 
 AudioSource::~AudioSource()
 {
-    ma_sound_uninit(&_sound);
+    ma_sound_uninit(_sound);
+    free(_sound);
+    _sound = NULL;
 }
 
 UPtr<AudioSource> AudioSource::create(const char* url, bool streamed)
@@ -27,7 +30,7 @@ UPtr<AudioSource> AudioSource::create(const char* url, bool streamed)
     GP_ASSERT(audioController);
     AudioSource* audioSource = new AudioSource(audioController);
 
-    ma_result result = ma_sound_init_from_file(audioController->_engine, url, 0, NULL, NULL, &audioSource->_sound);
+    ma_result result = ma_sound_init_from_file(audioController->_engine, url, 0, NULL, NULL, audioSource->_sound);
     if (result != MA_SUCCESS) {
         GP_ERROR("Failed to load audio source %s.", url);
         delete audioSource;
@@ -39,7 +42,7 @@ UPtr<AudioSource> AudioSource::create(const char* url, bool streamed)
 
 AudioSource::State AudioSource::getState() const
 {
-    if (!ma_sound_is_playing(&_sound)) {
+    if (!ma_sound_is_playing(_sound)) {
         if (_state == PLAYING) {
             return PAUSED;
         }
@@ -55,7 +58,7 @@ bool AudioSource::isStreamed() const
 
 void AudioSource::play()
 {
-    ma_sound_start(&_sound);
+    ma_sound_start(_sound);
     _state = PLAYING;
 
     // Add the source to the controller's list of currently playing sources.
@@ -64,7 +67,7 @@ void AudioSource::play()
 
 void AudioSource::pause()
 {
-    ma_sound_stop(&_sound);
+    ma_sound_stop(_sound);
     _state = PAUSED;
 
     // Remove the source from the controller's set of currently playing sources
@@ -82,8 +85,8 @@ void AudioSource::resume()
 
 void AudioSource::stop()
 {
-    ma_sound_stop(&_sound);
-    ma_sound_seek_to_pcm_frame(&_sound, 0);
+    ma_sound_stop(_sound);
+    ma_sound_seek_to_pcm_frame(_sound, 0);
     _state = STOPPED;
 
     // Remove the source from the controller's set of currently playing sources.
@@ -92,7 +95,7 @@ void AudioSource::stop()
 
 void AudioSource::rewind()
 {
-    ma_sound_seek_to_pcm_frame(&_sound, 0);
+    ma_sound_seek_to_pcm_frame(_sound, 0);
 }
 
 bool AudioSource::isLooped() const
@@ -102,7 +105,7 @@ bool AudioSource::isLooped() const
 
 void AudioSource::setLooped(bool looped)
 {
-    ma_sound_set_looping(&_sound, looped);
+    ma_sound_set_looping(_sound, looped);
     _looped = looped;
 }
 
@@ -113,8 +116,8 @@ float AudioSource::getGain() const
 
 void AudioSource::setGain(float gain)
 {
-    ma_sound_set_min_gain(&_sound, gain);
-    ma_sound_set_max_gain(&_sound, gain);
+    ma_sound_set_min_gain(_sound, gain);
+    ma_sound_set_max_gain(_sound, gain);
     _gain = gain;
 }
 
@@ -125,7 +128,7 @@ float AudioSource::getPitch() const
 
 void AudioSource::setPitch(float pitch)
 {
-    ma_sound_set_pitch(&_sound, pitch);
+    ma_sound_set_pitch(_sound, pitch);
     _pitch = pitch;
 }
 
@@ -136,7 +139,7 @@ const Vector3& AudioSource::getVelocity() const
 
 void AudioSource::setVelocity(const Vector3& velocity)
 {
-    ma_sound_set_velocity(&_sound, velocity.x, velocity.y, velocity.z);
+    ma_sound_set_velocity(_sound, velocity.x, velocity.y, velocity.z);
     _velocity = velocity;
 }
 
@@ -177,14 +180,14 @@ void AudioSource::transformChanged(Transform* transform, long cookie)
     if (_node)
     {
         Vector3 translation = _node->getTranslationWorld();
-        ma_sound_set_position(&_sound, translation.x, translation.y, translation.z);
+        ma_sound_set_position(_sound, translation.x, translation.y, translation.z);
     }
 }
 
 AudioSource* AudioSource::clone(NodeCloneContext& context)
 {
     AudioSource* audioClone = new AudioSource(_audioController);
-    ma_sound_init_copy(_audioController->_engine, &_sound, 0, NULL, &audioClone->_sound);
+    ma_sound_init_copy(_audioController->_engine, _sound, 0, NULL, audioClone->_sound);
   
     audioClone->setLooped(isLooped());
     audioClone->setGain(getGain());

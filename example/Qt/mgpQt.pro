@@ -29,49 +29,49 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 
 INCLUDEPATH += src \
-  $$(FMAKE_REPO)/lib/cpp/glew-2.2.0-debug/include \
-  $$(FMAKE_REPO)/lib/cpp/openal-1.22.2-debug/include \
-  $$(FMAKE_REPO)/lib/cpp/bullet-3.24-debug/include \
-  $$(FMAKE_REPO)/lib/cpp/freetype-2.4.12-debug/include \
-  $$(FMAKE_REPO)/lib/cpp/jsonc-2.0-debug/include \
-  $$(FMAKE_REPO)/lib/cpp/ljs-1.0-debug/include \
+  $$(FMAKE_REPO)/lib/cpp/debug/glew/include \
+  $$(FMAKE_REPO)/lib/cpp/debug/miniaudio/include \
+  $$(FMAKE_REPO)/lib/cpp/debug/bullet/include \
+  $$(FMAKE_REPO)/lib/cpp/debug/freetype/include \
+  $$(FMAKE_REPO)/lib/cpp/debug/jsonc/include \
+  $$(FMAKE_REPO)/lib/cpp/debug/ljs/include \
 
 CONFIG(release, debug|release): INCLUDEPATH += \
-  $$(FMAKE_REPO)/lib/cpp/mgpCore-1.0-release/include \
-  $$(FMAKE_REPO)/lib/cpp/mgpModules-1.0-release/include \
-  $$(FMAKE_REPO)/lib/cpp/mgpPro-1.0-release/include \
+  $$(FMAKE_REPO)/lib/cpp/release/mgpCore/include \
+  $$(FMAKE_REPO)/lib/cpp/release/mgpModules/include \
+  $$(FMAKE_REPO)/lib/cpp/release/mgpPro/include \
 
 CONFIG(debug, debug|release): INCLUDEPATH += \
-  $$(FMAKE_REPO)/lib/cpp/mgpCore-1.0-debug/include \
-  $$(FMAKE_REPO)/lib/cpp/mgpModules-1.0-debug/include \
-  $$(FMAKE_REPO)/lib/cpp/mgpPro-1.0-debug/include \
+  $$(FMAKE_REPO)/lib/cpp/debug/mgpCore/include \
+  $$(FMAKE_REPO)/lib/cpp/debug/mgpModules/include \
+  $$(FMAKE_REPO)/lib/cpp/debug/mgpPro/include \
 
-CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/glew-2.2.0-release/lib
-CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/openal-1.22.2-release/lib
-CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/bullet-3.24-release/lib
-CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/freetype-2.4.12-release/lib
-CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/jsonc-2.0-release/lib
-CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/ljs-1.0-release/lib
-CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/mgpCore-1.0-release/lib
-CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/mgpModules-1.0-release/lib
-# CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/mgpPro-1.0-release/lib
+CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/release/glew/lib
+CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/release/miniaudio/lib
+CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/release/bullet/lib
+CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/release/freetype/lib
+CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/release/jsonc/lib
+CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/release/ljs/lib
+CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/release/mgpCore/lib
+CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/release/mgpModules/lib
+# CONFIG(release, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/release/mgpPro/lib
 
-CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/glew-2.2.0-debug/lib
-CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/openal-1.22.2-debug/lib
-CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/bullet-3.24-debug/lib
-CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/freetype-2.4.12-debug/lib
-CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/jsonc-2.0-debug/lib
-CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/ljs-1.0-debug/lib
-CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/mgpCore-1.0-debug/lib
-CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/mgpModules-1.0-debug/lib
-CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/mgpPro-1.0-debug/lib
-CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/glfw-3.3.8-debug/lib
+CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/debug/glew/lib
+CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/debug/miniaudio/lib
+CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/debug/bullet/lib
+CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/debug/freetype/lib
+CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/debug/jsonc/lib
+CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/debug/ljs/lib
+CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/debug/mgpCore/lib
+CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/debug/mgpModules/lib
+CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/debug/mgpPro/lib
+CONFIG(debug, debug|release): LIBS += -L$$(FMAKE_REPO)/lib/cpp/debug/glfw/lib
 
 # LIBS += -lmgpPro
 LIBS += -lmgpModules
 LIBS += -lmgpCore
 LIBS += -lglew
-LIBS += -lopenal
+LIBS += -lminiaudio
 LIBS += -lbullet
 LIBS += -lfreetype
 LIBS += -ljsonc
