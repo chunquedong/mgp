@@ -17,5 +17,5 @@ class MainApp : public Application {
 
 int main() {
     MainApp instance;
-    return Platform::run();
+    return Platform::run(&instance);
 }
