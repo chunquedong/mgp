@@ -113,6 +113,10 @@ public:
 sric::OwnPtr<MgpWindow> g_window;
 NVGcontext* g_vg = NULL;
 
+NVGcontext* getCurrentNanoVgContext() {
+	if (g_window.isNull()) return nullptr;
+	return g_window->vg;
+}
 
 int Window::open(sric::OwnPtr<waseGraphics::View> view, const char* name) SC_NOTHROW {
 	if (!g_window.isNull()) {
