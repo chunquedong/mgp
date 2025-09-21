@@ -361,4 +361,34 @@ Float Ray::intersectTriangle(Vector3& a, Vector3& b, Vector3& c, bool backfaceCu
     return t;
 }
 
+Float Ray::intersectPlane(const Plane& plane, Vector3* target) {
+    const Vector3& normal = plane.getNormal();
+    // If the origin of the ray is on the plane then the distance is zero.
+    Float alpha = (normal.dot(_origin) + plane.getNegDistance());
+    if (fabs(alpha) < MATH_EPSILON)
+    {
+        *target = _origin;
+        return 0.0f;
+    }
+
+    Float dot = normal.dot(_direction);
+
+    // If the dot product of the plane's normal and this ray's direction is zero,
+    // then the ray is parallel to the plane and does not intersect it.
+    if (dot == 0.0f)
+    {
+        return INTERSECTS_NONE;
+    }
+
+    // Calculate the distance along the ray's direction vector to the point where
+    // the ray intersects the plane (if it is negative the plane is behind the ray).
+    Float d = -alpha / dot;
+    if (d < 0.0f)
+    {
+        return INTERSECTS_NONE;
+    }
+
+    *target = _origin + _direction * d;
+    return d;
+}
 }

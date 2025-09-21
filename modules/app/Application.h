@@ -17,7 +17,6 @@
 #include "EventTimer.h"
 #include "Platform.h"
 #include "AppConfig.h"
-#include "physics/PhysicsController.h"
 
 #ifndef __EMSCRIPTEN__
     #include "audio/AudioController.h"
@@ -33,6 +32,7 @@ class ScriptController;
 class SceneView;
 class FormManager;
 class Font;
+class PhysicsController;
 
 /**
  * Defines the base class your game will extend for game initialization, logic and platform delegates.

@@ -2,6 +2,7 @@
 #include "Platform.h"
 #include "base/FileSystem.h"
 #include "render/FrameBuffer.h"
+#include "physics/PhysicsController.h"
 
 #ifdef GP_UI
     #include "ui/Theme.h"
@@ -638,7 +639,9 @@ bool Application::mouseEvent(Mouse evt) {
 
 void Application::resizeEvent(unsigned int width, unsigned int height) {
     Rectangle vp(0.0f, 0.0f, (float)_width, (float)_height);
-    getView()->setViewport(&vp);
+    for (int i = 0; i<_sceneViews.size(); ++i) {
+        _sceneViews[i]->setViewport(&vp);
+    }
 }
 
 void Application::notifyKeyEvent(Keyboard evt)

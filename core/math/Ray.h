@@ -184,6 +184,7 @@ public:
     Float distanceSqToPoint(Vector3& point);
     Float distanceSqToSegment(Vector3& v0, Vector3& v1, Vector3* optionalPointOnRay, Vector3* optionalPointOnSegment);
     Float intersectTriangle(Vector3& a, Vector3& b, Vector3& c, bool backfaceCulling, Vector3* target);
+    Float intersectPlane(const Plane& plane, Vector3* target);
 private:
 
     /**
