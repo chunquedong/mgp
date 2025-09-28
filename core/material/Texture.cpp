@@ -91,7 +91,7 @@ UPtr<Texture> Texture::create(const char* path, bool generateMipmaps)
     std::string ext = FileSystem::getExtension(FileSystem::resolvePath(path));
     if (ext.size() > 0)
     {
-        if (ext == ".PNG" || ext == ".JPG" || ext == ".HDR" || ext == ".JPEG")
+        if (ext == ".PNG" || ext == ".JPG" || ext == ".HDR" || ext == ".JPEG" || ext == ".TGA")
         {
             bool flipY = false;
             UPtr<Image> image = Image::create(path, flipY);
