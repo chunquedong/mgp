@@ -852,8 +852,11 @@ private:
 			Node* rootJoint = (it->second)->getRootJoint();
 			if (!rootJoint && it->second->getJointCount() > 0) {
 				rootJoint = it->second->getJoint(0)->_node.get();
-				while (rootJoint && rootJoint->getParent() && rootJoint->getParent()->isBoneJoint()) {
+				while (rootJoint && rootJoint->getParent() ) {
 					rootJoint = rootJoint->getParent();
+					if (!rootJoint->isBoneJoint()) {
+						break;
+					}
 				}
 				it->second->setRootJoint(rootJoint);
 			}

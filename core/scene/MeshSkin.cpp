@@ -98,6 +98,9 @@ Vector4* MeshSkin::getMatrixPalette(const Matrix* viewMatrix, Node* node)
     for (size_t i = 0, count = _joints.size(); i < count; i++)
     {
         BoneJoint* joint = (BoneJoint*) & (_joints[i]);
+        if (joint->_node.isNull()) {
+            continue;
+        }
 
         Matrix t;
         Matrix::multiply(joint->_node->getWorldMatrix(), joint->_bindPose, &t);
@@ -136,7 +139,9 @@ void MeshSkin::bindByRootJoint() {
 
     for (int i = 0; i < _joints.size(); ++i) {
         Node* node = rootNode->findNode(_joints[i]._name.c_str());
-        GP_ASSERT(node);
+        if (!node) {
+            GP_DEBUG("bind Joint fail: %s", _joints[i]._name.c_str());
+        }
         _joints[i]._node = node;
     }
 }
