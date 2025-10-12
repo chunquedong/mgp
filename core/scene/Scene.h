@@ -329,6 +329,16 @@ void Scene::visitNode(Node* node, T* instance, bool (T::*visitMethod)(Node*))
     if (!(instance->*visitMethod)(node))
         return;
 
+    // If this node has a model with a mesh skin, visit the joint hierarchy within it
+    // since we don't add joint hierarcies directly to the scene. If joints are never
+    // visited, it's possible that nodes embedded within the joint hierarchy that contain
+    // models will never get visited (and therefore never get drawn).
+    Model* model = dynamic_cast<Model*>(node->getDrawable());
+    if (model && model->_skin.get() && model->_skin->getRootJoint())
+    {
+        visitNode(model->_skin->getRootJoint(), instance, visitMethod);
+    }
+
     // Recurse for all children.
     for (Node* child = node->getFirstChild(); child != NULL; child = child->getNextSibling()) {
         visitNode(child, instance, visitMethod);
@@ -341,6 +351,16 @@ void Scene::visitNode(Node* node, T* instance, bool (T::*visitMethod)(Node*,C), 
     // Invoke the visit method for this node.
     if (!(instance->*visitMethod)(node, cookie))
         return;
+
+    // If this node has a model with a mesh skin, visit the joint hierarchy within it
+    // since we don't add joint hierarcies directly to the scene. If joints are never
+    // visited, it's possible that nodes embedded within the joint hierarchy that contain
+    // models will never get visited (and therefore never get drawn).
+    Model* model = dynamic_cast<Model*>(node->getDrawable());
+    if (model && model->_skin.get() && model->_skin->getRootJoint())
+    {
+        visitNode(model->_skin->getRootJoint(), visitMethod, cookie);
+    }
 
     // Recurse for all children.
     for (Node* child = node->getFirstChild(); child != NULL; child = child->getNextSibling()) {
