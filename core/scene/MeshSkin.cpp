@@ -105,7 +105,7 @@ Vector4* MeshSkin::getMatrixPalette(const Matrix* viewMatrix, Node* node)
         Matrix t;
         Matrix::multiply(joint->_node->getWorldMatrix(), joint->_bindPose, &t);
 
-        Matrix::multiply(*viewMatrix, t, &t);
+        //Matrix::multiply(*viewMatrix, t, &t);
         
         //Matrix::multiply(t, bindShape, &t);
 

@@ -2,6 +2,11 @@
     #include "_morph.vert"
 #endif
 
+#ifdef INSTANCED
+    in mat4 a_instanceMatrix;
+#else
+    uniform mat4 u_worldViewMatrix;
+#endif
 
 uniform vec4 u_matrixPalette[SKINNING_JOINT_COUNT * 3];
 
@@ -44,7 +49,14 @@ vec4 getPosition()
     blendWeight = a_blendWeights[3];
     matrixIndex = int(a_blendIndices[3]) * 3;
     skinPosition(pos, blendWeight, matrixIndex);
-    return _skinnedPosition;    
+
+    vec4 pos4 = _skinnedPosition;
+#ifdef INSTANCED
+    pos4 = a_instanceMatrix * pos4;
+#else
+    pos4 = u_worldViewMatrix * pos4;
+#endif
+    return pos4;
 }
 
 #if defined(LIGHTING)

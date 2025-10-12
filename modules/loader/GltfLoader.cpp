@@ -808,6 +808,53 @@ private:
 		return UPtr<Node>(node);
 	}
 
+	Node* findJointRootSimple(Node* joint, bool mostTop) {
+		Node* rootJoint = joint;
+		while (rootJoint && rootJoint->getParent()) {
+			if (!mostTop && !rootJoint->getParent()->isBoneJoint()) {
+				break;
+			}
+			rootJoint = rootJoint->getParent();
+			if (!rootJoint->isBoneJoint()) {
+				break;
+			}
+		}
+		return rootJoint;
+	}
+
+	Node* findJointRootComplex(MeshSkin* skin) {
+		Node* rootJoint = nullptr;
+		for (int i = 0; i < skin->getJointCount(); ++i) {
+			Node* joint = skin->getJoint(i)->_node.get();
+
+			Node* root = findJointRootSimple(joint, false);
+			if (rootJoint == nullptr) {
+				rootJoint = root;
+			}
+			else if (rootJoint != root) {
+				rootJoint = nullptr;
+				break;
+			}
+		}
+
+		if (rootJoint) return rootJoint;
+
+		for (int i = 0; i < skin->getJointCount(); ++i) {
+			Node* joint = skin->getJoint(i)->_node.get();
+
+			Node* root = findJointRootSimple(joint, true);
+			if (rootJoint == nullptr) {
+				rootJoint = root;
+			}
+			else if (rootJoint != root) {
+				GP_WARN("skin root node error");
+				break;
+			}
+		}
+
+		return rootJoint;
+	}
+
 	UPtr<Scene> loadScene(cgltf_data* data) {
 
 		for (cgltf_size i = 0; i < data->extensions_required_count; i++) {
@@ -849,16 +896,18 @@ private:
 		}
 
 		for (auto it = _skins.begin(); it != _skins.end(); ++it) {
-			Node* rootJoint = (it->second)->getRootJoint();
-			if (!rootJoint && it->second->getJointCount() > 0) {
-				rootJoint = it->second->getJoint(0)->_node.get();
-				while (rootJoint && rootJoint->getParent() ) {
-					rootJoint = rootJoint->getParent();
-					if (!rootJoint->isBoneJoint()) {
-						break;
-					}
+			MeshSkin* skin = it->second.get();
+			Node* rootJoint = skin->getRootJoint();
+			if (!rootJoint && skin->getJointCount() > 0) {
+				rootJoint = findJointRootComplex(skin);
+				if (rootJoint) {
+					skin->setRootJoint(rootJoint);
 				}
-				it->second->setRootJoint(rootJoint);
+			}
+
+			//remvoe joint node from scene
+			if (rootJoint) {
+				rootJoint->remove();
 			}
 		}
 

@@ -286,14 +286,29 @@ Node* Node::findNode(const char* id, bool recursive, bool exactMatch, bool skipS
     }
 
     GP_ASSERT(id);
+    // If not skipSkin hierarchy, try searching the skin hierarchy
+    if (!skipSkin)
+    {
+        // If the drawable is a model with a mesh skin, search the skin's hierarchy as well.
+        Node* rootNode = NULL;
+        Model* model = dynamic_cast<Model*>(getDrawable());
+        if (model)
+        {
+            if (model->getSkin() != NULL && (rootNode = model->getSkin()->getRootJoint()) != NULL)
+            {
+                Node* match = rootNode->findNode(id, true, exactMatch, true);
+                if (match)
+                {
+                    return match;
+                }
+            }
+        }
+    }
 
     // Recurse.
     if (recursive)
     {
         for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
-            if (skipSkin && child->isBoneJoint()) {
-                continue;
-            }
             Node* match = child->findNode(id, true, exactMatch, skipSkin);
             if (match)
             {
@@ -325,6 +340,19 @@ unsigned int Node::findNodes(const char* id, std::vector<Node*>& nodes, bool rec
 
     // If the drawable is a model with a mesh skin, search the skin's hierarchy as well.
     unsigned int count = 0;
+
+    if (!skipSkin)
+    {
+        Node* rootNode = NULL;
+        Model* model = dynamic_cast<Model*>(getDrawable());
+        if (model)
+        {
+            if (model->getSkin() != NULL && (rootNode = model->getSkin()->getRootJoint()) != NULL)
+            {
+                count += rootNode->findNodes(id, nodes, recursive, exactMatch, true);
+            }
+        }
+    }
 
     // Search immediate children first.
     for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
@@ -359,6 +387,16 @@ void Node::getAllDrawable(std::vector<Drawable*> &list) {
 void Node::getAllAnimations(std::set<Animation*>& animations)
 {
     getAnimations(animations);
+
+    Node* rootNode = NULL;
+    Model* model = dynamic_cast<Model*>(getDrawable());
+    if (model)
+    {
+        if (model->getSkin() != NULL && (rootNode = model->getSkin()->getRootJoint()) != NULL)
+        {
+            rootNode->getAllAnimations(animations);
+        }
+    }
 
     // Recurse.
     for (Node* child = getFirstChild(); child != NULL; child = child->getNextSibling()) {
@@ -617,6 +655,19 @@ Animation* Node::getAnimation(const char* id) const
     Model* model = dynamic_cast<Model*>(getDrawable());
     if (model)
     {
+        // Check to see if there's any animations with the ID on the joints.
+        MeshSkin* skin = model->getSkin();
+        if (skin)
+        {
+            Node* rootNode = skin->getRootJoint();
+            if (rootNode)
+            {
+                animation = rootNode->getAnimation(id);
+                if (animation)
+                    return animation;
+            }
+        }
+
         // Check to see if any of the model's material parameter's has an animation
         // with the given ID.
         Material* material = model->getMaterial();
@@ -770,8 +821,8 @@ const BoundingSphere& Node::getBoundingSphere() const
                         // TODO: Should we protect against the case where joints are nested directly
                         // in the node hierachy of the model (this is normally not the case)?
                         Matrix boundsMatrix;
-                        //Matrix::multiply(getWorldMatrix(), jointParent->getWorldMatrix(), &boundsMatrix);
-                        boundsMatrix = jointParent->getWorldMatrix();
+                        Matrix::multiply(getWorldMatrix(), jointParent->getWorldMatrix(), &boundsMatrix);
+                        //boundsMatrix = jointParent->getWorldMatrix();
                         _bounds.transform(boundsMatrix);
                         applyWorldTransform = false;
                     }
