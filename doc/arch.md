@@ -15,9 +15,10 @@ mgpPro模块包括网络、定制的图形绘制等功能，暂时没有开源�
 - stb_image: 提供图片解码
 - freetype：提供文字渲染
 - Bullet：物理引擎
-- openAL：声音库
+- miniaudio：声音库
 - draco：压缩库（可选）
 - jsonc：json库
+- wase: GUI库
 
 通过websemmbly编译到web平台时，几乎不依赖第三方库，所有功能都优先用浏览器提供的。
 

@@ -693,6 +693,16 @@ public:
     bool isBoneJoint() { return _isBoneJoint; }
     void setSerializable(bool r) { _isSerializable = r; }
     bool isSerializable() { return _isSerializable; }
+
+
+    /**
+     * Recursively clones this node and its children.
+     *
+     * @param context The clone context.
+     *
+     * @return The newly created node.
+     */
+    UPtr<Node> cloneRecursive(NodeCloneContext& context) const;
 protected:
     /**
      * Clones a single node and its data but not its children.
@@ -703,14 +713,6 @@ protected:
      */
     virtual UPtr<Node> cloneSingleNode(NodeCloneContext &context) const;
 
-    /**
-     * Recursively clones this node and its children.
-     *
-     * @param context The clone context.
-     *
-     * @return The newly created node.
-     */
-    UPtr<Node> cloneRecursive(NodeCloneContext &context) const;
 
     /**
      * Copies the data from this node into the given node.

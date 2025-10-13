@@ -14,7 +14,7 @@ sh build.sh -debug
 ```
 fan fmake libjsonc.props -debug
 ```
-5. build sric and wase (optional)
+1. build sric and wase
 
 build [Wase](https://github.com/sric-language/wase) or remove WASE_UI in modules/fmake.props
 

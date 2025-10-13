@@ -2,7 +2,7 @@
 
 ## 声音
 
-目前只支持WAV和OGG两种格式
+目前只支持WAV、MP3、OGG格式
 
 ```
 class MainApp : public Application {

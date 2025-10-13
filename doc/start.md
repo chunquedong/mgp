@@ -33,7 +33,7 @@ class MainApp : public Application {
 int main() {
     printf("main start\n");
     MainApp* instance = new MainApp();
-    return Platform::run();
+    return Platform::run(instance);
 }
 
 ```

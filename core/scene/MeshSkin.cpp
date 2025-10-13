@@ -54,7 +54,12 @@ UPtr<MeshSkin> MeshSkin::clone(NodeCloneContext &context) const
         newJoint->_bindPose = _joints[i]._bindPose;
         newJoint->_name = _joints[i]._name;
     }
-    
+
+    if (!getRootJoint()->getParent()) {
+        UPtr<Node> rootNode = getRootJoint()->cloneRecursive(context);
+        skin->setRootJoint(rootNode.get());
+        skin->bindByRootJoint();
+    }
     return UPtr<MeshSkin>(skin);
 }
 

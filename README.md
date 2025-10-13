@@ -15,8 +15,7 @@ MGP is a lightweight 3D game engine.
 - Animation: Animation system with skeletal character animation
 - Terrain: Height map based terrains with LOD
 - Physics: Powered by Bullet
-- Audio: 3D audio system with WAV and OGG support
-- Lua like script (unmaintained)
+- Audio: 3D audio system with mp3 OGG support
 
 ## Doc
 [Learn More](doc/index.md)

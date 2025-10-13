@@ -3,6 +3,7 @@
 ## GUI
 
 mgp自带UI库，支持常用的控件。
+新版本使用wase库，自带的GUi库以后将不再维护。
 
 ```
     UPtr<Form> form = Form::create();
