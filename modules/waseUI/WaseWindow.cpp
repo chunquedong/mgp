@@ -10,14 +10,14 @@
 #include "openGL/ogl.h"
 
 #ifdef _WIN32
-	#include "Win32TextInput.h"
+	#include "windows/Win32TextInput.h"
 #endif
 
 #include "nanovg.h"
 #define NANOVG_GLES3_IMPLEMENTATION
 #include "nanovg_gl.h"
 
-#include "NanovgGraphics.h"
+#include "opengl/NanovgGraphics.h"
 #include "Window.h"
 
 #include "app/Platform.h"
