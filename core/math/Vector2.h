@@ -115,7 +115,7 @@ public:
      * 
      * @return The angle between the two vectors (in radians).
      */
-    static Float angle(const Vector2& v1, const Vector2& v2);
+    static Float angle(const Vector2& v1, const Vector2& v2, bool signal_ = false);
 
     /**
      * Adds the elements of the specified vector to this one.
@@ -196,6 +196,14 @@ public:
      * @return The dot product between the vectors.
      */
     static Float dot(const Vector2& v1, const Vector2& v2);
+
+    /**
+     * Computes the cross product of the specified vectors.
+     *
+     * @param v2 The second vector.
+     * @return The cross product.
+     */
+    Float cross(const Vector2& v2) const;
 
     /**
      * Computes the length of this vector.

@@ -67,10 +67,12 @@ bool Vector2::isOne() const
     return x == 1.0f && y == 1.0f;
 }
 
-Float Vector2::angle(const Vector2& v1, const Vector2& v2)
+Float Vector2::angle(const Vector2& v1, const Vector2& v2, bool signal_)
 {
     Float dz = v1.x * v2.y - v1.y * v2.x;
-    return atan2f(fabsf(dz) + MATH_FLOAT_SMALL, dot(v1, v2));
+    if (!signal_)
+        dz = fabsf(dz) + MATH_FLOAT_SMALL;
+    return atan2f(dz, dot(v1, v2));
 }
 
 void Vector2::add(const Vector2& v)
@@ -147,6 +149,10 @@ Float Vector2::dot(const Vector2& v) const
 Float Vector2::dot(const Vector2& v1, const Vector2& v2)
 {
     return (v1.x * v2.x + v1.y * v2.y);
+}
+
+Float Vector2::cross(const Vector2& other) const {
+    return x * other.y - y * other.x;
 }
 
 Float Vector2::length() const
