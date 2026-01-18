@@ -647,7 +647,7 @@ void Application::resizeEvent(unsigned int width, unsigned int height) {
 void Application::notifyKeyEvent(Keyboard evt)
 {
 #ifdef WASE_UI
-    if (waseUI::keyEvent(evt)) {
+    if (_waseEnabled && waseUI::keyEvent(evt)) {
         return;
     }
 #endif
@@ -675,7 +675,7 @@ bool Application::notifyMouseEvent(Mouse evt)
     }
 
 #ifdef WASE_UI
-    if (waseUI::mouseEvent(evt)) {
+    if (_waseEnabled && waseUI::mouseEvent(evt)) {
         return true;
     }
 #endif

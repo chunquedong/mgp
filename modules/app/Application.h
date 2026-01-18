@@ -250,8 +250,10 @@ private:
     bool startup();
 
     void drawFps();
+
 public:
     void showFps(bool v);
+    void setWaseEnabled(bool e) { _waseEnabled = e; }
 
     void notifyKeyEvent(Keyboard evt);
     bool notifyMouseEvent(Mouse evt);
@@ -299,7 +301,7 @@ protected:
 
     UPtr<Font> _font;
     bool _showFps;
-
+    bool _waseEnabled = true;
 
     // Note: Do not add STL object member variables on the stack; this will cause false memory leaks to be reported.
     friend class ScreenDisplayer;
