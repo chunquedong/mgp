@@ -2,8 +2,15 @@ name = samples-triangle
 summary = samples
 outType = exe
 version = 1.0
-depends = mgpCore 1.0, mgpModules 1.0, jsonc 2.0, sric 1.0, waseGraphics 1.0, waseGui 1.0, serial 1.0, waseNanovg 1.0
+depends = mgpCore 1.0, mgpModules 1.0, jsonc 2.0, bullet 3.24, sric 1.0, waseGraphics 1.0, waseGui 1.0, serial 1.0, waseNanovg 1.0
 srcDirs = ./
 incDir = ./
 defines=GP_NO_LUA_BINDINGS,GP_GLFW
-extConfigs.linkflags=-sUSE_GLFW=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sSAFE_HEAP=1 --preload-file D:/workspace/code/mgp/res/shaders@res/shaders -gsource-map -sMODULARIZE -s EXPORT_NAME="createMyModule" -s TOTAL_MEMORY=2013265920
+extConfigs.linkflags=-sUSE_GLFW=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 \
+--preload-file ../../res/shaders@res/shaders \
+-gsource-map -sMODULARIZE -s EXPORT_NAME="createMyModule" -s TOTAL_MEMORY=2013265920 \
+-sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$stringToUTF8OnStack -sEXPORTED_RUNTIME_METHODS=ccall,cwrap,UTF8ToString \
+--js-library ../../../mgpPro/wasm/library.js --extern-pre-js ../../../mgpPro/wasm/util.js \
+-sEXPORTED_FUNCTIONS=_main,_malloc,_free
+
+compiler = emcc
