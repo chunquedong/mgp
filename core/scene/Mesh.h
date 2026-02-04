@@ -401,6 +401,7 @@ template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset,
                         triangleNormal(a, b, c, &query.normal);
                     }
                 }
+                ++query.intersectionFaceCount;
             }
         }
     }
@@ -429,6 +430,7 @@ template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset,
                         triangleNormal(a, b, c, &query.normal);
                     }
                 }
+                ++query.intersectionFaceCount;
             }
         }
     }
@@ -457,6 +459,7 @@ template<typename T> bool Mesh::raycastPart(RayQuery& query, int _bufferOffset,
                         triangleNormal(a, b, c, &query.normal);
                     }
                 }
+                ++query.intersectionFaceCount;
             }
         }
     }

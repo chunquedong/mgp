@@ -73,6 +73,7 @@ bool Drawable::raycast(RayQuery& query) {
         double distance = localQuery.target.distance(query.ray.getOrigin());
         if (query.minDistance == Ray::INTERSECTS_NONE || distance < query.minDistance) {
             query.minDistance = distance;
+            query.intersectionFaceCount = localQuery.intersectionFaceCount;
             query.target = localQuery.target;
             query.normal = localQuery.normal;
             query.path.swap(localQuery.path);

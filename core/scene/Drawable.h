@@ -66,6 +66,9 @@ struct RayQuery {
     * min distance to ray origin
     */
     double minDistance = Ray::INTERSECTS_NONE;
+
+    int intersectionFaceCount = 0;
+
     /**
     *pick object
     */

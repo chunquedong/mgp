@@ -555,6 +555,7 @@ bool Mesh::doRaycast(RayQuery& query) {
                             triangleNormal(a, b, c, &query.normal);
                         }
                     }
+                    ++query.intersectionFaceCount;
                 }
             }
         }
@@ -580,6 +581,7 @@ bool Mesh::doRaycast(RayQuery& query) {
                             triangleNormal(a, b, c, &query.normal);
                         }
                     }
+                    ++query.intersectionFaceCount;
                 }
             }
         }
