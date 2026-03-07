@@ -16,6 +16,11 @@ class MainApp : public Application {
 };
 
 int main() {
-    MainApp instance;
-    return Platform::run(&instance);
+    #if __EMSCRIPTEN__
+        MainApp* instance = new MainApp();
+        return Platform::run(instance);
+    #else
+        MainApp instance;
+        return Platform::run(&instance);
+    #endif
 }

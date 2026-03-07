@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wase Demo</title>
+    <style>
+      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+      canvas.emscripten {
+        display: block;
+        border: 0px none;
+        padding: 0px;
+        margin: 0px;
+        width: 100%;
+        height: 100%;
+        background-color: blueviolet;
+      }
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+  <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <script type="text/javascript" src="samples-triangle.js"></script>
+    <script type='text/javascript'>
+
+      createMyModule({
+        printErr: function() {
+            console.warn(Array.prototype.slice.call(arguments).join(" "));
+        },
+        canvas: document.getElementById('canvas'),
+
+      }).then(function(Module) {
+          let w = window.innerWidth;
+          let h = window.innerHeight;
+          //Module.setCanvasSize(w*window.devicePixelRatio, h*window.devicePixelRatio);
+          // document.getElementById('canvas').style.width = w  + "px";
+          // document.getElementById('canvas').style.height = h  + "px";
+          //fixGlfw(document.getElementById('canvas'));
+      });
+   </script>
+</body>
+</html>
