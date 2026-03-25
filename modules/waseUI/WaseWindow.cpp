@@ -25,7 +25,7 @@
 using namespace waseGraphics;
 using namespace mgp;
 
-extern float g_screenScle;
+extern float g_screenScale;
 extern bool g_autoScale;
 
 #ifdef _WIN32
@@ -187,7 +187,7 @@ namespace waseUI {
 			printf("Could not init nanovg.\n");
 			return;
 		}
-		g_screenScle = mgp::Platform::cur()->getScreenScale();
+		g_screenScale = mgp::Platform::cur()->getScreenScale();
 		g_autoScale = isMobile();
 	}
 

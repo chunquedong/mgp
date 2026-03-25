@@ -522,7 +522,7 @@ unsigned int BorderImage::draw(SpriteBatch* batch, const Rectangle& _absoluteBou
 
     // Calculate screen-space positions.
     Border border = _skin->getBorder();
-    float scale = 1 / Toolkit::cur()->getScreenScale();
+    float scale = 0.67;
     border.bottom *= scale;
     border.top *= scale;
     border.left *= scale;
